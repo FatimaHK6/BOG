@@ -1,0 +1,6 @@
+@BOG.API_HostAddress = http://localhost:5118
+
+GET {{BOG.API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

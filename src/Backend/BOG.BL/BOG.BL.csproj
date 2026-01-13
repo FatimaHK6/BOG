@@ -1,0 +1,16 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\BOG.DAL\BOG.DAL.csproj" />
+    <ProjectReference Include="..\BOG.DTO\BOG.DTO.csproj" />
+    <ProjectReference Include="..\BOG.DbModel\BOG.DbModel.csproj" />
+    <ProjectReference Include="..\BOG.VM\BOG.VM.csproj" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+</Project>

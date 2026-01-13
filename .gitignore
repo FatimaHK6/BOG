@@ -1,0 +1,41 @@
+# .NET
+bin/
+obj/
+*.user
+*.suo
+*.sln.docstates
+.vs/
+.vscode/
+*.DotSettings
+*.DotSettings.user
+
+# Angular / Node
+node_modules/
+/dist/
+/tmp/
+/out-tsc/
+npm-debug.log
+yarn-error.log
+.angular/
+
+# Environment
+.env
+.env.local
+*.env.user
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+*.swp
+*.swo
+*~
+
+# Logs
+logs/
+*.log
+
+# Temporary files
+tmpclaude-*-cwd
