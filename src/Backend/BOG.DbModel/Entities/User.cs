@@ -1,3 +1,5 @@
+using BOG.DbModel.Entities.Identity;
+
 namespace BOG.DbModel.Entities;
 
 /// <summary>
@@ -36,4 +38,8 @@ public class User : BaseEntity
     /// Gets the user's full name.
     /// </summary>
     public string FullName => $"{FirstName} {LastName}";
+
+    // Navigation properties for roles and departments
+    public virtual ICollection<UserRole> UserRoles { get; set; } = new List<UserRole>();
+    public virtual ICollection<UserDepartment> UserDepartments { get; set; } = new List<UserDepartment>();
 }

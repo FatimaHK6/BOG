@@ -1,0 +1,1117 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>خطة تنفيذ حالة الاستخدام 6.5.1 - إدارة طلبات قيد دعوى إدارية</title>
+    <style>
+        :root {
+            --primary-color: #1e6f5c;
+            --secondary-color: #29bb89;
+            --success-color: #059669;
+            --warning-color: #d97706;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-color: #1e293b;
+            --border-color: #e2e8f0;
+            --code-bg: #1e293b;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Tahoma', 'Arial', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.8;
+            direction: rtl;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 40px 20px;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        header h1 {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        header h2 {
+            font-size: 1.3rem;
+            font-weight: normal;
+            opacity: 0.9;
+            direction: ltr;
+        }
+
+        header .meta {
+            margin-top: 20px;
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        .section {
+            background: var(--card-bg);
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .section h2 {
+            color: var(--primary-color);
+            border-bottom: 3px solid var(--secondary-color);
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+
+        .section h3 {
+            color: var(--primary-color);
+            margin: 20px 0 15px;
+            font-size: 1.2rem;
+        }
+
+        .section h4 {
+            color: var(--text-color);
+            margin: 15px 0 10px;
+            font-size: 1.1rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+            font-size: 0.95rem;
+        }
+
+        th, td {
+            padding: 12px 15px;
+            text-align: right;
+            border: 1px solid var(--border-color);
+        }
+
+        th {
+            background: var(--primary-color);
+            color: white;
+            font-weight: 600;
+        }
+
+        tr:nth-child(even) {
+            background: #f8fafc;
+        }
+
+        tr:hover {
+            background: #e8f5e9;
+        }
+
+        code, pre {
+            font-family: 'Consolas', 'Monaco', monospace;
+            direction: ltr;
+            text-align: left;
+        }
+
+        code {
+            background: #e2e8f0;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.9rem;
+        }
+
+        pre {
+            background: var(--code-bg);
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 15px 0;
+            font-size: 0.85rem;
+            line-height: 1.5;
+        }
+
+        pre code {
+            background: none;
+            padding: 0;
+            color: inherit;
+        }
+
+        .highlight {
+            background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
+            border-right: 4px solid var(--primary-color);
+            padding: 15px 20px;
+            margin: 15px 0;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .warning {
+            background: linear-gradient(135deg, #fff3e0, #ffe0b2);
+            border-right: 4px solid var(--warning-color);
+            padding: 15px 20px;
+            margin: 15px 0;
+            border-radius: 0 8px 8px 0;
+        }
+
+        ul, ol {
+            margin: 10px 20px;
+        }
+
+        li {
+            margin: 8px 0;
+        }
+
+        .file-tree {
+            background: #1e293b;
+            color: #94a3b8;
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'Consolas', monospace;
+            direction: ltr;
+            text-align: left;
+            font-size: 0.85rem;
+            line-height: 1.6;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin: 2px;
+        }
+
+        .badge-primary { background: var(--primary-color); color: white; }
+        .badge-success { background: var(--success-color); color: white; }
+        .badge-warning { background: var(--warning-color); color: white; }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .card {
+            background: #f8fafc;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 20px;
+        }
+
+        .card h4 {
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+
+        .relationship-diagram {
+            background: #f0f9ff;
+            border: 2px dashed var(--primary-color);
+            padding: 20px;
+            margin: 15px 0;
+            border-radius: 8px;
+            text-align: center;
+            font-family: 'Consolas', monospace;
+            direction: ltr;
+        }
+
+        footer {
+            text-align: center;
+            padding: 30px;
+            color: #64748b;
+            font-size: 0.9rem;
+        }
+
+        @media print {
+            body { background: white; }
+            .section { box-shadow: none; border: 1px solid #ddd; }
+            header { background: var(--primary-color); }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>خطة تنفيذ حالة الاستخدام 6.5.1</h1>
+        <h2>Implementation Plan: UC 6.5.1 - Case Registration Management</h2>
+        <h1>إدارة طلبات قيد دعوى إدارية</h1>
+        <div class="meta">
+            <strong>الإصدار:</strong> 1.0 |
+            <strong>التاريخ:</strong> 2026-01-14 |
+            <strong>المشروع:</strong> نظام إدارة الدعاوى - ديوان المظالم
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- جدول المحتويات -->
+        <div class="section">
+            <h2>جدول المحتويات</h2>
+            <ol>
+                <li><a href="#overview">نظرة عامة</a></li>
+                <li><a href="#phase0">المرحلة 0: الأدوار والصلاحيات</a></li>
+                <li><a href="#phase1">المرحلة 1: طبقة قاعدة البيانات</a></li>
+                <li><a href="#phase2">المرحلة 2: توزيع المهام على المطورين</a></li>
+                <li><a href="#phase3">المرحلة 3: الدمج والاختبار</a></li>
+                <li><a href="#phase4">المرحلة 4: خدمات التكامل</a></li>
+                <li><a href="#summary">ملخص الملفات</a></li>
+                <li><a href="#verification">التحقق</a></li>
+            </ol>
+        </div>
+
+        <!-- نظرة عامة -->
+        <div class="section" id="overview">
+            <h2>1. نظرة عامة</h2>
+            <p>تنفذ هذه الخطة حالة الاستخدام 6.5.1 (إدارة طلبات قيد دعوى إدارية) باتباع أنماط معمارية SOLID المعتمدة في المشروع.</p>
+
+            <h3>هيكل التنفيذ</h3>
+            <table>
+                <tr>
+                    <th>المرحلة</th>
+                    <th>الوصف</th>
+                    <th>الاعتماديات</th>
+                </tr>
+                <tr>
+                    <td><span class="badge badge-primary">المرحلة 0</span></td>
+                    <td>الأدوار والصلاحيات (الأساس)</td>
+                    <td>لا يوجد - يجب إكمالها أولاً</td>
+                </tr>
+                <tr>
+                    <td><span class="badge badge-primary">المرحلة 1</span></td>
+                    <td>طبقة قاعدة البيانات (الكيانات، DbContext، الهجرات)</td>
+                    <td>المرحلة 0</td>
+                </tr>
+                <tr>
+                    <td><span class="badge badge-success">المرحلة 2أ</span></td>
+                    <td>وحدة المدعين والممثلين</td>
+                    <td>المرحلة 1</td>
+                </tr>
+                <tr>
+                    <td><span class="badge badge-success">المرحلة 2ب</span></td>
+                    <td>وحدة المدعى عليهم وإدارة الطلبات</td>
+                    <td>المرحلة 1</td>
+                </tr>
+                <tr>
+                    <td><span class="badge badge-warning">المرحلة 3</span></td>
+                    <td>الدمج والاختبار</td>
+                    <td>المرحلة 2أ + 2ب</td>
+                </tr>
+                <tr>
+                    <td><span class="badge badge-warning">المرحلة 4</span></td>
+                    <td>خدمات التكامل والمحاكاة</td>
+                    <td>المرحلة 3</td>
+                </tr>
+            </table>
+
+            <h3>ملخص حالات الاستخدام</h3>
+            <div class="grid-2">
+                <div class="card">
+                    <h4>الإحصائيات</h4>
+                    <ul>
+                        <li>حالات الاستخدام الفرعية: <strong>24</strong></li>
+                        <li>أنواع المدعين: <strong>8</strong></li>
+                        <li>أنواع المدعى عليهم: <strong>6</strong></li>
+                        <li>أنواع الممثلين: <strong>9</strong></li>
+                        <li>حالات الطلب: <strong>10</strong></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- المرحلة 0: الأدوار والصلاحيات -->
+        <div class="section" id="phase0">
+            <h2>2. المرحلة 0: الأدوار والصلاحيات</h2>
+            <div class="highlight">
+                <strong>الأولوية:</strong> يجب إكمالها قبل المرحلة 1
+            </div>
+
+            <h3>2.1 أدوار المستخدمين</h3>
+            <table>
+                <tr>
+                    <th>الدور</th>
+                    <th>الاسم بالعربية</th>
+                    <th>الصلاحيات</th>
+                </tr>
+                <tr>
+                    <td>Clerk</td>
+                    <td>كاتب</td>
+                    <td>إنشاء الطلبات، إضافة المدعين/المدعى عليهم، التقديم</td>
+                </tr>
+                <tr>
+                    <td>Reviewer</td>
+                    <td>مدقق</td>
+                    <td>عرض الطلبات، اتخاذ الإجراءات (قيد، رفض، طلب استكمال)</td>
+                </tr>
+                <tr>
+                    <td>Judge</td>
+                    <td>قاضي</td>
+                    <td>عرض على المكتب، الموافقة/الرفض من مكتب القاضي</td>
+                </tr>
+                <tr>
+                    <td>RegistrationEmployee</td>
+                    <td>موظف قيد</td>
+                    <td>إنشاء الطلبات، تعديل، تقديم، قيد الدعاوى</td>
+                </tr>
+                <tr>
+                    <td>StatusEmployee</td>
+                    <td>موظف حالة</td>
+                    <td>عرض الطلبات، تحديث الحالة</td>
+                </tr>
+                <tr>
+                    <td>Admin</td>
+                    <td>مدير</td>
+                    <td>صلاحيات كاملة</td>
+                </tr>
+            </table>
+
+            <h3>2.2 الكيانات المطلوبة</h3>
+            <div class="file-tree">
+BOG.DbModel/Entities/Identity/
+├── Role.cs                    # أدوار النظام
+├── UserRole.cs                # ربط المستخدم-الدور (متعدد-لمتعدد)
+├── Court.cs                   # المحاكم
+├── Department.cs              # الدوائر داخل المحكمة
+└── UserDepartment.cs          # تعيين المستخدم للدائرة
+            </div>
+
+            <h3>2.3 كيان الدور (Role)</h3>
+            <pre><code>public class Role : BaseEntity
+{
+    public string Name { get; set; }           // Clerk, Reviewer, Judge, Admin
+    public string NameAr { get; set; }         // كاتب, مدقق, قاضي, مدير
+    public string Description { get; set; }
+
+    public virtual ICollection&lt;UserRole&gt; UserRoles { get; set; }
+}</code></pre>
+
+            <h3>2.4 كيان ربط المستخدم بالدور (UserRole)</h3>
+            <pre><code>public class UserRole : BaseEntity
+{
+    public int UserId { get; set; }
+    public int RoleId { get; set; }
+
+    public virtual User User { get; set; }
+    public virtual Role Role { get; set; }
+}</code></pre>
+
+            <h3>2.5 ثوابت الصلاحيات</h3>
+            <pre><code>public static class Permissions
+{
+    public const string CreateRequest = "CaseRegistration.Create";      // إنشاء طلب
+    public const string ViewRequest = "CaseRegistration.View";          // عرض طلب
+    public const string EditRequest = "CaseRegistration.Edit";          // تعديل طلب
+    public const string SubmitRequest = "CaseRegistration.Submit";      // تقديم طلب
+    public const string RegisterCase = "CaseRegistration.Register";     // قيد دعوى
+    public const string RejectRequest = "CaseRegistration.Reject";      // رفض طلب
+    public const string SendToJudge = "CaseRegistration.SendToJudge";   // إرسال للقاضي
+    public const string RequestCompletion = "CaseRegistration.RequestCompletion"; // طلب استكمال
+    public const string UpdateStatus = "CaseRegistration.UpdateStatus"; // تحديث الحالة
+}</code></pre>
+
+            <h3>2.6 بيانات البذر</h3>
+            <pre><code>// الأدوار
+new Role { Id = 1, Name = "Clerk", NameAr = "كاتب" },
+new Role { Id = 2, Name = "Reviewer", NameAr = "مدقق" },
+new Role { Id = 3, Name = "Judge", NameAr = "قاضي" },
+new Role { Id = 4, Name = "RegistrationEmployee", NameAr = "موظف قيد" },
+new Role { Id = 5, Name = "StatusEmployee", NameAr = "موظف حالة" },
+new Role { Id = 6, Name = "Admin", NameAr = "مدير" }</code></pre>
+        </div>
+
+        <!-- المرحلة 1: قاعدة البيانات -->
+        <div class="section" id="phase1">
+            <h2>3. المرحلة 1: طبقة قاعدة البيانات</h2>
+            <div class="highlight">
+                <strong>الأولوية:</strong> يجب إكمالها قبل توزيع المهام على المطورين
+            </div>
+
+            <h3>3.1 هيكل الكيانات</h3>
+            <div class="file-tree">
+BOG.DbModel/Entities/
+├── Lookups/                          # جداول البحث
+│   ├── PlaintiffType.cs              # أنواع المدعين (8)
+│   ├── DefendantType.cs              # أنواع المدعى عليهم (6)
+│   ├── RepresentativeType.cs         # أنواع الممثلين (9)
+│   ├── RequestStatus.cs              # حالات الطلب (10)
+│   ├── IdentityType.cs               # أنواع الهوية (3)
+│   ├── AttachmentType.cs             # أنواع المرفقات
+│   ├── DataSource.cs                 # مصدر البيانات (أبشر/المستخدم)
+│   ├── Region.cs                     # المناطق (13)
+│   ├── City.cs                       # المدن
+│   └── GovernmentAgency.cs           # الجهات الحكومية
+│
+├── Common/                           # كيانات مشتركة
+│   ├── Address.cs                    # العنوان الوطني (6.3.2)
+│   ├── ContactInfo.cs                # معلومات الاتصال
+│   └── PersonalData.cs               # البيانات الشخصية (6.3.1)
+│
+└── CaseRegistration/                 # كيانات قيد الدعوى
+    ├── CaseRegistrationRequest.cs    # طلب قيد الدعوى
+    ├── Claim.cs                      # الطلبات (علاقة واحد لمتعدد)
+    ├── RelatedCase.cs                # الدعاوى المرتبطة (علاقة واحد لمتعدد)
+    ├── RequestClassification.cs      # تصنيف الدعوى (علاقة واحد لمتعدد)
+    ├── Plaintiff.cs                  # المدعي
+    ├── CaseRequestPlaintiff.cs       # جدول الربط: طلب-مدعي (متعدد لمتعدد)
+    ├── PlaintiffAttachment.cs        # مرفقات المدعي
+    ├── Defendant.cs                  # المدعى عليه
+    ├── CaseRequestDefendant.cs       # جدول الربط: طلب-مدعى عليه (متعدد لمتعدد)
+    ├── Representative.cs             # الممثل
+    └── RequestAttachment.cs          # مرفقات الطلب
+            </div>
+
+            <h3>3.2 بيانات البذر للجداول المرجعية</h3>
+
+            <h4>أنواع المدعين (PlaintiffType)</h4>
+            <table>
+                <tr><th>المعرف</th><th>الاسم بالعربية</th><th>الاسم بالإنجليزية</th></tr>
+                <tr><td>1</td><td>فرد</td><td>Individual</td></tr>
+                <tr><td>2</td><td>فرد بدون هوية</td><td>Individual without ID</td></tr>
+                <tr><td>3</td><td>صاحب مؤسسة</td><td>Business Owner</td></tr>
+                <tr><td>4</td><td>شركة مسجلة</td><td>Registered Company</td></tr>
+                <tr><td>5</td><td>شركة غير مسجلة</td><td>Unregistered Company</td></tr>
+                <tr><td>6</td><td>جهة حكومية</td><td>Government Agency</td></tr>
+                <tr><td>7</td><td>جمعية/مؤسسة أهلية</td><td>Society/NGO</td></tr>
+                <tr><td>8</td><td>وقف</td><td>Waqf/Endowment</td></tr>
+            </table>
+
+            <h4>أنواع المدعى عليهم (DefendantType)</h4>
+            <table>
+                <tr><th>المعرف</th><th>الاسم بالعربية</th><th>الاسم بالإنجليزية</th></tr>
+                <tr><td>1</td><td>فرد</td><td>Individual</td></tr>
+                <tr><td>2</td><td>شركة مسجلة</td><td>Registered Company</td></tr>
+                <tr><td>3</td><td>شركة غير مسجلة</td><td>Unregistered Company</td></tr>
+                <tr><td>4</td><td>جهة حكومية</td><td>Government Agency</td></tr>
+                <tr><td>5</td><td>صاحب مؤسسة</td><td>Business Owner</td></tr>
+                <tr><td>6</td><td>وقف</td><td>Waqf/Endowment</td></tr>
+            </table>
+
+            <h4>أنواع الممثلين (RepresentativeType)</h4>
+            <table>
+                <tr><th>المعرف</th><th>الاسم بالعربية</th><th>الاسم بالإنجليزية</th></tr>
+                <tr><td>1</td><td>محامي/وكيل</td><td>Attorney/Lawyer</td></tr>
+                <tr><td>2</td><td>مصفي</td><td>Liquidator</td></tr>
+                <tr><td>3</td><td>أمين تفليسة</td><td>Bankruptcy Trustee</td></tr>
+                <tr><td>4</td><td>حارس قضائي</td><td>Judicial Custodian</td></tr>
+                <tr><td>5</td><td>ممثل نظامي</td><td>Company Representative</td></tr>
+                <tr><td>6</td><td>ولي</td><td>Guardian</td></tr>
+                <tr><td>7</td><td>ممثل جهة حكومية</td><td>Government Rep</td></tr>
+                <tr><td>8</td><td>وصي</td><td>Conservator</td></tr>
+                <tr><td>9</td><td>ناظر</td><td>Waqf Inspector</td></tr>
+            </table>
+
+            <h4>حالات الطلب (RequestStatus)</h4>
+            <table>
+                <tr><th>المعرف</th><th>الاسم بالعربية</th><th>الاسم بالإنجليزية</th></tr>
+                <tr><td>0</td><td>لا يوجد حالة</td><td>None</td></tr>
+                <tr><td>1</td><td>مسوّدة</td><td>Draft</td></tr>
+                <tr><td>2</td><td>يحتاج توثيق</td><td>Needs Authentication</td></tr>
+                <tr><td>3</td><td>طلب جديد</td><td>New Request</td></tr>
+                <tr><td>4</td><td>انتظار فحص الاكتمال</td><td>Awaiting Check</td></tr>
+                <tr><td>5</td><td>معروض على مكتب القاضي</td><td>On Judge Desk</td></tr>
+                <tr><td>6</td><td>دعوى مقيدة</td><td>Registered Case</td></tr>
+                <tr><td>7</td><td>دعوى محفوظة</td><td>Case Saved</td></tr>
+                <tr><td>8</td><td>استكمال النواقص</td><td>Pending Completion</td></tr>
+                <tr><td>9</td><td>التحقق من الاستكمال</td><td>Verifying Completion</td></tr>
+                <tr><td>10</td><td>مرفوضة</td><td>Rejected</td></tr>
+            </table>
+
+            <h4>مصدر البيانات (DataSource)</h4>
+            <table>
+                <tr><th>المعرف</th><th>الاسم بالعربية</th><th>الاسم بالإنجليزية</th><th>الوصف</th></tr>
+                <tr><td>1</td><td>من أبشر</td><td>FromAbsher</td><td>البيانات مجلوبة من نظام أبشر</td></tr>
+                <tr><td>2</td><td>من المستخدم</td><td>FromUser</td><td>البيانات مدخلة يدوياً</td></tr>
+            </table>
+            <p style="margin-top: 10px; color: #64748b;"><strong>ملاحظة:</strong> يُستخدم <code>DataSourceId</code> في كيانات المدعي والممثل والمدعى عليه لتتبع مصدر البيانات.</p>
+
+            <h3>3.3 طلب قيد الدعوى (CaseRegistrationRequest)</h3>
+            <pre><code>public class CaseRegistrationRequest : BaseEntity
+{
+    public int RequestStatusId { get; set; }           // حالة الطلب
+    public string Subject { get; set; }                // الموضوع (4000 حرف)
+    public string Evidence { get; set; }               // البيّنات (4000 حرف)
+    public string Notes { get; set; }                  // ملاحظات
+    public int CourtId { get; set; }                   // المحكمة
+    public DateTime? SubmissionDate { get; set; }      // تاريخ التقديم
+    public DateTime? CompletionDeadline { get; set; }  // مهلة الاستكمال (30 يوم)
+    public string RejectionReason { get; set; }        // سبب الرفض
+
+    // تتبع المستخدم
+    public int CreatedByUserId { get; set; }           // المستخدم المنشئ
+    public int? LastModifiedByUserId { get; set; }     // آخر معدل
+
+    // علاقات التنقل
+    public virtual RequestStatus Status { get; set; }
+    public virtual Court Court { get; set; }
+    public virtual User CreatedByUser { get; set; }
+
+    // علاقات متعدد لمتعدد (Many-to-Many)
+    public virtual ICollection&lt;CaseRequestPlaintiff&gt; CaseRequestPlaintiffs { get; set; }
+    public virtual ICollection&lt;CaseRequestDefendant&gt; CaseRequestDefendants { get; set; }
+
+    // علاقات واحد لمتعدد (One-to-Many)
+    public virtual ICollection&lt;Claim&gt; Claims { get; set; }
+    public virtual ICollection&lt;RelatedCase&gt; RelatedCases { get; set; }
+    public virtual ICollection&lt;RequestClassification&gt; Classifications { get; set; }
+    public virtual ICollection&lt;RequestAttachment&gt; Attachments { get; set; }
+}</code></pre>
+
+            <h3>3.4 جداول الربط (Junction Tables) - علاقات متعدد لمتعدد</h3>
+
+            <h4>جدول ربط الطلب بالمدعي (CaseRequestPlaintiff)</h4>
+            <pre><code>public class CaseRequestPlaintiff : BaseEntity
+{
+    public int CaseRegistrationRequestId { get; set; }
+    public int PlaintiffId { get; set; }
+
+    // علاقات التنقل
+    public virtual CaseRegistrationRequest Request { get; set; }
+    public virtual Plaintiff Plaintiff { get; set; }
+}</code></pre>
+
+            <div class="relationship-diagram">
+CaseRegistrationRequest (N) ←────→ (N) Plaintiff<br>
+        طلب قيد دعوى          ↑         المدعي<br>
+                              |<br>
+                    CaseRequestPlaintiff<br>
+                        جدول الربط
+            </div>
+
+            <h4>جدول ربط الطلب بالمدعى عليه (CaseRequestDefendant)</h4>
+            <pre><code>public class CaseRequestDefendant : BaseEntity
+{
+    public int CaseRegistrationRequestId { get; set; }
+    public int DefendantId { get; set; }
+
+    // علاقات التنقل
+    public virtual CaseRegistrationRequest Request { get; set; }
+    public virtual Defendant Defendant { get; set; }
+}</code></pre>
+
+            <div class="relationship-diagram">
+CaseRegistrationRequest (N) ←────→ (N) Defendant<br>
+        طلب قيد دعوى          ↑         المدعى عليه<br>
+                              |<br>
+                    CaseRequestDefendant<br>
+                        جدول الربط
+            </div>
+
+            <h3>3.5 المدعي (Plaintiff)</h3>
+            <pre><code>public class Plaintiff : BaseEntity
+{
+    public int PlaintiffTypeId { get; set; }           // نوع المدعي
+
+    // البيانات الشخصية (للأفراد)
+    public int? IdentityTypeId { get; set; }           // نوع الهوية
+    public string IdentityNumber { get; set; }         // رقم الهوية (10 أو 20 رقم)
+    public string FirstName { get; set; }              // الاسم الأول
+    public string FatherName { get; set; }             // اسم الأب
+    public string GrandfatherName { get; set; }        // اسم الجد
+    public string FamilyName { get; set; }             // اسم العائلة
+    public string ClanName { get; set; }               // اسم القبيلة
+    public DateTime? BirthDate { get; set; }           // تاريخ الميلاد
+    public string Gender { get; set; }                 // الجنس
+    public int? NationalityId { get; set; }            // الجنسية
+    public DateTime? IdentityIssueDate { get; set; }   // تاريخ إصدار الهوية
+    public DateTime? IdentityExpiryDate { get; set; }  // تاريخ انتهاء الهوية
+    public int? DataSourceId { get; set; }             // مصدر البيانات (أبشر/المستخدم)
+
+    // معلومات الاتصال
+    public string MobileNumber { get; set; }           // رقم الجوال (10 أرقام، يبدأ 05)
+    public string Email { get; set; }                  // البريد الإلكتروني
+
+    // العناوين
+    public int? ResidenceAddressId { get; set; }       // عنوان السكن
+    public int? WorkAddressId { get; set; }            // عنوان العمل
+    public int? SelectedAddressId { get; set; }        // العنوان المختار
+
+    // للمؤسسات والشركات
+    public string CommercialRegNumber { get; set; }    // رقم السجل التجاري (10 أرقام)
+    public string CompanyName { get; set; }            // اسم الشركة
+    public DateTime? CRStartDate { get; set; }         // تاريخ بداية السجل
+    public DateTime? CREndDate { get; set; }           // تاريخ انتهاء السجل
+
+    // علاقات التنقل
+    public virtual PlaintiffType PlaintiffType { get; set; }
+    public virtual DataSource DataSource { get; set; }
+    public virtual ICollection&lt;CaseRequestPlaintiff&gt; CaseRequestPlaintiffs { get; set; }
+    public virtual ICollection&lt;Representative&gt; Representatives { get; set; }
+    public virtual ICollection&lt;PlaintiffAttachment&gt; Attachments { get; set; }
+}</code></pre>
+
+            <h3>3.6 المدعى عليه (Defendant)</h3>
+            <pre><code>public class Defendant : BaseEntity
+{
+    public int DefendantTypeId { get; set; }           // نوع المدعى عليه
+    public string FullName { get; set; }               // الاسم الكامل (مطلوب - 200 حرف)
+
+    // الهوية (اختياري)
+    public int? IdentityTypeId { get; set; }
+    public string IdentityNumber { get; set; }
+    public int? DataSourceId { get; set; }             // مصدر البيانات (أبشر/المستخدم)
+
+    // العنوان (نصي أو مهيكل)
+    public string AddressText { get; set; }
+    public int? AddressId { get; set; }
+
+    // للشركات
+    public string CommercialRegNumber { get; set; }
+
+    // للجهات الحكومية
+    public int? GovernmentAgencyId { get; set; }
+    public string Headquarters { get; set; }           // المقر الرئيسي
+    public string AdditionalStatement { get; set; }
+
+    // علاقات التنقل
+    public virtual DefendantType DefendantType { get; set; }
+    public virtual DataSource DataSource { get; set; }
+    public virtual ICollection&lt;CaseRequestDefendant&gt; CaseRequestDefendants { get; set; }
+}</code></pre>
+
+            <h3>3.7 الممثل (Representative)</h3>
+            <pre><code>public class Representative : BaseEntity
+{
+    public int PlaintiffId { get; set; }
+    public int RepresentativeTypeId { get; set; }      // نوع الممثل
+
+    // البيانات الشخصية
+    public int IdentityTypeId { get; set; }
+    public string IdentityNumber { get; set; }
+    public string FirstName { get; set; }
+    public string FatherName { get; set; }
+    public string GrandfatherName { get; set; }
+    public string FamilyName { get; set; }
+    public string ClanName { get; set; }               // اسم القبيلة
+    public DateTime? BirthDate { get; set; }
+    public int? DataSourceId { get; set; }             // مصدر البيانات (أبشر/المستخدم)
+
+    // معلومات الاتصال
+    public string MobileNumber { get; set; }
+    public string Email { get; set; }
+
+    // وثيقة التفويض
+    public string AuthorizationNumber { get; set; }    // رقم الوكالة/القرار/الصك
+    public DateTime? AuthorizationDate { get; set; }   // تاريخ الوكالة
+    public string AuthorizationSource { get; set; }    // مصدر الوكالة
+    public string AuthorizationSourceType { get; set; } // نوع المصدر
+
+    // للولي
+    public string GuardianshipType { get; set; }       // نوع الولاية: طبيعية/مكتسبة
+
+    // علاقات التنقل
+    public virtual Plaintiff Plaintiff { get; set; }
+    public virtual RepresentativeType RepresentativeType { get; set; }
+    public virtual DataSource DataSource { get; set; }
+}</code></pre>
+
+            <h3>3.8 أوامر الهجرة</h3>
+            <pre><code># إضافة الهجرة
+dotnet ef migrations add AddCaseRegistrationEntities \
+    --project src/Backend/BOG.DbModel \
+    --startup-project src/Backend/BOG.API
+
+# تحديث قاعدة البيانات
+dotnet ef database update \
+    --project src/Backend/BOG.DbModel \
+    --startup-project src/Backend/BOG.API</code></pre>
+        </div>
+
+        <!-- المرحلة 2: توزيع المهام -->
+        <div class="section" id="phase2">
+            <h2>4. المرحلة 2: توزيع المهام على المطورين</h2>
+
+            <div class="grid-2">
+                <div class="card">
+                    <h4>المطور أ: المدعين والممثلين</h4>
+                    <p><strong>النطاق:</strong> حالات الاستخدام 6.5.1.1.1 - 6.5.1.1.10</p>
+                    <p><strong>عدد الحالات:</strong> 10 حالات استخدام</p>
+                    <ul>
+                        <li>إدارة المدعين</li>
+                        <li>إدارة الممثلين</li>
+                        <li>المرفقات</li>
+                        <li>العنوان المختار</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h4>المطور ب: المدعى عليهم والطلبات</h4>
+                    <p><strong>النطاق:</strong> حالات الاستخدام 6.5.1.1.11 - 6.5.1.1.24</p>
+                    <p><strong>عدد الحالات:</strong> 14 حالة استخدام</p>
+                    <ul>
+                        <li>إدارة المدعى عليهم</li>
+                        <li>دورة حياة الطلب</li>
+                        <li>الإجراءات</li>
+                        <li>البحث</li>
+                    </ul>
+                </div>
+            </div>
+
+            <h3>4.1 نقاط النهاية للمطور أ (API Endpoints)</h3>
+            <pre><code>GET    /api/case-requests/{requestId}/plaintiffs      # قائمة المدعين
+POST   /api/case-requests/{requestId}/plaintiffs      # إضافة مدعي
+GET    /api/plaintiffs/{id}                           # تفاصيل مدعي
+PUT    /api/plaintiffs/{id}                           # تعديل مدعي
+DELETE /api/plaintiffs/{id}                           # حذف مدعي
+
+GET    /api/plaintiffs/{id}/attachments               # قائمة المرفقات
+POST   /api/plaintiffs/{id}/attachments               # إضافة مرفق
+DELETE /api/plaintiffs/{id}/attachments/{attachmentId} # حذف مرفق
+
+GET    /api/plaintiffs/{id}/selected-address          # العنوان المختار
+PUT    /api/plaintiffs/{id}/selected-address          # تحديث العنوان
+
+GET    /api/plaintiffs/{plaintiffId}/representatives  # قائمة الممثلين
+POST   /api/plaintiffs/{plaintiffId}/representatives  # إضافة ممثل
+GET    /api/representatives/{id}                      # تفاصيل ممثل
+PUT    /api/representatives/{id}                      # تعديل ممثل
+DELETE /api/representatives/{id}                      # حذف ممثل</code></pre>
+
+            <h3>4.2 نقاط النهاية للمطور ب (API Endpoints)</h3>
+            <pre><code>GET    /api/case-requests/{requestId}/defendants      # قائمة المدعى عليهم
+POST   /api/case-requests/{requestId}/defendants      # إضافة مدعى عليه
+GET    /api/defendants/{id}                           # تفاصيل مدعى عليه
+PUT    /api/defendants/{id}                           # تعديل مدعى عليه
+DELETE /api/defendants/{id}                           # حذف مدعى عليه
+
+POST   /api/case-requests                             # إنشاء طلب (مسودة)
+GET    /api/case-requests/{id}                        # تفاصيل طلب
+PUT    /api/case-requests/{id}                        # تعديل طلب
+POST   /api/case-requests/{id}/submit                 # تقديم طلب
+GET    /api/case-requests/search                      # البحث
+
+POST   /api/case-requests/{id}/action                 # اتخاذ إجراء
+GET    /api/case-requests/{id}/attachments            # قائمة المرفقات
+POST   /api/case-requests/{id}/attachments            # إضافة مرفق
+
+GET    /api/case-requests/{id}/claims                 # قائمة الطلبات
+POST   /api/case-requests/{id}/claims                 # إضافة طلب
+PUT    /api/claims/{claimId}                          # تعديل طلب
+DELETE /api/claims/{claimId}                          # حذف طلب</code></pre>
+
+            <h3>4.3 انتقالات الحالة</h3>
+            <table>
+                <tr><th>من</th><th>الإجراء</th><th>إلى</th></tr>
+                <tr><td>لا يوجد</td><td>حفظ</td><td>مسودة</td></tr>
+                <tr><td>مسودة</td><td>تقديم</td><td>طلب جديد</td></tr>
+                <tr><td>طلب جديد</td><td>قيد</td><td>دعوى مقيدة</td></tr>
+                <tr><td>طلب جديد</td><td>إرسال للقاضي</td><td>معروض على مكتب القاضي</td></tr>
+                <tr><td>طلب جديد</td><td>طلب استكمال</td><td>استكمال النواقص</td></tr>
+                <tr><td>طلب جديد</td><td>رفض</td><td>مرفوضة</td></tr>
+                <tr><td>استكمال النواقص</td><td>استكمال</td><td>التحقق من الاستكمال</td></tr>
+                <tr><td>استكمال النواقص</td><td>انتهاء المهلة (30 يوم)</td><td>مرفوضة</td></tr>
+            </table>
+        </div>
+
+        <!-- المرحلة 3: الدمج والاختبار -->
+        <div class="section" id="phase3">
+            <h2>5. المرحلة 3: الدمج والاختبار</h2>
+
+            <h3>5.1 مهام الدمج</h3>
+            <ol>
+                <li><strong>خدمة التحقق من انتقال الحالة</strong> - تنفيذ IStatusTransitionValidator</li>
+                <li><strong>تكامل أبشر</strong> - إنشاء IAbsherService في BOG.Integration</li>
+                <li><strong>خدمة الإشعارات</strong> - إرسال رسائل SMS/بريد إلكتروني</li>
+                <li><strong>مهمة الخلفية للرفض التلقائي</strong> - فحص مهلة 30 يوم</li>
+            </ol>
+
+            <h3>5.2 رسائل التحقق</h3>
+            <table>
+                <tr><th>الرمز</th><th>الرسالة</th></tr>
+                <tr><td>ERR001</td><td>يجب إضافة مدّعي واحد على الأقل</td></tr>
+                <tr><td>ERR002</td><td>يجب إضافة مدّعى عليه واحد على الأقل</td></tr>
+                <tr><td>ERR003</td><td>المرفقات الإجبارية غير مكتملة</td></tr>
+                <tr><td>ERR004</td><td>يجب تحديد مقدم الطلب</td></tr>
+                <tr><td>ERR008</td><td>الممثّل موجود مسبقاً</td></tr>
+                <tr><td>ERR011</td><td>المدّعي موجود مسبقاً</td></tr>
+                <tr><td>ERR012</td><td>رقم هوية الممثّل نفس رقم هوية المدّعي</td></tr>
+                <tr><td>ERR013</td><td>المدّعى عليه موجود مسبقاً</td></tr>
+            </table>
+        </div>
+
+        <!-- المرحلة 4: خدمات التكامل -->
+        <div class="section" id="phase4">
+            <h2>6. المرحلة 4: خدمات التكامل</h2>
+            <p>جميع خدمات التكامل الخارجية ستُنفذ بواجهات وتنفيذات محاكاة للتطوير/الاختبار.</p>
+
+            <h3>6.1 تكامل أبشر (التحقق من الهوية)</h3>
+            <div class="highlight">
+                <strong>الغرض:</strong> التحقق من هوية المواطن/المقيم وجلب البيانات الشخصية من أبشر (مركز المعلومات الوطني)
+            </div>
+            <pre><code>public interface IAbsherService
+{
+    Task&lt;AbsherVerificationResult&gt; VerifyIdentityAsync(string identityNumber, int identityType);
+    Task&lt;AbsherPersonData?&gt; GetPersonDataAsync(string identityNumber, int identityType);
+    Task&lt;AbsherAddressData?&gt; GetNationalAddressAsync(string identityNumber);
+}</code></pre>
+
+            <h4>كائنات نقل البيانات (DTOs)</h4>
+            <pre><code>// نتيجة التحقق
+public class AbsherVerificationResult
+{
+    public bool IsVerified { get; set; }           // تم التحقق
+    public string? ErrorCode { get; set; }         // رمز الخطأ
+    public string? ErrorMessage { get; set; }      // رسالة الخطأ (إنجليزي)
+    public string? ErrorMessageAr { get; set; }    // رسالة الخطأ (عربي)
+}
+
+// بيانات الشخص
+public class AbsherPersonData
+{
+    public string FirstName { get; set; }           // الاسم الأول
+    public string FatherName { get; set; }          // اسم الأب
+    public string GrandfatherName { get; set; }     // اسم الجد
+    public string FamilyName { get; set; }          // اسم العائلة
+    public DateTime BirthDate { get; set; }         // تاريخ الميلاد
+    public string Gender { get; set; }              // الجنس: ذكر/أنثى
+    public int NationalityId { get; set; }          // الجنسية
+    public string MobileNumber { get; set; }        // رقم الجوال
+    public string Email { get; set; }               // البريد الإلكتروني
+}</code></pre>
+
+            <h3>6.2 خدمة الرسائل القصيرة (SMS)</h3>
+            <div class="highlight">
+                <strong>الغرض:</strong> إرسال إشعارات SMS عند تغيير الحالة والأحداث المهمة
+            </div>
+            <pre><code>public interface ISmsService
+{
+    Task&lt;SmsResult&gt; SendSmsAsync(string mobileNumber, string message);
+    Task&lt;SmsResult&gt; SendSmsAsync(string mobileNumber, string templateCode,
+        Dictionary&lt;string, string&gt; parameters);
+    Task&lt;List&lt;SmsResult&gt;&gt; SendBulkSmsAsync(List&lt;string&gt; mobileNumbers, string message);
+}</code></pre>
+
+            <h4>قوالب الرسائل</h4>
+            <table>
+                <tr><th>رمز القالب</th><th>الرسالة</th></tr>
+                <tr><td>REQUEST_SUBMITTED</td><td>تم استلام طلب قيد الدعوى رقم {RequestNumber} بنجاح</td></tr>
+                <tr><td>REQUEST_REGISTERED</td><td>تم قيد دعواكم رقم {CaseNumber} في المحكمة الإدارية</td></tr>
+                <tr><td>REQUEST_REJECTED</td><td>تم رفض طلب قيد الدعوى رقم {RequestNumber}. السبب: {Reason}</td></tr>
+                <tr><td>COMPLETION_REQUIRED</td><td>مطلوب استكمال نواقص الطلب رقم {RequestNumber} خلال 30 يوم</td></tr>
+                <tr><td>DEFICIENCY_REMINDER</td><td>تذكير: يرجى استكمال نواقص الطلب رقم {RequestNumber}. متبقي {DaysRemaining} أيام</td></tr>
+                <tr><td>AUTO_REJECTED</td><td>تم رفض الطلب رقم {RequestNumber} تلقائياً لعدم استكمال النواقص</td></tr>
+            </table>
+
+            <h3>6.3 خدمة البريد الإلكتروني</h3>
+            <div class="highlight">
+                <strong>الغرض:</strong> إرسال إشعارات البريد الإلكتروني للتحديثات والمراسلات الرسمية
+            </div>
+            <pre><code>public interface IEmailService
+{
+    Task&lt;EmailResult&gt; SendEmailAsync(string toEmail, string subject, string body, bool isHtml = true);
+    Task&lt;EmailResult&gt; SendEmailAsync(string toEmail, string templateCode,
+        Dictionary&lt;string, string&gt; parameters);
+    Task&lt;EmailResult&gt; SendEmailWithAttachmentAsync(string toEmail, string subject, string body,
+        List&lt;EmailAttachment&gt; attachments);
+}</code></pre>
+
+            <h3>6.4 تكامل نظام إدارة القضايا</h3>
+            <div class="highlight">
+                <strong>الغرض:</strong> قيد الدعاوى المعتمدة في نظام إدارة القضايا الأساسي (الإصدار 3/4)
+            </div>
+            <pre><code>public interface ICaseManagementService
+{
+    Task&lt;CaseRegistrationResult&gt; RegisterCaseAsync(CaseRegistrationData caseData);
+    Task&lt;CaseStatusResult&gt; GetCaseStatusAsync(string caseNumber);
+    Task&lt;bool&gt; UpdateCaseAsync(string caseNumber, CaseUpdateData updateData);
+}
+
+// نتيجة قيد الدعوى
+public class CaseRegistrationResult
+{
+    public bool IsSuccess { get; set; }             // نجح القيد
+    public string? CaseNumber { get; set; }         // رقم القضية
+    public string? RegistrationNumber { get; set; } // رقم القيد
+    public DateTime? RegistrationDate { get; set; } // تاريخ القيد
+    public string? ErrorCode { get; set; }          // رمز الخطأ
+    public string? ErrorMessage { get; set; }       // رسالة الخطأ
+}</code></pre>
+
+            <h3>6.5 إعدادات التكامل (appsettings.json)</h3>
+            <pre><code>{
+  "Integration": {
+    "Absher": {
+      "UseMock": true,
+      "BaseUrl": "https://absher.api.example.sa",
+      "ApiKey": "",
+      "TimeoutSeconds": 30
+    },
+    "Sms": {
+      "UseMock": true,
+      "Provider": "Unifonic",
+      "ApiKey": "",
+      "SenderId": "BOG"
+    },
+    "Email": {
+      "UseMock": true,
+      "SmtpHost": "smtp.example.sa",
+      "SmtpPort": 587,
+      "FromEmail": "noreply@bog.gov.sa",
+      "FromName": "ديوان المظالم"
+    },
+    "CaseManagement": {
+      "UseMock": true,
+      "BaseUrl": "https://cms.bog.gov.sa/api",
+      "Version": "v4"
+    }
+  }
+}</code></pre>
+
+            <h3>6.6 هيكل ملفات التكامل</h3>
+            <div class="file-tree">
+BOG.Integration/
+├── Configuration/
+│   └── IntegrationSettings.cs          # إعدادات التكامل
+├── Interfaces/
+│   ├── IAbsherService.cs               # واجهة أبشر
+│   ├── ISmsService.cs                  # واجهة الرسائل القصيرة
+│   ├── IEmailService.cs                # واجهة البريد الإلكتروني
+│   └── ICaseManagementService.cs       # واجهة نظام القضايا
+├── Services/
+│   ├── AbsherMockService.cs            # محاكاة أبشر
+│   ├── AbsherService.cs                # التنفيذ الحقيقي
+│   ├── SmsMockService.cs               # محاكاة الرسائل
+│   ├── SmsService.cs                   # التنفيذ الحقيقي
+│   ├── EmailMockService.cs             # محاكاة البريد
+│   ├── EmailService.cs                 # التنفيذ الحقيقي
+│   ├── CaseManagementMockService.cs    # محاكاة نظام القضايا
+│   └── CaseManagementService.cs        # التنفيذ الحقيقي
+├── DTOs/
+│   ├── Absher/
+│   │   ├── AbsherVerificationResult.cs
+│   │   ├── AbsherPersonData.cs
+│   │   └── AbsherAddressData.cs
+│   ├── Sms/
+│   │   ├── SmsResult.cs
+│   │   └── SmsTemplate.cs
+│   ├── Email/
+│   │   ├── EmailResult.cs
+│   │   ├── EmailAttachment.cs
+│   │   └── EmailTemplate.cs
+│   └── CaseManagement/
+│       ├── CaseRegistrationData.cs
+│       ├── CaseRegistrationResult.cs
+│       ├── CasePlaintiffData.cs
+│       ├── CaseDefendantData.cs
+│       ├── CaseStatusResult.cs
+│       └── CaseUpdateData.cs
+└── Extensions/
+    └── IntegrationServiceExtensions.cs  # تسجيل الخدمات
+            </div>
+        </div>
+
+        <!-- ملخص الملفات -->
+        <div class="section" id="summary">
+            <h2>7. ملخص الملفات</h2>
+            <div class="grid-2">
+                <div class="card">
+                    <h4>المرحلة 0 (الأدوار)</h4>
+                    <ul>
+                        <li>5 كيانات للهوية</li>
+                        <li>2 مستودعات</li>
+                        <li>2 خدمات منطق أعمال</li>
+                        <li>2 ملفات للصلاحيات</li>
+                        <li>1 متحكم API</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h4>المرحلة 1 (قاعدة البيانات)</h4>
+                    <ul>
+                        <li>10 كيانات للجداول المرجعية</li>
+                        <li>1 كيان مشترك (Address)</li>
+                        <li>11 كيان لقيد الدعوى</li>
+                        <li>1 تحديث DbContext</li>
+                        <li>1 هجرة</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h4>المطور أ (المدعين)</h4>
+                    <ul>
+                        <li>5 واجهات مستودعات + تنفيذات</li>
+                        <li>8 كائنات نقل بيانات (DTO)</li>
+                        <li>6 نماذج عرض (ViewModel)</li>
+                        <li>4 خدمات منطق أعمال</li>
+                        <li>2 متحكم API</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h4>المطور ب (المدعى عليهم)</h4>
+                    <ul>
+                        <li>8 واجهات مستودعات + تنفيذات</li>
+                        <li>12 كائن نقل بيانات (DTO)</li>
+                        <li>9 نماذج عرض (ViewModel)</li>
+                        <li>7 خدمات منطق أعمال</li>
+                        <li>5 متحكمات API</li>
+                    </ul>
+                </div>
+            </div>
+
+            <h3>المرحلة 4 (التكامل)</h3>
+            <ul>
+                <li>4 واجهات خدمات</li>
+                <li>8 تنفيذات (4 محاكاة + 4 حقيقية)</li>
+                <li>15+ كائنات نقل بيانات</li>
+                <li>1 ملف إعدادات</li>
+                <li>1 ملف تسجيل خدمات</li>
+            </ul>
+        </div>
+
+        <!-- التحقق -->
+        <div class="section" id="verification">
+            <h2>8. التحقق</h2>
+
+            <h3>8.1 أوامر البناء</h3>
+            <pre><code># البناء
+dotnet build src/Backend/BOG.sln
+
+# قاعدة البيانات
+dotnet ef database update \
+    --project src/Backend/BOG.DbModel \
+    --startup-project src/Backend/BOG.API
+
+# تشغيل API
+dotnet run --project src/Backend/BOG.API</code></pre>
+
+            <h3>8.2 الاختبار باستخدام Swagger</h3>
+            <div class="highlight">
+                افتح: <code>https://localhost:5001/swagger</code>
+            </div>
+
+            <h3>8.3 سيناريوهات الاختبار</h3>
+            <ol>
+                <li><strong>مسار إنشاء الطلب:</strong> إنشاء طلب مسودة → إضافة مدعي → إضافة مدعى عليه → تعيين مقدم الطلب → تقديم الطلب → قيد كدعوى</li>
+                <li><strong>مسار النواقص:</strong> تقديم طلب → طلب استكمال → استكمال النواقص → التحقق والقيد</li>
+                <li><strong>اختبارات التحقق:</strong>
+                    <ul>
+                        <li>تقديم بدون مدعي (ERR001)</li>
+                        <li>تقديم بدون مدعى عليه (ERR002)</li>
+                        <li>تقديم بدون مقدم طلب (ERR004)</li>
+                        <li>إضافة مدعي مكرر (ERR011)</li>
+                    </ul>
+                </li>
+            </ol>
+        </div>
+
+        <!-- المراجع -->
+        <div class="section">
+            <h2>المراجع</h2>
+            <ul>
+                <li><strong>مستند المتطلبات:</strong> <code>docs/srs/use-cases/6.5.1-case-registration/SRS_UC_6.5.1_Full_AR.md</code></li>
+                <li><strong>المعمارية:</strong> اتباع الأنماط في تنفيذ كيان <code>User</code></li>
+                <li><strong>CLAUDE.md:</strong> اتفاقيات المشروع وأوامر البناء</li>
+            </ul>
+        </div>
+    </div>
+
+    <footer>
+        <p>خطة تنفيذ حالة الاستخدام 6.5.1 - نظام إدارة الدعاوى - ديوان المظالم</p>
+        <p>الإصدار 1.0 | 2026-01-14</p>
+    </footer>
+</body>
+</html>

@@ -65,6 +65,11 @@ public static class ServiceCollectionExtensions
         // Feature-specific repositories
         services.AddScoped<IUserRepository, UserRepository>();
 
+        // Identity repositories
+        services.AddScoped<IRoleRepository, RoleRepository>();
+        services.AddScoped<ICourtRepository, CourtRepository>();
+        services.AddScoped<IDepartmentRepository, DepartmentRepository>();
+
         return services;
     }
 
@@ -78,6 +83,10 @@ public static class ServiceCollectionExtensions
     {
         // Feature-specific services
         services.AddScoped<IUserBL, UserBL>();
+
+        // Identity and authorization services
+        services.AddScoped<IRoleBL, RoleBL>();
+        services.AddScoped<IAuthorizationBL, AuthorizationBL>();
 
         return services;
     }
