@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>المطور ب: وحدة المدعى عليهم وإدارة الطلبات - BOG</title>
+    <title>Developer B: Defendants & Request Management Module - BOG</title>
     <style>
         :root {
             --primary-color: #059669;
@@ -48,588 +48,601 @@
             margin-bottom: 15px;
         }
 
-        header h1 { font-size: 2.2rem; margin-bottom: 10px; }
-        header h2 { font-size: 1.3rem; font-weight: normal; opacity: 0.9; }
-        header .scope { margin-top: 15px; font-size: 1.1rem; opacity: 0.9; }
+        header h1 { font-size: 2rem; margin-bottom: 10px; }
+        header p { font-size: 1rem; opacity: 0.9; }
 
-        section {
+        .meta-info {
             background: var(--card-bg);
-            border-radius: 10px;
-            padding: 25px;
-            margin-bottom: 25px;
-            box-shadow: 0 2px 10px rgba(5, 150, 105, 0.1);
-            border-right: 4px solid var(--primary-color);
-        }
-
-        section h2 {
-            color: var(--primary-color);
-            border-bottom: 2px solid var(--border-color);
-            padding-bottom: 10px;
+            padding: 15px 20px;
+            border-radius: 8px;
             margin-bottom: 20px;
-            font-size: 1.4rem;
+            border-right: 4px solid var(--primary-color);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
         }
 
-        section h3 { color: var(--secondary-color); margin: 20px 0 12px 0; font-size: 1.1rem; }
-        section h4 { color: var(--text-color); margin: 15px 0 10px 0; font-size: 1rem; }
+        .meta-item { flex: 1; min-width: 200px; }
+        .meta-item strong { color: var(--primary-color); }
 
-        table { width: 100%; border-collapse: collapse; margin: 15px 0; font-size: 0.95rem; }
-        th, td { padding: 10px 12px; text-align: right; border: 1px solid var(--border-color); }
-        th { background: var(--primary-color); color: white; font-weight: 600; }
-        tr:nth-child(even) { background: #ecfdf5; }
-        tr:hover { background: #d1fae5; }
+        .toc {
+            background: var(--card-bg);
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
 
-        .code-block {
+        .toc h2 { color: var(--primary-color); margin-bottom: 15px; font-size: 1.3rem; }
+        .toc ol { padding-right: 25px; }
+        .toc li { margin: 8px 0; }
+        .toc a { color: var(--primary-color); text-decoration: none; }
+        .toc a:hover { text-decoration: underline; }
+
+        .section {
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        h2 {
+            color: var(--primary-color);
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid var(--accent-color);
+        }
+
+        h3 {
+            color: var(--text-color);
+            font-size: 1.2rem;
+            margin: 25px 0 15px 0;
+        }
+
+        h4 {
+            color: #475569;
+            font-size: 1.1rem;
+            margin: 20px 0 10px 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+            font-size: 0.95rem;
+        }
+
+        th, td {
+            border: 1px solid var(--border-color);
+            padding: 12px 15px;
+            text-align: right;
+        }
+
+        th {
+            background: var(--primary-color);
+            color: white;
+            font-weight: 600;
+        }
+
+        tr:nth-child(even) { background-color: #ecfdf5; }
+        tr:hover { background-color: #d1fae5; }
+
+        pre {
             background: #1e293b;
             color: #e2e8f0;
-            padding: 15px;
+            padding: 20px;
             border-radius: 8px;
             overflow-x: auto;
+            direction: ltr;
+            text-align: left;
             font-family: 'Consolas', 'Monaco', monospace;
-            font-size: 0.85rem;
-            margin: 12px 0;
-            direction: ltr;
-            text-align: left;
-        }
-
-        .code-block pre { margin: 0; white-space: pre-wrap; }
-        .code-block .keyword { color: #93c5fd; }
-        .code-block .type { color: #a5f3fc; }
-        .code-block .string { color: #fde68a; }
-        .code-block .comment { color: #6b7280; }
-
-        .file-tree {
-            background: #f0fdf4;
-            padding: 15px;
-            border-radius: 8px;
-            font-family: monospace;
             font-size: 0.9rem;
-            white-space: pre;
-            overflow-x: auto;
-            border: 1px solid var(--border-color);
-            direction: ltr;
-            text-align: left;
-        }
-
-        .api-endpoint {
-            background: #f8fafc;
-            padding: 8px 12px;
-            border-radius: 5px;
-            margin: 5px 0;
-            font-family: monospace;
-            font-size: 0.9rem;
-            display: flex;
-            gap: 10px;
-            border: 1px solid var(--border-color);
-            direction: ltr;
-            flex-direction: row-reverse;
-            justify-content: flex-end;
-        }
-
-        .api-method { font-weight: bold; min-width: 60px; }
-        .api-method.get { color: var(--primary-color); }
-        .api-method.post { color: var(--info-color); }
-        .api-method.put { color: var(--warning-color); }
-        .api-method.delete { color: var(--danger-color); }
-
-        .use-case-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 15px;
+            line-height: 1.5;
             margin: 15px 0;
         }
 
-        .use-case-card {
+        code {
+            font-family: 'Consolas', 'Monaco', monospace;
+            background: #d1fae5;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.9em;
+            color: #047857;
+        }
+
+        pre code { background: none; padding: 0; color: inherit; }
+
+        .file-tree {
             background: #ecfdf5;
-            padding: 15px;
-            border-radius: 8px;
-            border-right: 4px solid var(--primary-color);
-        }
-
-        .use-case-card .uc-code { font-weight: bold; color: var(--primary-color); }
-        .use-case-card .uc-name { font-size: 1.1rem; margin: 5px 0; }
-        .use-case-card .uc-name-en { color: #64748b; direction: ltr; font-size: 0.9rem; }
-
-        .priority-high { border-right-color: var(--danger-color); }
-        .priority-medium { border-right-color: var(--warning-color); }
-        .priority-low { border-right-color: var(--primary-color); }
-
-        .summary-stats {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 15px;
-            margin: 20px 0;
-        }
-
-        .stat-item {
-            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
-            color: white;
             padding: 20px;
-            border-radius: 10px;
-            text-align: center;
+            border-radius: 8px;
+            font-family: monospace;
+            direction: ltr;
+            text-align: left;
+            white-space: pre;
+            overflow-x: auto;
+            margin: 15px 0;
+            border: 1px solid var(--border-color);
         }
 
-        .stat-item .number { font-size: 2rem; font-weight: bold; }
-        .stat-item .label { font-size: 0.9rem; opacity: 0.9; }
+        .note {
+            background: #fef3c7;
+            border-right: 4px solid var(--warning-color);
+            padding: 15px 20px;
+            border-radius: 0 8px 8px 0;
+            margin: 15px 0;
+        }
+
+        .info {
+            background: #dbeafe;
+            border-right: 4px solid var(--info-color);
+            padding: 15px 20px;
+            border-radius: 0 8px 8px 0;
+            margin: 15px 0;
+        }
+
+        .success {
+            background: #d1fae5;
+            border-right: 4px solid var(--primary-color);
+            padding: 15px 20px;
+            border-radius: 0 8px 8px 0;
+            margin: 15px 0;
+        }
+
+        .danger {
+            background: #fee2e2;
+            border-right: 4px solid var(--danger-color);
+            padding: 15px 20px;
+            border-radius: 0 8px 8px 0;
+            margin: 15px 0;
+        }
+
+        ul, ol { padding-right: 25px; margin: 10px 0; }
+        li { margin: 5px 0; }
+
+        .priority-high { color: var(--danger-color); font-weight: bold; }
+        .priority-medium { color: var(--warning-color); font-weight: bold; }
+        .priority-low { color: var(--primary-color); font-weight: bold; }
 
         .status-flow {
             display: flex;
             flex-wrap: wrap;
             gap: 10px;
             margin: 15px 0;
-            direction: ltr;
         }
 
         .status-item {
-            background: #f0fdf4;
-            padding: 10px 15px;
+            background: #f1f5f9;
+            padding: 8px 15px;
             border-radius: 20px;
             font-size: 0.9rem;
-            border: 2px solid var(--border-color);
         }
 
-        .status-item.active { background: var(--primary-color); color: white; border-color: var(--primary-color); }
-
-        .arrow { color: var(--primary-color); font-size: 1.2rem; display: flex; align-items: center; }
-
-        .checklist { list-style: none; padding: 0; }
-        .checklist li {
-            padding: 10px 15px;
-            margin: 5px 0;
-            background: #f0fdf4;
-            border-radius: 5px;
-            border-right: 3px solid var(--border-color);
+        .status-arrow {
+            color: var(--primary-color);
+            font-weight: bold;
         }
-        .checklist li:before { content: "☐ "; color: var(--primary-color); font-weight: bold; }
-
-        .notification-table td:first-child { font-weight: bold; }
 
         footer {
             text-align: center;
-            padding: 25px;
+            padding: 20px;
             color: #64748b;
             font-size: 0.9rem;
-            border-top: 1px solid var(--border-color);
-            margin-top: 30px;
         }
 
-        @media print {
-            body { background: white; }
-            section { box-shadow: none; border: 1px solid #ddd; page-break-inside: avoid; }
-            header { background: var(--primary-color); }
+        @media (max-width: 768px) {
+            .container { padding: 10px; }
+            .section { padding: 15px; }
+            table { font-size: 0.85rem; }
+            th, td { padding: 8px; }
+            .meta-info { flex-direction: column; }
         }
     </style>
 </head>
 <body>
     <header>
-        <div class="badge">المطور ب</div>
-        <h1>وحدة المدعى عليهم وإدارة الطلبات</h1>
-        <h2>Defendants & Request Management Module</h2>
-        <div class="scope">
-            <strong>النطاق:</strong> حالات الاستخدام 6.5.1.1.11 - 6.5.1.1.24 (14 حالة)<br>
-            <strong>الاعتماد:</strong> يجب إكمال المرحلة 1 (قاعدة البيانات) أولاً
-        </div>
+        <div class="badge">Developer B</div>
+        <h1>Defendants & Request Management Module</h1>
+        <h1>Defendants & Request Management Module</h1>
+        <p>Use Cases 6.5.1.1.11 - 6.5.1.1.24 | 14 Use Cases</p>
     </header>
 
     <div class="container">
-        <!-- ملخص الإحصائيات -->
-        <div class="summary-stats">
-            <div class="stat-item">
-                <div class="number">14</div>
-                <div class="label">حالات استخدام</div>
-            </div>
-            <div class="stat-item">
-                <div class="number">10</div>
-                <div class="label">ملفات Repository</div>
-            </div>
-            <div class="stat-item">
-                <div class="number">8</div>
-                <div class="label">DTOs</div>
-            </div>
-            <div class="stat-item">
-                <div class="number">6</div>
-                <div class="label">ViewModels</div>
-            </div>
-            <div class="stat-item">
-                <div class="number">2</div>
-                <div class="label">Controllers</div>
-            </div>
+        <div class="meta-info">
+            <div class="meta-item"><strong>Scope:</strong> UC 6.5.1.1.11 - 6.5.1.1.24 (14 use cases)</div>
+            <div class="meta-item"><strong>Dependency:</strong> Phase 1 (Database) must be completed first</div>
         </div>
 
-        <!-- حالات الاستخدام -->
-        <section>
-            <h2>حالات الاستخدام المخصصة</h2>
-            <div class="use-case-grid">
-                <div class="use-case-card priority-high">
-                    <div class="uc-code">6.5.1.1.11</div>
-                    <div class="uc-name">المدعى عليهم</div>
-                    <div class="uc-name-en">Defendants List</div>
-                </div>
-                <div class="use-case-card priority-high">
-                    <div class="uc-code">6.5.1.1.12</div>
-                    <div class="uc-name">إضافة مدّعى عليه</div>
-                    <div class="uc-name-en">Add Defendant</div>
-                </div>
-                <div class="use-case-card priority-medium">
-                    <div class="uc-code">6.5.1.1.13</div>
-                    <div class="uc-name">تفاصيل مدّعى عليه</div>
-                    <div class="uc-name-en">View Defendant</div>
-                </div>
-                <div class="use-case-card priority-medium">
-                    <div class="uc-code">6.5.1.1.14</div>
-                    <div class="uc-name">تعديل مدّعى عليه</div>
-                    <div class="uc-name-en">Edit Defendant</div>
-                </div>
-                <div class="use-case-card priority-medium">
-                    <div class="uc-code">6.5.1.1.15</div>
-                    <div class="uc-name">معلومات إضافية</div>
-                    <div class="uc-name-en">Additional Info</div>
-                </div>
-                <div class="use-case-card priority-low">
-                    <div class="uc-code">6.5.1.1.16</div>
-                    <div class="uc-name">استعراض معلومات</div>
-                    <div class="uc-name-en">View Additional Info</div>
-                </div>
-                <div class="use-case-card priority-medium">
-                    <div class="uc-code">6.5.1.1.17</div>
-                    <div class="uc-name">مرفقات الطلب</div>
-                    <div class="uc-name-en">Request Attachments</div>
-                </div>
-                <div class="use-case-card priority-high">
-                    <div class="uc-code">6.5.1.1.18</div>
-                    <div class="uc-name">استكمال نواقص</div>
-                    <div class="uc-name-en">Add Deficiencies</div>
-                </div>
-                <div class="use-case-card priority-low">
-                    <div class="uc-code">6.5.1.1.19</div>
-                    <div class="uc-name">استعراض نواقص</div>
-                    <div class="uc-name-en">View Deficiencies</div>
-                </div>
-                <div class="use-case-card priority-high">
-                    <div class="uc-code">6.5.1.1.20</div>
-                    <div class="uc-name">البحث</div>
-                    <div class="uc-name-en">Search Requests</div>
-                </div>
-                <div class="use-case-card priority-medium">
-                    <div class="uc-code">6.5.1.1.21</div>
-                    <div class="uc-name">تعديل الطلب</div>
-                    <div class="uc-name-en">Edit Request</div>
-                </div>
-                <div class="use-case-card priority-medium">
-                    <div class="uc-code">6.5.1.1.22</div>
-                    <div class="uc-name">تفاصيل الطلب</div>
-                    <div class="uc-name-en">View Request Details</div>
-                </div>
-                <div class="use-case-card priority-high">
-                    <div class="uc-code">6.5.1.1.23</div>
-                    <div class="uc-name">اتخاذ إجراء</div>
-                    <div class="uc-name-en">Take Action</div>
-                </div>
-                <div class="use-case-card priority-high">
-                    <div class="uc-code">6.5.1.1.24</div>
-                    <div class="uc-name">قيد دعوى</div>
-                    <div class="uc-name-en">Register New Case</div>
-                </div>
-            </div>
-            <p style="margin-top: 15px; color: #64748b; font-size: 0.9rem;">
-                <span style="color: var(--danger-color);">■</span> أولوية عالية &nbsp;
-                <span style="color: var(--warning-color);">■</span> أولوية متوسطة &nbsp;
-                <span style="color: var(--primary-color);">■</span> أولوية منخفضة
-            </p>
-        </section>
+        <div class="toc">
+            <h2>Table of Contents</h2>
+            <ol>
+                <li><a href="#usecases">Use Cases</a></li>
+                <li><a href="#files">Required Files</a></li>
+                <li><a href="#endpoints">API Endpoints</a></li>
+                <li><a href="#status">Status Transitions</a></li>
+                <li><a href="#rules">Business Rules</a></li>
+                <li><a href="#integrations">Integrations</a></li>
+                <li><a href="#notifications">Notifications</a></li>
+                <li><a href="#testing">Test Scenarios</a></li>
+            </ol>
+        </div>
 
-        <!-- الملفات المطلوبة -->
-        <section>
-            <h2>الملفات المطلوب إنشاؤها</h2>
+        <div class="section" id="usecases">
+            <h2>1. Use Cases</h2>
 
-            <h3>1. طبقة الوصول للبيانات (BOG.DAL)</h3>
-            <div class="file-tree">BOG.DAL/
-├── Interfaces/
-│   ├── IDefendantRepository.cs
-│   ├── ICaseRegistrationRequestRepository.cs
-│   ├── IRequestAttachmentRepository.cs
-│   ├── IRequestDeficiencyRepository.cs
-│   └── IAdditionalInfoRepository.cs
-└── Repositories/
-    ├── DefendantRepository.cs
-    ├── CaseRegistrationRequestRepository.cs
-    ├── RequestAttachmentRepository.cs
-    ├── RequestDeficiencyRepository.cs
-    └── AdditionalInfoRepository.cs</div>
-
-            <h3>2. طبقة نقل البيانات (BOG.DTO)</h3>
-            <div class="file-tree">BOG.DTO/
-├── Defendant/
-│   ├── DefendantCreateDTO.cs
-│   └── DefendantUpdateDTO.cs
-└── CaseRegistration/
-    ├── CaseRegistrationCreateDTO.cs
-    ├── CaseRegistrationUpdateDTO.cs
-    ├── RequestAttachmentDTO.cs
-    ├── RequestDeficiencyDTO.cs
-    ├── AdditionalInfoDTO.cs
-    ├── TakeActionDTO.cs
-    └── SearchRequestDTO.cs</div>
-
-            <h3>3. طبقة نماذج العرض (BOG.VM)</h3>
-            <div class="file-tree">BOG.VM/
-├── Defendant/
-│   ├── DefendantVM.cs
-│   └── DefendantListVM.cs
-└── CaseRegistration/
-    ├── CaseRegistrationRequestVM.cs
-    ├── CaseRegistrationListVM.cs
-    ├── RequestAttachmentVM.cs
-    └── RequestDeficiencyVM.cs</div>
-
-            <h3>4. طبقة منطق الأعمال (BOG.BL)</h3>
-            <div class="file-tree">BOG.BL/
-├── Interfaces/
-│   ├── IDefendantBL.cs
-│   ├── ICaseRegistrationBL.cs
-│   ├── IRequestActionBL.cs
-│   └── IRequestAttachmentBL.cs
-└── Services/
-    ├── DefendantBL.cs
-    ├── CaseRegistrationBL.cs
-    ├── RequestActionBL.cs
-    └── RequestAttachmentBL.cs</div>
-
-            <h3>5. وحدات التحكم (Controllers)</h3>
-            <div class="file-tree">BOG.API/Controllers/
-├── DefendantsController.cs
-└── CaseRegistrationController.cs</div>
-        </section>
-
-        <!-- نقاط النهاية API -->
-        <section>
-            <h2>نقاط النهاية (API Endpoints)</h2>
-
-            <h3>Defendants Controller - المدعى عليهم</h3>
-            <div class="api-endpoint"><span class="api-method get">GET</span><span>/api/case-requests/{requestId}/defendants</span></div>
-            <div class="api-endpoint"><span class="api-method post">POST</span><span>/api/case-requests/{requestId}/defendants</span></div>
-            <div class="api-endpoint"><span class="api-method get">GET</span><span>/api/defendants/{id}</span></div>
-            <div class="api-endpoint"><span class="api-method put">PUT</span><span>/api/defendants/{id}</span></div>
-            <div class="api-endpoint"><span class="api-method delete">DELETE</span><span>/api/defendants/{id}</span></div>
-
-            <h3>CaseRegistration Controller - الطلبات</h3>
-            <div class="api-endpoint"><span class="api-method post">POST</span><span>/api/case-requests</span></div>
-            <div class="api-endpoint"><span class="api-method get">GET</span><span>/api/case-requests/{id}</span></div>
-            <div class="api-endpoint"><span class="api-method put">PUT</span><span>/api/case-requests/{id}</span></div>
-            <div class="api-endpoint"><span class="api-method post">POST</span><span>/api/case-requests/{id}/submit</span></div>
-            <div class="api-endpoint"><span class="api-method get">GET</span><span>/api/case-requests/search</span></div>
-            <div class="api-endpoint"><span class="api-method post">POST</span><span>/api/case-requests/{id}/action</span></div>
-            <div class="api-endpoint"><span class="api-method get">GET</span><span>/api/case-requests/{id}/attachments</span></div>
-            <div class="api-endpoint"><span class="api-method post">POST</span><span>/api/case-requests/{id}/attachments</span></div>
-            <div class="api-endpoint"><span class="api-method delete">DELETE</span><span>/api/case-requests/{id}/attachments/{attachmentId}</span></div>
-            <div class="api-endpoint"><span class="api-method get">GET</span><span>/api/case-requests/{id}/deficiencies</span></div>
-            <div class="api-endpoint"><span class="api-method post">POST</span><span>/api/case-requests/{id}/deficiencies</span></div>
-            <div class="api-endpoint"><span class="api-method get">GET</span><span>/api/case-requests/{id}/additional-info</span></div>
-            <div class="api-endpoint"><span class="api-method put">PUT</span><span>/api/case-requests/{id}/additional-info</span></div>
-        </section>
-
-        <!-- انتقالات الحالة -->
-        <section>
-            <h2>انتقالات الحالة</h2>
             <table>
                 <thead>
-                    <tr><th>من</th><th>الإجراء</th><th>إلى</th><th>التحقق</th></tr>
+                    <tr><th>UC #</th><th>Name (Arabic)</th><th>Name (English)</th><th>Priority</th></tr>
                 </thead>
                 <tbody>
-                    <tr><td>None (0)</td><td>حفظ</td><td>مسودة (1)</td><td>-</td></tr>
-                    <tr><td>مسودة (1)</td><td>تقديم</td><td>طلب جديد (3)</td><td>ERR001-007</td></tr>
-                    <tr><td>طلب جديد (3)</td><td>قيد</td><td>مسجلة (6)</td><td>البيانات مكتملة</td></tr>
-                    <tr><td>طلب جديد (3)</td><td>إرسال للقاضي</td><td>على مكتب القاضي (5)</td><td>-</td></tr>
-                    <tr><td>طلب جديد (3)</td><td>رفض</td><td>مرفوض (10)</td><td>ملاحظات مطلوبة</td></tr>
-                    <tr><td>طلب جديد (3)</td><td>طلب استكمال</td><td>انتظار الاستكمال (8)</td><td>نواقص مطلوبة</td></tr>
-                    <tr><td>على مكتب القاضي (5)</td><td>قيد</td><td>مسجلة (6)</td><td>موافقة القاضي</td></tr>
-                    <tr><td>على مكتب القاضي (5)</td><td>رفض</td><td>مرفوض (10)</td><td>ملاحظات مطلوبة</td></tr>
-                    <tr><td>انتظار الاستكمال (8)</td><td>استكمال</td><td>قيد التحقق (9)</td><td>المستندات مقدمة</td></tr>
-                    <tr><td>انتظار الاستكمال (8)</td><td>انتهاء المهلة (30 يوم)</td><td>مرفوض (10)</td><td>تلقائي</td></tr>
+                    <tr><td>6.5.1.1.11</td><td>Defendants</td><td>Defendants List</td><td class="priority-high">High</td></tr>
+                    <tr><td>6.5.1.1.12</td><td>Add Defendant</td><td>Add Defendant</td><td class="priority-high">High</td></tr>
+                    <tr><td>6.5.1.1.13</td><td>Defendant Details</td><td>View Defendant</td><td class="priority-medium">Medium</td></tr>
+                    <tr><td>6.5.1.1.14</td><td>Edit Defendant</td><td>Edit Defendant</td><td class="priority-medium">Medium</td></tr>
+                    <tr><td>6.5.1.1.15</td><td>Additional Info</td><td>Additional Info</td><td class="priority-medium">Medium</td></tr>
+                    <tr><td>6.5.1.1.16</td><td>View Info</td><td>View Additional Info</td><td class="priority-low">Low</td></tr>
+                    <tr><td>6.5.1.1.17</td><td>Request Attachments</td><td>Request Attachments</td><td class="priority-medium">Medium</td></tr>
+                    <tr><td>6.5.1.1.18</td><td>Add Deficiencies</td><td>Add Deficiencies</td><td class="priority-high">High</td></tr>
+                    <tr><td>6.5.1.1.19</td><td>View Deficiencies</td><td>View Deficiencies</td><td class="priority-low">Low</td></tr>
+                    <tr><td>6.5.1.1.20</td><td>Search</td><td>Search Requests</td><td class="priority-high">High</td></tr>
+                    <tr><td>6.5.1.1.21</td><td>Edit Request</td><td>Edit Request</td><td class="priority-medium">Medium</td></tr>
+                    <tr><td>6.5.1.1.22</td><td>Request Details</td><td>View Request Details</td><td class="priority-medium">Medium</td></tr>
+                    <tr><td>6.5.1.1.23</td><td>Take Action</td><td>Take Action</td><td class="priority-high">High</td></tr>
+                    <tr><td>6.5.1.1.24</td><td>Register Case</td><td>Register New Case</td><td class="priority-high">High</td></tr>
                 </tbody>
             </table>
-        </section>
+        </div>
 
-        <!-- قواعد الأعمال -->
-        <section>
-            <h2>قواعد الأعمال للتنفيذ</h2>
-            <table>
-                <thead>
-                    <tr><th>الرمز</th><th>القاعدة</th><th>التنفيذ</th></tr>
-                </thead>
-                <tbody>
-                    <tr><td>ERR001</td><td>مدعي واحد على الأقل مطلوب</td><td>ValidateForSubmissionAsync</td></tr>
-                    <tr><td>ERR002</td><td>مدعى عليه واحد على الأقل مطلوب</td><td>ValidateForSubmissionAsync</td></tr>
-                    <tr><td>ERR003</td><td>المرفقات الإلزامية غير مكتملة</td><td>ValidateForSubmissionAsync</td></tr>
-                    <tr><td>ERR004</td><td>مقدم الطلب غير محدد</td><td>ValidateForSubmissionAsync</td></tr>
-                    <tr><td>ERR005</td><td>التصنيفات غير محددة</td><td>ValidateForSubmissionAsync</td></tr>
-                    <tr><td>ERR006</td><td>الموضوع فارغ</td><td>ValidateForSubmissionAsync</td></tr>
-                    <tr><td>ERR007</td><td>البيّنات فارغة</td><td>ValidateForSubmissionAsync</td></tr>
-                    <tr><td>ERR013</td><td>المدعى عليه موجود مسبقاً</td><td>DefendantBL.Create</td></tr>
-                    <tr><td>BR04</td><td>PDF فقط، الحد الأقصى 4MB</td><td>RequestAttachmentBL</td></tr>
-                    <tr><td>BR05</td><td>رفض تلقائي بعد 30 يوم</td><td>ProcessExpiredCompletionRequestsAsync</td></tr>
-                </tbody>
-            </table>
-        </section>
+        <div class="section" id="files">
+            <h2>2. Required Files</h2>
 
-        <!-- مصدر البيانات -->
-        <section>
-            <h2>جدول مصدر البيانات (DataSource)</h2>
-            <p>يُستخدم لتتبع مصدر بيانات المدعى عليه (أبشر أو إدخال يدوي).</p>
-            <table>
-                <thead>
-                    <tr><th>المعرف</th><th>الاسم</th><th>الاسم بالعربية</th><th>الوصف</th></tr>
-                </thead>
-                <tbody>
-                    <tr><td>1</td><td>FromAbsher</td><td>من أبشر</td><td>البيانات مجلوبة من نظام أبشر</td></tr>
-                    <tr><td>2</td><td>FromUser</td><td>من المستخدم</td><td>البيانات مدخلة يدوياً</td></tr>
-                </tbody>
-            </table>
-            <p style="margin-top: 10px; color: #64748b;"><strong>ملاحظة:</strong> استخدم <code>DataSourceId</code> بدلاً من <code>IsAbsherVerified</code> لتتبع مصدر بيانات المدعى عليه.</p>
-        </section>
+            <h3>2.1 Data Access Layer (BOG.DAL)</h3>
 
-        <!-- تكامل SMS -->
-        <section>
-            <h2>تكامل الرسائل القصيرة (SMS Integration)</h2>
-            <p>يستخدم هذا الموديول خدمة الرسائل القصيرة لإرسال الإشعارات عند تغيير الحالات والأحداث المهمة.</p>
-
-            <h3>الواجهة (Interface)</h3>
-            <div class="code-block">
-<pre><span class="keyword">public interface</span> <span class="type">ISmsService</span>
+            <h4>Interfaces (BOG.DAL/Interfaces/)</h4>
+            <pre><code>// IDefendantRepository.cs
+public interface IDefendantRepository : IRepository&lt;Defendant&gt;
 {
-    <span class="type">Task</span>&lt;<span class="type">SmsResult</span>&gt; SendSmsAsync(
-        <span class="keyword">string</span> mobileNumber,
-        <span class="keyword">string</span> message);
+    Task&lt;IEnumerable&lt;Defendant&gt;&gt; GetByRequestIdAsync(int requestId);
+    Task&lt;Defendant?&gt; GetByIdentityAsync(int requestId, string identityNumber, int defendantTypeId);
+    Task&lt;bool&gt; ExistsByIdentityAsync(int requestId, string identityNumber, int defendantTypeId);
+}
 
-    <span class="type">Task</span>&lt;<span class="type">SmsResult</span>&gt; SendSmsAsync(
-        <span class="keyword">string</span> mobileNumber,
-        <span class="keyword">string</span> templateCode,
-        <span class="type">Dictionary</span>&lt;<span class="keyword">string</span>, <span class="keyword">string</span>&gt; parameters);
+// ICaseRegistrationRequestRepository.cs
+public interface ICaseRegistrationRequestRepository : IRepository&lt;CaseRegistrationRequest&gt;
+{
+    Task&lt;CaseRegistrationRequest?&gt; GetWithDetailsAsync(int requestId);
+    Task&lt;IEnumerable&lt;CaseRegistrationRequest&gt;&gt; SearchAsync(SearchRequestDTO criteria);
+    Task&lt;IEnumerable&lt;CaseRegistrationRequest&gt;&gt; GetPendingCompletionExpiredAsync();
+}</code></pre>
 
-    <span class="type">Task</span>&lt;<span class="type">List</span>&lt;<span class="type">SmsResult</span>&gt;&gt; SendBulkSmsAsync(
-        <span class="type">List</span>&lt;<span class="keyword">string</span>&gt; mobileNumbers,
-        <span class="keyword">string</span> message);
-}</pre>
-            </div>
+            <h4>Implementations (BOG.DAL/Repositories/)</h4>
+            <div class="file-tree">BOG.DAL/Repositories/
++-- DefendantRepository.cs
++-- CaseRegistrationRequestRepository.cs
++-- RequestAttachmentRepository.cs
++-- RequestDeficiencyRepository.cs
++-- AdditionalInfoRepository.cs</div>
 
-            <h3>قوالب الرسائل</h3>
+            <h3>2.2 Data Transfer Objects (BOG.DTO)</h3>
+
+            <h4>Defendant DTOs (BOG.DTO/Defendant/)</h4>
+            <pre><code>// DefendantCreateDTO.cs
+public class DefendantCreateDTO
+{
+    public int DefendantTypeId { get; set; }           // Required: 1-6
+    public string FullName { get; set; }               // Required: Max 200 chars
+
+    // Optional identity (for individuals)
+    public int? IdentityTypeId { get; set; }
+    public string? IdentityNumber { get; set; }
+
+    // Optional address
+    public string? AddressText { get; set; }
+    public AddressDTO? Address { get; set; }
+
+    // For companies
+    public string? CommercialRegNumber { get; set; }
+
+    // For government agencies
+    public int? GovernmentAgencyId { get; set; }
+    public string? AdditionalStatement { get; set; }
+}</code></pre>
+
+            <h4>Request DTOs (BOG.DTO/CaseRegistration/)</h4>
+            <pre><code>// TakeActionDTO.cs
+public class TakeActionDTO
+{
+    public string Action { get; set; }                 // Register/SendToJudge/Reject/RequestCompletion
+    public string? Notes { get; set; }                 // Required for Reject
+    public List&lt;RequestDeficiencyDTO&gt;? Deficiencies { get; set; } // For RequestCompletion
+}
+
+// SearchRequestDTO.cs
+public class SearchRequestDTO
+{
+    public int? CourtId { get; set; }
+    public int? DisputeTypeId { get; set; }
+    public string? CaseNumber { get; set; }
+    public DateTime? CaseDate { get; set; }
+    public int? CaseYear { get; set; }
+    public string? IdentityNumber { get; set; }
+    public string? MobileNumber { get; set; }
+    public string? PartyName { get; set; }             // Partial match
+    public int? StatusId { get; set; }
+    public int PageNumber { get; set; } = 1;
+    public int PageSize { get; set; } = 20;
+}</code></pre>
+
+            <h3>2.3 View Models (BOG.VM)</h3>
+
+            <h4>Defendant VMs (BOG.VM/Defendant/)</h4>
+            <pre><code>// DefendantVM.cs
+public class DefendantVM
+{
+    public int Id { get; set; }
+    public int DefendantTypeId { get; set; }
+    public string DefendantTypeName { get; set; }
+    public string FullName { get; set; }
+    public string? IdentityNumber { get; set; }
+    public string? AddressText { get; set; }
+    public int? DataSourceId { get; set; }             // Data source (1=Absher, 2=User)
+    public string? DataSourceName { get; set; }        // Data source name
+    public string? CommercialRegNumber { get; set; }
+    public string? GovernmentAgencyName { get; set; }
+    public DateTime CreatedDate { get; set; }
+}</code></pre>
+
+            <h3>2.4 Business Logic Layer (BOG.BL)</h3>
+
+            <h4>Interfaces (BOG.BL/Interfaces/)</h4>
+            <pre><code>// IDefendantBL.cs
+public interface IDefendantBL
+{
+    Task&lt;DefendantVM&gt; CreateDefendantAsync(int requestId, DefendantCreateDTO dto);
+    Task&lt;DefendantVM?&gt; GetDefendantByIdAsync(int defendantId);
+    Task&lt;IEnumerable&lt;DefendantListVM&gt;&gt; GetDefendantsByRequestIdAsync(int requestId);
+    Task&lt;DefendantVM&gt; UpdateDefendantAsync(int defendantId, DefendantUpdateDTO dto);
+    Task DeleteDefendantAsync(int defendantId);
+}
+
+// IRequestActionBL.cs
+public interface IRequestActionBL
+{
+    Task&lt;CaseRegistrationRequestVM&gt; TakeActionAsync(int requestId, TakeActionDTO dto);
+    Task&lt;CaseRegistrationRequestVM&gt; RegisterCaseAsync(int requestId);
+    Task&lt;CaseRegistrationRequestVM&gt; SendToJudgeDeskAsync(int requestId);
+    Task&lt;CaseRegistrationRequestVM&gt; RejectRequestAsync(int requestId, string reason);
+    Task&lt;CaseRegistrationRequestVM&gt; RequestCompletionAsync(int requestId, List&lt;RequestDeficiencyDTO&gt; deficiencies);
+    Task ProcessExpiredCompletionRequestsAsync(); // Background task
+}</code></pre>
+
+            <h3>2.5 API Controllers (BOG.API/Controllers/)</h3>
+
+            <pre><code>// DefendantsController.cs
+[ApiController]
+[Route("api")]
+public class DefendantsController : ControllerBase
+{
+    // GET /api/case-requests/{requestId}/defendants
+    // POST /api/case-requests/{requestId}/defendants
+    // GET /api/defendants/{id}
+    // PUT /api/defendants/{id}
+    // DELETE /api/defendants/{id}
+}
+
+// CaseRegistrationController.cs
+[ApiController]
+[Route("api/case-requests")]
+public class CaseRegistrationController : ControllerBase
+{
+    // POST /api/case-requests
+    // GET /api/case-requests/{id}
+    // PUT /api/case-requests/{id}
+    // POST /api/case-requests/{id}/submit
+    // GET /api/case-requests/search
+    // POST /api/case-requests/{id}/action
+    // GET/POST/DELETE for attachments and deficiencies...
+}</code></pre>
+        </div>
+
+        <div class="section" id="endpoints">
+            <h2>3. API Endpoints</h2>
+
+            <h3>3.1 Defendants Controller</h3>
             <table>
-                <thead>
-                    <tr><th>الرمز</th><th>القالب (عربي)</th></tr>
-                </thead>
+                <thead><tr><th>Method</th><th>Route</th><th>Description</th></tr></thead>
                 <tbody>
-                    <tr><td>REQUEST_SUBMITTED</td><td>تم استلام طلب قيد الدعوى رقم {RequestNumber} بنجاح</td></tr>
-                    <tr><td>REQUEST_REGISTERED</td><td>تم قيد دعواكم رقم {CaseNumber} في المحكمة الإدارية</td></tr>
-                    <tr><td>REQUEST_REJECTED</td><td>تم رفض طلب قيد الدعوى رقم {RequestNumber}. السبب: {Reason}</td></tr>
-                    <tr><td>COMPLETION_REQUIRED</td><td>مطلوب استكمال نواقص الطلب رقم {RequestNumber} خلال 30 يوم</td></tr>
-                    <tr><td>AUTO_REJECTED</td><td>تم رفض الطلب رقم {RequestNumber} تلقائياً لعدم استكمال النواقص</td></tr>
+                    <tr><td>GET</td><td>/api/case-requests/{requestId}/defendants</td><td>Get defendants list for request</td></tr>
+                    <tr><td>POST</td><td>/api/case-requests/{requestId}/defendants</td><td>Add defendant</td></tr>
+                    <tr><td>GET</td><td>/api/defendants/{id}</td><td>Get defendant details</td></tr>
+                    <tr><td>PUT</td><td>/api/defendants/{id}</td><td>Update defendant</td></tr>
+                    <tr><td>DELETE</td><td>/api/defendants/{id}</td><td>Delete defendant</td></tr>
                 </tbody>
             </table>
 
-            <h3>استخدام الخدمة في RequestActionBL</h3>
-            <div class="code-block">
-<pre><span class="keyword">public async</span> <span class="type">Task</span>&lt;<span class="type">CaseRegistrationRequestVM</span>&gt; RegisterCaseAsync(<span class="keyword">int</span> requestId)
-{
-    <span class="comment">// ... منطق القيد ...</span>
+            <h3>3.2 Case Registration Controller</h3>
+            <table>
+                <thead><tr><th>Method</th><th>Route</th><th>Description</th></tr></thead>
+                <tbody>
+                    <tr><td>POST</td><td>/api/case-requests</td><td>Create new request (draft)</td></tr>
+                    <tr><td>GET</td><td>/api/case-requests/{id}</td><td>Get request details</td></tr>
+                    <tr><td>PUT</td><td>/api/case-requests/{id}</td><td>Update request</td></tr>
+                    <tr><td>POST</td><td>/api/case-requests/{id}/submit</td><td>Submit request</td></tr>
+                    <tr><td>GET</td><td>/api/case-requests/search</td><td>Search requests</td></tr>
+                    <tr><td>POST</td><td>/api/case-requests/{id}/action</td><td>Take action</td></tr>
+                    <tr><td>GET</td><td>/api/case-requests/{id}/attachments</td><td>Get attachments list</td></tr>
+                    <tr><td>POST</td><td>/api/case-requests/{id}/attachments</td><td>Add attachment</td></tr>
+                    <tr><td>DELETE</td><td>/api/case-requests/{id}/attachments/{attachmentId}</td><td>Delete attachment</td></tr>
+                    <tr><td>GET</td><td>/api/case-requests/{id}/deficiencies</td><td>Get deficiencies list</td></tr>
+                    <tr><td>POST</td><td>/api/case-requests/{id}/deficiencies</td><td>Add deficiency</td></tr>
+                    <tr><td>GET</td><td>/api/case-requests/{id}/additional-info</td><td>Get additional info</td></tr>
+                    <tr><td>PUT</td><td>/api/case-requests/{id}/additional-info</td><td>Update additional info</td></tr>
+                </tbody>
+            </table>
+        </div>
 
-    <span class="comment">// إرسال SMS للإشعار</span>
-    <span class="keyword">await</span> _smsService.SendSmsAsync(
+        <div class="section" id="status">
+            <h2>4. Status Transitions</h2>
+
+            <table>
+                <thead><tr><th>From</th><th>Action</th><th>To</th><th>Validation</th></tr></thead>
+                <tbody>
+                    <tr><td>None (0)</td><td>Save</td><td>Draft (1)</td><td>-</td></tr>
+                    <tr><td>Draft (1)</td><td>Submit</td><td>New Request (3)</td><td>ERR001-007</td></tr>
+                    <tr><td>New Request (3)</td><td>Register</td><td>Registered (6)</td><td>Data complete</td></tr>
+                    <tr><td>New Request (3)</td><td>Send to Judge</td><td>On Judge Desk (5)</td><td>-</td></tr>
+                    <tr><td>New Request (3)</td><td>Reject</td><td>Rejected (10)</td><td>Notes required</td></tr>
+                    <tr><td>New Request (3)</td><td>Request Completion</td><td>Pending Completion (8)</td><td>Deficiencies required</td></tr>
+                    <tr><td>On Judge Desk (5)</td><td>Register</td><td>Registered (6)</td><td>Judge approval</td></tr>
+                    <tr><td>On Judge Desk (5)</td><td>Reject</td><td>Rejected (10)</td><td>Notes required</td></tr>
+                    <tr><td>On Judge Desk (5)</td><td>Request Completion</td><td>Pending Completion (8)</td><td>Deficiencies required</td></tr>
+                    <tr><td>Pending Completion (8)</td><td>Complete</td><td>Verifying (9)</td><td>Documents submitted</td></tr>
+                    <tr><td>Pending Completion (8)</td><td>Timeout (30 days)</td><td>Rejected (10)</td><td>Auto</td></tr>
+                    <tr><td>Verifying (9)</td><td>Accept</td><td>New Request (3)</td><td>Deficiencies complete</td></tr>
+                    <tr><td>Verifying (9)</td><td>Reject</td><td>Pending Completion (8)</td><td>Deficiencies incomplete</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="section" id="rules">
+            <h2>5. Business Rules</h2>
+
+            <table>
+                <thead><tr><th>Code</th><th>Rule</th><th>Implementation</th></tr></thead>
+                <tbody>
+                    <tr><td>ERR001</td><td>At least one plaintiff required</td><td>ValidateForSubmissionAsync</td></tr>
+                    <tr><td>ERR002</td><td>At least one defendant required</td><td>ValidateForSubmissionAsync</td></tr>
+                    <tr><td>ERR003</td><td>Mandatory attachments incomplete</td><td>ValidateForSubmissionAsync</td></tr>
+                    <tr><td>ERR004</td><td>Applicant not set</td><td>ValidateForSubmissionAsync</td></tr>
+                    <tr><td>ERR005</td><td>Classifications not set</td><td>ValidateForSubmissionAsync</td></tr>
+                    <tr><td>ERR006</td><td>Subject empty</td><td>ValidateForSubmissionAsync</td></tr>
+                    <tr><td>ERR007</td><td>Evidence empty</td><td>ValidateForSubmissionAsync</td></tr>
+                    <tr><td>ERR013</td><td>Defendant already exists</td><td>DefendantBL.Create</td></tr>
+                    <tr><td>BR04</td><td>PDF only, Max 4MB</td><td>RequestAttachmentBL</td></tr>
+                    <tr><td>BR05</td><td>Auto-reject after 30 days</td><td>ProcessExpiredCompletionRequestsAsync</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="section" id="integrations">
+            <h2>6. Integrations</h2>
+
+            <h3>6.0 Data Source Table</h3>
+            <table>
+                <thead><tr><th>Id</th><th>Name</th><th>NameAr</th><th>Description</th></tr></thead>
+                <tbody>
+                    <tr><td>1</td><td>FromAbsher</td><td>From Absher</td><td>Data fetched from Absher system</td></tr>
+                    <tr><td>2</td><td>FromUser</td><td>From User</td><td>Data entered manually</td></tr>
+                </tbody>
+            </table>
+
+            <div class="info">
+                <strong>Note:</strong> Use <code>DataSourceId</code> instead of <code>IsAbsherVerified</code> to track data source for defendants.
+            </div>
+
+            <h3>6.1 SMS Service</h3>
+            <pre><code>// BOG.Integration/Interfaces/ISmsService.cs
+public interface ISmsService
+{
+    Task&lt;SmsResult&gt; SendSmsAsync(string mobileNumber, string message);
+    Task&lt;SmsResult&gt; SendSmsAsync(string mobileNumber, string templateCode, Dictionary&lt;string, string&gt; parameters);
+    Task&lt;List&lt;SmsResult&gt;&gt; SendBulkSmsAsync(List&lt;string&gt; mobileNumbers, string message);
+}</code></pre>
+
+            <h4>SMS Templates</h4>
+            <table>
+                <thead><tr><th>Code</th><th>Template (Arabic)</th></tr></thead>
+                <tbody>
+                    <tr><td>REQUEST_SUBMITTED</td><td>Case registration request {RequestNumber} received successfully</td></tr>
+                    <tr><td>REQUEST_REGISTERED</td><td>Your case {CaseNumber} has been registered at Administrative Court</td></tr>
+                    <tr><td>REQUEST_REJECTED</td><td>Request {RequestNumber} rejected. Reason: {Reason}</td></tr>
+                    <tr><td>COMPLETION_REQUIRED</td><td>Completion required for request {RequestNumber} within 30 days</td></tr>
+                    <tr><td>DEFICIENCY_REMINDER</td><td>Reminder: Complete request {RequestNumber}. {DaysRemaining} days remaining</td></tr>
+                    <tr><td>AUTO_REJECTED</td><td>Request {RequestNumber} auto-rejected due to incomplete deficiencies</td></tr>
+                </tbody>
+            </table>
+
+            <h4>Usage in RequestActionBL</h4>
+            <pre><code>public async Task&lt;CaseRegistrationRequestVM&gt; RegisterCaseAsync(int requestId)
+{
+    // ... registration logic ...
+
+    // Send SMS notification
+    await _smsService.SendSmsAsync(
         applicant.MobileNumber,
-        <span class="type">SmsTemplates</span>.RequestRegistered,
-        <span class="keyword">new</span> <span class="type">Dictionary</span>&lt;<span class="keyword">string</span>, <span class="keyword">string</span>&gt;
+        SmsTemplates.RequestRegistered,
+        new Dictionary&lt;string, string&gt;
         {
-            [<span class="string">"CaseNumber"</span>] = caseResult.CaseNumber,
-            [<span class="string">"CourtName"</span>] = request.Court.NameAr
+            ["CaseNumber"] = caseResult.CaseNumber,
+            ["CourtName"] = request.Court.NameAr
         });
 
-    <span class="comment">// ...</span>
-}</pre>
-            </div>
-        </section>
+    // ...
+}</code></pre>
 
-        <!-- تكامل Email -->
-        <section>
-            <h2>تكامل البريد الإلكتروني (Email Integration)</h2>
-
-            <h3>الواجهة (Interface)</h3>
-            <div class="code-block">
-<pre><span class="keyword">public interface</span> <span class="type">IEmailService</span>
+            <h3>6.2 Email Service</h3>
+            <pre><code>// BOG.Integration/Interfaces/IEmailService.cs
+public interface IEmailService
 {
-    <span class="type">Task</span>&lt;<span class="type">EmailResult</span>&gt; SendEmailAsync(
-        <span class="keyword">string</span> toEmail,
-        <span class="keyword">string</span> subject,
-        <span class="keyword">string</span> body,
-        <span class="keyword">bool</span> isHtml = <span class="keyword">true</span>);
+    Task&lt;EmailResult&gt; SendEmailAsync(string toEmail, string subject, string body, bool isHtml = true);
+    Task&lt;EmailResult&gt; SendEmailAsync(string toEmail, string templateCode, Dictionary&lt;string, string&gt; parameters);
+    Task&lt;EmailResult&gt; SendEmailWithAttachmentAsync(string toEmail, string subject, string body,
+        List&lt;EmailAttachment&gt; attachments);
+}</code></pre>
 
-    <span class="type">Task</span>&lt;<span class="type">EmailResult</span>&gt; SendEmailAsync(
-        <span class="keyword">string</span> toEmail,
-        <span class="keyword">string</span> templateCode,
-        <span class="type">Dictionary</span>&lt;<span class="keyword">string</span>, <span class="keyword">string</span>&gt; parameters);
-
-    <span class="type">Task</span>&lt;<span class="type">EmailResult</span>&gt; SendEmailWithAttachmentAsync(
-        <span class="keyword">string</span> toEmail,
-        <span class="keyword">string</span> subject,
-        <span class="keyword">string</span> body,
-        <span class="type">List</span>&lt;<span class="type">EmailAttachment</span>&gt; attachments);
-}</pre>
-            </div>
-
-            <h3>قوالب البريد الإلكتروني</h3>
+            <h4>Email Templates</h4>
             <table>
-                <thead>
-                    <tr><th>الرمز</th><th>الموضوع</th><th>المحتوى</th></tr>
-                </thead>
+                <thead><tr><th>Code</th><th>Subject</th><th>Content</th></tr></thead>
                 <tbody>
-                    <tr><td>REQUEST_SUBMITTED</td><td>تم استلام طلب قيد الدعوى</td><td>تأكيد استلام الطلب مع رقم الطلب</td></tr>
-                    <tr><td>REQUEST_REGISTERED</td><td>تم قيد الدعوى</td><td>بيانات القضية والمحكمة والدائرة</td></tr>
-                    <tr><td>COMPLETION_REQUIRED</td><td>مطلوب استكمال نواقص</td><td>قائمة النواقص والمهلة</td></tr>
-                </tbody>
-            </table>
-        </section>
-
-        <!-- تكامل نظام القضايا -->
-        <section>
-            <h2>تكامل نظام إدارة القضايا (Case Management Integration)</h2>
-            <p>يستخدم هذا الموديول نظام إدارة القضايا لتسجيل القضايا المعتمدة.</p>
-
-            <h3>الواجهة (Interface)</h3>
-            <div class="code-block">
-<pre><span class="keyword">public interface</span> <span class="type">ICaseManagementService</span>
-{
-    <span class="type">Task</span>&lt;<span class="type">CaseRegistrationResult</span>&gt; RegisterCaseAsync(
-        <span class="type">CaseRegistrationData</span> caseData);
-
-    <span class="type">Task</span>&lt;<span class="type">CaseStatusResult</span>&gt; GetCaseStatusAsync(
-        <span class="keyword">string</span> caseNumber);
-
-    <span class="type">Task</span>&lt;<span class="keyword">bool</span>&gt; UpdateCaseAsync(
-        <span class="keyword">string</span> caseNumber,
-        <span class="type">CaseUpdateData</span> updateData);
-}</pre>
-            </div>
-
-            <h3>النتيجة المسترجعة</h3>
-            <table>
-                <thead>
-                    <tr><th>الحقل</th><th>الوصف</th><th>النوع</th></tr>
-                </thead>
-                <tbody>
-                    <tr><td>IsSuccess</td><td>حالة نجاح العملية</td><td>bool</td></tr>
-                    <tr><td>CaseNumber</td><td>رقم القضية</td><td>string</td></tr>
-                    <tr><td>RegistrationNumber</td><td>رقم القيد</td><td>string</td></tr>
-                    <tr><td>RegistrationDate</td><td>تاريخ القيد</td><td>DateTime</td></tr>
-                    <tr><td>ErrorCode</td><td>رمز الخطأ (إن وجد)</td><td>string</td></tr>
-                    <tr><td>ErrorMessage</td><td>رسالة الخطأ</td><td>string</td></tr>
+                    <tr><td>REQUEST_SUBMITTED</td><td>Case registration request received - {RequestNumber}</td><td>Confirmation with request number</td></tr>
+                    <tr><td>REQUEST_REGISTERED</td><td>Case registered - {CaseNumber}</td><td>Case details, court, and department</td></tr>
+                    <tr><td>COMPLETION_REQUIRED</td><td>Completion required - Request {RequestNumber}</td><td>Deficiencies list and deadline</td></tr>
                 </tbody>
             </table>
 
-            <h3>استخدام الخدمة في RequestActionBL</h3>
-            <div class="code-block">
-<pre><span class="keyword">public async</span> <span class="type">Task</span>&lt;<span class="type">CaseRegistrationRequestVM</span>&gt; RegisterCaseAsync(<span class="keyword">int</span> requestId)
+            <h3>6.3 Case Management Service</h3>
+            <pre><code>// BOG.Integration/Interfaces/ICaseManagementService.cs
+public interface ICaseManagementService
 {
-    <span class="keyword">var</span> request = <span class="keyword">await</span> _requestRepository.GetWithDetailsAsync(requestId);
+    Task&lt;CaseRegistrationResult&gt; RegisterCaseAsync(CaseRegistrationData caseData);
+    Task&lt;CaseStatusResult&gt; GetCaseStatusAsync(string caseNumber);
+    Task&lt;bool&gt; UpdateCaseAsync(string caseNumber, CaseUpdateData updateData);
+}</code></pre>
 
-    <span class="comment">// تحضير بيانات القضية</span>
-    <span class="keyword">var</span> caseData = <span class="keyword">new</span> <span class="type">CaseRegistrationData</span>
+            <h4>Registration Data</h4>
+            <pre><code>// BOG.Integration/DTOs/CaseManagement/CaseRegistrationData.cs
+public class CaseRegistrationData
+{
+    public int RequestId { get; set; }
+    public int CourtId { get; set; }
+    public int DepartmentId { get; set; }
+    public int DisputeTypeId { get; set; }
+    public string Subject { get; set; }
+    public string Claims { get; set; }
+    public List&lt;CasePlaintiffData&gt; Plaintiffs { get; set; }
+    public List&lt;CaseDefendantData&gt; Defendants { get; set; }
+}
+
+// BOG.Integration/DTOs/CaseManagement/CaseRegistrationResult.cs
+public class CaseRegistrationResult
+{
+    public bool IsSuccess { get; set; }
+    public string? CaseNumber { get; set; }          // Case number
+    public string? RegistrationNumber { get; set; } // Registration number
+    public DateTime? RegistrationDate { get; set; }
+    public string? ErrorCode { get; set; }
+    public string? ErrorMessage { get; set; }
+}</code></pre>
+
+            <h4>Usage in RequestActionBL</h4>
+            <pre><code>public async Task&lt;CaseRegistrationRequestVM&gt; RegisterCaseAsync(int requestId)
+{
+    var request = await _requestRepository.GetWithDetailsAsync(requestId);
+
+    // Prepare case data
+    var caseData = new CaseRegistrationData
     {
         RequestId = request.Id,
         CourtId = request.CourtId,
@@ -637,112 +650,170 @@
         DisputeTypeId = request.DisputeTypeId,
         Subject = request.Subject,
         Claims = request.Claims,
-        Plaintiffs = request.Plaintiffs.Select(p => <span class="keyword">new</span> <span class="type">CasePlaintiffData</span>
+        Plaintiffs = request.Plaintiffs.Select(p =&gt; new CasePlaintiffData
         {
             FullName = p.FullName,
-            IdentityNumber = p.IdentityNumber
+            IdentityNumber = p.IdentityNumber,
+            // ...
         }).ToList(),
-        Defendants = request.Defendants.Select(d => <span class="keyword">new</span> <span class="type">CaseDefendantData</span>
+        Defendants = request.Defendants.Select(d =&gt; new CaseDefendantData
         {
-            FullName = d.FullName
+            FullName = d.FullName,
+            // ...
         }).ToList()
     };
 
-    <span class="comment">// تسجيل القضية في النظام</span>
-    <span class="keyword">var</span> result = <span class="keyword">await</span> _caseManagementService.RegisterCaseAsync(caseData);
+    // Register case in system
+    var result = await _caseManagementService.RegisterCaseAsync(caseData);
 
-    <span class="keyword">if</span> (!result.IsSuccess)
+    if (!result.IsSuccess)
     {
-        <span class="keyword">throw new</span> <span class="type">BusinessException</span>(<span class="string">$"فشل تسجيل القضية: {result.ErrorMessage}"</span>);
+        throw new BusinessException($"Case registration failed: {result.ErrorMessageAr}");
     }
 
-    <span class="comment">// تحديث الطلب برقم القضية</span>
+    // Update request with case number
     request.CaseNumber = result.CaseNumber;
     request.RegistrationNumber = result.RegistrationNumber;
-    request.RequestStatusId = (<span class="keyword">int</span>)<span class="type">RequestStatus</span>.Registered;
+    request.RegistrationDate = result.RegistrationDate;
+    request.RequestStatusId = (int)RequestStatus.Registered;
 
-    <span class="keyword">await</span> _unitOfWork.SaveChangesAsync();
-}</pre>
-            </div>
+    await _unitOfWork.SaveChangesAsync();
 
-            <h3>إعداد الخدمة الوهمية (Mock)</h3>
-            <div class="code-block">
-<pre><span class="comment">// appsettings.json</span>
-{
-  <span class="string">"Integration"</span>: {
-    <span class="string">"Sms"</span>: {
-      <span class="string">"UseMock"</span>: <span class="keyword">true</span>,
-      <span class="string">"Provider"</span>: <span class="string">"Unifonic"</span>,
-      <span class="string">"SenderId"</span>: <span class="string">"BOG"</span>
+    // Send notifications...
+}</code></pre>
+
+            <h3>6.4 Configuration (appsettings.json)</h3>
+            <pre><code>{
+  "Integration": {
+    "Sms": {
+      "UseMock": true,
+      "Provider": "Unifonic",
+      "ApiKey": "",
+      "SenderId": "BOG"
     },
-    <span class="string">"Email"</span>: {
-      <span class="string">"UseMock"</span>: <span class="keyword">true</span>,
-      <span class="string">"SmtpHost"</span>: <span class="string">"smtp.example.sa"</span>,
-      <span class="string">"FromEmail"</span>: <span class="string">"noreply@bog.gov.sa"</span>,
-      <span class="string">"FromName"</span>: <span class="string">"ديوان المظالم"</span>
+    "Email": {
+      "UseMock": true,
+      "SmtpHost": "smtp.example.sa",
+      "SmtpPort": 587,
+      "FromEmail": "noreply@bog.gov.sa",
+      "FromName": "Board of Grievances"
     },
-    <span class="string">"CaseManagement"</span>: {
-      <span class="string">"UseMock"</span>: <span class="keyword">true</span>,
-      <span class="string">"BaseUrl"</span>: <span class="string">"https://cms.bog.gov.sa/api"</span>,
-      <span class="string">"Version"</span>: <span class="string">"v4"</span>
+    "CaseManagement": {
+      "UseMock": true,
+      "BaseUrl": "https://cms.bog.gov.sa/api",
+      "Version": "v4"
     }
   }
-}</pre>
-            </div>
-        </section>
+}</code></pre>
+        </div>
 
-        <!-- الإشعارات -->
-        <section>
-            <h2>الإشعارات</h2>
-            <table class="notification-table">
-                <thead>
-                    <tr><th>الحدث</th><th>النوع</th><th>المستلم</th></tr>
-                </thead>
+        <div class="section" id="notifications">
+            <h2>7. Notifications</h2>
+
+            <table>
+                <thead><tr><th>Event</th><th>Type</th><th>Recipient</th></tr></thead>
                 <tbody>
-                    <tr><td>الطلب → مسجلة</td><td>SMS + Email</td><td>مقدم الطلب</td></tr>
-                    <tr><td>الطلب → مرفوض</td><td>SMS + Email</td><td>مقدم الطلب</td></tr>
-                    <tr><td>الطلب → انتظار الاستكمال</td><td>SMS + Email</td><td>مقدم الطلب</td></tr>
-                    <tr><td>انتظار الاستكمال → مرفوض (انتهاء المهلة)</td><td>SMS + Email</td><td>مقدم الطلب</td></tr>
+                    <tr><td>Request -> Registered</td><td>SMS + Email</td><td>Applicant</td></tr>
+                    <tr><td>Request -> Rejected</td><td>SMS + Email</td><td>Applicant</td></tr>
+                    <tr><td>Request -> Pending Completion</td><td>SMS + Email</td><td>Applicant</td></tr>
+                    <tr><td>Pending Completion -> Rejected (Timeout)</td><td>SMS + Email</td><td>Applicant</td></tr>
                 </tbody>
             </table>
-        </section>
+        </div>
 
-        <!-- سيناريوهات الاختبار -->
-        <section>
-            <h2>سيناريوهات الاختبار</h2>
-            <ul class="checklist">
-                <li>إنشاء طلب جديد (POST /api/case-requests) - التحقق من الحالة = مسودة</li>
-                <li>إضافة مدعى عليه (POST /api/case-requests/1/defendants) - التحقق أن FullName فقط مطلوب</li>
-                <li>تقديم الطلب (POST /api/case-requests/1/submit) - التحقق من جميع أخطاء التحقق</li>
-                <li>اتخاذ إجراء - قيد (Action="Register") - التحقق من تغيير الحالة إلى مسجلة</li>
-                <li>التحقق من إرسال SMS و Email عند القيد</li>
-                <li>اتخاذ إجراء - طلب استكمال (Action="RequestCompletion") - التحقق من إضافة النواقص</li>
-                <li>التحقق من تعيين CompletionDeadline = الآن + 30 يوم</li>
-                <li>البحث في الطلبات (GET /api/case-requests/search) - التحقق من عمل الترقيم</li>
-                <li>إضافة نفس المدعى عليه مرتين - التحقق من إرجاع ERR013</li>
-                <li>التحقق من تكامل نظام القضايا - استلام رقم القضية</li>
-            </ul>
-        </section>
+        <div class="section" id="testing">
+            <h2>8. Test Scenarios</h2>
 
-        <!-- أوامر التحقق -->
-        <section>
-            <h2>أوامر التحقق</h2>
-            <div class="code-block">
-<pre><span class="comment"># البناء</span>
+            <ol>
+                <li><strong>Create New Request</strong>
+                    <ul>
+                        <li>POST /api/case-requests (create draft)</li>
+                        <li>Verify status = Draft (1)</li>
+                    </ul>
+                </li>
+                <li><strong>Add Defendant</strong>
+                    <ul>
+                        <li>POST /api/case-requests/1/defendants</li>
+                        <li>Verify only FullName is required</li>
+                    </ul>
+                </li>
+                <li><strong>Submit Request</strong>
+                    <ul>
+                        <li>POST /api/case-requests/1/submit</li>
+                        <li>Verify all validation errors</li>
+                    </ul>
+                </li>
+                <li><strong>Take Action - Register</strong>
+                    <ul>
+                        <li>POST /api/case-requests/1/action with Action="Register"</li>
+                        <li>Verify status changes to Registered (6)</li>
+                        <li>Verify SMS and Email sent</li>
+                    </ul>
+                </li>
+                <li><strong>Take Action - Request Completion</strong>
+                    <ul>
+                        <li>POST /api/case-requests/1/action with Action="RequestCompletion"</li>
+                        <li>Verify deficiencies added</li>
+                        <li>Verify CompletionDeadline set</li>
+                    </ul>
+                </li>
+                <li><strong>Search Requests</strong>
+                    <ul>
+                        <li>GET /api/case-requests/search with various criteria</li>
+                        <li>Verify pagination works</li>
+                    </ul>
+                </li>
+                <li><strong>Duplicate Check</strong>
+                    <ul>
+                        <li>Add same defendant twice</li>
+                        <li>Verify ERR013 returned</li>
+                    </ul>
+                </li>
+                <li><strong>Case Management Integration</strong>
+                    <ul>
+                        <li>Register request</li>
+                        <li>Verify case number received from case management system</li>
+                    </ul>
+                </li>
+            </ol>
+
+            <h3>DI Registration (ServiceCollectionExtensions.cs)</h3>
+            <pre><code>// Repositories
+services.AddScoped&lt;IDefendantRepository, DefendantRepository&gt;();
+services.AddScoped&lt;ICaseRegistrationRequestRepository, CaseRegistrationRequestRepository&gt;();
+services.AddScoped&lt;IRequestAttachmentRepository, RequestAttachmentRepository&gt;();
+services.AddScoped&lt;IRequestDeficiencyRepository, RequestDeficiencyRepository&gt;();
+services.AddScoped&lt;IAdditionalInfoRepository, AdditionalInfoRepository&gt;();
+
+// Business Logic
+services.AddScoped&lt;IDefendantBL, DefendantBL&gt;();
+services.AddScoped&lt;ICaseRegistrationBL, CaseRegistrationBL&gt;();
+services.AddScoped&lt;IRequestActionBL, RequestActionBL&gt;();
+services.AddScoped&lt;IRequestAttachmentBL, RequestAttachmentBL&gt;();</code></pre>
+
+            <h3>Verification Commands</h3>
+            <pre><code># Build
 dotnet build src/Backend/BOG.sln
 
-<span class="comment"># التشغيل</span>
+# Run
 dotnet run --project src/Backend/BOG.API
 
-<span class="comment"># الاختبار عبر Swagger</span>
-<span class="comment"># https://localhost:5001/swagger</span></pre>
-            </div>
-        </section>
-    </div>
+# Test with Swagger
+# https://localhost:5001/swagger</code></pre>
 
-    <footer>
-        <p><strong>المرجع:</strong> docs/srs/use-cases/6.5.1-case-registration/SRS_UC_6.5.1_Full_AR.md</p>
-        <p>BOG - نظام إدارة الدعاوى | خطة المطور ب</p>
-    </footer>
+            <div class="success">
+                <strong>References:</strong>
+                <ul>
+                    <li><strong>SRS:</strong> <code>docs/srs/use-cases/6.5.1-case-registration/SRS_UC_6.5.1_Full_AR.md</code></li>
+                    <li><strong>Main Plan:</strong> <code>docs/implementation/UC-6.5.1-Implementation-Plan.md</code></li>
+                </ul>
+            </div>
+        </div>
+
+        <footer>
+            <p>Developer B: Defendants & Request Management Module - BOG Legal Case Management System</p>
+            <p>Generated: 2026-01-14</p>
+        </footer>
+    </div>
 </body>
 </html>

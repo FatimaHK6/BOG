@@ -3,6 +3,8 @@ using BOG.BL.Services;
 using BOG.DAL.Interfaces;
 using BOG.DAL.Repositories;
 using BOG.DbModel;
+using BOG.Integration.Interfaces;
+using BOG.Integration.Services;
 using Microsoft.EntityFrameworkCore;
 
 namespace BOG.API.Extensions;
@@ -70,6 +72,13 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ICourtRepository, CourtRepository>();
         services.AddScoped<IDepartmentRepository, DepartmentRepository>();
 
+        // Plaintiff & Representative repositories
+        services.AddScoped<IPlaintiffRepository, PlaintiffRepository>();
+        services.AddScoped<IRepresentativeRepository, RepresentativeRepository>();
+        services.AddScoped<IPlaintiffAttachmentRepository, PlaintiffAttachmentRepository>();
+        services.AddScoped<IAddressRepository, AddressRepository>();
+        services.AddScoped<ICaseRequestPlaintiffRepository, CaseRequestPlaintiffRepository>();
+
         return services;
     }
 
@@ -87,6 +96,25 @@ public static class ServiceCollectionExtensions
         // Identity and authorization services
         services.AddScoped<IRoleBL, RoleBL>();
         services.AddScoped<IAuthorizationBL, AuthorizationBL>();
+
+        // Plaintiff & Representative services
+        services.AddScoped<IPlaintiffBL, PlaintiffBL>();
+        services.AddScoped<IRepresentativeBL, RepresentativeBL>();
+        services.AddScoped<IPlaintiffAttachmentBL, PlaintiffAttachmentBL>();
+
+        return services;
+    }
+
+    /// <summary>
+    /// Registers integration services (external system integrations).
+    /// Follows Dependency Inversion Principle - depends on service interfaces.
+    /// </summary>
+    /// <param name="services">The service collection</param>
+    /// <returns>The service collection for chaining</returns>
+    public static IServiceCollection AddIntegrationServices(this IServiceCollection services)
+    {
+        // Absher integration (using mock for development)
+        services.AddScoped<IAbsherService, AbsherMockService>();
 
         return services;
     }
@@ -106,7 +134,8 @@ public static class ServiceCollectionExtensions
             .AddApplicationDbContext(configuration)
             .AddUnitOfWork()
             .AddRepositories()
-            .AddBusinessLogicServices();
+            .AddBusinessLogicServices()
+            .AddIntegrationServices();
 
         return services;
     }
