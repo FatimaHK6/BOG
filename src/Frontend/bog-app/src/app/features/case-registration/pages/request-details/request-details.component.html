@@ -1,0 +1,149 @@
+<div class="case-registration-layout" dir="rtl">
+  <!-- Header Bar -->
+  <header class="layout-header">
+    <div class="header-content">
+      <h1>{{ pageTitle }}</h1>
+      <div class="header-info">
+        <span class="request-number" *ngIf="requestId">رقم الطلب: {{ requestId }}</span>
+        <span class="request-status" [class]="'status-' + currentStatus">
+          {{ currentStatusName }}
+        </span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <div class="layout-container">
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar" [class.mobile-hidden]="isMobileView && !sidebarOpen">
+      <nav class="sidebar-nav">
+        <ul class="nav-sections">
+          <li class="nav-item" [class.active]="activeSection === 'defendants'"
+              (click)="scrollToSection('defendants')">
+            <mat-icon>group</mat-icon>
+            <span>المدعى عليهم</span>
+            <span class="count-badge" *ngIf="defendantsCount > 0">{{ defendantsCount }}</span>
+          </li>
+
+          <li class="nav-item" [class.active]="activeSection === 'case-data'"
+              (click)="scrollToSection('case-data')">
+            <mat-icon>description</mat-icon>
+            <span>بيانات الدعوى</span>
+          </li>
+
+          <li class="nav-item" [class.active]="activeSection === 'attachments'"
+              (click)="scrollToSection('attachments')">
+            <mat-icon>attach_file</mat-icon>
+            <span>المرفقات</span>
+            <span class="count-badge" *ngIf="attachmentsCount > 0">{{ attachmentsCount }}</span>
+          </li>
+
+          <li class="nav-item" [class.active]="activeSection === 'additional-info'"
+              (click)="scrollToSection('additional-info')">
+            <mat-icon>info</mat-icon>
+            <span>معلومات إضافية</span>
+          </li>
+
+          <li class="nav-item" [class.active]="activeSection === 'deficiencies'"
+              (click)="scrollToSection('deficiencies')"
+              *ngIf="hasDeficiencies">
+            <mat-icon>warning</mat-icon>
+            <span>أوجه القصور</span>
+            <span class="count-badge error">{{ deficienciesCount }}</span>
+          </li>
+
+          <li class="nav-item" [class.active]="activeSection === 'actions'"
+              (click)="scrollToSection('actions')">
+            <mat-icon>check_circle</mat-icon>
+            <span>إجراءات الطلب</span>
+          </li>
+        </ul>
+      </nav>
+
+      <!-- Sticky Action Buttons -->
+      <div class="sidebar-actions">
+        <button mat-raised-button color="primary"
+                (click)="saveRequest()"
+                [disabled]="!canSave"
+                *ngIf="canEdit">
+          <mat-icon>save</mat-icon>
+          حفظ
+        </button>
+        <button mat-stroked-button (click)="navigateBack()">
+          <mat-icon>arrow_back</mat-icon>
+          رجوع
+        </button>
+      </div>
+    </aside>
+
+    <!-- Content Area -->
+    <main class="content-area">
+      <!-- Loading State -->
+      <div class="loading-container" *ngIf="loading">
+        <mat-spinner></mat-spinner>
+        <p>جاري التحميل...</p>
+      </div>
+
+      <!-- Content Sections - Tabbed View -->
+      <div class="content-sections" *ngIf="!loading" [ngSwitch]="activeSection">
+
+        <!-- Defendants Tab -->
+        <section id="defendants" *ngSwitchCase="'defendants'" class="tab-content">
+          <app-defendants-list
+            [requestId]="requestId"
+            [canEdit]="canEdit"
+            [showValidation]="showValidation">
+          </app-defendants-list>
+        </section>
+
+        <!-- Case Data Tab -->
+        <section id="case-data" *ngSwitchCase="'case-data'" class="tab-content">
+          <app-case-data-form
+            [requestId]="requestId"
+            [canEdit]="canEdit">
+          </app-case-data-form>
+        </section>
+
+        <!-- Attachments Tab -->
+        <section id="attachments" *ngSwitchCase="'attachments'" class="tab-content">
+          <app-attachments-list
+            [requestId]="requestId"
+            [canEdit]="canEdit"
+            [showValidation]="showValidation">
+          </app-attachments-list>
+        </section>
+
+        <!-- Additional Info Tab -->
+        <section id="additional-info" *ngSwitchCase="'additional-info'" class="tab-content">
+          <app-additional-info-form
+            [requestId]="requestId"
+            [canEdit]="canEdit">
+          </app-additional-info-form>
+        </section>
+
+        <!-- Deficiencies Tab -->
+        <section id="deficiencies" *ngSwitchCase="'deficiencies'" class="tab-content">
+          <app-deficiencies-list *ngIf="hasDeficiencies" [requestId]="requestId"></app-deficiencies-list>
+        </section>
+
+        <!-- Request Actions Tab -->
+        <section id="actions" *ngSwitchCase="'actions'" class="tab-content">
+          <app-request-actions [requestId]="requestId"></app-request-actions>
+        </section>
+
+        <!-- No Content Message -->
+        <div class="no-section" *ngSwitchDefault>
+          <p>الرجاء اختيار قسم من القائمة الجانبية</p>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Mobile: Bottom Toggle for Sidebar -->
+  <button class="mobile-sidebar-toggle"
+          *ngIf="isMobileView"
+          (click)="toggleSidebar()"
+          mat-fab color="primary">
+    <mat-icon>{{ sidebarOpen ? 'close' : 'menu' }}</mat-icon>
+  </button>
+</div>
