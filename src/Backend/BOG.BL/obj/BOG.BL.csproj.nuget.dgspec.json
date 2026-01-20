@@ -1,27 +1,25 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\Lenovo\\Desktop\\Claude\\BOG\\src\\Backend\\BOG.BL\\BOG.BL.csproj": {}
+    "D:\\Work\\Bog\\BOG\\src\\Backend\\BOG.BL\\BOG.BL.csproj": {}
   },
   "projects": {
-    "C:\\Users\\Lenovo\\Desktop\\Claude\\BOG\\src\\Backend\\BOG.BL\\BOG.BL.csproj": {
+    "D:\\Work\\Bog\\BOG\\src\\Backend\\BOG.BL\\BOG.BL.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\Lenovo\\Desktop\\Claude\\BOG\\src\\Backend\\BOG.BL\\BOG.BL.csproj",
+        "projectUniqueName": "D:\\Work\\Bog\\BOG\\src\\Backend\\BOG.BL\\BOG.BL.csproj",
         "projectName": "BOG.BL",
-        "projectPath": "C:\\Users\\Lenovo\\Desktop\\Claude\\BOG\\src\\Backend\\BOG.BL\\BOG.BL.csproj",
+        "projectPath": "D:\\Work\\Bog\\BOG\\src\\Backend\\BOG.BL\\BOG.BL.csproj",
         "packagesPath": "C:\\Users\\Lenovo\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\Lenovo\\Desktop\\Claude\\BOG\\src\\Backend\\BOG.BL\\obj\\",
+        "outputPath": "D:\\Work\\Bog\\BOG\\src\\Backend\\BOG.BL\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
-          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages",
-          "C:\\Program Files (x86)\\Microsoft\\Xamarin\\NuGet\\"
+          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
           "C:\\Users\\Lenovo\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Xamarin.Offline.config"
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
           "net8.0"
@@ -34,17 +32,20 @@
           "net8.0": {
             "targetAlias": "net8.0",
             "projectReferences": {
-              "C:\\Users\\Lenovo\\Desktop\\Claude\\BOG\\src\\Backend\\BOG.DAL\\BOG.DAL.csproj": {
-                "projectPath": "C:\\Users\\Lenovo\\Desktop\\Claude\\BOG\\src\\Backend\\BOG.DAL\\BOG.DAL.csproj"
+              "D:\\Work\\Bog\\BOG\\src\\Backend\\BOG.DAL\\BOG.DAL.csproj": {
+                "projectPath": "D:\\Work\\Bog\\BOG\\src\\Backend\\BOG.DAL\\BOG.DAL.csproj"
               },
-              "C:\\Users\\Lenovo\\Desktop\\Claude\\BOG\\src\\Backend\\BOG.DbModel\\BOG.DbModel.csproj": {
-                "projectPath": "C:\\Users\\Lenovo\\Desktop\\Claude\\BOG\\src\\Backend\\BOG.DbModel\\BOG.DbModel.csproj"
+              "D:\\Work\\Bog\\BOG\\src\\Backend\\BOG.DbModel\\BOG.DbModel.csproj": {
+                "projectPath": "D:\\Work\\Bog\\BOG\\src\\Backend\\BOG.DbModel\\BOG.DbModel.csproj"
               },
-              "C:\\Users\\Lenovo\\Desktop\\Claude\\BOG\\src\\Backend\\BOG.DTO\\BOG.DTO.csproj": {
-                "projectPath": "C:\\Users\\Lenovo\\Desktop\\Claude\\BOG\\src\\Backend\\BOG.DTO\\BOG.DTO.csproj"
+              "D:\\Work\\Bog\\BOG\\src\\Backend\\BOG.DTO\\BOG.DTO.csproj": {
+                "projectPath": "D:\\Work\\Bog\\BOG\\src\\Backend\\BOG.DTO\\BOG.DTO.csproj"
               },
-              "C:\\Users\\Lenovo\\Desktop\\Claude\\BOG\\src\\Backend\\BOG.VM\\BOG.VM.csproj": {
-                "projectPath": "C:\\Users\\Lenovo\\Desktop\\Claude\\BOG\\src\\Backend\\BOG.VM\\BOG.VM.csproj"
+              "D:\\Work\\Bog\\BOG\\src\\Backend\\BOG.Integration\\BOG.Integration.csproj": {
+                "projectPath": "D:\\Work\\Bog\\BOG\\src\\Backend\\BOG.Integration\\BOG.Integration.csproj"
+              },
+              "D:\\Work\\Bog\\BOG\\src\\Backend\\BOG.VM\\BOG.VM.csproj": {
+                "projectPath": "D:\\Work\\Bog\\BOG\\src\\Backend\\BOG.VM\\BOG.VM.csproj"
               }
             }
           }
@@ -58,7 +59,8 @@
           "enableAudit": "true",
           "auditLevel": "low",
           "auditMode": "direct"
-        }
+        },
+        "SdkAnalysisLevel": "10.0.100"
       },
       "frameworks": {
         "net8.0": {
@@ -74,33 +76,45 @@
           ],
           "assetTargetFallback": true,
           "warn": true,
+          "downloadDependencies": [
+            {
+              "name": "Microsoft.AspNetCore.App.Ref",
+              "version": "[8.0.22, 8.0.22]"
+            },
+            {
+              "name": "Microsoft.NETCore.App.Ref",
+              "version": "[8.0.22, 8.0.22]"
+            },
+            {
+              "name": "Microsoft.WindowsDesktop.App.Ref",
+              "version": "[8.0.22, 8.0.22]"
+            }
+          ],
           "frameworkReferences": {
             "Microsoft.NETCore.App": {
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.416/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.101/PortableRuntimeIdentifierGraph.json"
         }
       }
     },
-    "C:\\Users\\Lenovo\\Desktop\\Claude\\BOG\\src\\Backend\\BOG.DAL\\BOG.DAL.csproj": {
+    "D:\\Work\\Bog\\BOG\\src\\Backend\\BOG.DAL\\BOG.DAL.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\Lenovo\\Desktop\\Claude\\BOG\\src\\Backend\\BOG.DAL\\BOG.DAL.csproj",
+        "projectUniqueName": "D:\\Work\\Bog\\BOG\\src\\Backend\\BOG.DAL\\BOG.DAL.csproj",
         "projectName": "BOG.DAL",
-        "projectPath": "C:\\Users\\Lenovo\\Desktop\\Claude\\BOG\\src\\Backend\\BOG.DAL\\BOG.DAL.csproj",
+        "projectPath": "D:\\Work\\Bog\\BOG\\src\\Backend\\BOG.DAL\\BOG.DAL.csproj",
         "packagesPath": "C:\\Users\\Lenovo\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\Lenovo\\Desktop\\Claude\\BOG\\src\\Backend\\BOG.DAL\\obj\\",
+        "outputPath": "D:\\Work\\Bog\\BOG\\src\\Backend\\BOG.DAL\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
-          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages",
-          "C:\\Program Files (x86)\\Microsoft\\Xamarin\\NuGet\\"
+          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
           "C:\\Users\\Lenovo\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Xamarin.Offline.config"
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
           "net8.0"
@@ -113,11 +127,11 @@
           "net8.0": {
             "targetAlias": "net8.0",
             "projectReferences": {
-              "C:\\Users\\Lenovo\\Desktop\\Claude\\BOG\\src\\Backend\\BOG.DbModel\\BOG.DbModel.csproj": {
-                "projectPath": "C:\\Users\\Lenovo\\Desktop\\Claude\\BOG\\src\\Backend\\BOG.DbModel\\BOG.DbModel.csproj"
+              "D:\\Work\\Bog\\BOG\\src\\Backend\\BOG.DbModel\\BOG.DbModel.csproj": {
+                "projectPath": "D:\\Work\\Bog\\BOG\\src\\Backend\\BOG.DbModel\\BOG.DbModel.csproj"
               },
-              "C:\\Users\\Lenovo\\Desktop\\Claude\\BOG\\src\\Backend\\BOG.DTO\\BOG.DTO.csproj": {
-                "projectPath": "C:\\Users\\Lenovo\\Desktop\\Claude\\BOG\\src\\Backend\\BOG.DTO\\BOG.DTO.csproj"
+              "D:\\Work\\Bog\\BOG\\src\\Backend\\BOG.DTO\\BOG.DTO.csproj": {
+                "projectPath": "D:\\Work\\Bog\\BOG\\src\\Backend\\BOG.DTO\\BOG.DTO.csproj"
               }
             }
           }
@@ -131,7 +145,8 @@
           "enableAudit": "true",
           "auditLevel": "low",
           "auditMode": "direct"
-        }
+        },
+        "SdkAnalysisLevel": "10.0.100"
       },
       "frameworks": {
         "net8.0": {
@@ -147,33 +162,45 @@
           ],
           "assetTargetFallback": true,
           "warn": true,
+          "downloadDependencies": [
+            {
+              "name": "Microsoft.AspNetCore.App.Ref",
+              "version": "[8.0.22, 8.0.22]"
+            },
+            {
+              "name": "Microsoft.NETCore.App.Ref",
+              "version": "[8.0.22, 8.0.22]"
+            },
+            {
+              "name": "Microsoft.WindowsDesktop.App.Ref",
+              "version": "[8.0.22, 8.0.22]"
+            }
+          ],
           "frameworkReferences": {
             "Microsoft.NETCore.App": {
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.416/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.101/PortableRuntimeIdentifierGraph.json"
         }
       }
     },
-    "C:\\Users\\Lenovo\\Desktop\\Claude\\BOG\\src\\Backend\\BOG.DbModel\\BOG.DbModel.csproj": {
+    "D:\\Work\\Bog\\BOG\\src\\Backend\\BOG.DbModel\\BOG.DbModel.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\Lenovo\\Desktop\\Claude\\BOG\\src\\Backend\\BOG.DbModel\\BOG.DbModel.csproj",
+        "projectUniqueName": "D:\\Work\\Bog\\BOG\\src\\Backend\\BOG.DbModel\\BOG.DbModel.csproj",
         "projectName": "BOG.DbModel",
-        "projectPath": "C:\\Users\\Lenovo\\Desktop\\Claude\\BOG\\src\\Backend\\BOG.DbModel\\BOG.DbModel.csproj",
+        "projectPath": "D:\\Work\\Bog\\BOG\\src\\Backend\\BOG.DbModel\\BOG.DbModel.csproj",
         "packagesPath": "C:\\Users\\Lenovo\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\Lenovo\\Desktop\\Claude\\BOG\\src\\Backend\\BOG.DbModel\\obj\\",
+        "outputPath": "D:\\Work\\Bog\\BOG\\src\\Backend\\BOG.DbModel\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
-          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages",
-          "C:\\Program Files (x86)\\Microsoft\\Xamarin\\NuGet\\"
+          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
           "C:\\Users\\Lenovo\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Xamarin.Offline.config"
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
           "net8.0"
@@ -197,7 +224,8 @@
           "enableAudit": "true",
           "auditLevel": "low",
           "auditMode": "direct"
-        }
+        },
+        "SdkAnalysisLevel": "10.0.100"
       },
       "frameworks": {
         "net8.0": {
@@ -235,33 +263,45 @@
           ],
           "assetTargetFallback": true,
           "warn": true,
+          "downloadDependencies": [
+            {
+              "name": "Microsoft.AspNetCore.App.Ref",
+              "version": "[8.0.22, 8.0.22]"
+            },
+            {
+              "name": "Microsoft.NETCore.App.Ref",
+              "version": "[8.0.22, 8.0.22]"
+            },
+            {
+              "name": "Microsoft.WindowsDesktop.App.Ref",
+              "version": "[8.0.22, 8.0.22]"
+            }
+          ],
           "frameworkReferences": {
             "Microsoft.NETCore.App": {
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.416/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.101/PortableRuntimeIdentifierGraph.json"
         }
       }
     },
-    "C:\\Users\\Lenovo\\Desktop\\Claude\\BOG\\src\\Backend\\BOG.DTO\\BOG.DTO.csproj": {
+    "D:\\Work\\Bog\\BOG\\src\\Backend\\BOG.DTO\\BOG.DTO.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\Lenovo\\Desktop\\Claude\\BOG\\src\\Backend\\BOG.DTO\\BOG.DTO.csproj",
+        "projectUniqueName": "D:\\Work\\Bog\\BOG\\src\\Backend\\BOG.DTO\\BOG.DTO.csproj",
         "projectName": "BOG.DTO",
-        "projectPath": "C:\\Users\\Lenovo\\Desktop\\Claude\\BOG\\src\\Backend\\BOG.DTO\\BOG.DTO.csproj",
+        "projectPath": "D:\\Work\\Bog\\BOG\\src\\Backend\\BOG.DTO\\BOG.DTO.csproj",
         "packagesPath": "C:\\Users\\Lenovo\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\Lenovo\\Desktop\\Claude\\BOG\\src\\Backend\\BOG.DTO\\obj\\",
+        "outputPath": "D:\\Work\\Bog\\BOG\\src\\Backend\\BOG.DTO\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
-          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages",
-          "C:\\Program Files (x86)\\Microsoft\\Xamarin\\NuGet\\"
+          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
           "C:\\Users\\Lenovo\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Xamarin.Offline.config"
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
           "net8.0"
@@ -285,7 +325,8 @@
           "enableAudit": "true",
           "auditLevel": "low",
           "auditMode": "direct"
-        }
+        },
+        "SdkAnalysisLevel": "10.0.100"
       },
       "frameworks": {
         "net8.0": {
@@ -301,33 +342,45 @@
           ],
           "assetTargetFallback": true,
           "warn": true,
+          "downloadDependencies": [
+            {
+              "name": "Microsoft.AspNetCore.App.Ref",
+              "version": "[8.0.22, 8.0.22]"
+            },
+            {
+              "name": "Microsoft.NETCore.App.Ref",
+              "version": "[8.0.22, 8.0.22]"
+            },
+            {
+              "name": "Microsoft.WindowsDesktop.App.Ref",
+              "version": "[8.0.22, 8.0.22]"
+            }
+          ],
           "frameworkReferences": {
             "Microsoft.NETCore.App": {
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.416/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.101/PortableRuntimeIdentifierGraph.json"
         }
       }
     },
-    "C:\\Users\\Lenovo\\Desktop\\Claude\\BOG\\src\\Backend\\BOG.VM\\BOG.VM.csproj": {
+    "D:\\Work\\Bog\\BOG\\src\\Backend\\BOG.Integration\\BOG.Integration.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\Lenovo\\Desktop\\Claude\\BOG\\src\\Backend\\BOG.VM\\BOG.VM.csproj",
-        "projectName": "BOG.VM",
-        "projectPath": "C:\\Users\\Lenovo\\Desktop\\Claude\\BOG\\src\\Backend\\BOG.VM\\BOG.VM.csproj",
+        "projectUniqueName": "D:\\Work\\Bog\\BOG\\src\\Backend\\BOG.Integration\\BOG.Integration.csproj",
+        "projectName": "BOG.Integration",
+        "projectPath": "D:\\Work\\Bog\\BOG\\src\\Backend\\BOG.Integration\\BOG.Integration.csproj",
         "packagesPath": "C:\\Users\\Lenovo\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\Lenovo\\Desktop\\Claude\\BOG\\src\\Backend\\BOG.VM\\obj\\",
+        "outputPath": "D:\\Work\\Bog\\BOG\\src\\Backend\\BOG.Integration\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
-          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages",
-          "C:\\Program Files (x86)\\Microsoft\\Xamarin\\NuGet\\"
+          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
           "C:\\Users\\Lenovo\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Xamarin.Offline.config"
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
           "net8.0"
@@ -351,7 +404,93 @@
           "enableAudit": "true",
           "auditLevel": "low",
           "auditMode": "direct"
+        },
+        "SdkAnalysisLevel": "10.0.100"
+      },
+      "frameworks": {
+        "net8.0": {
+          "targetAlias": "net8.0",
+          "dependencies": {
+            "Microsoft.Extensions.Logging.Abstractions": {
+              "target": "Package",
+              "version": "[8.0.0, )"
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "downloadDependencies": [
+            {
+              "name": "Microsoft.AspNetCore.App.Ref",
+              "version": "[8.0.22, 8.0.22]"
+            },
+            {
+              "name": "Microsoft.NETCore.App.Ref",
+              "version": "[8.0.22, 8.0.22]"
+            },
+            {
+              "name": "Microsoft.WindowsDesktop.App.Ref",
+              "version": "[8.0.22, 8.0.22]"
+            }
+          ],
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.101/PortableRuntimeIdentifierGraph.json"
         }
+      }
+    },
+    "D:\\Work\\Bog\\BOG\\src\\Backend\\BOG.VM\\BOG.VM.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "D:\\Work\\Bog\\BOG\\src\\Backend\\BOG.VM\\BOG.VM.csproj",
+        "projectName": "BOG.VM",
+        "projectPath": "D:\\Work\\Bog\\BOG\\src\\Backend\\BOG.VM\\BOG.VM.csproj",
+        "packagesPath": "C:\\Users\\Lenovo\\.nuget\\packages\\",
+        "outputPath": "D:\\Work\\Bog\\BOG\\src\\Backend\\BOG.VM\\obj\\",
+        "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+        ],
+        "configFilePaths": [
+          "C:\\Users\\Lenovo\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+        ],
+        "originalTargetFrameworks": [
+          "net8.0"
+        ],
+        "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net8.0": {
+            "targetAlias": "net8.0",
+            "projectReferences": {}
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        },
+        "restoreAuditProperties": {
+          "enableAudit": "true",
+          "auditLevel": "low",
+          "auditMode": "direct"
+        },
+        "SdkAnalysisLevel": "10.0.100"
       },
       "frameworks": {
         "net8.0": {
@@ -367,12 +506,26 @@
           ],
           "assetTargetFallback": true,
           "warn": true,
+          "downloadDependencies": [
+            {
+              "name": "Microsoft.AspNetCore.App.Ref",
+              "version": "[8.0.22, 8.0.22]"
+            },
+            {
+              "name": "Microsoft.NETCore.App.Ref",
+              "version": "[8.0.22, 8.0.22]"
+            },
+            {
+              "name": "Microsoft.WindowsDesktop.App.Ref",
+              "version": "[8.0.22, 8.0.22]"
+            }
+          ],
           "frameworkReferences": {
             "Microsoft.NETCore.App": {
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.416/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.101/PortableRuntimeIdentifierGraph.json"
         }
       }
     }

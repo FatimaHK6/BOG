@@ -1,8 +1,14 @@
 {
   "version": 2,
-  "dgSpecHash": "OQuD3nn5eaE=",
+  "dgSpecHash": "yov0Oc+1zd4=",
   "success": true,
-  "projectFilePath": "C:\\Users\\Lenovo\\Desktop\\Claude\\BOG\\src\\Backend\\BOG.Integration\\BOG.Integration.csproj",
-  "expectedPackageFiles": [],
+  "projectFilePath": "D:\\Work\\Bog\\BOG\\src\\Backend\\BOG.Integration\\BOG.Integration.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\Lenovo\\.nuget\\packages\\microsoft.extensions.dependencyinjection.abstractions\\8.0.0\\microsoft.extensions.dependencyinjection.abstractions.8.0.0.nupkg.sha512",
+    "C:\\Users\\Lenovo\\.nuget\\packages\\microsoft.extensions.logging.abstractions\\8.0.0\\microsoft.extensions.logging.abstractions.8.0.0.nupkg.sha512",
+    "C:\\Users\\Lenovo\\.nuget\\packages\\microsoft.windowsdesktop.app.ref\\8.0.22\\microsoft.windowsdesktop.app.ref.8.0.22.nupkg.sha512",
+    "C:\\Users\\Lenovo\\.nuget\\packages\\microsoft.netcore.app.ref\\8.0.22\\microsoft.netcore.app.ref.8.0.22.nupkg.sha512",
+    "C:\\Users\\Lenovo\\.nuget\\packages\\microsoft.aspnetcore.app.ref\\8.0.22\\microsoft.aspnetcore.app.ref.8.0.22.nupkg.sha512"
+  ],
   "logs": []
 }
