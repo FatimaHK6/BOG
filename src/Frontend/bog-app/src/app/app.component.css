@@ -1,0 +1,147 @@
+/* App Layout - Clean Modern Design */
+
+:host {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+/* Toolbar */
+.app-toolbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  background: #059669 !important;
+  height: 56px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.app-title {
+  font-size: 18px;
+  font-weight: 600;
+  margin-right: 12px;
+  letter-spacing: -0.3px;
+}
+
+.app-subtitle {
+  font-size: 13px;
+  opacity: 0.85;
+  font-weight: 400;
+}
+
+.spacer {
+  flex: 1 1 auto;
+}
+
+/* Sidenav Container */
+.sidenav-container {
+  position: absolute;
+  top: 56px;
+  bottom: 0;
+  left: 0;
+  right: 0;
+}
+
+/* Sidenav - Clean Design */
+.sidenav {
+  width: 240px;
+  background: #ffffff;
+  border-left: 1px solid #e5e7eb;
+  border-right: none;
+}
+
+.sidenav mat-nav-list {
+  padding: 12px 8px;
+}
+
+.sidenav mat-nav-list [mat-subheader] {
+  color: #6b7280;
+  font-weight: 600;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 16px 12px 8px;
+  height: auto;
+}
+
+.sidenav mat-nav-list a[mat-list-item] {
+  height: 44px;
+  border-radius: 8px;
+  margin: 2px 0;
+  padding: 0 12px;
+}
+
+.sidenav mat-nav-list a[mat-list-item]:hover {
+  background-color: #f3f4f6;
+}
+
+.sidenav mat-nav-list a[mat-list-item].active {
+  background-color: #ecfdf5;
+}
+
+.sidenav mat-nav-list a[mat-list-item] mat-icon {
+  color: #9ca3af;
+  margin-left: 12px;
+  margin-right: 0;
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+}
+
+.sidenav mat-nav-list a[mat-list-item]:hover mat-icon {
+  color: #6b7280;
+}
+
+.sidenav mat-nav-list a[mat-list-item].active mat-icon {
+  color: #059669;
+}
+
+.sidenav mat-nav-list a[mat-list-item] span {
+  color: #374151;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.sidenav mat-nav-list a[mat-list-item]:hover span {
+  color: #111827;
+}
+
+.sidenav mat-nav-list a[mat-list-item].active span {
+  color: #059669;
+  font-weight: 600;
+}
+
+/* Divider */
+.sidenav mat-divider {
+  margin: 12px 0;
+  border-color: #e5e7eb;
+}
+
+/* Main Content */
+.main-content {
+  padding: 24px;
+  background-color: #f9fafb;
+  min-height: 100%;
+  overflow-y: auto;
+}
+
+/* RTL Adjustments */
+::ng-deep .mat-list-item-content {
+  flex-direction: row-reverse !important;
+}
+
+::ng-deep .mat-list-icon {
+  margin-left: 12px !important;
+  margin-right: 0 !important;
+}
+
+/* Toolbar button */
+.app-toolbar button[mat-icon-button] {
+  margin-left: 4px;
+}
+
+.app-toolbar button[mat-icon-button] mat-icon {
+  font-size: 22px;
+}

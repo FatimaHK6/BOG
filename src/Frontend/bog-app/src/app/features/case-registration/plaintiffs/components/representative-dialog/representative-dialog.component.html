@@ -1,0 +1,211 @@
+<h2 mat-dialog-title>{{ isEditMode ? 'تعديل بيانات الممثل' : 'إضافة ممثل جديد' }}</h2>
+
+<mat-dialog-content>
+  <form [formGroup]="representativeForm">
+    <!-- Representative Type -->
+    <div class="form-row">
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>نوع الممثل</mat-label>
+        <mat-select formControlName="representativeTypeId" required>
+          <mat-option *ngFor="let type of representativeTypes" [value]="type.id">
+            {{ type.nameAr }}
+          </mat-option>
+        </mat-select>
+        <mat-error>نوع الممثل مطلوب</mat-error>
+      </mat-form-field>
+    </div>
+
+    <!-- Identity Lookup -->
+    <div class="form-row two-col">
+      <mat-form-field appearance="outline">
+        <mat-label>نوع الهوية</mat-label>
+        <mat-select formControlName="identityTypeId" required>
+          <mat-option *ngFor="let type of identityTypes" [value]="type.id">
+            {{ type.nameAr }}
+          </mat-option>
+        </mat-select>
+        <mat-error>نوع الهوية مطلوب</mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>رقم الهوية</mat-label>
+        <input matInput formControlName="identityNumber" required>
+        <button mat-icon-button matSuffix (click)="onLookupIdentity()"
+                [disabled]="isLookingUp" matTooltip="البحث في أبشر">
+          <mat-icon>search</mat-icon>
+        </button>
+        <mat-error>رقم الهوية مطلوب</mat-error>
+      </mat-form-field>
+    </div>
+
+    <!-- Name Fields -->
+    <div class="form-row four-col">
+      <mat-form-field appearance="outline">
+        <mat-label>الاسم الأول</mat-label>
+        <input matInput formControlName="firstName" required>
+        <mat-error>الاسم الأول مطلوب</mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>اسم الأب</mat-label>
+        <input matInput formControlName="fatherName">
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>اسم الجد</mat-label>
+        <input matInput formControlName="grandfatherName">
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>اسم العائلة</mat-label>
+        <input matInput formControlName="familyName" required>
+        <mat-error>اسم العائلة مطلوب</mat-error>
+      </mat-form-field>
+    </div>
+
+    <!-- Contact Information -->
+    <div class="form-row two-col">
+      <mat-form-field appearance="outline">
+        <mat-label>رقم الجوال</mat-label>
+        <input matInput formControlName="mobileNumber" dir="ltr">
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>البريد الإلكتروني</mat-label>
+        <input matInput formControlName="email" type="email" dir="ltr">
+        <mat-error>البريد الإلكتروني غير صحيح</mat-error>
+      </mat-form-field>
+    </div>
+
+    <!-- Lawyer License Fields - بيانات رخصة المحاماة -->
+    <ng-container *ngIf="showAuthorizationFields()">
+      <h4>بيانات رخصة المحاماة</h4>
+      <div class="form-row">
+        <mat-form-field appearance="outline">
+          <mat-label>رقم رخصة المحاماة</mat-label>
+          <input matInput formControlName="lawyerLicenseNumber">
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>تاريخ الرخصة</mat-label>
+          <input matInput [matDatepicker]="licenseDatePicker" formControlName="lawyerLicenseDate">
+          <mat-datepicker-toggle matSuffix [for]="licenseDatePicker"></mat-datepicker-toggle>
+          <mat-datepicker #licenseDatePicker></mat-datepicker>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>تاريخ انتهاء الرخصة</mat-label>
+          <input matInput [matDatepicker]="licenseExpiryPicker" formControlName="lawyerLicenseExpiryDate">
+          <mat-datepicker-toggle matSuffix [for]="licenseExpiryPicker"></mat-datepicker-toggle>
+          <mat-datepicker #licenseExpiryPicker></mat-datepicker>
+        </mat-form-field>
+      </div>
+
+      <h4>بيانات الوكالة</h4>
+      <div class="form-row">
+        <mat-form-field appearance="outline">
+          <mat-label>رقم الوكالة</mat-label>
+          <input matInput formControlName="authorizationNumber">
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>تاريخ الوكالة</mat-label>
+          <input matInput [matDatepicker]="authDatePicker" formControlName="authorizationDate">
+          <mat-datepicker-toggle matSuffix [for]="authDatePicker"></mat-datepicker-toggle>
+          <mat-datepicker #authDatePicker></mat-datepicker>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>نوع مصدر الوكالة</mat-label>
+          <mat-select formControlName="authorizationSourceType">
+            <mat-option value="notary">كتابة العدل</mat-option>
+            <mat-option value="court">المحكمة</mat-option>
+            <mat-option value="foreign">وزارة الخارجية</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>مصدر الوكالة</mat-label>
+          <input matInput formControlName="authorizationSource">
+        </mat-form-field>
+      </div>
+    </ng-container>
+
+    <!-- Guardianship Type -->
+    <ng-container *ngIf="showGuardianshipType()">
+      <div class="form-row">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>نوع الولاية</mat-label>
+          <mat-select formControlName="guardianshipType">
+            <mat-option value="natural">طبيعية</mat-option>
+            <mat-option value="acquired">مكتسبة</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+    </ng-container>
+
+    <!-- Representation Document Attachment - ارفاق صورة التمثيل -->
+    <div class="attachment-section">
+      <h4>
+        <mat-icon>attach_file</mat-icon>
+        ارفاق صورة التمثيل
+      </h4>
+
+      <!-- Existing Attachments Table -->
+      <div class="attachments-list" *ngIf="attachments.length > 0">
+        <table mat-table [dataSource]="attachments" class="attachment-table">
+          <ng-container matColumnDef="fileName">
+            <th mat-header-cell *matHeaderCellDef>اسم الملف</th>
+            <td mat-cell *matCellDef="let attachment">{{ attachment.fileName }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="size">
+            <th mat-header-cell *matHeaderCellDef>الحجم</th>
+            <td mat-cell *matCellDef="let attachment">{{ formatFileSize(attachment.fileSizeBytes) }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef>إجراءات</th>
+            <td mat-cell *matCellDef="let attachment; let i = index">
+              <button mat-icon-button matTooltip="عرض" (click)="onViewAttachment(attachment)">
+                <mat-icon>visibility</mat-icon>
+              </button>
+              <button mat-icon-button matTooltip="حذف" (click)="onDeleteAttachment(i)" class="delete-btn">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="['fileName', 'size', 'actions']"></tr>
+          <tr mat-row *matRowDef="let row; columns: ['fileName', 'size', 'actions'];"></tr>
+        </table>
+      </div>
+
+      <!-- Upload Area -->
+      <div class="upload-area"
+           [class.drag-over]="isDragOver"
+           (dragover)="onDragOver($event)"
+           (dragleave)="onDragLeave($event)"
+           (drop)="onDrop($event)">
+        <input #fileInput type="file" accept=".pdf" style="display: none;" (change)="onFileSelected($event)">
+        <mat-icon class="upload-icon">cloud_upload</mat-icon>
+        <p class="upload-text">اسحب الملف هنا أو</p>
+        <button mat-stroked-button color="primary" (click)="fileInput.click()" [disabled]="isUploading">
+          <mat-icon>upload</mat-icon>
+          اختر ملف
+        </button>
+        <p class="upload-hint">
+          <mat-icon>info_outline</mat-icon>
+          الحد الأقصى: 4 ميجابايت | الصيغة المسموحة: PDF فقط
+        </p>
+      </div>
+    </div>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="onCancel()">إلغاء</button>
+  <button mat-raised-button color="primary" (click)="onSave()" [disabled]="isLoading">
+    {{ isEditMode ? 'حفظ التعديلات' : 'إضافة' }}
+  </button>
+</mat-dialog-actions>
