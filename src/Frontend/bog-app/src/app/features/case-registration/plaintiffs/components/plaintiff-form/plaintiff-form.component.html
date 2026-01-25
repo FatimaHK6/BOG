@@ -35,8 +35,8 @@
 
             <!-- Individual Fields -->
             <ng-container *ngIf="isIndividual()">
-              <!-- Identity Lookup -->
-              <div class="form-row">
+              <!-- Identity Lookup - Type 1 only -->
+              <div class="form-row" *ngIf="isIndividualWithId()">
                 <mat-form-field appearance="outline" class="form-field">
                   <mat-label>نوع الهوية</mat-label>
                   <mat-select formControlName="identityTypeId">
@@ -47,17 +47,28 @@
                 </mat-form-field>
 
                 <mat-form-field appearance="outline" class="form-field">
-                  <mat-label>{{ selectedPlaintiffType === 2 ? 'رقم الوثيقة' : 'رقم الهوية' }}</mat-label>
-                  <input matInput formControlName="identityNumber"
-                         [required]="selectedPlaintiffType === 1"
-                         [readonly]="isDocumentNumberReadonly()">
+                  <mat-label>رقم الهوية</mat-label>
+                  <input matInput formControlName="identityNumber" required>
                   <button mat-icon-button matSuffix (click)="onLookupIdentity()"
-                          [disabled]="isLookingUp || isDocumentNumberReadonly()"
-                          matTooltip="البحث في أبشر"
-                          *ngIf="selectedPlaintiffType === 1">
+                          [disabled]="isLookingUp || plaintiffId"
+                          matTooltip="{{ plaintiffId ? 'التحقق من أبشر غير متاح في وضع التعديل' : 'البحث في أبشر' }}">
                     <mat-icon>search</mat-icon>
                   </button>
-                  <mat-error>رقم الهوية مطلوب</mat-error>
+                  <mat-error *ngIf="plaintiffForm.get('identityNumber')?.hasError('required')">رقم الهوية مطلوب</mat-error>
+                  <mat-error *ngIf="plaintiffForm.get('identityNumber')?.hasError('identityNumber')">
+                    {{ plaintiffForm.get('identityNumber')?.getError('identityNumber') }}
+                  </mat-error>
+                  <mat-error *ngIf="plaintiffForm.get('identityNumber')?.hasError('maxlength')">رقم الهوية يجب ألا يتجاوز 20 حرف</mat-error>
+                </mat-form-field>
+              </div>
+
+              <!-- Document Number - Type 2 only (فرد بدون هوية) -->
+              <!-- BC05: Document number is readonly after initial save -->
+              <div class="form-row" *ngIf="isIndividualWithoutId()">
+                <mat-form-field appearance="outline" class="form-field">
+                  <mat-label>رقم الوثيقة</mat-label>
+                  <input matInput formControlName="documentNumber">
+                  <mat-error *ngIf="plaintiffForm.get('documentNumber')?.hasError('maxlength')">رقم الوثيقة يجب ألا يتجاوز 20 حرف</mat-error>
                 </mat-form-field>
               </div>
 
@@ -92,6 +103,12 @@
                 </mat-form-field>
 
                 <mat-form-field appearance="outline" class="form-field">
+                  <mat-label>اسم الفخذ</mat-label>
+                  <input matInput formControlName="clanName" [readonly]="isAbsherFieldsReadonly()">
+                  <mat-error *ngIf="plaintiffForm.get('clanName')?.hasError('maxlength')">اسم الفخذ يجب ألا يتجاوز 100 حرف</mat-error>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="form-field">
                   <mat-label>اسم العائلة</mat-label>
                   <input matInput formControlName="familyName" required [readonly]="isAbsherFieldsReadonly()">
                   <mat-error>اسم العائلة مطلوب</mat-error>
@@ -110,23 +127,25 @@
                 <mat-form-field appearance="outline" class="form-field">
                   <mat-label>الجنس</mat-label>
                   <mat-select formControlName="gender">
-                    <mat-option value="M">ذكر</mat-option>
-                    <mat-option value="F">أنثى</mat-option>
+                    <mat-option value="ذكر">ذكر</mat-option>
+                    <mat-option value="أنثى">أنثى</mat-option>
                   </mat-select>
+                  <mat-error *ngIf="plaintiffForm.get('gender')?.hasError('required')">الجنس مطلوب</mat-error>
+                  <mat-error *ngIf="plaintiffForm.get('gender')?.hasError('gender')">الجنس يجب أن يكون 'ذكر' أو 'أنثى'</mat-error>
                 </mat-form-field>
 
                 <mat-form-field appearance="outline" class="form-field">
                   <mat-label>الجنسية</mat-label>
                   <mat-select formControlName="nationalityId">
-                    <mat-option *ngFor="let nationality of nationalities" [value]="nationality.id">
+                    <mat-option *ngFor="let nationality of filteredNationalities" [value]="nationality.id">
                       {{ nationality.nameAr }}
                     </mat-option>
                   </mat-select>
                 </mat-form-field>
               </div>
 
-              <!-- Identity Dates -->
-              <div class="form-row">
+              <!-- Identity Dates - Type 1 only -->
+              <div class="form-row" *ngIf="isIndividualWithId()">
                 <mat-form-field appearance="outline" class="form-field">
                   <mat-label>تاريخ إصدار الهوية</mat-label>
                   <input matInput [matDatepicker]="identityIssuePicker" formControlName="identityIssueDate" [readonly]="isAbsherFieldsReadonly()">
@@ -147,29 +166,36 @@
                 <mat-checkbox formControlName="isDisabled">هل من ذوي الهمم؟</mat-checkbox>
               </div>
 
-              <!-- Employment Data -->
-              <h4>بيانات العمل</h4>
-              <div class="form-row">
-                <mat-form-field appearance="outline" class="form-field">
-                  <mat-label>قطاع العمل</mat-label>
-                  <mat-select formControlName="employmentSector">
-                    <mat-option value="government">حكومي</mat-option>
-                    <mat-option value="private">خاص</mat-option>
-                    <mat-option value="retired">متقاعد</mat-option>
-                    <mat-option value="unemployed">بدون عمل</mat-option>
-                  </mat-select>
-                </mat-form-field>
+              <!-- Employment Data (BC01/BC02) - Type 1 only (not required for Type 2 per SRS 6.3.10) -->
+              <ng-container *ngIf="isIndividualWithId()">
+                <h4>بيانات العمل</h4>
+                <div class="form-row">
+                  <mat-form-field appearance="outline" class="form-field">
+                    <mat-label>حالة العمل</mat-label>
+                    <mat-select formControlName="employmentStatusId">
+                      <mat-option *ngFor="let status of employmentStatusOptions" [value]="status.id">
+                        {{ status.nameAr }}
+                      </mat-option>
+                    </mat-select>
+                    <mat-error *ngIf="plaintiffForm.get('employmentStatusId')?.hasError('required')">حالة العمل مطلوبة</mat-error>
+                  </mat-form-field>
 
-                <mat-form-field appearance="outline" class="form-field">
-                  <mat-label>جهة العمل</mat-label>
-                  <input matInput formControlName="employerName">
-                </mat-form-field>
+                  <!-- BC01: Show جهة العمل and المهنة when status = Government(1) or Private(2) -->
+                  <mat-form-field appearance="outline" class="form-field" *ngIf="showEmployer">
+                    <mat-label>جهة العمل</mat-label>
+                    <input matInput formControlName="employer">
+                    <mat-error *ngIf="plaintiffForm.get('employer')?.hasError('maxlength')">جهة العمل يجب ألا تتجاوز 200 حرف</mat-error>
+                  </mat-form-field>
 
-                <mat-form-field appearance="outline" class="form-field">
-                  <mat-label>المهنة</mat-label>
-                  <input matInput formControlName="occupation">
-                </mat-form-field>
-              </div>
+                  <!-- المهنة - hidden when بدون عمل -->
+                  <mat-form-field appearance="outline" class="form-field" *ngIf="showEmployer">
+                    <mat-label>المهنة</mat-label>
+                    <input matInput formControlName="profession">
+                    <mat-error *ngIf="plaintiffForm.get('profession')?.hasError('required')">المهنة مطلوبة</mat-error>
+                    <mat-error *ngIf="plaintiffForm.get('profession')?.hasError('maxlength')">المهنة يجب ألا تتجاوز 200 حرف</mat-error>
+                  </mat-form-field>
+                </div>
+              </ng-container>
             </ng-container>
 
             <!-- Business Owner Fields (Type 3) - Personal Data + CR -->
@@ -190,7 +216,8 @@
                   <mat-label>رقم الهوية</mat-label>
                   <input matInput formControlName="identityNumber" required>
                   <button mat-icon-button matSuffix (click)="onLookupIdentity()"
-                          [disabled]="isLookingUp" matTooltip="البحث في أبشر">
+                          [disabled]="isLookingUp || plaintiffId"
+                          matTooltip="{{ plaintiffId ? 'التحقق من أبشر غير متاح في وضع التعديل' : 'البحث في أبشر' }}">
                     <mat-icon>search</mat-icon>
                   </button>
                   <mat-error>رقم الهوية مطلوب</mat-error>
@@ -215,9 +242,68 @@
                 </mat-form-field>
 
                 <mat-form-field appearance="outline" class="form-field">
+                  <mat-label>اسم الفخذ</mat-label>
+                  <input matInput formControlName="clanName">
+                  <mat-error *ngIf="plaintiffForm.get('clanName')?.hasError('maxlength')">اسم الفخذ يجب ألا يتجاوز 100 حرف</mat-error>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="form-field">
                   <mat-label>اسم العائلة</mat-label>
                   <input matInput formControlName="familyName" required>
                   <mat-error>اسم العائلة مطلوب</mat-error>
+                </mat-form-field>
+              </div>
+
+              <!-- Birth Date, Gender, Nationality - SRS 6.3.1 -->
+              <div class="form-row">
+                <mat-form-field appearance="outline" class="form-field">
+                  <mat-label>تاريخ الميلاد</mat-label>
+                  <input matInput [matDatepicker]="boBirthDatePicker" formControlName="birthDate">
+                  <mat-datepicker-toggle matSuffix [for]="boBirthDatePicker"></mat-datepicker-toggle>
+                  <mat-datepicker #boBirthDatePicker></mat-datepicker>
+                  <mat-error *ngIf="plaintiffForm.get('birthDate')?.hasError('required')">تاريخ الميلاد مطلوب</mat-error>
+                  <mat-error *ngIf="plaintiffForm.get('birthDate')?.hasError('notFutureDate')">تاريخ الميلاد لا يمكن أن يكون في المستقبل</mat-error>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="form-field">
+                  <mat-label>الجنس</mat-label>
+                  <mat-select formControlName="gender">
+                    <mat-option value="ذكر">ذكر</mat-option>
+                    <mat-option value="أنثى">أنثى</mat-option>
+                  </mat-select>
+                  <mat-error *ngIf="plaintiffForm.get('gender')?.hasError('required')">الجنس مطلوب</mat-error>
+                  <mat-error *ngIf="plaintiffForm.get('gender')?.hasError('gender')">الجنس يجب أن يكون 'ذكر' أو 'أنثى'</mat-error>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="form-field">
+                  <mat-label>الجنسية</mat-label>
+                  <mat-select formControlName="nationalityId">
+                    <mat-option *ngFor="let nationality of filteredNationalities" [value]="nationality.id">
+                      {{ nationality.nameAr }}
+                    </mat-option>
+                  </mat-select>
+                  <mat-error *ngIf="plaintiffForm.get('nationalityId')?.hasError('required')">الجنسية مطلوبة</mat-error>
+                </mat-form-field>
+              </div>
+
+              <!-- Identity Dates - SRS 6.3.1 -->
+              <div class="form-row">
+                <mat-form-field appearance="outline" class="form-field">
+                  <mat-label>تاريخ إصدار الهوية</mat-label>
+                  <input matInput [matDatepicker]="boIdentityIssuePicker" formControlName="identityIssueDate">
+                  <mat-datepicker-toggle matSuffix [for]="boIdentityIssuePicker"></mat-datepicker-toggle>
+                  <mat-datepicker #boIdentityIssuePicker></mat-datepicker>
+                  <mat-error *ngIf="plaintiffForm.get('identityIssueDate')?.hasError('required')">تاريخ إصدار الهوية مطلوب</mat-error>
+                  <mat-error *ngIf="plaintiffForm.get('identityIssueDate')?.hasError('notFutureDate')">تاريخ إصدار الهوية لا يمكن أن يكون في المستقبل</mat-error>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="form-field">
+                  <mat-label>تاريخ انتهاء الهوية</mat-label>
+                  <input matInput [matDatepicker]="boIdentityExpiryPicker" formControlName="identityExpiryDate">
+                  <mat-datepicker-toggle matSuffix [for]="boIdentityExpiryPicker"></mat-datepicker-toggle>
+                  <mat-datepicker #boIdentityExpiryPicker></mat-datepicker>
+                  <mat-error *ngIf="plaintiffForm.get('identityExpiryDate')?.hasError('required')">تاريخ انتهاء الهوية مطلوب</mat-error>
+                  <mat-error *ngIf="plaintiffForm.get('identityExpiryDate')?.hasError('dateAfter')">تاريخ انتهاء الهوية يجب أن يكون أكبر من تاريخ الإصدار</mat-error>
                 </mat-form-field>
               </div>
 
@@ -225,14 +311,17 @@
               <div class="form-row">
                 <mat-form-field appearance="outline" class="form-field">
                   <mat-label>رقم السجل التجاري</mat-label>
-                  <input matInput formControlName="commercialRegNumber" required>
-                  <mat-error>رقم السجل التجاري مطلوب</mat-error>
+                  <input matInput formControlName="commercialRegNumber" required placeholder="10 أرقام">
+                  <mat-error *ngIf="plaintiffForm.get('commercialRegNumber')?.hasError('required')">رقم السجل التجاري مطلوب</mat-error>
+                  <mat-error *ngIf="plaintiffForm.get('commercialRegNumber')?.hasError('commercialRegNumber')">رقم السجل التجاري يجب أن يكون 10 أرقام فقط</mat-error>
                 </mat-form-field>
 
                 <mat-form-field appearance="outline" class="form-field">
                   <mat-label>اسم المؤسسة</mat-label>
                   <input matInput formControlName="companyName" required>
-                  <mat-error>اسم المؤسسة مطلوب</mat-error>
+                  <mat-error *ngIf="plaintiffForm.get('companyName')?.hasError('required')">اسم المؤسسة مطلوب</mat-error>
+                  <mat-error *ngIf="plaintiffForm.get('companyName')?.hasError('arabicOnly')">اسم المؤسسة يجب أن يكون بالعربية فقط</mat-error>
+                  <mat-error *ngIf="plaintiffForm.get('companyName')?.hasError('maxlength')">اسم المؤسسة يجب ألا يتجاوز 200 حرف</mat-error>
                 </mat-form-field>
               </div>
 
@@ -242,6 +331,8 @@
                   <input matInput [matDatepicker]="boRegStartPicker" formControlName="crStartDate">
                   <mat-datepicker-toggle matSuffix [for]="boRegStartPicker"></mat-datepicker-toggle>
                   <mat-datepicker #boRegStartPicker></mat-datepicker>
+                  <mat-error *ngIf="plaintiffForm.get('crStartDate')?.hasError('required')">تاريخ بداية السجل مطلوب</mat-error>
+                  <mat-error *ngIf="plaintiffForm.get('crStartDate')?.hasError('notFutureDate')">تاريخ بداية السجل لا يمكن أن يكون في المستقبل</mat-error>
                 </mat-form-field>
 
                 <mat-form-field appearance="outline" class="form-field">
@@ -249,7 +340,212 @@
                   <input matInput [matDatepicker]="boRegEndPicker" formControlName="crEndDate">
                   <mat-datepicker-toggle matSuffix [for]="boRegEndPicker"></mat-datepicker-toggle>
                   <mat-datepicker #boRegEndPicker></mat-datepicker>
+                  <mat-error *ngIf="plaintiffForm.get('crEndDate')?.hasError('required')">تاريخ نهاية السجل مطلوب</mat-error>
+                  <mat-error *ngIf="plaintiffForm.get('crEndDate')?.hasError('dateAfter')">تاريخ نهاية السجل يجب أن يكون أكبر من تاريخ البداية</mat-error>
                 </mat-form-field>
+              </div>
+
+              <!-- Employment Data for Business Owner (BC01/BC02) -->
+              <h4>بيانات العمل</h4>
+              <div class="form-row">
+                <mat-form-field appearance="outline" class="form-field">
+                  <mat-label>حالة العمل</mat-label>
+                  <mat-select formControlName="employmentStatusId">
+                    <mat-option *ngFor="let status of employmentStatusOptions" [value]="status.id">
+                      {{ status.nameAr }}
+                    </mat-option>
+                  </mat-select>
+                  <mat-error *ngIf="plaintiffForm.get('employmentStatusId')?.hasError('required')">حالة العمل مطلوبة</mat-error>
+                </mat-form-field>
+
+                <!-- BC01: Show جهة العمل when status = Government(1) or Private(2) -->
+                <mat-form-field appearance="outline" class="form-field" *ngIf="showEmployer">
+                  <mat-label>جهة العمل</mat-label>
+                  <input matInput formControlName="employer">
+                  <mat-error *ngIf="plaintiffForm.get('employer')?.hasError('maxlength')">جهة العمل يجب ألا تتجاوز 200 حرف</mat-error>
+                </mat-form-field>
+
+                <!-- المهنة - hidden when بدون عمل -->
+                <mat-form-field appearance="outline" class="form-field" *ngIf="showEmployer">
+                  <mat-label>المهنة</mat-label>
+                  <input matInput formControlName="profession">
+                  <mat-error *ngIf="plaintiffForm.get('profession')?.hasError('required')">المهنة مطلوبة</mat-error>
+                  <mat-error *ngIf="plaintiffForm.get('profession')?.hasError('maxlength')">المهنة يجب ألا تتجاوز 200 حرف</mat-error>
+                </mat-form-field>
+              </div>
+
+              <!-- عنوان الإقامة - Business Owner -->
+              <div class="address-section" formGroupName="residenceAddress">
+                <h4>عنوان الإقامة</h4>
+                <div class="form-row">
+                  <mat-form-field appearance="outline" class="form-field">
+                    <mat-label>المنطقة</mat-label>
+                    <mat-select formControlName="regionId" (selectionChange)="onResidenceRegionChange($event.value)">
+                      <mat-option *ngFor="let region of regions" [value]="region.id">
+                        {{ region.nameAr }}
+                      </mat-option>
+                    </mat-select>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="form-field">
+                    <mat-label>المدينة</mat-label>
+                    <mat-select formControlName="cityId" (selectionChange)="onCityChange()">
+                      <mat-option *ngFor="let city of residenceCities" [value]="city.id">
+                        {{ city.nameAr }}
+                      </mat-option>
+                    </mat-select>
+                  </mat-form-field>
+                </div>
+
+                <div class="form-row">
+                  <mat-form-field appearance="outline" class="form-field">
+                    <mat-label>الحي</mat-label>
+                    <input matInput formControlName="districtId">
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="form-field">
+                    <mat-label>الشارع</mat-label>
+                    <input matInput formControlName="street">
+                  </mat-form-field>
+                </div>
+
+                <div class="form-row">
+                  <mat-form-field appearance="outline" class="form-field">
+                    <mat-label>رقم المبنى</mat-label>
+                    <input matInput formControlName="buildingNumber" placeholder="4 أرقام">
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="form-field">
+                    <mat-label>رقم الوحدة</mat-label>
+                    <input matInput formControlName="unitNumber" placeholder="أرقام فقط">
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="form-field">
+                    <mat-label>الرمز البريدي</mat-label>
+                    <input matInput formControlName="postalCode" placeholder="5 أرقام">
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="form-field">
+                    <mat-label>الرقم الإضافي</mat-label>
+                    <input matInput formControlName="additionalCode" placeholder="4 أرقام">
+                  </mat-form-field>
+                </div>
+              </div>
+
+              <!-- عنوان العمل - Business Owner BC02 -->
+              <div class="address-section" formGroupName="workAddress" *ngIf="showWorkAddress">
+                <h4>عنوان العمل</h4>
+                <div class="form-row">
+                  <mat-form-field appearance="outline" class="form-field">
+                    <mat-label>المنطقة</mat-label>
+                    <mat-select formControlName="regionId" (selectionChange)="onWorkRegionChange($event.value)">
+                      <mat-option *ngFor="let region of regions" [value]="region.id">
+                        {{ region.nameAr }}
+                      </mat-option>
+                    </mat-select>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="form-field">
+                    <mat-label>المدينة</mat-label>
+                    <mat-select formControlName="cityId" (selectionChange)="onCityChange()">
+                      <mat-option *ngFor="let city of workCities" [value]="city.id">
+                        {{ city.nameAr }}
+                      </mat-option>
+                    </mat-select>
+                  </mat-form-field>
+                </div>
+
+                <div class="form-row">
+                  <mat-form-field appearance="outline" class="form-field">
+                    <mat-label>الحي</mat-label>
+                    <input matInput formControlName="districtId">
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="form-field">
+                    <mat-label>الشارع</mat-label>
+                    <input matInput formControlName="street">
+                  </mat-form-field>
+                </div>
+
+                <div class="form-row">
+                  <mat-form-field appearance="outline" class="form-field">
+                    <mat-label>رقم المبنى</mat-label>
+                    <input matInput formControlName="buildingNumber" placeholder="4 أرقام">
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="form-field">
+                    <mat-label>رقم الوحدة</mat-label>
+                    <input matInput formControlName="unitNumber" placeholder="أرقام فقط">
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="form-field">
+                    <mat-label>الرمز البريدي</mat-label>
+                    <input matInput formControlName="postalCode" placeholder="5 أرقام">
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="form-field">
+                    <mat-label>الرقم الإضافي</mat-label>
+                    <input matInput formControlName="additionalCode" placeholder="4 أرقام">
+                  </mat-form-field>
+                </div>
+              </div>
+
+              <!-- عنوان المؤسسة - Business Owner Only -->
+              <div class="address-section" formGroupName="businessAddress">
+                <h4>عنوان المؤسسة</h4>
+                <div class="form-row">
+                  <mat-form-field appearance="outline" class="form-field">
+                    <mat-label>المنطقة</mat-label>
+                    <mat-select formControlName="regionId" (selectionChange)="onBusinessRegionChange($event.value)">
+                      <mat-option *ngFor="let region of regions" [value]="region.id">
+                        {{ region.nameAr }}
+                      </mat-option>
+                    </mat-select>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="form-field">
+                    <mat-label>المدينة</mat-label>
+                    <mat-select formControlName="cityId" (selectionChange)="onCityChange()">
+                      <mat-option *ngFor="let city of businessCities" [value]="city.id">
+                        {{ city.nameAr }}
+                      </mat-option>
+                    </mat-select>
+                  </mat-form-field>
+                </div>
+
+                <div class="form-row">
+                  <mat-form-field appearance="outline" class="form-field">
+                    <mat-label>الحي</mat-label>
+                    <input matInput formControlName="districtId">
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="form-field">
+                    <mat-label>الشارع</mat-label>
+                    <input matInput formControlName="street">
+                  </mat-form-field>
+                </div>
+
+                <div class="form-row">
+                  <mat-form-field appearance="outline" class="form-field">
+                    <mat-label>رقم المبنى</mat-label>
+                    <input matInput formControlName="buildingNumber" placeholder="4 أرقام">
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="form-field">
+                    <mat-label>رقم الوحدة</mat-label>
+                    <input matInput formControlName="unitNumber" placeholder="أرقام فقط">
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="form-field">
+                    <mat-label>الرمز البريدي</mat-label>
+                    <input matInput formControlName="postalCode" placeholder="5 أرقام">
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="form-field">
+                    <mat-label>الرقم الإضافي</mat-label>
+                    <input matInput formControlName="additionalCode" placeholder="4 أرقام">
+                  </mat-form-field>
+                </div>
               </div>
             </ng-container>
 
@@ -258,14 +554,17 @@
               <div class="form-row">
                 <mat-form-field appearance="outline" class="form-field">
                   <mat-label>رقم السجل التجاري</mat-label>
-                  <input matInput formControlName="commercialRegNumber" required>
-                  <mat-error>رقم السجل التجاري مطلوب</mat-error>
+                  <input matInput formControlName="commercialRegNumber" required placeholder="10 أرقام">
+                  <mat-error *ngIf="plaintiffForm.get('commercialRegNumber')?.hasError('required')">رقم السجل التجاري مطلوب</mat-error>
+                  <mat-error *ngIf="plaintiffForm.get('commercialRegNumber')?.hasError('commercialRegNumber')">رقم السجل التجاري يجب أن يكون 10 أرقام فقط</mat-error>
                 </mat-form-field>
 
                 <mat-form-field appearance="outline" class="form-field">
                   <mat-label>اسم الشركة</mat-label>
                   <input matInput formControlName="companyName" required>
-                  <mat-error>اسم الشركة مطلوب</mat-error>
+                  <mat-error *ngIf="plaintiffForm.get('companyName')?.hasError('required')">اسم الشركة مطلوب</mat-error>
+                  <mat-error *ngIf="plaintiffForm.get('companyName')?.hasError('arabicOnly')">اسم الشركة يجب أن يكون بالعربية فقط</mat-error>
+                  <mat-error *ngIf="plaintiffForm.get('companyName')?.hasError('maxlength')">اسم الشركة يجب ألا يتجاوز 200 حرف</mat-error>
                 </mat-form-field>
               </div>
 
@@ -275,6 +574,8 @@
                   <input matInput [matDatepicker]="regStartPicker" formControlName="crStartDate">
                   <mat-datepicker-toggle matSuffix [for]="regStartPicker"></mat-datepicker-toggle>
                   <mat-datepicker #regStartPicker></mat-datepicker>
+                  <mat-error *ngIf="plaintiffForm.get('crStartDate')?.hasError('required')">تاريخ بداية السجل مطلوب</mat-error>
+                  <mat-error *ngIf="plaintiffForm.get('crStartDate')?.hasError('notFutureDate')">تاريخ بداية السجل لا يمكن أن يكون في المستقبل</mat-error>
                 </mat-form-field>
 
                 <mat-form-field appearance="outline" class="form-field">
@@ -282,7 +583,69 @@
                   <input matInput [matDatepicker]="regEndPicker" formControlName="crEndDate">
                   <mat-datepicker-toggle matSuffix [for]="regEndPicker"></mat-datepicker-toggle>
                   <mat-datepicker #regEndPicker></mat-datepicker>
+                  <mat-error *ngIf="plaintiffForm.get('crEndDate')?.hasError('required')">تاريخ نهاية السجل مطلوب</mat-error>
+                  <mat-error *ngIf="plaintiffForm.get('crEndDate')?.hasError('dateAfter')">تاريخ نهاية السجل يجب أن يكون أكبر من تاريخ البداية</mat-error>
                 </mat-form-field>
+              </div>
+
+              <!-- Company Address - SRS 6.3.6 (Required) -->
+              <h4>عنوان الشركة</h4>
+              <div class="address-section" formGroupName="companyAddress">
+                <div class="form-row">
+                  <mat-form-field appearance="outline" class="form-field">
+                    <mat-label>المنطقة</mat-label>
+                    <mat-select formControlName="regionId" (selectionChange)="onCompanyRegionChange($event.value)">
+                      <mat-option *ngFor="let region of regions" [value]="region.id">
+                        {{ region.nameAr }}
+                      </mat-option>
+                    </mat-select>
+                    <mat-error>المنطقة مطلوبة</mat-error>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="form-field">
+                    <mat-label>المدينة</mat-label>
+                    <mat-select formControlName="cityId">
+                      <mat-option *ngFor="let city of companyCities" [value]="city.id">
+                        {{ city.nameAr }}
+                      </mat-option>
+                    </mat-select>
+                    <mat-error>المدينة مطلوبة</mat-error>
+                  </mat-form-field>
+                </div>
+
+                <div class="form-row">
+                  <mat-form-field appearance="outline" class="form-field">
+                    <mat-label>الحي</mat-label>
+                    <input matInput formControlName="districtId">
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="form-field">
+                    <mat-label>الشارع</mat-label>
+                    <input matInput formControlName="street">
+                  </mat-form-field>
+                </div>
+
+                <div class="form-row">
+                  <mat-form-field appearance="outline" class="form-field">
+                    <mat-label>رقم المبنى</mat-label>
+                    <input matInput formControlName="buildingNumber" placeholder="4 أرقام">
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="form-field">
+                    <mat-label>رقم الوحدة</mat-label>
+                    <input matInput formControlName="unitNumber" placeholder="أرقام فقط">
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="form-field">
+                    <mat-label>الرمز البريدي</mat-label>
+                    <input matInput formControlName="postalCode" placeholder="5 أرقام">
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="form-field">
+                    <mat-label>الرقم الإضافي</mat-label>
+                    <input matInput formControlName="additionalCode" placeholder="4 أرقام">
+                  </mat-form-field>
+                </div>
               </div>
             </ng-container>
 
@@ -329,13 +692,16 @@
                 <mat-form-field appearance="outline" class="form-field">
                   <mat-label>اسم الجمعية/المؤسسة</mat-label>
                   <input matInput formControlName="ngoName" required>
-                  <mat-error>اسم الجمعية مطلوب</mat-error>
+                  <mat-error *ngIf="plaintiffForm.get('ngoName')?.hasError('required')">اسم الجمعية مطلوب</mat-error>
+                  <mat-error *ngIf="plaintiffForm.get('ngoName')?.hasError('arabicOnly')">اسم الجمعية يجب أن يكون بالعربية فقط</mat-error>
+                  <mat-error *ngIf="plaintiffForm.get('ngoName')?.hasError('maxlength')">اسم الجمعية يجب ألا يتجاوز 200 حرف</mat-error>
                 </mat-form-field>
 
                 <mat-form-field appearance="outline" class="form-field">
                   <mat-label>رقم الترخيص</mat-label>
-                  <input matInput formControlName="licenseNumber" required>
-                  <mat-error>رقم الترخيص مطلوب</mat-error>
+                  <input matInput formControlName="licenseNumber" required placeholder="10 أرقام">
+                  <mat-error *ngIf="plaintiffForm.get('licenseNumber')?.hasError('required')">رقم الترخيص مطلوب</mat-error>
+                  <mat-error *ngIf="plaintiffForm.get('licenseNumber')?.hasError('licenseNumber')">رقم الترخيص يجب أن يكون 10 أرقام فقط</mat-error>
                 </mat-form-field>
               </div>
 
@@ -355,14 +721,74 @@
                   <input matInput [matDatepicker]="licenseDatePicker" formControlName="licenseDate">
                   <mat-datepicker-toggle matSuffix [for]="licenseDatePicker"></mat-datepicker-toggle>
                   <mat-datepicker #licenseDatePicker></mat-datepicker>
+                  <mat-error *ngIf="plaintiffForm.get('licenseDate')?.hasError('required')">تاريخ الترخيص مطلوب</mat-error>
+                  <mat-error *ngIf="plaintiffForm.get('licenseDate')?.hasError('notFutureDate')">تاريخ الترخيص لا يمكن أن يكون في المستقبل</mat-error>
                 </mat-form-field>
+              </div>
+
+              <!-- NGO Address - SRS 6.3.4 -->
+              <h4>عنوان الجمعية/المؤسسة</h4>
+              <div class="address-section" formGroupName="ngoAddress">
+                <div class="form-row">
+                  <mat-form-field appearance="outline" class="form-field">
+                    <mat-label>المنطقة</mat-label>
+                    <mat-select formControlName="regionId" (selectionChange)="onNgoRegionChange($event.value)">
+                      <mat-option *ngFor="let region of regions" [value]="region.id">
+                        {{ region.nameAr }}
+                      </mat-option>
+                    </mat-select>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="form-field">
+                    <mat-label>المدينة</mat-label>
+                    <mat-select formControlName="cityId">
+                      <mat-option *ngFor="let city of ngoCities" [value]="city.id">
+                        {{ city.nameAr }}
+                      </mat-option>
+                    </mat-select>
+                  </mat-form-field>
+                </div>
+
+                <div class="form-row">
+                  <mat-form-field appearance="outline" class="form-field">
+                    <mat-label>الحي</mat-label>
+                    <input matInput formControlName="districtId">
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="form-field">
+                    <mat-label>الشارع</mat-label>
+                    <input matInput formControlName="street">
+                  </mat-form-field>
+                </div>
+
+                <div class="form-row">
+                  <mat-form-field appearance="outline" class="form-field">
+                    <mat-label>رقم المبنى</mat-label>
+                    <input matInput formControlName="buildingNumber" placeholder="4 أرقام">
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="form-field">
+                    <mat-label>رقم الوحدة</mat-label>
+                    <input matInput formControlName="unitNumber" placeholder="أرقام فقط">
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="form-field">
+                    <mat-label>الرمز البريدي</mat-label>
+                    <input matInput formControlName="postalCode" placeholder="5 أرقام">
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="form-field">
+                    <mat-label>الرقم الإضافي</mat-label>
+                    <input matInput formControlName="additionalCode" placeholder="4 أرقام">
+                  </mat-form-field>
+                </div>
               </div>
             </ng-container>
 
             <!-- Government Agency Fields -->
             <ng-container *ngIf="isGovernmentAgency()">
               <div class="form-row">
-                <mat-form-field appearance="outline" class="full-width">
+                <mat-form-field appearance="outline" class="form-field">
                   <mat-label>الجهة الحكومية</mat-label>
                   <mat-select formControlName="governmentAgencyId" required>
                     <mat-option *ngFor="let agency of governmentAgencies" [value]="agency.id">
@@ -370,6 +796,12 @@
                     </mat-option>
                   </mat-select>
                   <mat-error>الجهة الحكومية مطلوبة</mat-error>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="form-field">
+                  <mat-label>المقر</mat-label>
+                  <input matInput formControlName="headquarters" required>
+                  <mat-error>المقر مطلوب</mat-error>
                 </mat-form-field>
               </div>
 
@@ -385,49 +817,281 @@
             <ng-container *ngIf="isWaqf()">
               <div class="form-row">
                 <mat-form-field appearance="outline" class="form-field">
-                  <mat-label>رقم صك الوقف</mat-label>
-                  <input matInput formControlName="courtDeedNumber" required>
-                  <mat-error>رقم صك الوقف مطلوب</mat-error>
+                  <mat-label>اسم الوقف</mat-label>
+                  <input matInput formControlName="waqfName" required>
+                  <mat-error *ngIf="plaintiffForm.get('waqfName')?.hasError('required')">اسم الوقف مطلوب</mat-error>
+                  <mat-error *ngIf="plaintiffForm.get('waqfName')?.hasError('arabicOnly')">اسم الوقف يجب أن يكون بالعربية</mat-error>
+                  <mat-error *ngIf="plaintiffForm.get('waqfName')?.hasError('maxlength')">اسم الوقف يجب ألا يتجاوز 200 حرف</mat-error>
                 </mat-form-field>
 
                 <mat-form-field appearance="outline" class="form-field">
-                  <mat-label>تاريخ الصك</mat-label>
-                  <input matInput [matDatepicker]="waqfDatePicker" formControlName="deedDate">
-                  <mat-datepicker-toggle matSuffix [for]="waqfDatePicker"></mat-datepicker-toggle>
-                  <mat-datepicker #waqfDatePicker></mat-datepicker>
+                  <mat-label>رقم صك الوقف</mat-label>
+                  <input matInput formControlName="courtDeedNumber" required placeholder="10 أرقام">
+                  <mat-error *ngIf="plaintiffForm.get('courtDeedNumber')?.hasError('required')">رقم صك الوقف مطلوب</mat-error>
+                  <mat-error *ngIf="plaintiffForm.get('courtDeedNumber')?.hasError('courtDeedNumber')">رقم صك الوقف يجب أن يكون 10 أرقام فقط</mat-error>
                 </mat-form-field>
               </div>
 
               <div class="form-row">
                 <mat-form-field appearance="outline" class="form-field">
-                  <mat-label>مصدر الصك</mat-label>
-                  <input matInput formControlName="deedSource">
+                  <mat-label>تاريخ الصك</mat-label>
+                  <input matInput [matDatepicker]="waqfDatePicker" formControlName="deedDate">
+                  <mat-datepicker-toggle matSuffix [for]="waqfDatePicker"></mat-datepicker-toggle>
+                  <mat-datepicker #waqfDatePicker></mat-datepicker>
+                  <mat-error *ngIf="plaintiffForm.get('deedDate')?.hasError('required')">تاريخ الصك مطلوب</mat-error>
+                  <mat-error *ngIf="plaintiffForm.get('deedDate')?.hasError('notFutureDate')">تاريخ الصك لا يمكن أن يكون في المستقبل</mat-error>
                 </mat-form-field>
 
                 <mat-form-field appearance="outline" class="form-field">
+                  <mat-label>مصدر الصك</mat-label>
+                  <input matInput formControlName="deedSource">
+                  <mat-error *ngIf="plaintiffForm.get('deedSource')?.hasError('required')">مصدر الصك مطلوب</mat-error>
+                  <mat-error *ngIf="plaintiffForm.get('deedSource')?.hasError('maxlength')">مصدر الصك يجب ألا يتجاوز 100 حرف</mat-error>
+                </mat-form-field>
+              </div>
+
+              <div class="form-row">
+                <mat-form-field appearance="outline" class="form-field">
                   <mat-label>نوع نظارة الوقف</mat-label>
                   <mat-select formControlName="waqfOversightType">
-                    <mat-option value="private">خاصة</mat-option>
-                    <mat-option value="government">حكومية</mat-option>
+                    <mat-option value="خاصة">خاصة</mat-option>
+                    <mat-option value="حكومية">حكومية</mat-option>
                   </mat-select>
+                  <mat-error *ngIf="plaintiffForm.get('waqfOversightType')?.hasError('required')">نظارة الوقف مطلوبة</mat-error>
+                  <mat-error *ngIf="plaintiffForm.get('waqfOversightType')?.hasError('waqfOversightType')">نظارة الوقف يجب أن تكون 'خاصة' أو 'حكومية'</mat-error>
+                </mat-form-field>
+
+                <!-- Agency Name - BC03: shown when oversight is حكومية -->
+                <mat-form-field appearance="outline" class="form-field" *ngIf="showWaqfAgencyName">
+                  <mat-label>اسم الجهة</mat-label>
+                  <input matInput formControlName="waqfAgencyName">
+                  <mat-error *ngIf="plaintiffForm.get('waqfAgencyName')?.hasError('required')">اسم الجهة مطلوب عند اختيار نظارة حكومية</mat-error>
+                  <mat-error *ngIf="plaintiffForm.get('waqfAgencyName')?.hasError('maxlength')">اسم الجهة يجب ألا يتجاوز 200 حرف</mat-error>
+                </mat-form-field>
+              </div>
+
+              <div class="form-row">
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>وصف تقريبي للوقف</mat-label>
+                  <textarea matInput formControlName="waqfDescription" rows="3" maxlength="200"></textarea>
+                  <mat-hint align="end">{{ plaintiffForm.get('waqfDescription')?.value?.length || 0 }}/200</mat-hint>
+                  <mat-error *ngIf="plaintiffForm.get('waqfDescription')?.hasError('required')">وصف الوقف مطلوب</mat-error>
+                  <mat-error *ngIf="plaintiffForm.get('waqfDescription')?.hasError('maxlength')">وصف الوقف يجب ألا يتجاوز 200 حرف</mat-error>
+                </mat-form-field>
+              </div>
+
+              <!-- Waqf Address - SRS 6.3.11 -->
+              <h4>عنوان الوقف <span class="required-indicator">*</span></h4>
+              <div class="address-section" formGroupName="waqfAddress">
+                <div class="form-row">
+                  <mat-form-field appearance="outline" class="form-field">
+                    <mat-label>المنطقة</mat-label>
+                    <mat-select formControlName="regionId" (selectionChange)="onWaqfRegionChange($event.value)">
+                      <mat-option *ngFor="let region of regions" [value]="region.id">
+                        {{ region.nameAr }}
+                      </mat-option>
+                    </mat-select>
+                    <mat-error *ngIf="plaintiffForm.get('waqfAddress.regionId')?.hasError('required')">المنطقة مطلوبة</mat-error>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="form-field">
+                    <mat-label>المدينة</mat-label>
+                    <mat-select formControlName="cityId">
+                      <mat-option *ngFor="let city of waqfCities" [value]="city.id">
+                        {{ city.nameAr }}
+                      </mat-option>
+                    </mat-select>
+                    <mat-error *ngIf="plaintiffForm.get('waqfAddress.cityId')?.hasError('required')">المدينة مطلوبة</mat-error>
+                  </mat-form-field>
+                </div>
+
+                <div class="form-row">
+                  <mat-form-field appearance="outline" class="form-field">
+                    <mat-label>الحي</mat-label>
+                    <input matInput formControlName="districtId">
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="form-field">
+                    <mat-label>الشارع</mat-label>
+                    <input matInput formControlName="street">
+                  </mat-form-field>
+                </div>
+
+                <div class="form-row">
+                  <mat-form-field appearance="outline" class="form-field">
+                    <mat-label>رقم المبنى</mat-label>
+                    <input matInput formControlName="buildingNumber" placeholder="4 أرقام">
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="form-field">
+                    <mat-label>رقم الوحدة</mat-label>
+                    <input matInput formControlName="unitNumber" placeholder="أرقام فقط">
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="form-field">
+                    <mat-label>الرمز البريدي</mat-label>
+                    <input matInput formControlName="postalCode" placeholder="5 أرقام">
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="form-field">
+                    <mat-label>الرقم الإضافي</mat-label>
+                    <input matInput formControlName="additionalCode" placeholder="4 أرقام">
+                  </mat-form-field>
+                </div>
+              </div>
+            </ng-container>
+
+            <!-- Contact Information - Hidden for Waqf (Type 9) -->
+            <ng-container *ngIf="!isWaqf()">
+              <h4>بيانات التواصل</h4>
+              <div class="form-row">
+                <mat-form-field appearance="outline" class="form-field">
+                  <mat-label>رقم الجوال</mat-label>
+                  <input matInput formControlName="mobileNumber" dir="ltr" placeholder="05xxxxxxxx">
+                  <mat-error *ngIf="plaintiffForm.get('mobileNumber')?.hasError('required')">رقم الجوال مطلوب</mat-error>
+                  <mat-error *ngIf="plaintiffForm.get('mobileNumber')?.hasError('mobileNumber')">رقم الجوال يجب أن يبدأ بـ 05 ويتكون من 10 أرقام</mat-error>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="form-field">
+                  <mat-label>البريد الإلكتروني</mat-label>
+                  <input matInput formControlName="email" type="email" dir="ltr">
+                  <mat-error *ngIf="plaintiffForm.get('email')?.hasError('email')">البريد الإلكتروني غير صحيح</mat-error>
+                  <mat-error *ngIf="plaintiffForm.get('email')?.hasError('maxlength')">البريد الإلكتروني يجب ألا يتجاوز 255 حرف</mat-error>
                 </mat-form-field>
               </div>
             </ng-container>
 
-            <!-- Contact Information -->
-            <h4>بيانات التواصل</h4>
-            <div class="form-row">
-              <mat-form-field appearance="outline" class="form-field">
-                <mat-label>رقم الجوال</mat-label>
-                <input matInput formControlName="mobileNumber" dir="ltr">
-              </mat-form-field>
+            <!-- عنوان الإقامة - Individual types (1, 2) -->
+            <ng-container *ngIf="isIndividual()">
+              <div class="address-section" formGroupName="residenceAddress">
+                <h4>عنوان الإقامة<span *ngIf="residenceAddressRequired" class="required-indicator"> *</span></h4>
+                <div class="form-row">
+                  <mat-form-field appearance="outline" class="form-field">
+                    <mat-label>المنطقة</mat-label>
+                    <mat-select formControlName="regionId" (selectionChange)="onResidenceRegionChange($event.value)">
+                      <mat-option *ngFor="let region of regions" [value]="region.id">
+                        {{ region.nameAr }}
+                      </mat-option>
+                    </mat-select>
+                  </mat-form-field>
 
-              <mat-form-field appearance="outline" class="form-field">
-                <mat-label>البريد الإلكتروني</mat-label>
-                <input matInput formControlName="email" type="email" dir="ltr">
-                <mat-error>البريد الإلكتروني غير صحيح</mat-error>
-              </mat-form-field>
-            </div>
+                  <mat-form-field appearance="outline" class="form-field">
+                    <mat-label>المدينة</mat-label>
+                    <mat-select formControlName="cityId" (selectionChange)="onCityChange()">
+                      <mat-option *ngFor="let city of residenceCities" [value]="city.id">
+                        {{ city.nameAr }}
+                      </mat-option>
+                    </mat-select>
+                  </mat-form-field>
+                </div>
+
+                <div class="form-row">
+                  <mat-form-field appearance="outline" class="form-field">
+                    <mat-label>الحي</mat-label>
+                    <input matInput formControlName="districtId">
+                    <mat-error *ngIf="plaintiffForm.get('residenceAddress.districtId')?.hasError('arabicOnly')">الحي يجب أن يكون بالعربية فقط</mat-error>
+                    <mat-error *ngIf="plaintiffForm.get('residenceAddress.districtId')?.hasError('maxlength')">الحي يجب ألا يتجاوز 100 حرف</mat-error>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="form-field">
+                    <mat-label>الشارع</mat-label>
+                    <input matInput formControlName="street">
+                    <mat-error *ngIf="plaintiffForm.get('residenceAddress.street')?.hasError('arabicOnly')">الشارع يجب أن يكون بالعربية فقط</mat-error>
+                    <mat-error *ngIf="plaintiffForm.get('residenceAddress.street')?.hasError('maxlength')">الشارع يجب ألا يتجاوز 100 حرف</mat-error>
+                  </mat-form-field>
+                </div>
+
+                <div class="form-row">
+                  <mat-form-field appearance="outline" class="form-field">
+                    <mat-label>رقم المبنى</mat-label>
+                    <input matInput formControlName="buildingNumber" placeholder="4 أرقام">
+                    <mat-error *ngIf="plaintiffForm.get('residenceAddress.buildingNumber')?.hasError('buildingNumber')">رقم المبنى يجب أن يكون 4 أرقام فقط</mat-error>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="form-field">
+                    <mat-label>رقم الوحدة</mat-label>
+                    <input matInput formControlName="unitNumber" placeholder="أرقام فقط">
+                    <mat-error *ngIf="plaintiffForm.get('residenceAddress.unitNumber')?.hasError('pattern')">رقم الوحدة يجب أن يكون أرقام فقط</mat-error>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="form-field">
+                    <mat-label>الرمز البريدي</mat-label>
+                    <input matInput formControlName="postalCode" placeholder="5 أرقام">
+                    <mat-error *ngIf="plaintiffForm.get('residenceAddress.postalCode')?.hasError('postalCode')">الرمز البريدي يجب أن يكون 5 أرقام فقط</mat-error>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="form-field">
+                    <mat-label>الرقم الإضافي</mat-label>
+                    <input matInput formControlName="additionalCode" placeholder="4 أرقام">
+                    <mat-error *ngIf="plaintiffForm.get('residenceAddress.additionalCode')?.hasError('additionalNumber')">الرقم الإضافي يجب أن يكون 4 أرقام فقط</mat-error>
+                  </mat-form-field>
+                </div>
+              </div>
+
+              <!-- عنوان العمل - BC02: only when showWorkAddress (employment = خاص) -->
+              <div class="address-section" formGroupName="workAddress" *ngIf="showWorkAddress">
+                <h4>عنوان العمل</h4>
+                <div class="form-row">
+                  <mat-form-field appearance="outline" class="form-field">
+                    <mat-label>المنطقة</mat-label>
+                    <mat-select formControlName="regionId" (selectionChange)="onWorkRegionChange($event.value)">
+                      <mat-option *ngFor="let region of regions" [value]="region.id">
+                        {{ region.nameAr }}
+                      </mat-option>
+                    </mat-select>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="form-field">
+                    <mat-label>المدينة</mat-label>
+                    <mat-select formControlName="cityId" (selectionChange)="onCityChange()">
+                      <mat-option *ngFor="let city of workCities" [value]="city.id">
+                        {{ city.nameAr }}
+                      </mat-option>
+                    </mat-select>
+                  </mat-form-field>
+                </div>
+
+                <div class="form-row">
+                  <mat-form-field appearance="outline" class="form-field">
+                    <mat-label>الحي</mat-label>
+                    <input matInput formControlName="districtId">
+                    <mat-error *ngIf="plaintiffForm.get('workAddress.districtId')?.hasError('arabicOnly')">الحي يجب أن يكون بالعربية فقط</mat-error>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="form-field">
+                    <mat-label>الشارع</mat-label>
+                    <input matInput formControlName="street">
+                    <mat-error *ngIf="plaintiffForm.get('workAddress.street')?.hasError('arabicOnly')">الشارع يجب أن يكون بالعربية فقط</mat-error>
+                  </mat-form-field>
+                </div>
+
+                <div class="form-row">
+                  <mat-form-field appearance="outline" class="form-field">
+                    <mat-label>رقم المبنى</mat-label>
+                    <input matInput formControlName="buildingNumber" placeholder="4 أرقام">
+                    <mat-error *ngIf="plaintiffForm.get('workAddress.buildingNumber')?.hasError('buildingNumber')">رقم المبنى يجب أن يكون 4 أرقام فقط</mat-error>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="form-field">
+                    <mat-label>رقم الوحدة</mat-label>
+                    <input matInput formControlName="unitNumber" placeholder="أرقام فقط">
+                    <mat-error *ngIf="plaintiffForm.get('workAddress.unitNumber')?.hasError('pattern')">رقم الوحدة يجب أن يكون أرقام فقط</mat-error>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="form-field">
+                    <mat-label>الرمز البريدي</mat-label>
+                    <input matInput formControlName="postalCode" placeholder="5 أرقام">
+                    <mat-error *ngIf="plaintiffForm.get('workAddress.postalCode')?.hasError('postalCode')">الرمز البريدي يجب أن يكون 5 أرقام فقط</mat-error>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="form-field">
+                    <mat-label>الرقم الإضافي</mat-label>
+                    <input matInput formControlName="additionalCode" placeholder="4 أرقام">
+                    <mat-error *ngIf="plaintiffForm.get('workAddress.additionalCode')?.hasError('additionalNumber')">الرقم الإضافي يجب أن يكون 4 أرقام فقط</mat-error>
+                  </mat-form-field>
+                </div>
+              </div>
+            </ng-container>
           </form>
         </div>
 
@@ -535,19 +1199,32 @@
         </div>
       </mat-step>
 
-      <!-- Step 4: Additional Data (Addresses) -->
+      <!-- Step 4: Additional Data (Checkboxes Only) -->
       <mat-step [label]="steps[3].label">
         <div class="step-content">
           <h3>بيانات إضافية</h3>
 
           <form [formGroup]="plaintiffForm">
-            <!-- Residence Address -->
-            <div class="address-section" formGroupName="residenceAddress">
-              <h4>عنوان الإقامة</h4>
+            <div class="additional-options">
+              <!-- Checkbox: تحديد كمقدم طلب -->
+              <div class="checkbox-row">
+                <mat-checkbox formControlName="isApplicant">تحديد كمقدم طلب</mat-checkbox>
+              </div>
+
+              <!-- Checkbox: إضافة عنوان مختار -->
+              <div class="checkbox-row">
+                <mat-checkbox formControlName="addSelectedAddress">إضافة عنوان مختار</mat-checkbox>
+              </div>
+            </div>
+
+            <!-- بيانات عنوان وطني - shows when checkbox is checked -->
+            <div class="address-section" formGroupName="selectedAddress"
+                 *ngIf="plaintiffForm.get('addSelectedAddress')?.value">
+              <h4>بيانات عنوان وطني</h4>
               <div class="form-row">
                 <mat-form-field appearance="outline" class="form-field">
                   <mat-label>المنطقة</mat-label>
-                  <mat-select formControlName="regionId" (selectionChange)="onResidenceRegionChange($event.value)">
+                  <mat-select formControlName="regionId" (selectionChange)="onSelectedRegionChange($event.value)">
                     <mat-option *ngFor="let region of regions" [value]="region.id">
                       {{ region.nameAr }}
                     </mat-option>
@@ -556,8 +1233,8 @@
 
                 <mat-form-field appearance="outline" class="form-field">
                   <mat-label>المدينة</mat-label>
-                  <mat-select formControlName="cityId" (selectionChange)="onCityChange()">
-                    <mat-option *ngFor="let city of residenceCities" [value]="city.id">
+                  <mat-select formControlName="cityId">
+                    <mat-option *ngFor="let city of selectedAddressCities" [value]="city.id">
                       {{ city.nameAr }}
                     </mat-option>
                   </mat-select>
@@ -567,207 +1244,39 @@
               <div class="form-row">
                 <mat-form-field appearance="outline" class="form-field">
                   <mat-label>الحي</mat-label>
-                  <input matInput formControlName="district">
+                  <input matInput formControlName="districtId">
                 </mat-form-field>
 
                 <mat-form-field appearance="outline" class="form-field">
                   <mat-label>الشارع</mat-label>
-                  <input matInput formControlName="streetName">
+                  <input matInput formControlName="street">
                 </mat-form-field>
               </div>
 
               <div class="form-row">
                 <mat-form-field appearance="outline" class="form-field">
                   <mat-label>رقم المبنى</mat-label>
-                  <input matInput formControlName="buildingNumber">
+                  <input matInput formControlName="buildingNumber" placeholder="4 أرقام">
+                  <mat-error *ngIf="plaintiffForm.get('selectedAddress.buildingNumber')?.hasError('buildingNumber')">رقم المبنى يجب أن يكون 4 أرقام فقط</mat-error>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="form-field">
+                  <mat-label>رقم الوحدة</mat-label>
+                  <input matInput formControlName="unitNumber" placeholder="أرقام فقط">
+                  <mat-error *ngIf="plaintiffForm.get('selectedAddress.unitNumber')?.hasError('pattern')">رقم الوحدة يجب أن يكون أرقام فقط</mat-error>
                 </mat-form-field>
 
                 <mat-form-field appearance="outline" class="form-field">
                   <mat-label>الرمز البريدي</mat-label>
-                  <input matInput formControlName="postalCode">
+                  <input matInput formControlName="postalCode" placeholder="5 أرقام">
+                  <mat-error *ngIf="plaintiffForm.get('selectedAddress.postalCode')?.hasError('postalCode')">الرمز البريدي يجب أن يكون 5 أرقام فقط</mat-error>
                 </mat-form-field>
 
                 <mat-form-field appearance="outline" class="form-field">
                   <mat-label>الرقم الإضافي</mat-label>
-                  <input matInput formControlName="additionalNumber">
+                  <input matInput formControlName="additionalCode" placeholder="4 أرقام">
+                  <mat-error *ngIf="plaintiffForm.get('selectedAddress.additionalCode')?.hasError('additionalNumber')">الرقم الإضافي يجب أن يكون 4 أرقام فقط</mat-error>
                 </mat-form-field>
-              </div>
-            </div>
-
-            <!-- Work Address -->
-            <div class="address-section" formGroupName="workAddress">
-              <h4>عنوان العمل</h4>
-              <div class="form-row">
-                <mat-form-field appearance="outline" class="form-field">
-                  <mat-label>المنطقة</mat-label>
-                  <mat-select formControlName="regionId" (selectionChange)="onWorkRegionChange($event.value)">
-                    <mat-option *ngFor="let region of regions" [value]="region.id">
-                      {{ region.nameAr }}
-                    </mat-option>
-                  </mat-select>
-                </mat-form-field>
-
-                <mat-form-field appearance="outline" class="form-field">
-                  <mat-label>المدينة</mat-label>
-                  <mat-select formControlName="cityId" (selectionChange)="onCityChange()">
-                    <mat-option *ngFor="let city of workCities" [value]="city.id">
-                      {{ city.nameAr }}
-                    </mat-option>
-                  </mat-select>
-                </mat-form-field>
-              </div>
-
-              <div class="form-row">
-                <mat-form-field appearance="outline" class="form-field">
-                  <mat-label>الحي</mat-label>
-                  <input matInput formControlName="district">
-                </mat-form-field>
-
-                <mat-form-field appearance="outline" class="form-field">
-                  <mat-label>الشارع</mat-label>
-                  <input matInput formControlName="streetName">
-                </mat-form-field>
-              </div>
-
-              <div class="form-row">
-                <mat-form-field appearance="outline" class="form-field">
-                  <mat-label>رقم المبنى</mat-label>
-                  <input matInput formControlName="buildingNumber">
-                </mat-form-field>
-
-                <mat-form-field appearance="outline" class="form-field">
-                  <mat-label>الرمز البريدي</mat-label>
-                  <input matInput formControlName="postalCode">
-                </mat-form-field>
-
-                <mat-form-field appearance="outline" class="form-field">
-                  <mat-label>الرقم الإضافي</mat-label>
-                  <input matInput formControlName="additionalNumber">
-                </mat-form-field>
-              </div>
-            </div>
-
-            <!-- Business Address (for Business Owner - Type 3) -->
-            <div class="address-section" formGroupName="businessAddress" *ngIf="isBusinessOwner()">
-              <h4>عنوان المؤسسة</h4>
-              <div class="form-row">
-                <mat-form-field appearance="outline" class="form-field">
-                  <mat-label>المنطقة</mat-label>
-                  <mat-select formControlName="regionId" (selectionChange)="onBusinessRegionChange($event.value)">
-                    <mat-option *ngFor="let region of regions" [value]="region.id">
-                      {{ region.nameAr }}
-                    </mat-option>
-                  </mat-select>
-                </mat-form-field>
-
-                <mat-form-field appearance="outline" class="form-field">
-                  <mat-label>المدينة</mat-label>
-                  <mat-select formControlName="cityId" (selectionChange)="onCityChange()">
-                    <mat-option *ngFor="let city of businessCities" [value]="city.id">
-                      {{ city.nameAr }}
-                    </mat-option>
-                  </mat-select>
-                </mat-form-field>
-              </div>
-
-              <div class="form-row">
-                <mat-form-field appearance="outline" class="form-field">
-                  <mat-label>الحي</mat-label>
-                  <input matInput formControlName="district">
-                </mat-form-field>
-
-                <mat-form-field appearance="outline" class="form-field">
-                  <mat-label>الشارع</mat-label>
-                  <input matInput formControlName="streetName">
-                </mat-form-field>
-              </div>
-
-              <div class="form-row">
-                <mat-form-field appearance="outline" class="form-field">
-                  <mat-label>رقم المبنى</mat-label>
-                  <input matInput formControlName="buildingNumber">
-                </mat-form-field>
-
-                <mat-form-field appearance="outline" class="form-field">
-                  <mat-label>الرمز البريدي</mat-label>
-                  <input matInput formControlName="postalCode">
-                </mat-form-field>
-
-                <mat-form-field appearance="outline" class="form-field">
-                  <mat-label>الرقم الإضافي</mat-label>
-                  <input matInput formControlName="additionalNumber">
-                </mat-form-field>
-              </div>
-            </div>
-
-            <!-- Selected Address (BC03) -->
-            <div class="selected-address-section">
-              <h4>العنوان المختار للتبليغ</h4>
-
-              <!-- BC03 Info Message -->
-              <div class="bc03-info" *ngIf="requiresSelectedAddress">
-                <mat-icon>info</mat-icon>
-                <span>مدينة المدعي تختلف عن مدينة المحكمة. الرجاء تحديد عنوان للتبليغ.</span>
-              </div>
-
-              <mat-radio-group formControlName="selectedAddressType">
-                <mat-radio-button value="residence">عنوان الإقامة</mat-radio-button>
-                <mat-radio-button value="work">عنوان العمل</mat-radio-button>
-                <mat-radio-button value="business" *ngIf="isBusinessOwner()">عنوان المؤسسة</mat-radio-button>
-                <mat-radio-button value="other">عنوان آخر</mat-radio-button>
-              </mat-radio-group>
-
-              <!-- Custom Address Form (when "other" is selected) -->
-              <div class="custom-address-form" formGroupName="customAddress" *ngIf="isCustomAddressSelected()">
-                <h5>العنوان المخصص</h5>
-                <div class="form-row">
-                  <mat-form-field appearance="outline" class="form-field">
-                    <mat-label>المنطقة</mat-label>
-                    <mat-select formControlName="regionId" (selectionChange)="onCustomRegionChange($event.value)">
-                      <mat-option *ngFor="let region of regions" [value]="region.id">
-                        {{ region.nameAr }}
-                      </mat-option>
-                    </mat-select>
-                  </mat-form-field>
-
-                  <mat-form-field appearance="outline" class="form-field">
-                    <mat-label>المدينة</mat-label>
-                    <mat-select formControlName="cityId">
-                      <mat-option *ngFor="let city of customCities" [value]="city.id">
-                        {{ city.nameAr }}
-                      </mat-option>
-                    </mat-select>
-                  </mat-form-field>
-                </div>
-
-                <div class="form-row">
-                  <mat-form-field appearance="outline" class="form-field">
-                    <mat-label>الحي</mat-label>
-                    <input matInput formControlName="district">
-                  </mat-form-field>
-
-                  <mat-form-field appearance="outline" class="form-field">
-                    <mat-label>الشارع</mat-label>
-                    <input matInput formControlName="streetName">
-                  </mat-form-field>
-                </div>
-
-                <div class="form-row">
-                  <mat-form-field appearance="outline" class="form-field">
-                    <mat-label>رقم المبنى</mat-label>
-                    <input matInput formControlName="buildingNumber">
-                  </mat-form-field>
-
-                  <mat-form-field appearance="outline" class="form-field">
-                    <mat-label>الرمز البريدي</mat-label>
-                    <input matInput formControlName="postalCode">
-                  </mat-form-field>
-
-                  <mat-form-field appearance="outline" class="form-field">
-                    <mat-label>الرقم الإضافي</mat-label>
-                    <input matInput formControlName="additionalNumber">
-                  </mat-form-field>
-                </div>
               </div>
             </div>
           </form>
