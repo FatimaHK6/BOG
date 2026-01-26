@@ -67,7 +67,7 @@ export interface CaseRegistrationRequestUpdateDTO {
   providedIn: 'root'
 })
 export class CaseRegistrationRequestService {
-  private readonly apiUrl = `${environment.apiUrl}/api/case-requests`;
+  private readonly apiUrl = `${environment.apiUrl}/api/case-registration-requests`;
 
   constructor(private http: HttpClient) { }
 

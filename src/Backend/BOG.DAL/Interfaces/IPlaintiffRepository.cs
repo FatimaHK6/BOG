@@ -38,6 +38,16 @@ public interface IPlaintiffRepository : IRepository<Plaintiff>
     Task<bool> ExistsByIdentityAsync(int requestId, string identityNumber, int plaintiffTypeId, CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// Checks if a plaintiff with the given document number exists in a request.
+    /// Used for duplicate checking (ERR011) for Type 2 - Individual without ID.
+    /// </summary>
+    /// <param name="requestId">The case request ID</param>
+    /// <param name="documentNumber">The document number</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>True if plaintiff exists, false otherwise</returns>
+    Task<bool> ExistsByDocumentNumberAsync(int requestId, string documentNumber, CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Gets a plaintiff with all related details (representatives, attachments, addresses).
     /// </summary>
     /// <param name="id">The plaintiff ID</param>

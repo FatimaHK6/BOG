@@ -18,24 +18,26 @@ public class RepresentativeBL : IRepresentativeBL
     private readonly IAbsherService _absherService;
     private readonly IUnitOfWork _unitOfWork;
 
-    // Representative type to plaintiff type mapping
+    // Representative type to plaintiff type mapping per SRS table 2.16
+    // Types: 1-Lawyer, 2-Liquidator, 3-BankruptcyTrustee, 4-JudicialCustodian,
+    //        5-CompanyRep, 6-Guardian, 7-GovRep, 8-Conservator, 9-WaqfInspector
     private static readonly Dictionary<int, int[]> AllowedRepresentativeTypes = new()
     {
-        // Individual (1): Lawyer, Liquidator, Trustee, Custodian, Guardian, Conservator
-        [1] = new[] { 1, 2, 3, 4, 6, 8 },
-        // IndividualNoId (2): Same as Individual
-        [2] = new[] { 1, 2, 3, 4, 6, 8 },
-        // BusinessOwner (3): Lawyer, Liquidator, Trustee, Custodian
-        [3] = new[] { 1, 2, 3, 4 },
-        // RegisteredCompany (4): Lawyer, Liquidator, Trustee, Custodian, CompanyRep
+        // فرد Individual (1): محامي(1)، ولي(6)، وصي(8)
+        [1] = new[] { 1, 6, 8 },
+        // فرد بدون هوية IndividualNoId (2): محامي(1)، ولي(6)، وصي(8)
+        [2] = new[] { 1, 6, 8 },
+        // صاحب مؤسسة BusinessOwner (3): محامي(1) only
+        [3] = new[] { 1 },
+        // شركة مسجلة RegisteredCompany (4): محامي(1)، مصفي(2)، أمين تفليسة(3)، حارس قضائي(4)، ممثل نظامي(5)
         [4] = new[] { 1, 2, 3, 4, 5 },
-        // UnregisteredCompany (5): Lawyer, Liquidator, Trustee, Custodian
-        [5] = new[] { 1, 2, 3, 4 },
-        // GovernmentAgency (6): Lawyer, GovRep
-        [6] = new[] { 1, 7 },
-        // NGO (7): Lawyer, CompanyRep
+        // شركة غير مسجلة UnregisteredCompany (5): محامي(1)، مصفي(2)، أمين تفليسة(3)، حارس قضائي(4)، ممثل نظامي(5)
+        [5] = new[] { 1, 2, 3, 4, 5 },
+        // جهة حكومية GovernmentAgency (6): ممثل جهة حكومية(7) only
+        [6] = new[] { 7 },
+        // جمعية/مؤسسة أهلية NGO (7): محامي(1)، ممثل نظامي(5)
         [7] = new[] { 1, 5 },
-        // Waqf (8): Lawyer, WaqfInspector
+        // وقف Waqf (8): محامي(1)، ناظر(9)
         [8] = new[] { 1, 9 }
     };
 
@@ -117,7 +119,12 @@ public class RepresentativeBL : IRepresentativeBL
             FatherName = dto.FatherName,
             GrandfatherName = dto.GrandfatherName,
             FamilyName = dto.FamilyName,
+            ClanName = dto.ClanName,
             BirthDate = dto.BirthDate,
+            Gender = dto.Gender,
+            NationalityId = dto.NationalityId,
+            IdentityIssueDate = dto.IdentityIssueDate,
+            IdentityExpiryDate = dto.IdentityExpiryDate,
             DataSourceId = dataSourceId,
             MobileNumber = dto.MobileNumber,
             Email = dto.Email,
@@ -125,6 +132,14 @@ public class RepresentativeBL : IRepresentativeBL
             AuthorizationDate = dto.AuthorizationDate,
             AuthorizationSource = dto.AuthorizationSource,
             AuthorizationSourceType = dto.AuthorizationSourceType,
+            // Liquidator fields
+            DecisionNumber = dto.DecisionNumber,
+            DecisionDate = dto.DecisionDate,
+            DecisionSource = dto.DecisionSource,
+            // Guardian fields
+            DeedNumber = dto.DeedNumber,
+            DeedDate = dto.DeedDate,
+            DeedSource = dto.DeedSource,
             GuardianshipType = dto.GuardianshipType,
             IsActive = true,
             CreatedDate = DateTime.UtcNow
@@ -153,6 +168,12 @@ public class RepresentativeBL : IRepresentativeBL
             if (!string.IsNullOrEmpty(dto.FatherName)) representative.FatherName = dto.FatherName;
             if (!string.IsNullOrEmpty(dto.GrandfatherName)) representative.GrandfatherName = dto.GrandfatherName;
             if (!string.IsNullOrEmpty(dto.FamilyName)) representative.FamilyName = dto.FamilyName;
+            if (!string.IsNullOrEmpty(dto.ClanName)) representative.ClanName = dto.ClanName;
+            if (dto.BirthDate.HasValue) representative.BirthDate = dto.BirthDate;
+            if (!string.IsNullOrEmpty(dto.Gender)) representative.Gender = dto.Gender;
+            if (dto.NationalityId.HasValue) representative.NationalityId = dto.NationalityId;
+            if (dto.IdentityIssueDate.HasValue) representative.IdentityIssueDate = dto.IdentityIssueDate;
+            if (dto.IdentityExpiryDate.HasValue) representative.IdentityExpiryDate = dto.IdentityExpiryDate;
         }
 
         // Contact info can always be updated
@@ -164,6 +185,17 @@ public class RepresentativeBL : IRepresentativeBL
         if (dto.AuthorizationDate.HasValue) representative.AuthorizationDate = dto.AuthorizationDate;
         if (dto.AuthorizationSource != null) representative.AuthorizationSource = dto.AuthorizationSource;
         if (dto.AuthorizationSourceType != null) representative.AuthorizationSourceType = dto.AuthorizationSourceType;
+
+        // Liquidator fields
+        if (dto.DecisionNumber != null) representative.DecisionNumber = dto.DecisionNumber;
+        if (dto.DecisionDate.HasValue) representative.DecisionDate = dto.DecisionDate;
+        if (dto.DecisionSource != null) representative.DecisionSource = dto.DecisionSource;
+
+        // Guardian fields
+        if (dto.DeedNumber != null) representative.DeedNumber = dto.DeedNumber;
+        if (dto.DeedDate.HasValue) representative.DeedDate = dto.DeedDate;
+        if (dto.DeedSource != null) representative.DeedSource = dto.DeedSource;
+        if (dto.GuardianshipType != null) representative.GuardianshipType = dto.GuardianshipType;
 
         representative.ModifiedDate = DateTime.UtcNow;
 
@@ -211,13 +243,19 @@ public class RepresentativeBL : IRepresentativeBL
             RepresentativeTypeId = rep.RepresentativeTypeId,
             RepresentativeTypeNameAr = rep.RepresentativeType?.NameAr ?? "",
             RepresentativeTypeName = rep.RepresentativeType?.Name ?? "",
+            IdentityTypeId = rep.IdentityTypeId,
             IdentityTypeName = rep.IdentityType?.NameAr ?? "",
             IdentityNumber = rep.IdentityNumber,
             FirstName = rep.FirstName,
             FatherName = rep.FatherName,
             GrandfatherName = rep.GrandfatherName,
             FamilyName = rep.FamilyName,
+            ClanName = rep.ClanName,
             BirthDate = rep.BirthDate,
+            Gender = rep.Gender,
+            NationalityId = rep.NationalityId,
+            IdentityIssueDate = rep.IdentityIssueDate,
+            IdentityExpiryDate = rep.IdentityExpiryDate,
             DataSourceId = rep.DataSourceId,
             DataSourceName = rep.DataSource?.NameAr,
             MobileNumber = rep.MobileNumber,
@@ -226,6 +264,14 @@ public class RepresentativeBL : IRepresentativeBL
             AuthorizationDate = rep.AuthorizationDate,
             AuthorizationSource = rep.AuthorizationSource,
             AuthorizationSourceType = rep.AuthorizationSourceType,
+            // Liquidator fields
+            DecisionNumber = rep.DecisionNumber,
+            DecisionDate = rep.DecisionDate,
+            DecisionSource = rep.DecisionSource,
+            // Guardian fields
+            DeedNumber = rep.DeedNumber,
+            DeedDate = rep.DeedDate,
+            DeedSource = rep.DeedSource,
             GuardianshipType = rep.GuardianshipType,
             CreatedDate = rep.CreatedDate
         };

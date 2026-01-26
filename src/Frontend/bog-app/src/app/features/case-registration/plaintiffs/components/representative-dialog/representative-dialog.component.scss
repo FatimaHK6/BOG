@@ -38,6 +38,13 @@ mat-dialog-content {
     }
   }
 
+  &.three-col {
+    mat-form-field {
+      flex: 1;
+      min-width: 0;
+    }
+  }
+
   &.four-col {
     mat-form-field {
       flex: 1;
@@ -227,5 +234,158 @@ mat-dialog-actions {
   .upload-area button mat-icon {
     margin-left: 0;
     margin-right: 6px;
+  }
+}
+
+/* Absher Banner - Shows when data loaded from Absher */
+.absher-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  margin-bottom: 20px;
+  background: linear-gradient(135deg, #dbeafe 0%, #eff6ff 100%);
+  border: 1px solid #93c5fd;
+  border-radius: 10px;
+  color: #1e40af;
+
+  .banner-content {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    mat-icon {
+      color: #3b82f6;
+      font-size: 22px;
+      width: 22px;
+      height: 22px;
+    }
+
+    span {
+      font-size: 14px;
+      font-weight: 500;
+    }
+  }
+
+  .reset-btn {
+    color: #dc2626 !important;
+    font-size: 13px;
+
+    mat-icon {
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+      margin-left: 4px;
+    }
+  }
+}
+
+/* Absher Locked Fields - Disabled fields from Absher lookup */
+.absher-locked {
+  ::ng-deep {
+    .mat-form-field-wrapper {
+      background: #f8fafc;
+    }
+
+    .mat-form-field-outline {
+      color: #94a3b8 !important;
+    }
+
+    .mat-input-element:disabled,
+    .mat-select-disabled .mat-select-value {
+      color: #64748b !important;
+    }
+  }
+
+  &::after {
+    content: 'lock';
+    font-family: 'Material Icons';
+    position: absolute;
+    left: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 14px;
+    color: #94a3b8;
+  }
+}
+
+/* Required Indicator - Red asterisk for required section headers */
+.required-indicator {
+  &::after {
+    content: ' *';
+    color: #ef4444;
+    font-weight: bold;
+    margin-right: 4px;
+  }
+}
+
+/* Upload Area Error State */
+.upload-area {
+  &.error {
+    border-color: #ef4444;
+    background: #fef2f2;
+
+    &:hover {
+      border-color: #dc2626;
+      background: #fee2e2;
+    }
+
+    .upload-icon {
+      color: #ef4444;
+    }
+  }
+}
+
+/* Upload Error Message */
+.upload-error {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+  padding: 8px 12px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 6px;
+  color: #dc2626;
+  font-size: 13px;
+
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+  }
+}
+
+/* Form Field Error Styling Enhancement */
+::ng-deep {
+  .mat-form-field.mat-form-field-invalid {
+    .mat-form-field-outline-thick {
+      color: #ef4444 !important;
+    }
+  }
+
+  .mat-error {
+    font-size: 12px;
+    margin-top: 4px;
+  }
+}
+
+/* RTL Support for Absher Banner */
+:host-context([dir="rtl"]) {
+  .absher-banner {
+    .reset-btn mat-icon {
+      margin-left: 0;
+      margin-right: 4px;
+    }
+  }
+
+  .absher-locked::after {
+    left: auto;
+    right: 8px;
+  }
+
+  .required-indicator::after {
+    margin-right: 0;
+    margin-left: 4px;
   }
 }

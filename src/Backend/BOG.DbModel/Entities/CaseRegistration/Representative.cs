@@ -60,9 +60,136 @@ public class Representative : BaseEntity
     public DateTime? BirthDate { get; set; }
 
     /// <summary>
+    /// Gender (الجنس): male/female.
+    /// </summary>
+    public string? Gender { get; set; }
+
+    /// <summary>
+    /// Foreign key to Nationality (الجنسية).
+    /// </summary>
+    public int? NationalityId { get; set; }
+
+    /// <summary>
+    /// Identity issue date (تاريخ إصدار الهوية).
+    /// </summary>
+    public DateTime? IdentityIssueDate { get; set; }
+
+    /// <summary>
+    /// Identity expiry date (تاريخ انتهاء الهوية).
+    /// </summary>
+    public DateTime? IdentityExpiryDate { get; set; }
+
+    /// <summary>
     /// Foreign key to DataSource (مصدر البيانات - أبشر/المستخدم).
     /// </summary>
     public int? DataSourceId { get; set; }
+
+    #endregion
+
+    #region Residence Address (عنوان السكن - 6.3.2)
+
+    /// <summary>
+    /// Region ID for residence address (المنطقة).
+    /// </summary>
+    public int? ResidenceRegionId { get; set; }
+
+    /// <summary>
+    /// City ID for residence address (المدينة).
+    /// </summary>
+    public int? ResidenceCityId { get; set; }
+
+    /// <summary>
+    /// District for residence address (الحي).
+    /// </summary>
+    public string? ResidenceDistrict { get; set; }
+
+    /// <summary>
+    /// Street for residence address (الشارع).
+    /// </summary>
+    public string? ResidenceStreet { get; set; }
+
+    /// <summary>
+    /// Building number for residence address (رقم المبنى).
+    /// </summary>
+    public string? ResidenceBuildingNumber { get; set; }
+
+    /// <summary>
+    /// Unit number for residence address (رقم الوحدة).
+    /// </summary>
+    public string? ResidenceUnitNumber { get; set; }
+
+    /// <summary>
+    /// Postal code for residence address (الرمز البريدي).
+    /// </summary>
+    public string? ResidencePostalCode { get; set; }
+
+    /// <summary>
+    /// Additional code for residence address (الرمز الإضافي).
+    /// </summary>
+    public string? ResidenceAdditionalCode { get; set; }
+
+    #endregion
+
+    #region Employment Data (بيانات العمل)
+
+    /// <summary>
+    /// Employment status (حالة العمل): government/private/unemployed.
+    /// </summary>
+    public string? EmploymentStatus { get; set; }
+
+    /// <summary>
+    /// Employer name (جهة العمل) - conditional BC01.
+    /// </summary>
+    public string? Employer { get; set; }
+
+    /// <summary>
+    /// Profession (المهنة).
+    /// </summary>
+    public string? Profession { get; set; }
+
+    #endregion
+
+    #region Work Address (عنوان العمل - 6.3.2) - Conditional BC02
+
+    /// <summary>
+    /// Region ID for work address (المنطقة).
+    /// </summary>
+    public int? WorkRegionId { get; set; }
+
+    /// <summary>
+    /// City ID for work address (المدينة).
+    /// </summary>
+    public int? WorkCityId { get; set; }
+
+    /// <summary>
+    /// District for work address (الحي).
+    /// </summary>
+    public string? WorkDistrict { get; set; }
+
+    /// <summary>
+    /// Street for work address (الشارع).
+    /// </summary>
+    public string? WorkStreet { get; set; }
+
+    /// <summary>
+    /// Building number for work address (رقم المبنى).
+    /// </summary>
+    public string? WorkBuildingNumber { get; set; }
+
+    /// <summary>
+    /// Unit number for work address (رقم الوحدة).
+    /// </summary>
+    public string? WorkUnitNumber { get; set; }
+
+    /// <summary>
+    /// Postal code for work address (الرمز البريدي).
+    /// </summary>
+    public string? WorkPostalCode { get; set; }
+
+    /// <summary>
+    /// Additional code for work address (الرمز الإضافي).
+    /// </summary>
+    public string? WorkAdditionalCode { get; set; }
 
     #endregion
 
@@ -104,7 +231,41 @@ public class Representative : BaseEntity
 
     #endregion
 
-    #region Guardian Data
+    #region Liquidator Data (مصفي - 6.3.12)
+
+    /// <summary>
+    /// Decision number (رقم القرار) for Liquidator.
+    /// </summary>
+    public string? DecisionNumber { get; set; }
+
+    /// <summary>
+    /// Decision date (تاريخ القرار) for Liquidator.
+    /// </summary>
+    public DateTime? DecisionDate { get; set; }
+
+    /// <summary>
+    /// Decision source (مصدر القرار) for Liquidator.
+    /// </summary>
+    public string? DecisionSource { get; set; }
+
+    #endregion
+
+    #region Guardian Data (ولي - 6.3.16)
+
+    /// <summary>
+    /// Deed number (رقم الصك) for Guardian.
+    /// </summary>
+    public string? DeedNumber { get; set; }
+
+    /// <summary>
+    /// Deed date (تاريخ الصك) for Guardian.
+    /// </summary>
+    public DateTime? DeedDate { get; set; }
+
+    /// <summary>
+    /// Deed source (مصدر الصك) for Guardian.
+    /// </summary>
+    public string? DeedSource { get; set; }
 
     /// <summary>
     /// Guardianship type for Guardian (ولي): طبيعية/مكتسبة.

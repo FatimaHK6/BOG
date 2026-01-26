@@ -48,6 +48,8 @@ export interface AbsherPersonData {
   nationalityName: string;
   mobileNumber?: string;
   email?: string;
+  identityIssueDate?: Date;
+  identityExpiryDate?: Date;
   residenceAddress?: AbsherAddress;
   workAddress?: AbsherAddress;
 }

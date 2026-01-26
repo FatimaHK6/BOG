@@ -26,41 +26,82 @@ export interface PlaintiffVM {
   plaintiffTypeId: number;
   plaintiffTypeName: string;
   plaintiffTypeNameAr: string;
+
+  // Personal Data
   identityTypeId?: number;
   identityTypeName?: string;
   identityNumber?: string;
+  documentNumber?: string; // رقم الوثيقة - for Type 2
   firstName?: string;
   fatherName?: string;
   grandfatherName?: string;
+  clanName?: string; // اسم الفخذ
   familyName?: string;
   fullName: string;
   birthDate?: Date;
   gender?: string;
   nationalityId?: number;
   nationalityName?: string;
+  identityIssueDate?: Date;
+  identityExpiryDate?: Date;
   mobileNumber?: string;
   email?: string;
   dataSourceId?: number;
   dataSourceName?: string;
   isApplicant: boolean;
   isDisabled: boolean;
-  identityExpiryDate?: Date;
-  identityIssueDate?: Date;
+
+  // Employment Data
+  employmentStatusId?: number; // حالة العمل
+  employer?: string; // جهة العمل
+  profession?: string; // المهنة
+
+  // Commercial Registration
   commercialRegNumber?: string;
   companyName?: string;
   crStartDate?: Date;
   crEndDate?: Date;
+
+  // Government Agency
   governmentAgencyId?: number;
   governmentAgencyName?: string;
+  headquarters?: string; // المقر
   additionalStatement?: string;
+
+  // NGO/Charity
+  licenseNumber?: string;
+  licenseSourceId?: number;
+  licenseSourceName?: string;
+  ngoName?: string;
+  licenseDate?: Date;
+
+  // Waqf
   courtDeedNumber?: string;
+  waqfName?: string; // اسم الوقف
   deedDate?: Date;
   deedSource?: string;
   waqfOversightType?: string;
+  waqfAgencyName?: string; // اسم الجهة
+  waqfDescription?: string; // وصف الوقف
+
+  // Unregistered Company
+  unregisteredCompanyAddress?: string;
+  countryId?: number;
+  countryName?: string;
+  unregisteredCompanyCity?: string;
+  description?: string;
+
+  // Addresses
   residenceAddress?: AddressVM;
   workAddress?: AddressVM;
+  businessAddress?: AddressVM;
+  companyAddress?: AddressVM;
+  ngoAddress?: AddressVM;
+  waqfAddress?: AddressVM;
   selectedAddress?: AddressVM;
   selectedAddressType?: string;
+
+  // Related entities
   representatives: RepresentativeVM[];
   attachments: PlaintiffAttachmentVM[];
   createdDate: Date;
@@ -74,11 +115,16 @@ export interface AddressVM {
   regionName?: string;
   cityId?: number;
   cityName?: string;
+  districtId?: number;
   districtName?: string;
-  streetName?: string;
+  district?: string;           // Backend property name
+  street?: string;
+  streetName?: string;         // Backend property name
   buildingNumber?: string;
+  unitNumber?: string;
   postalCode?: string;
-  additionalNumber?: string;
+  additionalCode?: string;
+  additionalNumber?: string;   // Backend property name
   fullAddress?: string;
 }
 
@@ -96,11 +142,19 @@ export interface RepresentativeVM {
   fatherName?: string;
   grandfatherName?: string;
   familyName?: string;
+  clanName?: string;          // اسم الفخذ - SRS 6.3.1
   fullName: string;
+  birthDate?: Date;           // تاريخ الميلاد - SRS 6.3.1
+  gender?: string;            // الجنس - SRS 6.3.1
+  nationalityId?: number;     // الجنسية - SRS 6.3.1
+  nationalityName?: string;
+  identityIssueDate?: Date;   // تاريخ إصدار الهوية - SRS 6.3.1
+  identityExpiryDate?: Date;  // تاريخ انتهاء الهوية - SRS 6.3.1
   mobileNumber?: string;
   email?: string;
   dataSourceId?: number;
   dataSourceName?: string;
+  // Lawyer/Agent (محامي/وكيل) authorization fields
   authorizationNumber?: string;
   authorizationDate?: Date;
   authorizationSource?: string;
@@ -108,10 +162,17 @@ export interface RepresentativeVM {
   lawyerLicenseNumber?: string;
   lawyerLicenseDate?: Date;
   lawyerLicenseExpiryDate?: Date;
-  guardianshipType?: string;
+  // Liquidator (مصفي - 6.3.12) fields
+  decisionNumber?: string;    // رقم القرار
+  decisionDate?: Date;        // تاريخ القرار
+  decisionSource?: string;    // مصدر القرار
+  // Guardian (ولي - 6.3.16) fields
+  deedNumber?: string;        // رقم الصك
+  deedDate?: Date;            // تاريخ الصك
+  deedSource?: string;        // مصدر الصك
+  guardianshipType?: string;  // نوع الولاية
   isApplicant: boolean;
   createdDate: Date;
-  birthDate?: Date;
   attachments?: RepresentativeAttachmentVM[];
 }
 
@@ -150,51 +211,69 @@ export interface PlaintiffAttachmentVM {
 // Create DTOs
 export interface PlaintiffCreateDTO {
   plaintiffTypeId: number;
+
+  // Personal Data (6.3.1) - for Individual types: 1, 2, 3
   identityTypeId?: number;
   identityNumber?: string;
+  documentNumber?: string; // رقم الوثيقة - for Type 2 (Individual without ID)
   firstName?: string;
   fatherName?: string;
   grandfatherName?: string;
+  clanName?: string; // اسم الفخذ - SRS 6.3.1
   familyName?: string;
   birthDate?: Date;
   gender?: string;
   nationalityId?: number;
+  identityIssueDate?: Date;
+  identityExpiryDate?: Date;
   mobileNumber?: string;
   email?: string;
   isDisabled?: boolean;
-  identityExpiryDate?: Date;
-  identityIssueDate?: Date;
+
+  // Employment Data (6.3.9)
+  employer?: string; // جهة العمل
+  profession?: string; // المهنة
+
+  // Commercial Registration (6.3.3) - for types: 3, 4, 5
   commercialRegNumber?: string;
   companyName?: string;
   crStartDate?: Date;
   crEndDate?: Date;
+
+  // Government Agency (6.3.5) - for type 6
   governmentAgencyId?: number;
+  headquarters?: string; // المقر - auto-filled based on agency
   additionalStatement?: string;
-  // NGO/Charity (Type 7)
-  ngoName?: string;
+
+  // NGO/Charity (6.3.4) - Type 7
   licenseNumber?: string;
   licenseSourceId?: number;
-  licenseSource?: string;
+  ngoName?: string; // اسم الجمعية
   licenseDate?: Date;
-  // Waqf (Type 8)
+
+  // Waqf (6.3.11) - Type 8
   courtDeedNumber?: string;
+  waqfName?: string; // اسم الوقف
   deedDate?: Date;
   deedSource?: string;
-  waqfOversightType?: string;
-  // Unregistered Company (Type 5)
-  unregisteredCompanyName?: string;
-  unregisteredCountryId?: number;
-  unregisteredCity?: string;
-  unregisteredDescription?: string;
-  // Addresses
+  waqfOversightType?: string; // خاصة/حكومية
+  waqfAgencyName?: string; // اسم الجهة - required if WaqfOversightType is حكومية
+  waqfDescription?: string; // وصف الوقف
+
+  // Unregistered Company (6.3.7) - Type 5
+  unregisteredCompanyAddress?: string; // عنوان الشركة
+  countryId?: number; // الدولة
+  unregisteredCompanyCity?: string; // المدينة
+  description?: string; // وصف تقريبي
+
+  // Addresses (6.3.2)
   residenceAddress?: AddressDTO;
   workAddress?: AddressDTO;
   businessAddress?: AddressDTO;
-  customAddress?: AddressDTO;
+  companyAddress?: AddressDTO; // for Type 4 (Registered Company)
+  ngoAddress?: AddressDTO; // for Type 7 (NGO)
+  waqfAddress?: AddressDTO; // for Type 8 (Waqf)
   selectedAddressType?: string;
-  employmentSector?: string;
-  employerName?: string;
-  occupation?: string;
 }
 
 export interface PlaintiffUpdateDTO extends PlaintiffCreateDTO {
@@ -208,11 +287,12 @@ export interface SelectedAddressDTO {
 }
 
 export interface AddressDTO {
-  regionId?: number;
-  cityId?: number;
-  district?: string;
-  streetName?: string;
-  buildingNumber?: string;
-  postalCode?: string;
-  additionalNumber?: string;
+  regionId: number;
+  cityId: number;
+  districtId: number; // Changed from district: string to match backend FK
+  street: string; // Renamed from streetName
+  buildingNumber: string; // 4 digits
+  unitNumber: string; // Added - digits only
+  postalCode: string; // 5 digits
+  additionalCode: string; // Renamed from additionalNumber - 4 digits
 }

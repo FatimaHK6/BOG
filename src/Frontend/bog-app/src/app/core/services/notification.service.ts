@@ -63,6 +63,30 @@ export class NotificationService {
    * @param fallbackMessage Default message if error doesn't contain one
    */
   handleError(error: any, fallbackMessage: string = 'حدث خطأ غير متوقع'): MatDialogRef<NotificationDialogComponent> {
+    // Check for validation errors format: { errors: { field: [messages] } }
+    if (error?.error?.errors) {
+      const validationErrors = error.error.errors;
+      const errorMessages: string[] = [];
+
+      for (const field in validationErrors) {
+        if (validationErrors.hasOwnProperty(field)) {
+          const messages = validationErrors[field];
+          if (Array.isArray(messages)) {
+            errorMessages.push(...messages);
+          } else {
+            errorMessages.push(messages);
+          }
+        }
+      }
+
+      if (errorMessages.length > 0) {
+        // Show first 5 errors to avoid overwhelming the user
+        const displayMessages = errorMessages.slice(0, 5);
+        const message = displayMessages.join('\n');
+        return this.error(message, 'أخطاء التحقق');
+      }
+    }
+
     const message = error?.error?.message || error?.message || fallbackMessage;
     return this.error(message);
   }

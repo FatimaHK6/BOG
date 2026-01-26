@@ -4,6 +4,7 @@ using BOG.DbModel;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BOG.DbModel.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260122131442_AddEmploymentStatusToPlaintiff")]
+    partial class AddEmploymentStatusToPlaintiff
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -656,33 +659,9 @@ namespace BOG.DbModel.Migrations
                     b.Property<int?>("DataSourceId")
                         .HasColumnType("int");
 
-                    b.Property<DateTime?>("DecisionDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("DecisionNumber")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("DecisionSource")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime?>("DeedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("DeedNumber")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("DeedSource")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("Email")
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)");
-
-                    b.Property<string>("Employer")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("EmploymentStatus")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("FamilyName")
                         .IsRequired()
@@ -698,9 +677,6 @@ namespace BOG.DbModel.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
-                    b.Property<string>("Gender")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("GrandfatherName")
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
@@ -708,12 +684,6 @@ namespace BOG.DbModel.Migrations
                     b.Property<string>("GuardianshipType")
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
-
-                    b.Property<DateTime?>("IdentityExpiryDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("IdentityIssueDate")
-                        .HasColumnType("datetime2");
 
                     b.Property<string>("IdentityNumber")
                         .IsRequired()
@@ -740,65 +710,11 @@ namespace BOG.DbModel.Migrations
                     b.Property<DateTime>("ModifiedDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<int?>("NationalityId")
-                        .HasColumnType("int");
-
                     b.Property<int>("PlaintiffId")
                         .HasColumnType("int");
 
-                    b.Property<string>("Profession")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<int>("RepresentativeTypeId")
                         .HasColumnType("int");
-
-                    b.Property<string>("ResidenceAdditionalCode")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ResidenceBuildingNumber")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int?>("ResidenceCityId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("ResidenceDistrict")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ResidencePostalCode")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int?>("ResidenceRegionId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("ResidenceStreet")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ResidenceUnitNumber")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("WorkAdditionalCode")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("WorkBuildingNumber")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int?>("WorkCityId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("WorkDistrict")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("WorkPostalCode")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int?>("WorkRegionId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("WorkStreet")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("WorkUnitNumber")
-                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
@@ -984,10 +900,6 @@ namespace BOG.DbModel.Migrations
                         .HasColumnType("nvarchar(20)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("CityId");
-
-                    b.HasIndex("RegionId");
 
                     b.ToTable("Addresses");
                 });
@@ -2492,42 +2404,12 @@ namespace BOG.DbModel.Migrations
                             IsActive = true,
                             IsDeleted = false,
                             ModifiedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Name = "IndividualWithoutId",
-                            NameAr = "فرد بدون هوية"
+                            Name = "Company",
+                            NameAr = "شركة"
                         },
                         new
                         {
                             Id = 3,
-                            CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            IsActive = true,
-                            IsDeleted = false,
-                            ModifiedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Name = "BusinessOwner",
-                            NameAr = "صاحب مؤسسة"
-                        },
-                        new
-                        {
-                            Id = 4,
-                            CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            IsActive = true,
-                            IsDeleted = false,
-                            ModifiedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Name = "RegisteredCompany",
-                            NameAr = "شركة مسجلة"
-                        },
-                        new
-                        {
-                            Id = 5,
-                            CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            IsActive = true,
-                            IsDeleted = false,
-                            ModifiedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Name = "UnregisteredCompany",
-                            NameAr = "شركة غير مسجلة"
-                        },
-                        new
-                        {
-                            Id = 6,
                             CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             IsActive = true,
                             IsDeleted = false,
@@ -2537,13 +2419,43 @@ namespace BOG.DbModel.Migrations
                         },
                         new
                         {
-                            Id = 7,
+                            Id = 4,
                             CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             IsActive = true,
                             IsDeleted = false,
                             ModifiedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             Name = "Society",
-                            NameAr = "جمعية/مؤسسة أهلية"
+                            NameAr = "جمعية"
+                        },
+                        new
+                        {
+                            Id = 5,
+                            CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            IsActive = true,
+                            IsDeleted = false,
+                            ModifiedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Name = "Waqf",
+                            NameAr = "وقف"
+                        },
+                        new
+                        {
+                            Id = 6,
+                            CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            IsActive = true,
+                            IsDeleted = false,
+                            ModifiedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Name = "MinorOrIncapacitated",
+                            NameAr = "قاصر أو محجور عليه"
+                        },
+                        new
+                        {
+                            Id = 7,
+                            CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            IsActive = true,
+                            IsDeleted = false,
+                            ModifiedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Name = "Heir",
+                            NameAr = "وريث"
                         },
                         new
                         {
@@ -2552,8 +2464,8 @@ namespace BOG.DbModel.Migrations
                             IsActive = true,
                             IsDeleted = false,
                             ModifiedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Name = "Waqf",
-                            NameAr = "وقف"
+                            Name = "BankruptEstate",
+                            NameAr = "تفليسة"
                         });
                 });
 
@@ -3395,23 +3307,6 @@ namespace BOG.DbModel.Migrations
                         .IsRequired();
 
                     b.Navigation("Request");
-                });
-
-            modelBuilder.Entity("BOG.DbModel.Entities.Common.Address", b =>
-                {
-                    b.HasOne("BOG.DbModel.Entities.Lookups.City", "City_")
-                        .WithMany()
-                        .HasForeignKey("CityId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.HasOne("BOG.DbModel.Entities.Lookups.Region", "Region")
-                        .WithMany()
-                        .HasForeignKey("RegionId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.Navigation("City_");
-
-                    b.Navigation("Region");
                 });
 
             modelBuilder.Entity("BOG.DbModel.Entities.Identity.Department", b =>

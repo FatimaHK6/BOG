@@ -1,5 +1,6 @@
 using BOG.BL.Interfaces;
 using BOG.DTO.Plaintiff;
+using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BOG.API.Controllers;
@@ -14,15 +15,18 @@ public class PlaintiffsController : ControllerBase
 {
     private readonly IPlaintiffBL _plaintiffBL;
     private readonly IPlaintiffAttachmentBL _attachmentBL;
+    private readonly IValidator<PlaintiffCreateDTO> _plaintiffValidator;
     private readonly ILogger<PlaintiffsController> _logger;
 
     public PlaintiffsController(
         IPlaintiffBL plaintiffBL,
         IPlaintiffAttachmentBL attachmentBL,
+        IValidator<PlaintiffCreateDTO> plaintiffValidator,
         ILogger<PlaintiffsController> logger)
     {
         _plaintiffBL = plaintiffBL ?? throw new ArgumentNullException(nameof(plaintiffBL));
         _attachmentBL = attachmentBL ?? throw new ArgumentNullException(nameof(attachmentBL));
+        _plaintiffValidator = plaintiffValidator ?? throw new ArgumentNullException(nameof(plaintiffValidator));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
@@ -60,10 +64,42 @@ public class PlaintiffsController : ControllerBase
         [FromBody] PlaintiffCreateDTO dto,
         CancellationToken cancellationToken)
     {
+        // === DEBUG LOGGING START ===
+        _logger.LogWarning("=== CREATE PLAINTIFF API CALLED ===");
+        _logger.LogWarning("RequestId: {RequestId}", requestId);
+        _logger.LogWarning("DTO PlaintiffTypeId: {TypeId}", dto?.PlaintiffTypeId);
+        _logger.LogWarning("DTO WaqfName: {WaqfName}", dto?.WaqfName);
+        _logger.LogWarning("DTO CourtDeedNumber: {DeedNum}", dto?.CourtDeedNumber);
+        _logger.LogWarning("DTO DeedDate: {DeedDate}", dto?.DeedDate);
+        _logger.LogWarning("DTO DeedSource: {DeedSource}", dto?.DeedSource);
+        _logger.LogWarning("DTO WaqfOversightType: {OversightType}", dto?.WaqfOversightType);
+        _logger.LogWarning("DTO WaqfDescription: {Desc}", dto?.WaqfDescription);
+        _logger.LogWarning("DTO WaqfAddress: RegionId={RegionId}, CityId={CityId}",
+            dto?.WaqfAddress?.RegionId, dto?.WaqfAddress?.CityId);
+        // === DEBUG LOGGING END ===
+
+        // Validate the DTO using FluentValidation
+        var validationResult = await _plaintiffValidator.ValidateAsync(dto, cancellationToken);
+        if (!validationResult.IsValid)
+        {
+            var errors = validationResult.Errors
+                .GroupBy(e => e.PropertyName)
+                .ToDictionary(g => g.Key, g => g.Select(e => e.ErrorMessage).ToArray());
+            _logger.LogWarning("=== VALIDATION FAILED ===");
+            foreach (var error in validationResult.Errors)
+            {
+                _logger.LogWarning("Validation Error: {Property} - {Message}", error.PropertyName, error.ErrorMessage);
+            }
+            return BadRequest(new { errors });
+        }
+
+        _logger.LogWarning("=== VALIDATION PASSED, CALLING BL ===");
+
         try
         {
             var plaintiff = await _plaintiffBL.CreateAsync(requestId, dto, cancellationToken);
-            _logger.LogInformation("Plaintiff created with ID: {PlaintiffId} for request {RequestId}",
+            _logger.LogWarning("=== PLAINTIFF CREATED SUCCESSFULLY ===");
+            _logger.LogWarning("Plaintiff created with ID: {PlaintiffId} for request {RequestId}",
                 plaintiff.Id, requestId);
             return CreatedAtAction(nameof(GetPlaintiffById), new { id = plaintiff.Id }, plaintiff);
         }

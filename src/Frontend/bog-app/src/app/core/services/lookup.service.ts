@@ -119,14 +119,15 @@ export class LookupService {
   // ============== Demo Data ==============
 
   private getDemoPlaintiffTypes(): PlaintiffType[] {
+    // IDs must match backend PlaintiffTypes table (exactly 8 types per SRS Section 1.3)
     return [
       { id: 1, name: 'Individual', nameAr: 'فرد' },
-      { id: 2, name: 'Individual without ID', nameAr: 'فرد بدون هوية' },
-      { id: 3, name: 'Business Owner', nameAr: 'صاحب مؤسسة فردية' },
-      { id: 4, name: 'Registered Company', nameAr: 'شركة مسجلة' },
-      { id: 5, name: 'Unregistered Company', nameAr: 'شركة غير مسجلة' },
-      { id: 6, name: 'Government Agency', nameAr: 'جهة حكومية' },
-      { id: 7, name: 'NGO/Charity', nameAr: 'جمعية/مؤسسة خيرية' },
+      { id: 2, name: 'IndividualWithoutId', nameAr: 'فرد بدون هوية' },
+      { id: 3, name: 'BusinessOwner', nameAr: 'صاحب مؤسسة' },
+      { id: 4, name: 'RegisteredCompany', nameAr: 'شركة مسجلة' },
+      { id: 5, name: 'UnregisteredCompany', nameAr: 'شركة غير مسجلة' },
+      { id: 6, name: 'GovernmentAgency', nameAr: 'جهة حكومية' },
+      { id: 7, name: 'Society', nameAr: 'جمعية/مؤسسة أهلية' },
       { id: 8, name: 'Waqf', nameAr: 'وقف' }
     ];
   }

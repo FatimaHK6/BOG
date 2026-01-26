@@ -4,6 +4,7 @@ using BOG.DbModel;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BOG.DbModel.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260125113050_UpdatePlaintiffTypesToMatchSRS")]
+    partial class UpdatePlaintiffTypesToMatchSRS
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -656,33 +659,9 @@ namespace BOG.DbModel.Migrations
                     b.Property<int?>("DataSourceId")
                         .HasColumnType("int");
 
-                    b.Property<DateTime?>("DecisionDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("DecisionNumber")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("DecisionSource")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime?>("DeedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("DeedNumber")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("DeedSource")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("Email")
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)");
-
-                    b.Property<string>("Employer")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("EmploymentStatus")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("FamilyName")
                         .IsRequired()
@@ -698,9 +677,6 @@ namespace BOG.DbModel.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
-                    b.Property<string>("Gender")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("GrandfatherName")
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
@@ -708,12 +684,6 @@ namespace BOG.DbModel.Migrations
                     b.Property<string>("GuardianshipType")
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
-
-                    b.Property<DateTime?>("IdentityExpiryDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("IdentityIssueDate")
-                        .HasColumnType("datetime2");
 
                     b.Property<string>("IdentityNumber")
                         .IsRequired()
@@ -740,65 +710,11 @@ namespace BOG.DbModel.Migrations
                     b.Property<DateTime>("ModifiedDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<int?>("NationalityId")
-                        .HasColumnType("int");
-
                     b.Property<int>("PlaintiffId")
                         .HasColumnType("int");
 
-                    b.Property<string>("Profession")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<int>("RepresentativeTypeId")
                         .HasColumnType("int");
-
-                    b.Property<string>("ResidenceAdditionalCode")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ResidenceBuildingNumber")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int?>("ResidenceCityId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("ResidenceDistrict")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ResidencePostalCode")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int?>("ResidenceRegionId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("ResidenceStreet")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ResidenceUnitNumber")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("WorkAdditionalCode")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("WorkBuildingNumber")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int?>("WorkCityId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("WorkDistrict")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("WorkPostalCode")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int?>("WorkRegionId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("WorkStreet")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("WorkUnitNumber")
-                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 

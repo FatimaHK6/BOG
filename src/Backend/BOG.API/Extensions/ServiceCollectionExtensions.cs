@@ -3,8 +3,10 @@ using BOG.BL.Services;
 using BOG.DAL.Interfaces;
 using BOG.DAL.Repositories;
 using BOG.DbModel;
+using BOG.DTO.Plaintiff;
 using BOG.Integration.Interfaces;
 using BOG.Integration.Services;
+using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 
 namespace BOG.API.Extensions;
@@ -79,6 +81,9 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IAddressRepository, AddressRepository>();
         services.AddScoped<ICaseRequestPlaintiffRepository, CaseRequestPlaintiffRepository>();
 
+        // Case Registration Request repository
+        services.AddScoped<ICaseRegistrationRequestRepository, CaseRegistrationRequestRepository>();
+
         return services;
     }
 
@@ -102,6 +107,9 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IRepresentativeBL, RepresentativeBL>();
         services.AddScoped<IPlaintiffAttachmentBL, PlaintiffAttachmentBL>();
 
+        // Case Registration Request service
+        services.AddScoped<ICaseRegistrationRequestBL, CaseRegistrationRequestBL>();
+
         return services;
     }
 
@@ -115,6 +123,20 @@ public static class ServiceCollectionExtensions
     {
         // Absher integration (using mock for development)
         services.AddScoped<IAbsherService, AbsherMockService>();
+
+        return services;
+    }
+
+    /// <summary>
+    /// Registers FluentValidation services.
+    /// Registers all validators from the DTO assembly for dependency injection.
+    /// </summary>
+    /// <param name="services">The service collection</param>
+    /// <returns>The service collection for chaining</returns>
+    public static IServiceCollection AddFluentValidation(this IServiceCollection services)
+    {
+        // Register all validators from the DTO assembly
+        services.AddValidatorsFromAssemblyContaining<PlaintiffCreateDTOValidator>();
 
         return services;
     }
@@ -135,7 +157,8 @@ public static class ServiceCollectionExtensions
             .AddUnitOfWork()
             .AddRepositories()
             .AddBusinessLogicServices()
-            .AddIntegrationServices();
+            .AddIntegrationServices()
+            .AddFluentValidation();
 
         return services;
     }

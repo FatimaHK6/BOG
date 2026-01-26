@@ -41,6 +41,26 @@ public class AddressVM
     public int? RegionId { get; set; }
 
     /// <summary>
+    /// Region name in Arabic (اسم المنطقة).
+    /// </summary>
+    public string? RegionName { get; set; }
+
+    /// <summary>
+    /// City name in Arabic (اسم المدينة).
+    /// </summary>
+    public string? CityName { get; set; }
+
+    /// <summary>
+    /// District ID.
+    /// </summary>
+    public int? DistrictId { get; set; }
+
+    /// <summary>
+    /// District name in Arabic (اسم الحي).
+    /// </summary>
+    public string? DistrictName { get; set; }
+
+    /// <summary>
     /// Postal code (الرمز البريدي).
     /// </summary>
     public string? PostalCode { get; set; }
