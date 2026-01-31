@@ -1,3 +1,5 @@
+import { RelatedCaseVM } from './related-case.model';
+
 export interface CaseRequestVM {
   id: number;
   courtId: number;
@@ -13,6 +15,11 @@ export interface CaseRequestVM {
   attachmentsCount?: number;
   deficienciesCount?: number;
   isDeleted: boolean;
+  classificationIds?: number[];
+  relatedCases?: RelatedCaseVM[];
+  primaryMobile?: string;
+  secondaryMobile?: string;
+  email?: string;
 }
 
 export interface CaseRequestCreateDTO {
@@ -26,6 +33,7 @@ export interface CaseRequestUpdateDTO {
   subject?: string;
   evidence?: string;
   requestStatusId?: number;
+  classificationIds?: number[];
 }
 
 export interface PagedResult<T> {
@@ -36,4 +44,18 @@ export interface PagedResult<T> {
   totalPages: number;
   hasPreviousPage?: boolean;
   hasNextPage?: boolean;
+}
+
+export interface ClassificationVM {
+  id: number;
+  name: string;
+  nameAr: string;
+  description?: string;
+}
+
+export interface CaseClassificationVM {
+  id: number;
+  nameAr: string;
+  nameEn?: string;
+  code?: string;
 }

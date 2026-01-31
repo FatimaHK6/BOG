@@ -11,21 +11,24 @@ namespace BOG.BL.Services.CaseRegistration;
 /// <summary>
 /// Business logic service for case registration request lifecycle management.
 /// Handles request creation, updates, submission validation, and state management.
-/// Enforces all submission validation rules (ERR001-007).
+/// Enforces all submission validation rules (ERR002-007).
 /// </summary>
 public class CaseRegistrationBL : ICaseRegistrationBL
 {
     private readonly ICaseRegistrationRequestRepository _requestRepository;
     private readonly IRepository<AttachmentType> _attachmentTypeRepository;
+    private readonly IRepository<Classification> _classificationRepository;
     private readonly IUnitOfWork _unitOfWork;
 
     public CaseRegistrationBL(
         ICaseRegistrationRequestRepository requestRepository,
         IRepository<AttachmentType> attachmentTypeRepository,
+        IRepository<Classification> classificationRepository,
         IUnitOfWork unitOfWork)
     {
         _requestRepository = requestRepository ?? throw new ArgumentNullException(nameof(requestRepository));
         _attachmentTypeRepository = attachmentTypeRepository ?? throw new ArgumentNullException(nameof(attachmentTypeRepository));
+        _classificationRepository = classificationRepository ?? throw new ArgumentNullException(nameof(classificationRepository));
         _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
     }
 
@@ -61,7 +64,7 @@ public class CaseRegistrationBL : ICaseRegistrationBL
         }
 
         if (dto.CourtId <= 0)
-            throw new InvalidOperationException("Valid court ID is required.");
+            throw new InvalidOperationException("معرف المحكمة مطلوب وصحيح");
 
         // Create new request in Draft state (1)
         // Use a default user ID (9999 for tests, in production this should come from HttpContext)
@@ -82,7 +85,7 @@ public class CaseRegistrationBL : ICaseRegistrationBL
         // Reload request with navigation properties for mapping
         var savedRequest = await _requestRepository.GetByIdAsync(request.Id, cancellationToken);
         if (savedRequest == null)
-            throw new InvalidOperationException($"Failed to retrieve created request with ID {request.Id}");
+            throw new InvalidOperationException($"فشل في استرجاع الطلب المنشأ برقم {request.Id}");
 
         return MapToViewModel(savedRequest);
     }
@@ -131,13 +134,14 @@ public class CaseRegistrationBL : ICaseRegistrationBL
         if (requestData == null)
             throw new ArgumentNullException(nameof(requestData));
 
-        var request = await _requestRepository.GetByIdAsync(requestId, cancellationToken);
+        // Load with all details including Classifications so EF can track changes
+        var request = await _requestRepository.GetWithDetailsAsync(requestId, cancellationToken);
         if (request == null || request.IsDeleted)
-            throw new InvalidOperationException($"Request {requestId} not found.");
+            throw new InvalidOperationException($"الطلب {requestId} غير موجود");
 
         // Can only update in Draft or PendingCompletion states
         if (request.RequestStatusId != 1 && request.RequestStatusId != 8)
-            throw new InvalidOperationException("Can only update requests in Draft or PendingCompletion state.");
+            throw new InvalidOperationException("يمكن تحديث الطلبات فقط في حالة المسودة أو في الانتظار للاستكمال");
 
         // Handle both strongly-typed DTO and object types
         IDictionary<string, object> requestDict;
@@ -150,6 +154,8 @@ public class CaseRegistrationBL : ICaseRegistrationBL
                 requestDict["evidence"] = updateDto.Evidence;
             if (updateDto.CourtId.HasValue && updateDto.CourtId > 0)
                 requestDict["courtId"] = updateDto.CourtId;
+            if (updateDto.ClassificationIds != null)
+                requestDict["classificationIds"] = updateDto.ClassificationIds;
         }
         else if (requestData is IDictionary<string, object> dictData)
         {
@@ -170,18 +176,88 @@ public class CaseRegistrationBL : ICaseRegistrationBL
         if (requestDict.ContainsKey("courtId"))
             request.CourtId = Convert.ToInt32(requestDict["courtId"]);
 
+        // Handle classifications update
+        if (requestDict.ContainsKey("classificationIds"))
+        {
+            var classificationIds = requestDict["classificationIds"] as System.Collections.IEnumerable;
+            if (classificationIds != null)
+            {
+                var idList = new List<int>();
+                foreach (var classId in classificationIds)
+                {
+                    if (int.TryParse(classId?.ToString(), out int id) && id > 0)
+                    {
+                        idList.Add(id);
+                    }
+                }
+
+                if (idList.Any())
+                {
+                    // VALIDATE: Ensure all classification IDs exist and are active
+                    var validClassifications = await _classificationRepository.FindAsync(
+                        c => idList.Contains(c.Id) && c.IsActive && !c.IsDeleted,
+                        cancellationToken);
+
+                    var validIds = validClassifications.Select(c => c.Id).ToHashSet();
+                    var invalidIds = idList.Where(id => !validIds.Contains(id)).ToList();
+
+                    if (invalidIds.Any())
+                    {
+                        throw new InvalidOperationException(
+                            $"معرفات التصنيف غير صالحة: {string.Join(", ", invalidIds)}");
+                    }
+
+                    // Soft delete existing classifications
+                    var existingClassifications = request.Classifications?.ToList() ?? new List<RequestClassification>();
+                    foreach (var classification in existingClassifications)
+                    {
+                        classification.IsDeleted = true;
+                    }
+
+                    // Add new classifications with proper foreign keys
+                    int displayOrder = 0;
+                    foreach (var classificationId in idList)
+                    {
+                        request.Classifications?.Add(new RequestClassification
+                        {
+                            CaseRegistrationRequestId = request.Id,
+                            ClassificationId = classificationId,
+                            DisplayOrder = displayOrder++,
+                            CreatedDate = DateTime.UtcNow,
+                            ModifiedDate = DateTime.UtcNow,
+                            IsDeleted = false
+                        });
+                    }
+                }
+                else
+                {
+                    // Empty list: soft delete all classifications
+                    var existingClassifications = request.Classifications?.ToList() ?? new List<RequestClassification>();
+                    foreach (var classification in existingClassifications)
+                    {
+                        classification.IsDeleted = true;
+                    }
+                }
+            }
+        }
+
         request.ModifiedDate = DateTime.UtcNow;
 
         await _requestRepository.UpdateAsync(request, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-        return MapToViewModel(request);
+        // Reload with all details including classifications
+        var updatedRequest = await _requestRepository.GetWithDetailsAsync(requestId, cancellationToken);
+        if (updatedRequest == null)
+            throw new InvalidOperationException($"Failed to reload request {requestId}");
+
+        return MapToViewModel(updatedRequest);
     }
 
     /// <summary>
     /// Submits a case registration request for review.
     /// Changes state from Draft (1) to New (3).
-    /// Validates all business rules (ERR001-007).
+    /// Validates all business rules (ERR002-007).
     /// </summary>
     public async Task<CaseRegistrationRequestVM> SubmitRequestAsync(int requestId, CancellationToken cancellationToken = default)
     {
@@ -193,7 +269,7 @@ public class CaseRegistrationBL : ICaseRegistrationBL
 
         var request = await _requestRepository.GetByIdAsync(requestId, cancellationToken);
         if (request == null)
-            throw new InvalidOperationException($"Request {requestId} not found.");
+            throw new InvalidOperationException($"الطلب {requestId} غير موجود");
 
         // Change status from Draft (1) to New (3)
         request.RequestStatusId = 3;
@@ -208,7 +284,7 @@ public class CaseRegistrationBL : ICaseRegistrationBL
 
     /// <summary>
     /// Validates case registration request for submission.
-    /// Checks ERR001-007 validation rules.
+    /// Checks ERR002-007 validation rules.
     /// </summary>
     public async Task<bool> ValidateForSubmissionAsync(int requestId, CancellationToken cancellationToken = default)
     {
@@ -217,34 +293,33 @@ public class CaseRegistrationBL : ICaseRegistrationBL
 
         var request = await _requestRepository.GetWithDetailsAsync(requestId, cancellationToken);
         if (request == null)
-            throw new InvalidOperationException($"Request {requestId} not found.");
+            throw new InvalidOperationException($"الطلب {requestId} غير موجود");
 
         var errors = new List<string>();
 
-        // ERR001: At least one plaintiff required
-        if (!request.CaseRequestPlaintiffs?.Any() ?? true)
-            errors.Add("ERR001: At least one plaintiff is required.");
-
         // ERR002: At least one defendant required
         if (!request.CaseRequestDefendants?.Any() ?? true)
-            errors.Add("ERR002: At least one defendant is required.");
+            errors.Add("ERR002: يجب تحديد مدعى عليه واحد على الأقل");
 
         // ERR006: Subject is required
         if (string.IsNullOrWhiteSpace(request.Subject))
-            errors.Add("ERR006: Subject is required.");
+            errors.Add("ERR006: الموضوع مطلوب");
 
         // ERR007: Evidence is required
         if (string.IsNullOrWhiteSpace(request.Evidence))
-            errors.Add("ERR007: Evidence is required.");
+            errors.Add("ERR007: الأدلة مطلوبة");
 
-        // ERR004: Applicant must be specified
-        var hasApplicant = request.CaseRequestPlaintiffs?.Any(p => p.Plaintiff?.IsApplicant ?? false) ?? false;
-        if (!hasApplicant)
-            errors.Add("ERR004: At least one applicant must be specified.");
+        // ERR004: If plaintiffs exist, at least one must be applicant
+        if (request.CaseRequestPlaintiffs?.Any() ?? false)
+        {
+            var hasApplicant = request.CaseRequestPlaintiffs.Any(p => p.Plaintiff?.IsApplicant ?? false);
+            if (!hasApplicant)
+                errors.Add("ERR004: يجب تحديد مدعٍ واحد على الأقل كمدعٍ");
+        }
 
         // ERR005: Classifications must be specified
         if (!request.Classifications?.Any() ?? true)
-            errors.Add("ERR005: At least one case classification is required.");
+            errors.Add("ERR005: يجب تحديد تصنيف واحد على الأقل للدعوى");
 
         // ERR003: Mandatory attachments must be complete
         var mandatoryTypes = await _attachmentTypeRepository.FindAsync(
@@ -261,7 +336,7 @@ public class CaseRegistrationBL : ICaseRegistrationBL
             if (missingTypes.Any())
             {
                 var missingNames = string.Join(", ", missingTypes.Select(t => t.NameAr));
-                errors.Add($"ERR003: Missing mandatory attachments: {missingNames}");
+                errors.Add($"ERR003: المرفقات الإلزامية المفقودة: {missingNames}");
             }
         }
 
@@ -331,6 +406,27 @@ public class CaseRegistrationBL : ICaseRegistrationBL
             PlaintiffsCount = request.CaseRequestPlaintiffs?.Count ?? 0,
             DefendantsCount = request.CaseRequestDefendants?.Count ?? 0,
             AttachmentsCount = request.Attachments?.Where(a => !a.IsDeleted).Count() ?? 0,
+            ClassificationIds = request.Classifications?
+                .Where(rc => !rc.IsDeleted)
+                .Select(rc => rc.ClassificationId)
+                .ToList() ?? new List<int>(),
+            PrimaryMobile = request.PrimaryMobile,
+            SecondaryMobile = request.SecondaryMobile,
+            Email = request.Email,
+            RelatedCases = request.RelatedCases?
+                .Where(rc => !rc.IsDeleted)
+                .Select(rc => new RelatedCaseVM
+                {
+                    Id = rc.Id,
+                    CaseRegistrationRequestId = rc.CaseRegistrationRequestId,
+                    CourtId = rc.CourtId,
+                    CourtName = rc.Court?.NameAr,
+                    CaseNumber = rc.CaseNumber,
+                    CaseYear = rc.CaseYear,
+                    CreatedDate = rc.CreatedDate,
+                    ModifiedDate = rc.ModifiedDate
+                })
+                .ToList() ?? new List<RelatedCaseVM>(),
             CreatedDate = request.CreatedDate,
             ModifiedDate = request.ModifiedDate
         };
@@ -356,8 +452,17 @@ public class CaseRegistrationBL : ICaseRegistrationBL
             CaseNumber = request.CaseNumber,
             RegistrationNumber = request.RegistrationNumber,
             RegistrationDate = request.RegistrationDate,
-            // Note: Full details (plaintiffs, defendants, etc.) would be populated here
-            // For now, these are left empty as the relationships need to be loaded separately
+            Classifications = request.Classifications?
+                .Where(rc => !rc.IsDeleted)
+                .OrderBy(rc => rc.DisplayOrder)
+                .Select(rc => new CaseClassificationVM
+                {
+                    Id = rc.Classification.Id,
+                    NameAr = rc.Classification.NameAr,
+                    NameEn = rc.Classification.Name,
+                    Code = rc.Classification.Description
+                })
+                .ToList() ?? new List<CaseClassificationVM>(),
             CreatedDate = request.CreatedDate,
             ModifiedDate = request.ModifiedDate
         };
