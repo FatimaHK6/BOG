@@ -49,7 +49,6 @@ export interface PlaintiffVM {
   dataSourceId?: number;
   dataSourceName?: string;
   isApplicant: boolean;
-  isDisabled: boolean;
 
   // Employment Data
   employmentStatusId?: number; // حالة العمل
@@ -228,7 +227,6 @@ export interface PlaintiffCreateDTO {
   identityExpiryDate?: Date;
   mobileNumber?: string;
   email?: string;
-  isDisabled?: boolean;
 
   // Employment Data (6.3.9)
   employer?: string; // جهة العمل

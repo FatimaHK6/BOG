@@ -36,6 +36,7 @@ export class PlaintiffFormComponent implements OnInit {
   isLoading = false;
   isSaving = false;
   isLookingUp = false;
+  isPatching = false; // Flag to skip field reset during form population
 
   // Lookup data
   plaintiffTypes: PlaintiffType[] = [];
@@ -159,7 +160,6 @@ export class PlaintiffFormComponent implements OnInit {
       nationalityId: [null],
       mobileNumber: [''],
       email: [''],
-      isDisabled: [false],
       identityIssueDate: [null],
       identityExpiryDate: [null],
       documentNumber: [''],
@@ -230,9 +230,13 @@ export class PlaintiffFormComponent implements OnInit {
     this.plaintiffForm.get('plaintiffTypeId')?.valueChanges.subscribe(typeId => {
       console.log('=== TYPE CHANGED ===');
       console.log('New typeId:', typeId, 'typeof:', typeof typeId);
+      console.log('isPatching:', this.isPatching);
 
-      // NUCLEAR OPTION: Reset all non-common form values when type changes
-      this.resetTypeSpecificFields(typeId);
+      // Skip reset during form population (edit mode) to preserve loaded values
+      if (!this.isPatching) {
+        // NUCLEAR OPTION: Reset all non-common form values when type changes
+        this.resetTypeSpecificFields(typeId);
+      }
       this.updateFormValidation(typeId);
     });
 
@@ -559,8 +563,8 @@ export class PlaintiffFormComponent implements OnInit {
         console.log('[CASE 5] Unregistered Company - setting validators on unregisteredCompanyName');
         // FIXED: Use unregisteredCompanyName, not companyName (field name mismatch bug)
         controls.unregisteredCompanyName?.setValidators([Validators.required, Validators.maxLength(200), CustomValidators.arabicOnly('اسم الشركة')]);
-        controls.mobileNumber?.setValidators([Validators.required, CustomValidators.mobileNumber()]);
-        // No commercial registration required
+        controls.commercialRegNumber?.setValidators([Validators.required, Validators.maxLength(20)]);
+        // No contact information section for Unregistered Company
         break;
 
       case 6: // جهة حكومية (Government Agency) - SRS Section 1.3
@@ -716,12 +720,15 @@ export class PlaintiffFormComponent implements OnInit {
 
     // Define fields for each type
     const individualFields = ['identityTypeId', 'identityNumber', 'firstName', 'fatherName', 'grandfatherName',
-      'clanName', 'familyName', 'birthDate', 'gender', 'nationalityId', 'mobileNumber', 'email', 'isDisabled',
+      'clanName', 'familyName', 'birthDate', 'gender', 'nationalityId', 'mobileNumber', 'email',
       'identityIssueDate', 'identityExpiryDate', 'documentNumber', 'employmentStatusId', 'employer', 'profession'];
 
-    const businessOwnerFields = ['commercialRegNumber', 'companyName', 'crStartDate', 'crEndDate'];
+    // commercialRegNumber is used by Types 3, 4, 5
+    const commercialRegFields = ['commercialRegNumber'];
+    // companyName, crStartDate, crEndDate are only used by Types 3, 4
+    const businessOwnerFields = ['companyName', 'crStartDate', 'crEndDate'];
 
-    const registeredCompanyFields = ['commercialRegNumber', 'companyName', 'crStartDate', 'crEndDate'];
+    const registeredCompanyFields = ['companyName', 'crStartDate', 'crEndDate'];
 
     const unregisteredCompanyFields = ['unregisteredCompanyName', 'unregisteredCountryId', 'unregisteredCity',
       'unregisteredDescription', 'unregisteredCompanyAddress', 'countryId', 'description'];
@@ -741,7 +748,12 @@ export class PlaintiffFormComponent implements OnInit {
       fieldsToReset.push(...individualFields);
     }
 
-    // Types 3, 4 use business/company fields
+    // Types 3, 4, 5 use commercialRegNumber
+    if (![3, 4, 5].includes(typeId)) {
+      fieldsToReset.push(...commercialRegFields);
+    }
+
+    // Types 3, 4 use business/company fields (companyName, crStartDate, crEndDate)
     if (![3, 4].includes(typeId)) {
       fieldsToReset.push(...businessOwnerFields);
     }
@@ -873,9 +885,8 @@ export class PlaintiffFormComponent implements OnInit {
     console.log('Plaintiff data:', plaintiff);
     console.log('plaintiffTypeId from data:', plaintiff.plaintiffTypeId);
 
-    // IMPORTANT: Temporarily disable valueChanges to prevent updateFormValidation from running mid-patch
-    // We will manually call updateFormValidation after patching
-    const typeControl = this.plaintiffForm.get('plaintiffTypeId');
+    // Set flag to prevent resetTypeSpecificFields from clearing values during patch
+    this.isPatching = true;
 
     // Patch all form fields from plaintiff data
     this.plaintiffForm.patchValue({
@@ -898,14 +909,13 @@ export class PlaintiffFormComponent implements OnInit {
       identityExpiryDate: plaintiff.identityExpiryDate,
       mobileNumber: plaintiff.mobileNumber,
       email: plaintiff.email,
-      isDisabled: plaintiff.isDisabled,
 
       // Employment Data (Types 1, 3)
       employmentStatusId: plaintiff.employmentStatusId,
       employer: plaintiff.employer,
       profession: plaintiff.profession,
 
-      // Commercial Registration (Types 3, 4)
+      // Commercial Registration (Types 3, 4, 5)
       commercialRegNumber: plaintiff.commercialRegNumber,
       companyName: plaintiff.companyName,
       crStartDate: plaintiff.crStartDate,
@@ -932,10 +942,11 @@ export class PlaintiffFormComponent implements OnInit {
       waqfDescription: plaintiff.waqfDescription,
 
       // Unregistered Company (Type 5)
+      unregisteredCompanyName: plaintiff.companyName,  // Backend uses companyName for all company types
       unregisteredCompanyAddress: plaintiff.unregisteredCompanyAddress,
-      countryId: plaintiff.countryId,
+      unregisteredCountryId: plaintiff.countryId,
       unregisteredCity: plaintiff.unregisteredCompanyCity,
-      description: plaintiff.description,
+      unregisteredDescription: plaintiff.description,
 
       // Step 4: Additional Data
       isApplicant: plaintiff.isApplicant,
@@ -1043,6 +1054,9 @@ export class PlaintiffFormComponent implements OnInit {
         this.plaintiffForm.get('waqfAgencyName')?.setValue(plaintiff.waqfAgencyName);
       }
     }
+
+    // Reset patching flag after form population is complete
+    this.isPatching = false;
   }
 
   onLookupIdentity(): void {
@@ -1265,6 +1279,16 @@ export class PlaintiffFormComponent implements OnInit {
     console.log('plaintiffId:', this.plaintiffId);
     console.log('formValue:', JSON.stringify(formValue, null, 2));
 
+    // Type 5 debug logging
+    if (formValue.plaintiffTypeId === 5) {
+      console.log('=== TYPE 5 FIELDS BEING SENT ===');
+      console.log('countryId:', formValue.countryId, 'type:', typeof formValue.countryId);
+      console.log('unregisteredCompanyCity:', formValue.unregisteredCompanyCity);
+      console.log('description:', formValue.description);
+      console.log('companyName:', formValue.companyName);
+      console.log('commercialRegNumber:', formValue.commercialRegNumber);
+    }
+
     if (this.plaintiffId) {
       // Update existing plaintiff
       this.plaintiffService.updatePlaintiff(this.plaintiffId, formValue).subscribe({
@@ -1364,6 +1388,16 @@ export class PlaintiffFormComponent implements OnInit {
     console.log('=== WAQF ADDRESS AFTER CLEAN ===');
     console.log('waqfAddress (cleaned):', JSON.stringify(formValue.waqfAddress));
 
+    // Format all date fields as local YYYY-MM-DD strings to avoid timezone shift
+    // (JavaScript's toJSON() converts to UTC which shifts dates by one day)
+    formValue.birthDate = this.formatDateToLocalString(formValue.birthDate);
+    formValue.identityIssueDate = this.formatDateToLocalString(formValue.identityIssueDate);
+    formValue.identityExpiryDate = this.formatDateToLocalString(formValue.identityExpiryDate);
+    formValue.crStartDate = this.formatDateToLocalString(formValue.crStartDate);
+    formValue.crEndDate = this.formatDateToLocalString(formValue.crEndDate);
+    formValue.deedDate = this.formatDateToLocalString(formValue.deedDate);
+    formValue.licenseDate = this.formatDateToLocalString(formValue.licenseDate);
+
     // Clean up type-specific fields based on plaintiff type to avoid FK constraint violations
     const typeId = formValue.plaintiffTypeId;
 
@@ -1382,9 +1416,13 @@ export class PlaintiffFormComponent implements OnInit {
       formValue.identityExpiryDate = null;
     }
 
-    // Type 3 (Business Owner) & Type 4 (Registered Company) fields
-    if (![3, 4].includes(typeId)) {
+    // commercialRegNumber is used by Types 3, 4, 5
+    if (![3, 4, 5].includes(typeId)) {
       formValue.commercialRegNumber = null;
+    }
+
+    // Type 3 (Business Owner) & Type 4 (Registered Company) CR date fields
+    if (![3, 4].includes(typeId)) {
       formValue.crStartDate = null;
       formValue.crEndDate = null;
     }
@@ -1395,6 +1433,7 @@ export class PlaintiffFormComponent implements OnInit {
       formValue.companyName = formValue.unregisteredCompanyName;
       // Also map other Type 5 fields to backend expected names
       formValue.countryId = formValue.unregisteredCountryId;
+      formValue.unregisteredCompanyCity = formValue.unregisteredCity;
       formValue.description = formValue.unregisteredDescription;
     }
 
@@ -1450,6 +1489,39 @@ export class PlaintiffFormComponent implements OnInit {
       return null;
     }
     return address;
+  }
+
+  /**
+   * Formats a Date object to local YYYY-MM-DD string to avoid timezone shift.
+   * JavaScript's toJSON() converts dates to UTC which can shift the date by one day.
+   * This method extracts the local date components instead.
+   */
+  private formatDateToLocalString(date: any): string | null {
+    if (!date) {
+      return null;
+    }
+
+    // If it's already a string, return as-is (may already be formatted)
+    if (typeof date === 'string') {
+      // If it's already in YYYY-MM-DD format, return as-is
+      if (/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+        return date;
+      }
+      // If it's an ISO string, extract the local date
+      date = new Date(date);
+    }
+
+    // Ensure it's a valid Date object
+    if (!(date instanceof Date) || isNaN(date.getTime())) {
+      return null;
+    }
+
+    // Extract local date components (not UTC)
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+
+    return `${year}-${month}-${day}`;
   }
 
   /**

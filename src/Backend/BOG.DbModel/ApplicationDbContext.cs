@@ -67,6 +67,7 @@ public class ApplicationDbContext : DbContext
     public DbSet<LicenseSource> LicenseSources { get; set; }
     public DbSet<Country> Countries { get; set; }
     public DbSet<District> Districts { get; set; }
+    public DbSet<Nationality> Nationalities { get; set; }
 
     #endregion
 
@@ -801,8 +802,56 @@ public class ApplicationDbContext : DbContext
             entity.Property(e => e.IdentityNumber).HasMaxLength(20);
             entity.Property(e => e.AddressText).HasMaxLength(500);
             entity.Property(e => e.CommercialRegNumber).HasMaxLength(20);
+            entity.Property(e => e.CompanyName).HasMaxLength(200);
             entity.Property(e => e.Headquarters).HasMaxLength(200);
             entity.Property(e => e.AdditionalStatement).HasMaxLength(4000);
+            // Registered Company (Type 2) fields
+            entity.Property(e => e.RegCompanyDistrict).HasMaxLength(100);
+            entity.Property(e => e.RegCompanyStreet).HasMaxLength(200);
+            entity.Property(e => e.RegCompanyBuildingNumber).HasMaxLength(4);
+            entity.Property(e => e.RegCompanyUnitNumber).HasMaxLength(20);
+            entity.Property(e => e.RegCompanyPostalCode).HasMaxLength(5);
+            entity.Property(e => e.RegCompanyAdditionalCode).HasMaxLength(4);
+            // Unregistered Company (Type 4) fields
+            entity.Property(e => e.City).HasMaxLength(100);
+            entity.Property(e => e.Description).HasMaxLength(1000);
+            // Waqf (Type 7) fields
+            entity.Property(e => e.WaqfName).HasMaxLength(200);
+            entity.Property(e => e.CourtDeedNumber).HasMaxLength(10);
+            entity.Property(e => e.DeedSource).HasMaxLength(100);
+            entity.Property(e => e.WaqfAgencyName).HasMaxLength(200);
+            entity.Property(e => e.WaqfDistrict).HasMaxLength(100);
+            entity.Property(e => e.WaqfStreet).HasMaxLength(200);
+            entity.Property(e => e.WaqfBuildingNumber).HasMaxLength(4);
+            entity.Property(e => e.WaqfUnitNumber).HasMaxLength(20);
+            entity.Property(e => e.WaqfPostalCode).HasMaxLength(5);
+            entity.Property(e => e.WaqfAdditionalCode).HasMaxLength(4);
+            entity.Property(e => e.WaqfAddressDescription).HasMaxLength(500);
+            // NGO (Type 6) fields
+            entity.Property(e => e.LicenseNumber).HasMaxLength(10);
+            entity.Property(e => e.NGOName).HasMaxLength(200);
+            entity.Property(e => e.NGODistrict).HasMaxLength(100);
+            entity.Property(e => e.NGOStreet).HasMaxLength(200);
+            entity.Property(e => e.NGOBuildingNumber).HasMaxLength(4);
+            entity.Property(e => e.NGOUnitNumber).HasMaxLength(20);
+            entity.Property(e => e.NGOPostalCode).HasMaxLength(5);
+            entity.Property(e => e.NGOAdditionalCode).HasMaxLength(4);
+            // Individual (Type 1) fields
+            entity.Property(e => e.FirstName).HasMaxLength(100);
+            entity.Property(e => e.FatherName).HasMaxLength(100);
+            entity.Property(e => e.GrandfatherName).HasMaxLength(100);
+            entity.Property(e => e.TribeName).HasMaxLength(100);
+            entity.Property(e => e.FamilyName).HasMaxLength(100);
+            entity.Property(e => e.MobileNumber).HasMaxLength(20);
+            entity.Property(e => e.Email).HasMaxLength(255);
+            entity.Property(e => e.IndDistrict).HasMaxLength(100);
+            entity.Property(e => e.IndStreet).HasMaxLength(200);
+            entity.Property(e => e.IndBuildingNumber).HasMaxLength(4);
+            entity.Property(e => e.IndUnitNumber).HasMaxLength(4);
+            entity.Property(e => e.IndPostalCode).HasMaxLength(5);
+            entity.Property(e => e.IndAdditionalCode).HasMaxLength(4);
+            entity.Property(e => e.Employer).HasMaxLength(200);
+            entity.Property(e => e.Occupation).HasMaxLength(200);
             entity.Property(e => e.IsActive).HasDefaultValue(true);
             entity.Property(e => e.IsDeleted).HasDefaultValue(false);
 
@@ -829,6 +878,70 @@ public class ApplicationDbContext : DbContext
             entity.HasOne(e => e.GovernmentAgency)
                 .WithMany()
                 .HasForeignKey(e => e.GovernmentAgencyId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Registered Company (Type 2) navigation properties
+            entity.HasOne(e => e.RegCompanyRegion)
+                .WithMany()
+                .HasForeignKey(e => e.RegCompanyRegionId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(e => e.RegCompanyCity)
+                .WithMany()
+                .HasForeignKey(e => e.RegCompanyCityId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(e => e.Country)
+                .WithMany()
+                .HasForeignKey(e => e.CountryId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Waqf (Type 7) navigation properties
+            entity.HasOne(e => e.WaqfRegion)
+                .WithMany()
+                .HasForeignKey(e => e.WaqfRegionId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(e => e.WaqfCity)
+                .WithMany()
+                .HasForeignKey(e => e.WaqfCityId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // NGO (Type 6) navigation properties
+            entity.HasOne(e => e.LicenseSource)
+                .WithMany()
+                .HasForeignKey(e => e.LicenseSourceId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(e => e.NGORegion)
+                .WithMany()
+                .HasForeignKey(e => e.NGORegionId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(e => e.NGOCity)
+                .WithMany()
+                .HasForeignKey(e => e.NGOCityId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(e => e.IndRegion)
+                .WithMany()
+                .HasForeignKey(e => e.IndRegionId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(e => e.IndCity)
+                .WithMany()
+                .HasForeignKey(e => e.IndCityId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Work address (Individual Type 1, Private employment)
+            entity.HasOne(e => e.WorkRegion)
+                .WithMany()
+                .HasForeignKey(e => e.WorkRegionId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(e => e.WorkCity)
+                .WithMany()
+                .HasForeignKey(e => e.WorkCityId)
                 .OnDelete(DeleteBehavior.Restrict);
         });
 
@@ -935,14 +1048,15 @@ public class ApplicationDbContext : DbContext
             new PlaintiffType { Id = 8, Name = "Waqf", NameAr = "وقف", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now }
         );
 
-        // DefendantTypes (6 types)
+        // DefendantTypes (7 types) - matching defendant-user-stories-plan.html
         modelBuilder.Entity<DefendantType>().HasData(
             new DefendantType { Id = 1, Name = "Individual", NameAr = "فرد", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
-            new DefendantType { Id = 2, Name = "Company", NameAr = "شركة", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
+            new DefendantType { Id = 2, Name = "RegisteredCompany", NameAr = "شركة مسجلة في المملكة", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
             new DefendantType { Id = 3, Name = "GovernmentAgency", NameAr = "جهة حكومية", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
-            new DefendantType { Id = 4, Name = "Society", NameAr = "جمعية", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
-            new DefendantType { Id = 5, Name = "Waqf", NameAr = "وقف", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
-            new DefendantType { Id = 6, Name = "Unknown", NameAr = "مجهول", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now }
+            new DefendantType { Id = 4, Name = "UnregisteredCompany", NameAr = "شركة غير مسجلة في المملكة", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
+            new DefendantType { Id = 5, Name = "BusinessOwner", NameAr = "صاحب مؤسسة", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
+            new DefendantType { Id = 6, Name = "NGO", NameAr = "جمعية/مؤسسة أهلية", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
+            new DefendantType { Id = 7, Name = "Waqf", NameAr = "وقف", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now }
         );
 
         // RepresentativeTypes (9 types)
@@ -1077,6 +1191,25 @@ public class ApplicationDbContext : DbContext
             // Dammam districts
             new District { Id = 9, Name = "Al Faisaliyah", NameAr = "الفيصلية", CityId = 5, IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
             new District { Id = 10, Name = "Al Anoud", NameAr = "العنود", CityId = 5, IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now }
+        );
+
+        // GovernmentAgencies (الجهات الحكومية)
+        modelBuilder.Entity<GovernmentAgency>().HasData(
+            new GovernmentAgency { Id = 1, Name = "Ministry of Justice", NameAr = "وزارة العدل", Code = "MOJ", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
+            new GovernmentAgency { Id = 2, Name = "Ministry of Interior", NameAr = "وزارة الداخلية", Code = "MOI", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
+            new GovernmentAgency { Id = 3, Name = "Ministry of Finance", NameAr = "وزارة المالية", Code = "MOF", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
+            new GovernmentAgency { Id = 4, Name = "Ministry of Health", NameAr = "وزارة الصحة", Code = "MOH", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
+            new GovernmentAgency { Id = 5, Name = "Ministry of Education", NameAr = "وزارة التعليم", Code = "MOE", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
+            new GovernmentAgency { Id = 6, Name = "Ministry of Commerce", NameAr = "وزارة التجارة", Code = "MOC", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
+            new GovernmentAgency { Id = 7, Name = "Ministry of Human Resources", NameAr = "وزارة الموارد البشرية والتنمية الاجتماعية", Code = "HRSD", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
+            new GovernmentAgency { Id = 8, Name = "Ministry of Transport", NameAr = "وزارة النقل والخدمات اللوجستية", Code = "MOT", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
+            new GovernmentAgency { Id = 9, Name = "Ministry of Municipal Affairs", NameAr = "وزارة الشؤون البلدية والقروية والإسكان", Code = "MOMRA", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
+            new GovernmentAgency { Id = 10, Name = "Ministry of Environment", NameAr = "وزارة البيئة والمياه والزراعة", Code = "MEWA", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
+            new GovernmentAgency { Id = 11, Name = "General Authority of Zakat and Tax", NameAr = "هيئة الزكاة والضريبة والجمارك", Code = "ZATCA", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
+            new GovernmentAgency { Id = 12, Name = "General Organization for Social Insurance", NameAr = "المؤسسة العامة للتأمينات الاجتماعية", Code = "GOSI", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
+            new GovernmentAgency { Id = 13, Name = "Saudi Central Bank", NameAr = "البنك المركزي السعودي", Code = "SAMA", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
+            new GovernmentAgency { Id = 14, Name = "Capital Market Authority", NameAr = "هيئة السوق المالية", Code = "CMA", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
+            new GovernmentAgency { Id = 15, Name = "Royal Court", NameAr = "الديوان الملكي", Code = "RC", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now }
         );
     }
 }

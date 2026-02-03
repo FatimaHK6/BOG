@@ -92,15 +92,13 @@ public class RepresentativeCreateDTO
     #region Residence Address (عنوان السكن - 6.3.2)
 
     /// <summary>
-    /// Region ID for residence address (المنطقة) - Required per BC04.
+    /// Region ID for residence address (المنطقة).
     /// </summary>
-    [Required(ErrorMessage = "المنطقة مطلوبة")]
     public int? ResidenceRegionId { get; set; }
 
     /// <summary>
-    /// City ID for residence address (المدينة) - Required per BC04.
+    /// City ID for residence address (المدينة).
     /// </summary>
-    [Required(ErrorMessage = "المدينة مطلوبة")]
     public int? ResidenceCityId { get; set; }
 
     /// <summary>
@@ -148,7 +146,6 @@ public class RepresentativeCreateDTO
     /// <summary>
     /// Employment status (حالة العمل): government/private/unemployed.
     /// </summary>
-    [Required(ErrorMessage = "حالة العمل مطلوبة")]
     [StringLength(20)]
     public string? EmploymentStatus { get; set; }
 
@@ -161,7 +158,6 @@ public class RepresentativeCreateDTO
     /// <summary>
     /// Profession (المهنة).
     /// </summary>
-    [Required(ErrorMessage = "المهنة مطلوبة")]
     [StringLength(200)]
     public string? Profession { get; set; }
 

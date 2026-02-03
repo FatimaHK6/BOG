@@ -27,6 +27,9 @@ export interface Court extends LookupItem {
   cityId: number;
 }
 
+// License Sources (for NGO/Society)
+export interface LicenseSource extends LookupItem { }
+
 // Absher Verification Result
 export interface AbsherVerificationResult {
   isVerified: boolean;

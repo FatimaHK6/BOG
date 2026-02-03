@@ -15,6 +15,10 @@ const routes: Routes = [
   {
     path: 'plaintiffs',
     loadChildren: () => import('./plaintiffs/plaintiffs.module').then(m => m.PlaintiffsModule)
+  },
+  {
+    path: 'defendants',
+    loadChildren: () => import('./defendants/defendants.module').then(m => m.DefendantsModule)
   }
   // Future modules will be added here:
   // { path: 'representatives', loadChildren: () => import('./representatives/representatives.module').then(m => m.RepresentativesModule) },

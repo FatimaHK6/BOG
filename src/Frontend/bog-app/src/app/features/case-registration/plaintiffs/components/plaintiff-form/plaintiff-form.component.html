@@ -161,11 +161,6 @@
                 </mat-form-field>
               </div>
 
-              <!-- Disability -->
-              <div class="form-row">
-                <mat-checkbox formControlName="isDisabled">هل من ذوي الهمم؟</mat-checkbox>
-              </div>
-
               <!-- Employment Data (BC01/BC02) - Type 1 only (not required for Type 2 per SRS 6.3.10) -->
               <ng-container *ngIf="isIndividualWithId()">
                 <h4>بيانات العمل</h4>
@@ -374,9 +369,9 @@
                 </mat-form-field>
               </div>
 
-              <!-- عنوان الإقامة - Business Owner -->
+              <!-- بيانات عنوان صاحب المؤسسة - Business Owner -->
               <div class="address-section" formGroupName="residenceAddress">
-                <h4>عنوان الإقامة</h4>
+                <h4>بيانات عنوان صاحب المؤسسة</h4>
                 <div class="form-row">
                   <mat-form-field appearance="outline" class="form-field">
                     <mat-label>المنطقة</mat-label>
@@ -432,9 +427,9 @@
                 </div>
               </div>
 
-              <!-- عنوان العمل - Business Owner BC02 -->
+              <!-- عمل صاحب المؤسسة - Business Owner BC02 -->
               <div class="address-section" formGroupName="workAddress" *ngIf="showWorkAddress">
-                <h4>عنوان العمل</h4>
+                <h4>عمل صاحب المؤسسة</h4>
                 <div class="form-row">
                   <mat-form-field appearance="outline" class="form-field">
                     <mat-label>المنطقة</mat-label>
@@ -653,11 +648,20 @@
             <ng-container *ngIf="isUnregisteredCompany()">
               <div class="form-row">
                 <mat-form-field appearance="outline" class="form-field">
+                  <mat-label>رقم السجل التجاري</mat-label>
+                  <input matInput formControlName="commercialRegNumber" required placeholder="10 أرقام" maxlength="20">
+                  <mat-error *ngIf="plaintiffForm.get('commercialRegNumber')?.hasError('required')">رقم السجل التجاري مطلوب</mat-error>
+                  <mat-error *ngIf="plaintiffForm.get('commercialRegNumber')?.hasError('maxlength')">رقم السجل التجاري يجب ألا يتجاوز 20 حرف</mat-error>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="form-field">
                   <mat-label>اسم الشركة</mat-label>
                   <input matInput formControlName="unregisteredCompanyName" required>
                   <mat-error>اسم الشركة مطلوب</mat-error>
                 </mat-form-field>
+              </div>
 
+              <div class="form-row">
                 <mat-form-field appearance="outline" class="form-field">
                   <mat-label>الدولة</mat-label>
                   <mat-select formControlName="unregisteredCountryId" required>
@@ -941,8 +945,8 @@
               </div>
             </ng-container>
 
-            <!-- Contact Information - Hidden for Waqf (Type 9) -->
-            <ng-container *ngIf="!isWaqf()">
+            <!-- Contact Information - Hidden for Waqf (Type 8), NGO (Type 7), Government Agency (Type 6), Registered Company (Type 4), and Unregistered Company (Type 5) -->
+            <ng-container *ngIf="!isWaqf() && !isNGO() && !isGovernmentAgency() && !isRegisteredCompany() && !isUnregisteredCompany()">
               <h4>بيانات التواصل</h4>
               <div class="form-row">
                 <mat-form-field appearance="outline" class="form-field">
@@ -1098,7 +1102,7 @@
         <div class="step-actions">
           <button mat-button (click)="onCancel()">إلغاء</button>
           <span class="spacer"></span>
-          <button mat-raised-button color="primary" (click)="onNextStep()">التالي</button>
+          <button mat-raised-button class="primary-btn" (click)="onNextStep()">التالي</button>
         </div>
       </mat-step>
 
@@ -1112,7 +1116,7 @@
             </div>
             <button mat-flat-button class="add-representative-btn" (click)="onAddRepresentative()" *ngIf="!isViewMode">
               <mat-icon>person_add</mat-icon>
-              <span>إضافة ممثل</span>
+              <span>إضافة ممثّل للمدّعي</span>
             </button>
           </div>
 
@@ -1122,7 +1126,7 @@
             <p>لا يوجد ممثلين</p>
             <button mat-flat-button class="add-representative-btn" (click)="onAddRepresentative()" *ngIf="!isViewMode">
               <mat-icon>person_add</mat-icon>
-              <span>إضافة ممثل</span>
+              <span>إضافة ممثّل للمدّعي</span>
             </button>
           </div>
 
@@ -1172,7 +1176,7 @@
         <div class="step-actions">
           <button mat-button (click)="onPreviousStep()">السابق</button>
           <span class="spacer"></span>
-          <button mat-raised-button color="primary" (click)="onNextStep()">التالي</button>
+          <button mat-raised-button class="primary-btn" (click)="onNextStep()">التالي</button>
         </div>
       </mat-step>
 
@@ -1195,7 +1199,7 @@
         <div class="step-actions">
           <button mat-button (click)="onPreviousStep()">السابق</button>
           <span class="spacer"></span>
-          <button mat-raised-button color="primary" (click)="onNextStep()">التالي</button>
+          <button mat-raised-button class="primary-btn" (click)="onNextStep()">التالي</button>
         </div>
       </mat-step>
 
@@ -1288,7 +1292,7 @@
           <button mat-button (click)="onCancel()" *ngIf="isViewMode">
             العودة للقائمة
           </button>
-          <button mat-raised-button color="primary" (click)="onSave()" [disabled]="isSaving" *ngIf="!isViewMode">
+          <button mat-raised-button class="primary-btn" (click)="onSave()" [disabled]="isSaving" *ngIf="!isViewMode">
             <mat-spinner *ngIf="isSaving" diameter="20"></mat-spinner>
             <span *ngIf="!isSaving">{{ plaintiffId ? 'حفظ التعديلات' : 'حفظ المدعي' }}</span>
           </button>

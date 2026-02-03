@@ -1,0 +1,493 @@
+<div class="defendant-form-container">
+  <!-- Header -->
+  <div class="form-header">
+    <h2 class="form-title">{{ isViewMode ? 'عرض مدعى عليه - فرد' : (isEditMode ? 'تعديل مدعى عليه - فرد' : 'إضافة مدعى عليه - فرد') }}</h2>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="isLoading" class="loading-container">
+    <mat-spinner diameter="40"></mat-spinner>
+  </div>
+
+  <!-- Form -->
+  <mat-card *ngIf="!isLoading">
+    <mat-card-content>
+      <form [formGroup]="form" (ngSubmit)="onSubmit()">
+
+        <div class="form-layout">
+          <!-- Internal Tabs (Left Side) -->
+          <div class="form-tabs">
+            <button type="button" class="tab-btn" [class.active]="activeTab === 0"
+                    [class.has-error]="hasTab1Errors()"
+                    (click)="setActiveTab(0)">
+              بيانات شخصية
+            </button>
+            <button type="button" class="tab-btn" [class.active]="activeTab === 1"
+                    [class.has-error]="hasTab2Errors()"
+                    (click)="setActiveTab(1)">
+              بيانات مكان الإقامة
+            </button>
+            <button type="button" class="tab-btn" [class.active]="activeTab === 2"
+                    [class.has-error]="hasTab3Errors()"
+                    (click)="setActiveTab(2)">
+              بيانات جهة العمل
+            </button>
+          </div>
+
+          <!-- Form Content (Right Side) -->
+          <div class="form-content">
+
+            <!-- Tab 1: بيانات شخصية -->
+            <div class="form-section" *ngIf="activeTab === 0">
+
+              <div class="form-row two-columns">
+                <!-- Identity Type -->
+                <mat-form-field appearance="outline">
+                  <mat-label>نوع الهوية</mat-label>
+                  <mat-select formControlName="identityTypeId">
+                    <mat-option [value]="null">-- اختر --</mat-option>
+                    <mat-option *ngFor="let type of identityTypes" [value]="type.id">
+                      {{ type.nameAr }}
+                    </mat-option>
+                  </mat-select>
+                </mat-form-field>
+
+                <!-- Identity Number -->
+                <mat-form-field appearance="outline">
+                  <mat-label>رقم الهوية</mat-label>
+                  <input matInput formControlName="identityNumber"
+                         maxlength="10"
+                         placeholder="أدخل رقم الهوية (10 أرقام)">
+                  <mat-hint align="end">{{ form.value.identityNumber?.length || 0 }} / 10</mat-hint>
+                  <mat-error *ngIf="f['identityNumber'].hasError('pattern')">
+                    رقم الهوية يجب أن يكون 10 أرقام
+                  </mat-error>
+                </mat-form-field>
+              </div>
+
+              <!-- Absher Fetch Button -->
+              <div class="form-row" *ngIf="!isViewMode">
+                <button type="button" mat-stroked-button color="primary"
+                        (click)="onFetchAbsherData()"
+                        [disabled]="!f['identityNumber'].value || !f['identityTypeId'].value || isFetchingAbsher">
+                  <mat-spinner *ngIf="isFetchingAbsher" diameter="18" class="inline-spinner"></mat-spinner>
+                  <span *ngIf="!isFetchingAbsher">جلب البيانات من أبشر</span>
+                </button>
+              </div>
+
+
+              <div class="form-row two-columns">
+                <!-- First Name -->
+                <mat-form-field appearance="outline" [class.locked-field]="isAbsherLocked">
+                  <mat-label>الاسم الأول</mat-label>
+                  <input matInput formControlName="firstName"
+                         maxlength="100"
+                         placeholder="أدخل الاسم الأول"
+                         [readonly]="isAbsherLocked">
+                  <mat-error *ngIf="f['firstName'].hasError('required')">
+                    الاسم الأول مطلوب
+                  </mat-error>
+                </mat-form-field>
+
+                <!-- Father Name -->
+                <mat-form-field appearance="outline" [class.locked-field]="isAbsherLocked">
+                  <mat-label>اسم الأب</mat-label>
+                  <input matInput formControlName="fatherName"
+                         maxlength="100"
+                         placeholder="أدخل اسم الأب"
+                         [readonly]="isAbsherLocked">
+                  <mat-error *ngIf="f['fatherName'].hasError('required')">
+                    اسم الأب مطلوب عند اختيار هوية وطنية
+                  </mat-error>
+                </mat-form-field>
+              </div>
+
+              <div class="form-row two-columns">
+                <!-- Grandfather Name -->
+                <mat-form-field appearance="outline" [class.locked-field]="isAbsherLocked">
+                  <mat-label>اسم الجد</mat-label>
+                  <input matInput formControlName="grandfatherName"
+                         maxlength="100"
+                         placeholder="أدخل اسم الجد"
+                         [readonly]="isAbsherLocked">
+                </mat-form-field>
+
+                <!-- Tribe Name -->
+                <mat-form-field appearance="outline" [class.locked-field]="isAbsherLocked">
+                  <mat-label>اسم الفخذ</mat-label>
+                  <input matInput formControlName="tribeName"
+                         maxlength="100"
+                         placeholder="أدخل اسم الفخذ"
+                         [readonly]="isAbsherLocked">
+                </mat-form-field>
+              </div>
+
+              <div class="form-row two-columns">
+                <!-- Family Name -->
+                <mat-form-field appearance="outline" [class.locked-field]="isAbsherLocked">
+                  <mat-label>اسم العائلة</mat-label>
+                  <input matInput formControlName="familyName"
+                         maxlength="100"
+                         placeholder="أدخل اسم العائلة"
+                         [readonly]="isAbsherLocked">
+                  <mat-error *ngIf="f['familyName'].hasError('required')">
+                    اسم العائلة مطلوب
+                  </mat-error>
+                </mat-form-field>
+
+                <!-- Birth Date -->
+                <mat-form-field appearance="outline" [class.locked-field]="isAbsherLocked">
+                  <mat-label>تاريخ الميلاد</mat-label>
+                  <input matInput [matDatepicker]="birthPicker" formControlName="birthDate"
+                         placeholder="اختر التاريخ" [max]="today" [readonly]="isAbsherLocked">
+                  <mat-datepicker-toggle matIconSuffix [for]="birthPicker" [disabled]="isAbsherLocked"></mat-datepicker-toggle>
+                  <mat-datepicker #birthPicker></mat-datepicker>
+                </mat-form-field>
+              </div>
+
+              <div class="form-row two-columns">
+                <!-- Gender -->
+                <mat-form-field appearance="outline">
+                  <mat-label>الجنس</mat-label>
+                  <mat-select formControlName="genderId">
+                    <mat-option *ngFor="let gender of genders" [value]="gender.id">
+                      {{ gender.nameAr }}
+                    </mat-option>
+                  </mat-select>
+                  <mat-error *ngIf="f['genderId'].hasError('required')">
+                    الجنس مطلوب
+                  </mat-error>
+                </mat-form-field>
+
+                <!-- Nationality -->
+                <mat-form-field appearance="outline">
+                  <mat-label>الجنسية</mat-label>
+                  <mat-select formControlName="nationalityId">
+                    <mat-option *ngFor="let nat of filteredNationalities" [value]="nat.id">
+                      {{ nat.nameAr }}
+                    </mat-option>
+                  </mat-select>
+                  <mat-error *ngIf="f['nationalityId'].hasError('required')">
+                    الجنسية مطلوبة
+                  </mat-error>
+                </mat-form-field>
+              </div>
+
+              <div class="form-row two-columns">
+                <!-- Mobile Number -->
+                <mat-form-field appearance="outline">
+                  <mat-label>رقم الجوال</mat-label>
+                  <input matInput formControlName="mobileNumber"
+                         maxlength="10"
+                         placeholder="05XXXXXXXX">
+                  <mat-hint align="end">{{ form.value.mobileNumber?.length || 0 }} / 10</mat-hint>
+                  <mat-error *ngIf="f['mobileNumber'].hasError('required')">
+                    رقم الجوال مطلوب
+                  </mat-error>
+                  <mat-error *ngIf="f['mobileNumber'].hasError('pattern')">
+                    رقم الجوال يجب أن يكون 10 أرقام ويبدأ بـ 05
+                  </mat-error>
+                </mat-form-field>
+
+                <!-- Email -->
+                <mat-form-field appearance="outline">
+                  <mat-label>البريد الإلكتروني</mat-label>
+                  <input matInput formControlName="email"
+                         type="email"
+                         placeholder="example@email.com">
+                  <mat-error *ngIf="f['email'].hasError('email')">
+                    صيغة البريد الإلكتروني غير صحيحة
+                  </mat-error>
+                </mat-form-field>
+              </div>
+            </div>
+
+            <!-- Tab 2: بيانات مكان الإقامة -->
+            <div class="form-section" *ngIf="activeTab === 1">
+
+              <div class="form-row two-columns">
+                <!-- Region -->
+                <mat-form-field appearance="outline">
+                  <mat-label>المنطقة</mat-label>
+                  <mat-select formControlName="indRegionId"
+                              (selectionChange)="onRegionChange($event.value)">
+                    <mat-option [value]="null">-- اختر --</mat-option>
+                    <mat-option *ngFor="let region of regions" [value]="region.id">
+                      {{ region.nameAr }}
+                    </mat-option>
+                  </mat-select>
+                  <mat-error *ngIf="f['indRegionId'].hasError('required')">
+                    المنطقة مطلوبة
+                  </mat-error>
+                </mat-form-field>
+
+                <!-- City -->
+                <mat-form-field appearance="outline">
+                  <mat-label>المدينة</mat-label>
+                  <mat-select formControlName="indCityId">
+                    <mat-option [value]="null">-- اختر --</mat-option>
+                    <mat-option *ngFor="let city of cities" [value]="city.id">
+                      {{ city.nameAr }}
+                    </mat-option>
+                  </mat-select>
+                  <mat-error *ngIf="f['indCityId'].hasError('required')">
+                    المدينة مطلوبة
+                  </mat-error>
+                </mat-form-field>
+              </div>
+
+              <div class="form-row">
+                <!-- District -->
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>الحي</mat-label>
+                  <input matInput formControlName="indDistrict"
+                         maxlength="100"
+                         placeholder="أدخل اسم الحي">
+                </mat-form-field>
+              </div>
+
+              <div class="form-row">
+                <!-- Street -->
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>الشارع</mat-label>
+                  <input matInput formControlName="indStreet"
+                         maxlength="200"
+                         placeholder="أدخل اسم الشارع">
+                </mat-form-field>
+              </div>
+
+              <div class="form-row two-columns">
+                <!-- Building Number -->
+                <mat-form-field appearance="outline">
+                  <mat-label>رقم المبنى</mat-label>
+                  <input matInput formControlName="indBuildingNumber"
+                         maxlength="4"
+                         placeholder="0000">
+                  <mat-error *ngIf="f['indBuildingNumber'].hasError('pattern')">
+                    يجب إدخال 4 أرقام فقط
+                  </mat-error>
+                </mat-form-field>
+
+                <!-- Unit Number -->
+                <mat-form-field appearance="outline">
+                  <mat-label>رقم الوحدة</mat-label>
+                  <input matInput formControlName="indUnitNumber"
+                         maxlength="4"
+                         placeholder="0000">
+                  <mat-error *ngIf="f['indUnitNumber'].hasError('pattern')">
+                    يجب إدخال 4 أرقام فقط
+                  </mat-error>
+                </mat-form-field>
+              </div>
+
+              <div class="form-row two-columns">
+                <!-- Postal Code -->
+                <mat-form-field appearance="outline">
+                  <mat-label>الرمز البريدي</mat-label>
+                  <input matInput formControlName="indPostalCode"
+                         maxlength="5"
+                         placeholder="00000">
+                  <mat-error *ngIf="f['indPostalCode'].hasError('pattern')">
+                    يجب إدخال 5 أرقام فقط
+                  </mat-error>
+                </mat-form-field>
+
+                <!-- Additional Code -->
+                <mat-form-field appearance="outline">
+                  <mat-label>الرمز الإضافي</mat-label>
+                  <input matInput formControlName="indAdditionalCode"
+                         maxlength="4"
+                         placeholder="0000">
+                  <mat-error *ngIf="f['indAdditionalCode'].hasError('pattern')">
+                    يجب إدخال 4 أرقام فقط
+                  </mat-error>
+                </mat-form-field>
+              </div>
+            </div>
+
+            <!-- Tab 3: بيانات جهة العمل -->
+            <div class="form-section" *ngIf="activeTab === 2">
+
+              <div class="form-row">
+                <!-- Employment Status -->
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>حالة العمل</mat-label>
+                  <mat-select formControlName="employmentStatusId">
+                    <mat-option [value]="null">-- اختر --</mat-option>
+                    <mat-option *ngFor="let status of employmentStatuses" [value]="status.id">
+                      {{ status.nameAr }}
+                    </mat-option>
+                  </mat-select>
+                </mat-form-field>
+              </div>
+
+              <!-- بيانات جهة العمل - تظهر فقط إذا حالة العمل = حكومي أو خاص -->
+              <ng-container *ngIf="showEmploymentFields">
+                <div class="form-row">
+                  <!-- Employer -->
+                  <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>جهة العمل</mat-label>
+                    <input matInput formControlName="employer"
+                           maxlength="200"
+                           placeholder="أدخل جهة العمل">
+                    <mat-error *ngIf="f['employer'].hasError('required')">
+                      جهة العمل مطلوبة
+                    </mat-error>
+                  </mat-form-field>
+                </div>
+
+                <div class="form-row">
+                  <!-- Occupation -->
+                  <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>المهنة</mat-label>
+                    <input matInput formControlName="occupation"
+                           maxlength="200"
+                           placeholder="أدخل المهنة">
+                    <mat-error *ngIf="f['occupation'].hasError('required')">
+                      المهنة مطلوبة
+                    </mat-error>
+                  </mat-form-field>
+                </div>
+              </ng-container>
+
+              <!-- عنوان العمل - يظهر فقط إذا حالة العمل = خاص (جميع الحقول إجبارية) -->
+              <ng-container *ngIf="showWorkAddressFields">
+                <h4 class="section-title">عنوان العمل</h4>
+
+                <div class="form-row two-columns">
+                  <!-- Work Region -->
+                  <mat-form-field appearance="outline">
+                    <mat-label>المنطقة</mat-label>
+                    <mat-select formControlName="workRegionId"
+                                (selectionChange)="onWorkRegionChange($event.value)">
+                      <mat-option [value]="null">-- اختر --</mat-option>
+                      <mat-option *ngFor="let region of regions" [value]="region.id">
+                        {{ region.nameAr }}
+                      </mat-option>
+                    </mat-select>
+                    <mat-error *ngIf="f['workRegionId'].hasError('required')">
+                      المنطقة مطلوبة
+                    </mat-error>
+                  </mat-form-field>
+
+                  <!-- Work City -->
+                  <mat-form-field appearance="outline">
+                    <mat-label>المدينة</mat-label>
+                    <mat-select formControlName="workCityId">
+                      <mat-option [value]="null">-- اختر --</mat-option>
+                      <mat-option *ngFor="let city of workCities" [value]="city.id">
+                        {{ city.nameAr }}
+                      </mat-option>
+                    </mat-select>
+                    <mat-error *ngIf="f['workCityId'].hasError('required')">
+                      المدينة مطلوبة
+                    </mat-error>
+                  </mat-form-field>
+                </div>
+
+                <div class="form-row">
+                  <!-- Work District -->
+                  <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>الحي</mat-label>
+                    <input matInput formControlName="workDistrict"
+                           maxlength="100"
+                           placeholder="أدخل اسم الحي">
+                    <mat-error *ngIf="f['workDistrict'].hasError('required')">
+                      الحي مطلوب
+                    </mat-error>
+                  </mat-form-field>
+                </div>
+
+                <div class="form-row">
+                  <!-- Work Street -->
+                  <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>الشارع</mat-label>
+                    <input matInput formControlName="workStreet"
+                           maxlength="200"
+                           placeholder="أدخل اسم الشارع">
+                    <mat-error *ngIf="f['workStreet'].hasError('required')">
+                      الشارع مطلوب
+                    </mat-error>
+                  </mat-form-field>
+                </div>
+
+                <div class="form-row two-columns">
+                  <!-- Work Building Number -->
+                  <mat-form-field appearance="outline">
+                    <mat-label>رقم المبنى</mat-label>
+                    <input matInput formControlName="workBuildingNumber"
+                           maxlength="4"
+                           placeholder="0000">
+                    <mat-error *ngIf="f['workBuildingNumber'].hasError('required')">
+                      رقم المبنى مطلوب
+                    </mat-error>
+                    <mat-error *ngIf="f['workBuildingNumber'].hasError('pattern')">
+                      يجب إدخال 4 أرقام فقط
+                    </mat-error>
+                  </mat-form-field>
+
+                  <!-- Work Unit Number -->
+                  <mat-form-field appearance="outline">
+                    <mat-label>رقم الوحدة</mat-label>
+                    <input matInput formControlName="workUnitNumber"
+                           maxlength="4"
+                           placeholder="0000">
+                    <mat-error *ngIf="f['workUnitNumber'].hasError('required')">
+                      رقم الوحدة مطلوب
+                    </mat-error>
+                    <mat-error *ngIf="f['workUnitNumber'].hasError('pattern')">
+                      يجب إدخال 4 أرقام فقط
+                    </mat-error>
+                  </mat-form-field>
+                </div>
+
+                <div class="form-row two-columns">
+                  <!-- Work Postal Code -->
+                  <mat-form-field appearance="outline">
+                    <mat-label>الرمز البريدي</mat-label>
+                    <input matInput formControlName="workPostalCode"
+                           maxlength="5"
+                           placeholder="00000">
+                    <mat-error *ngIf="f['workPostalCode'].hasError('required')">
+                      الرمز البريدي مطلوب
+                    </mat-error>
+                    <mat-error *ngIf="f['workPostalCode'].hasError('pattern')">
+                      يجب إدخال 5 أرقام فقط
+                    </mat-error>
+                  </mat-form-field>
+
+                  <!-- Work Additional Code -->
+                  <mat-form-field appearance="outline">
+                    <mat-label>الرمز الإضافي</mat-label>
+                    <input matInput formControlName="workAdditionalCode"
+                           maxlength="4"
+                           placeholder="0000">
+                    <mat-error *ngIf="f['workAdditionalCode'].hasError('required')">
+                      الرمز الإضافي مطلوب
+                    </mat-error>
+                    <mat-error *ngIf="f['workAdditionalCode'].hasError('pattern')">
+                      يجب إدخال 4 أرقام فقط
+                    </mat-error>
+                  </mat-form-field>
+                </div>
+              </ng-container>
+            </div>
+
+            <!-- Actions -->
+            <div class="form-actions">
+              <button mat-button type="button" (click)="onCancel()">
+                {{ isViewMode ? 'رجوع' : 'إلغاء' }}
+              </button>
+              <button *ngIf="!isViewMode" mat-raised-button type="submit" class="save-btn"
+                      [disabled]="isSaving">
+                <mat-spinner *ngIf="isSaving" diameter="20" class="inline-spinner"></mat-spinner>
+                <span *ngIf="!isSaving">حفظ المدعى عليه</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+      </form>
+    </mat-card-content>
+  </mat-card>
+</div>

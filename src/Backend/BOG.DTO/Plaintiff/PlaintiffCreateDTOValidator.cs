@@ -250,15 +250,15 @@ public class PlaintiffCreateDTOValidator : AbstractValidator<PlaintiffCreateDTO>
         // ===== Type 5: Unregistered Company (شركة غير مسجلة) - SRS Section 1.3 =====
         When(x => !x.IsDraft && x.PlaintiffTypeId == TypeUnregisteredCompany, () =>
         {
+            RuleFor(x => x.CommercialRegNumber)
+                .NotEmpty().WithMessage("رقم السجل التجاري مطلوب")
+                .MaximumLength(20).WithMessage("رقم السجل التجاري يجب ألا يتجاوز 20 حرف");
+
             RuleFor(x => x.CompanyName)
                 .NotEmpty().WithMessage("اسم الشركة مطلوب")
                 .MaximumLength(200).WithMessage("اسم الشركة يجب ألا يتجاوز 200 حرف");
 
-            // No commercial registration required for unregistered company
-
-            RuleFor(x => x.MobileNumber)
-                .NotEmpty().WithMessage("رقم الجوال مطلوب")
-                .Matches(@"^05\d{8}$").WithMessage("رقم الجوال يجب أن يبدأ بـ 05 ويتكون من 10 أرقام");
+            // No contact information section for Unregistered Company
         });
 
         // ===== Type 6: Government Agency (جهة حكومية) - SRS Section 1.3 =====
@@ -353,7 +353,7 @@ public class PlaintiffCreateDTOValidator : AbstractValidator<PlaintiffCreateDTO>
                 .WithMessage("تاريخ انتهاء الهوية يجب أن يكون أكبر من تاريخ الإصدار");
 
             RuleFor(x => x.CRStartDate)
-                .Must(date => !date.HasValue || date.Value <= DateTime.Today)
+                .Must(date => !date.HasValue || date.Value <= DateOnly.FromDateTime(DateTime.Today))
                 .WithMessage("تاريخ بداية السجل التجاري لا يمكن أن يكون في المستقبل");
 
             RuleFor(x => x.CREndDate)

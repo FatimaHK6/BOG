@@ -68,6 +68,18 @@ public class PlaintiffsController : ControllerBase
         _logger.LogWarning("=== CREATE PLAINTIFF API CALLED ===");
         _logger.LogWarning("RequestId: {RequestId}", requestId);
         _logger.LogWarning("DTO PlaintiffTypeId: {TypeId}", dto?.PlaintiffTypeId);
+
+        // Type 5 (Unregistered Company) fields - DEBUG
+        _logger.LogWarning("=== TYPE 5 FIELDS ===");
+        _logger.LogWarning("DTO CountryId: {CountryId}", dto?.CountryId);
+        _logger.LogWarning("DTO UnregisteredCompanyCity: {City}", dto?.UnregisteredCompanyCity);
+        _logger.LogWarning("DTO Description: {Desc}", dto?.Description);
+        _logger.LogWarning("DTO CompanyName: {Name}", dto?.CompanyName);
+        _logger.LogWarning("DTO CommercialRegNumber: {RegNum}", dto?.CommercialRegNumber);
+        _logger.LogWarning("DTO UnregisteredCompanyAddress: {Addr}", dto?.UnregisteredCompanyAddress);
+
+        // Type 8 (Waqf) fields
+        _logger.LogWarning("=== TYPE 8 FIELDS ===");
         _logger.LogWarning("DTO WaqfName: {WaqfName}", dto?.WaqfName);
         _logger.LogWarning("DTO CourtDeedNumber: {DeedNum}", dto?.CourtDeedNumber);
         _logger.LogWarning("DTO DeedDate: {DeedDate}", dto?.DeedDate);

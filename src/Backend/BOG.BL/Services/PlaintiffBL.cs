@@ -20,6 +20,7 @@ public class PlaintiffBL : IPlaintiffBL
 {
     private readonly IPlaintiffRepository _plaintiffRepository;
     private readonly ICaseRequestPlaintiffRepository _caseRequestPlaintiffRepository;
+    private readonly IRepresentativeRepository _representativeRepository;
     private readonly IAddressRepository _addressRepository;
     private readonly IAbsherService _absherService;
     private readonly IUnitOfWork _unitOfWork;
@@ -32,6 +33,7 @@ public class PlaintiffBL : IPlaintiffBL
     public PlaintiffBL(
         IPlaintiffRepository plaintiffRepository,
         ICaseRequestPlaintiffRepository caseRequestPlaintiffRepository,
+        IRepresentativeRepository representativeRepository,
         IAddressRepository addressRepository,
         IAbsherService absherService,
         IUnitOfWork unitOfWork,
@@ -39,6 +41,7 @@ public class PlaintiffBL : IPlaintiffBL
     {
         _plaintiffRepository = plaintiffRepository ?? throw new ArgumentNullException(nameof(plaintiffRepository));
         _caseRequestPlaintiffRepository = caseRequestPlaintiffRepository ?? throw new ArgumentNullException(nameof(caseRequestPlaintiffRepository));
+        _representativeRepository = representativeRepository ?? throw new ArgumentNullException(nameof(representativeRepository));
         _addressRepository = addressRepository ?? throw new ArgumentNullException(nameof(addressRepository));
         _absherService = absherService ?? throw new ArgumentNullException(nameof(absherService));
         _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
@@ -182,6 +185,16 @@ public class PlaintiffBL : IPlaintiffBL
 
         // === DEBUG: Log before creating entity ===
         _logger.LogWarning("=== CREATING PLAINTIFF ENTITY ===");
+        _logger.LogWarning("PlaintiffTypeId: {TypeId}", dto.PlaintiffTypeId);
+
+        // Type 5 (Unregistered Company) fields - DEBUG
+        _logger.LogWarning("=== BL: TYPE 5 FIELDS FROM DTO ===");
+        _logger.LogWarning("BL DTO CountryId: {CountryId}", dto.CountryId);
+        _logger.LogWarning("BL DTO UnregisteredCompanyCity: {City}", dto.UnregisteredCompanyCity);
+        _logger.LogWarning("BL DTO Description: {Desc}", dto.Description);
+        _logger.LogWarning("BL DTO CompanyName: {Name}", dto.CompanyName);
+        _logger.LogWarning("BL DTO CommercialRegNumber: {RegNum}", dto.CommercialRegNumber);
+
         _logger.LogWarning("Waqf Fields - WaqfName: {WaqfName}, CourtDeedNumber: {Deed}, DeedDate: {Date}",
             dto.WaqfName, dto.CourtDeedNumber, dto.DeedDate);
         _logger.LogWarning("Waqf Fields - DeedSource: {Source}, OversightType: {Type}, Description: {Desc}",
@@ -259,6 +272,14 @@ public class PlaintiffBL : IPlaintiffBL
         // === DEBUG: Log after save ===
         _logger.LogWarning("=== PLAINTIFF SAVED TO DB ===");
         _logger.LogWarning("Rows saved: {Rows}, Plaintiff ID: {Id}", rowsSaved, plaintiff.Id);
+
+        // Type 5 (Unregistered Company) fields after save
+        _logger.LogWarning("=== BL: TYPE 5 FIELDS AFTER SAVE ===");
+        _logger.LogWarning("Saved CountryId: {CountryId}", plaintiff.CountryId);
+        _logger.LogWarning("Saved UnregisteredCompanyCity: {City}", plaintiff.UnregisteredCompanyCity);
+        _logger.LogWarning("Saved Description: {Desc}", plaintiff.Description);
+        _logger.LogWarning("Saved CompanyName: {Name}", plaintiff.CompanyName);
+
         _logger.LogWarning("Saved Waqf Fields - WaqfName: {WaqfName}, CourtDeedNumber: {Deed}",
             plaintiff.WaqfName, plaintiff.CourtDeedNumber);
         _logger.LogWarning("Saved Waqf Fields - WaqfAddressId: {AddressId}", plaintiff.WaqfAddressId);
@@ -273,6 +294,12 @@ public class PlaintiffBL : IPlaintiffBL
 
         await _caseRequestPlaintiffRepository.AddAsync(caseRequestPlaintiff, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        // Clear other applicants if this one is set as applicant
+        if (dto.IsApplicant)
+        {
+            await ClearOtherApplicantsAsync(plaintiff.Id, cancellationToken);
+        }
 
         // Fetch addresses from Absher if available (only if no addresses from form)
         bool hasAddressFromForm = residenceAddressId.HasValue || workAddressId.HasValue;
@@ -327,6 +354,48 @@ public class PlaintiffBL : IPlaintiffBL
             }
         }
 
+        // Create representatives if provided
+        if (dto.Representatives?.Any() == true)
+        {
+            _logger.LogInformation("Creating {Count} representatives for plaintiff {PlaintiffId}", dto.Representatives.Count, plaintiff.Id);
+
+            foreach (var repDto in dto.Representatives)
+            {
+                var representative = new Representative
+                {
+                    PlaintiffId = plaintiff.Id,
+                    RepresentativeTypeId = repDto.RepresentativeTypeId,
+                    IdentityTypeId = repDto.IdentityTypeId,
+                    IdentityNumber = repDto.IdentityNumber,
+                    FirstName = repDto.FirstName,
+                    FatherName = repDto.FatherName,
+                    GrandfatherName = repDto.GrandfatherName,
+                    FamilyName = repDto.FamilyName,
+                    ClanName = repDto.ClanName,
+                    BirthDate = repDto.BirthDate,
+                    Gender = repDto.Gender,
+                    NationalityId = repDto.NationalityId,
+                    IdentityIssueDate = repDto.IdentityIssueDate,
+                    IdentityExpiryDate = repDto.IdentityExpiryDate,
+                    MobileNumber = repDto.MobileNumber,
+                    Email = repDto.Email,
+                    AuthorizationNumber = repDto.AuthorizationNumber,
+                    AuthorizationDate = repDto.AuthorizationDate,
+                    AuthorizationSource = repDto.AuthorizationSource,
+                    AuthorizationSourceType = repDto.AuthorizationSourceType,
+                    GuardianshipType = repDto.GuardianshipType,
+                    DataSourceId = 2, // FromUser
+                    IsActive = true,
+                    CreatedDate = DateTime.UtcNow
+                };
+
+                await _representativeRepository.AddAsync(representative, cancellationToken);
+            }
+
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
+            _logger.LogInformation("Successfully created {Count} representatives", dto.Representatives.Count);
+        }
+
         return await GetByIdAsync(plaintiff.Id, cancellationToken) ?? throw new InvalidOperationException("Failed to create plaintiff");
     }
 
@@ -352,6 +421,71 @@ public class PlaintiffBL : IPlaintiffBL
         {
             _logger.LogInformation("Changing PlaintiffTypeId from {Old} to {New}", plaintiff.PlaintiffTypeId, dto.PlaintiffTypeId.Value);
             plaintiff.PlaintiffTypeId = dto.PlaintiffTypeId.Value;
+
+            // Clear type-specific fields when changing plaintiff type
+            var newTypeId = dto.PlaintiffTypeId.Value;
+
+            // Clear Government Agency fields if not Type 6
+            if (newTypeId != 6)
+            {
+                plaintiff.GovernmentAgencyId = null;
+                plaintiff.Headquarters = null;
+            }
+
+            // Clear Waqf fields if not Type 8
+            if (newTypeId != 8)
+            {
+                plaintiff.WaqfName = null;
+                plaintiff.WaqfAddressId = null;
+                plaintiff.WaqfAgencyName = null;
+                plaintiff.WaqfDescription = null;
+                plaintiff.WaqfOversightType = null;
+                plaintiff.CourtDeedNumber = null;
+                plaintiff.DeedDate = null;
+                plaintiff.DeedSource = null;
+            }
+
+            // Clear NGO fields if not Type 7
+            if (newTypeId != 7)
+            {
+                plaintiff.NGOName = null;
+                plaintiff.NGOAddressId = null;
+                plaintiff.LicenseNumber = null;
+                plaintiff.LicenseDate = null;
+                plaintiff.LicenseSourceId = null;
+            }
+
+            // Clear Company fields if not Type 4 or 5
+            if (newTypeId != 4 && newTypeId != 5)
+            {
+                plaintiff.CompanyName = null;
+                plaintiff.CompanyAddressId = null;
+                plaintiff.UnregisteredCompanyAddress = null;
+                plaintiff.UnregisteredCompanyCity = null;
+            }
+
+            // Clear Registered Company fields if not Type 4
+            if (newTypeId != 4)
+            {
+                plaintiff.CommercialRegNumber = null;
+                plaintiff.CRStartDate = null;
+                plaintiff.CREndDate = null;
+            }
+
+            // Clear Business Owner fields if not Type 3
+            if (newTypeId != 3)
+            {
+                plaintiff.BusinessAddressId = null;
+            }
+
+            // Clear Individual fields if not Type 1 or 2
+            if (newTypeId != 1 && newTypeId != 2)
+            {
+                plaintiff.EmploymentStatusId = null;
+                plaintiff.Employer = null;
+                plaintiff.Profession = null;
+                plaintiff.WorkAddressId = null;
+            }
         }
 
         // Update fields (only non-Absher fields can be updated if data is from Absher)
@@ -392,9 +526,20 @@ public class PlaintiffBL : IPlaintiffBL
         // Business/Company data
         if (dto.CompanyName != null) plaintiff.CompanyName = dto.CompanyName;
         if (dto.CommercialRegNumber != null) plaintiff.CommercialRegNumber = dto.CommercialRegNumber;
+        if (dto.CRStartDate.HasValue) plaintiff.CRStartDate = dto.CRStartDate;
+        if (dto.CREndDate.HasValue) plaintiff.CREndDate = dto.CREndDate;
+
+        // Unregistered Company (Type 5) specific fields
+        if (dto.CountryId.HasValue) plaintiff.CountryId = dto.CountryId > 0 ? dto.CountryId : null;
+        if (dto.UnregisteredCompanyCity != null) plaintiff.UnregisteredCompanyCity = dto.UnregisteredCompanyCity;
+        if (dto.Description != null) plaintiff.Description = dto.Description;
+
         if (dto.LicenseNumber != null) plaintiff.LicenseNumber = dto.LicenseNumber;
-        if (dto.LicenseSourceId.HasValue) plaintiff.LicenseSourceId = dto.LicenseSourceId;
-        if (dto.GovernmentAgencyId.HasValue) plaintiff.GovernmentAgencyId = dto.GovernmentAgencyId;
+        if (dto.LicenseSourceId.HasValue) plaintiff.LicenseSourceId = dto.LicenseSourceId > 0 ? dto.LicenseSourceId : null;
+        if (dto.NGOName != null) plaintiff.NGOName = dto.NGOName;
+        if (dto.LicenseDate.HasValue) plaintiff.LicenseDate = dto.LicenseDate;
+        // Treat GovernmentAgencyId = 0 as null to avoid FK constraint errors
+        if (dto.GovernmentAgencyId.HasValue) plaintiff.GovernmentAgencyId = dto.GovernmentAgencyId > 0 ? dto.GovernmentAgencyId : null;
         if (dto.Headquarters != null) plaintiff.Headquarters = dto.Headquarters;
         if (dto.WaqfOversightType != null) plaintiff.WaqfOversightType = dto.WaqfOversightType;
 
@@ -895,13 +1040,19 @@ public class PlaintiffBL : IPlaintiffBL
             RepresentativeTypeId = rep.RepresentativeTypeId,
             RepresentativeTypeNameAr = rep.RepresentativeType?.NameAr ?? "",
             RepresentativeTypeName = rep.RepresentativeType?.Name ?? "",
+            IdentityTypeId = rep.IdentityTypeId,
             IdentityTypeName = rep.IdentityType?.NameAr ?? "",
             IdentityNumber = rep.IdentityNumber,
             FirstName = rep.FirstName,
             FatherName = rep.FatherName,
             GrandfatherName = rep.GrandfatherName,
             FamilyName = rep.FamilyName,
+            ClanName = rep.ClanName,
             BirthDate = rep.BirthDate,
+            Gender = rep.Gender,
+            NationalityId = rep.NationalityId,
+            IdentityIssueDate = rep.IdentityIssueDate,
+            IdentityExpiryDate = rep.IdentityExpiryDate,
             DataSourceId = rep.DataSourceId,
             DataSourceName = rep.DataSource?.NameAr,
             MobileNumber = rep.MobileNumber,

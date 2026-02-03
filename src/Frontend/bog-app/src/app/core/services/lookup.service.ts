@@ -10,7 +10,8 @@ import {
   Region,
   City,
   GovernmentAgency,
-  Court
+  Court,
+  LicenseSource
 } from '../models/lookup.model';
 import { PlaintiffType } from '../models/plaintiff.model';
 import { RepresentativeType } from '../models/representative.model';
@@ -28,6 +29,8 @@ export class LookupService {
   private nationalities$?: Observable<Nationality[]>;
   private regions$?: Observable<Region[]>;
   private governmentAgencies$?: Observable<GovernmentAgency[]>;
+  private countries$?: Observable<any[]>;
+  private licenseSources$?: Observable<LicenseSource[]>;
 
   constructor(private http: HttpClient) { }
 
@@ -102,6 +105,28 @@ export class LookupService {
     return this.governmentAgencies$;
   }
 
+  getCountries(): Observable<any[]> {
+    if (!this.countries$) {
+      this.countries$ = this.http.get<any[]>(`${this.apiUrl}/countries`)
+        .pipe(
+          catchError(() => of(this.getDemoCountries())),
+          shareReplay(1)
+        );
+    }
+    return this.countries$;
+  }
+
+  getLicenseSources(): Observable<LicenseSource[]> {
+    if (!this.licenseSources$) {
+      this.licenseSources$ = this.http.get<LicenseSource[]>(`${this.apiUrl}/license-sources`)
+        .pipe(
+          catchError(() => of(this.getDemoLicenseSources())),
+          shareReplay(1)
+        );
+    }
+    return this.licenseSources$;
+  }
+
   getCourtsByCity(cityId: number): Observable<Court[]> {
     return this.http.get<Court[]>(`${this.apiUrl}/cities/${cityId}/courts`)
       .pipe(catchError(() => of(this.getDemoCourts())));
@@ -114,6 +139,8 @@ export class LookupService {
     this.nationalities$ = undefined;
     this.regions$ = undefined;
     this.governmentAgencies$ = undefined;
+    this.countries$ = undefined;
+    this.licenseSources$ = undefined;
   }
 
   // ============== Demo Data ==============
@@ -236,6 +263,29 @@ export class LookupService {
     return [
       { id: 1, name: 'Administrative Court - Riyadh', nameAr: 'المحكمة الإدارية بالرياض', cityId: 1 },
       { id: 2, name: 'Administrative Appeals Court - Riyadh', nameAr: 'محكمة الاستئناف الإدارية بالرياض', cityId: 1 }
+    ];
+  }
+
+  private getDemoCountries(): any[] {
+    return [
+      { id: 1, name: 'Saudi Arabia', nameAr: 'المملكة العربية السعودية', isoCode: 'SA' },
+      { id: 2, name: 'United Arab Emirates', nameAr: 'الإمارات العربية المتحدة', isoCode: 'AE' },
+      { id: 3, name: 'Kuwait', nameAr: 'الكويت', isoCode: 'KW' },
+      { id: 4, name: 'Qatar', nameAr: 'قطر', isoCode: 'QA' },
+      { id: 5, name: 'Bahrain', nameAr: 'البحرين', isoCode: 'BH' },
+      { id: 6, name: 'Oman', nameAr: 'عمان', isoCode: 'OM' },
+      { id: 7, name: 'Egypt', nameAr: 'مصر', isoCode: 'EG' },
+      { id: 8, name: 'Jordan', nameAr: 'الأردن', isoCode: 'JO' },
+      { id: 9, name: 'Lebanon', nameAr: 'لبنان', isoCode: 'LB' },
+      { id: 10, name: 'Syria', nameAr: 'سوريا', isoCode: 'SY' }
+    ];
+  }
+
+  private getDemoLicenseSources(): LicenseSource[] {
+    return [
+      { id: 1, name: 'Ministry of Human Resources', nameAr: 'وزارة الموارد البشرية' },
+      { id: 2, name: 'Ministry of Interior', nameAr: 'وزارة الداخلية' },
+      { id: 3, name: 'Ministry of Commerce', nameAr: 'وزارة التجارة' }
     ];
   }
 }

@@ -1,0 +1,237 @@
+<div class="defendant-form-container">
+  <!-- Header -->
+  <div class="form-header">
+    <h2 class="form-title">{{ isViewMode ? 'عرض مدعى عليه - جمعية/مؤسسة أهلية' : (isEditMode ? 'تعديل مدعى عليه - جمعية/مؤسسة أهلية' : 'إضافة مدعى عليه - جمعية/مؤسسة أهلية') }}</h2>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="isLoading" class="loading-container">
+    <mat-spinner diameter="40"></mat-spinner>
+  </div>
+
+  <!-- Form -->
+  <mat-card *ngIf="!isLoading">
+    <mat-card-content>
+      <form [formGroup]="form" (ngSubmit)="onSubmit()">
+
+        <div class="form-layout">
+          <!-- Internal Tabs (Left Side) -->
+          <div class="form-tabs">
+            <button type="button" class="tab-btn" [class.active]="activeTab === 0"
+                    [class.has-error]="hasTab1Errors()"
+                    (click)="setActiveTab(0)">
+              بيانات الجمعية/المؤسسة
+            </button>
+            <button type="button" class="tab-btn" [class.active]="activeTab === 1"
+                    [class.has-error]="hasTab2Errors()"
+                    (click)="setActiveTab(1)">
+              العنوان الوطني
+            </button>
+          </div>
+
+          <!-- Form Content (Right Side) -->
+          <div class="form-content">
+
+            <!-- Tab 1: بيانات الجمعية/المؤسسة -->
+            <div class="form-section" *ngIf="activeTab === 0">
+
+              <div class="form-row">
+                <!-- License Number -->
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>رقم الترخيص</mat-label>
+                  <input matInput formControlName="licenseNumber"
+                         maxlength="10"
+                         placeholder="أدخل رقم الترخيص (10 أرقام)">
+                  <mat-hint align="end">{{ form.value.licenseNumber?.length || 0 }} / 10</mat-hint>
+                  <mat-error *ngIf="f['licenseNumber'].hasError('required')">
+                    رقم الترخيص مطلوب
+                  </mat-error>
+                  <mat-error *ngIf="f['licenseNumber'].hasError('pattern')">
+                    رقم الترخيص يجب أن يكون 10 أرقام
+                  </mat-error>
+                </mat-form-field>
+              </div>
+
+              <div class="form-row">
+                <!-- License Source -->
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>مصدر الترخيص</mat-label>
+                  <mat-select formControlName="licenseSourceId">
+                    <mat-option *ngFor="let source of licenseSources" [value]="source.id">
+                      {{ source.nameAr }}
+                    </mat-option>
+                  </mat-select>
+                  <mat-error *ngIf="f['licenseSourceId'].hasError('required')">
+                    مصدر الترخيص مطلوب
+                  </mat-error>
+                </mat-form-field>
+              </div>
+
+              <div class="form-row">
+                <!-- NGO Name -->
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>اسم الجمعية/المؤسسة</mat-label>
+                  <input matInput formControlName="ngoName"
+                         maxlength="200"
+                         placeholder="أدخل اسم الجمعية/المؤسسة">
+                  <mat-hint align="end">{{ form.value.ngoName?.length || 0 }} / 200</mat-hint>
+                  <mat-error *ngIf="f['ngoName'].hasError('required')">
+                    اسم الجمعية/المؤسسة مطلوب
+                  </mat-error>
+                  <mat-error *ngIf="f['ngoName'].hasError('maxlength')">
+                    اسم الجمعية/المؤسسة يجب ألا يتجاوز 200 حرف
+                  </mat-error>
+                </mat-form-field>
+              </div>
+
+              <div class="form-row">
+                <!-- License Date -->
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>تاريخ الترخيص</mat-label>
+                  <input matInput [matDatepicker]="licensePicker" formControlName="licenseDate"
+                         placeholder="اختر التاريخ">
+                  <mat-datepicker-toggle matIconSuffix [for]="licensePicker"></mat-datepicker-toggle>
+                  <mat-datepicker #licensePicker></mat-datepicker>
+                  <mat-error *ngIf="f['licenseDate'].hasError('required')">
+                    تاريخ الترخيص مطلوب
+                  </mat-error>
+                </mat-form-field>
+              </div>
+            </div>
+
+            <!-- Tab 2: العنوان الوطني -->
+            <div class="form-section" *ngIf="activeTab === 1">
+
+              <div class="form-row two-columns">
+                <!-- Region -->
+                <mat-form-field appearance="outline">
+                  <mat-label>المنطقة</mat-label>
+                  <mat-select formControlName="ngoRegionId"
+                              (selectionChange)="onRegionChange($event.value)">
+                    <mat-option *ngFor="let region of regions" [value]="region.id">
+                      {{ region.nameAr }}
+                    </mat-option>
+                  </mat-select>
+                  <mat-error *ngIf="f['ngoRegionId'].hasError('required')">
+                    المنطقة مطلوبة
+                  </mat-error>
+                </mat-form-field>
+
+                <!-- City -->
+                <mat-form-field appearance="outline">
+                  <mat-label>المدينة</mat-label>
+                  <mat-select formControlName="ngoCityId">
+                    <mat-option *ngFor="let city of cities" [value]="city.id">
+                      {{ city.nameAr }}
+                    </mat-option>
+                  </mat-select>
+                  <mat-error *ngIf="f['ngoCityId'].hasError('required')">
+                    المدينة مطلوبة
+                  </mat-error>
+                </mat-form-field>
+              </div>
+
+              <div class="form-row">
+                <!-- District -->
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>الحي</mat-label>
+                  <input matInput formControlName="ngoDistrict"
+                         maxlength="100"
+                         placeholder="أدخل اسم الحي">
+                  <mat-error *ngIf="f['ngoDistrict'].hasError('required')">
+                    الحي مطلوب
+                  </mat-error>
+                </mat-form-field>
+              </div>
+
+              <div class="form-row">
+                <!-- Street -->
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>الشارع</mat-label>
+                  <input matInput formControlName="ngoStreet"
+                         maxlength="200"
+                         placeholder="أدخل اسم الشارع">
+                  <mat-error *ngIf="f['ngoStreet'].hasError('required')">
+                    الشارع مطلوب
+                  </mat-error>
+                </mat-form-field>
+              </div>
+
+              <div class="form-row two-columns">
+                <!-- Building Number -->
+                <mat-form-field appearance="outline">
+                  <mat-label>رقم المبنى</mat-label>
+                  <input matInput formControlName="ngoBuildingNumber"
+                         maxlength="4"
+                         placeholder="0000">
+                  <mat-error *ngIf="f['ngoBuildingNumber'].hasError('required')">
+                    رقم المبنى مطلوب
+                  </mat-error>
+                  <mat-error *ngIf="f['ngoBuildingNumber'].hasError('pattern')">
+                    يجب إدخال 4 أرقام فقط
+                  </mat-error>
+                </mat-form-field>
+
+                <!-- Unit Number -->
+                <mat-form-field appearance="outline">
+                  <mat-label>رقم الوحدة</mat-label>
+                  <input matInput formControlName="ngoUnitNumber"
+                         placeholder="أدخل رقم الوحدة">
+                  <mat-error *ngIf="f['ngoUnitNumber'].hasError('required')">
+                    رقم الوحدة مطلوب
+                  </mat-error>
+                  <mat-error *ngIf="f['ngoUnitNumber'].hasError('pattern')">
+                    أرقام فقط
+                  </mat-error>
+                </mat-form-field>
+              </div>
+
+              <div class="form-row two-columns">
+                <!-- Postal Code -->
+                <mat-form-field appearance="outline">
+                  <mat-label>الرمز البريدي</mat-label>
+                  <input matInput formControlName="ngoPostalCode"
+                         maxlength="5"
+                         placeholder="00000">
+                  <mat-error *ngIf="f['ngoPostalCode'].hasError('required')">
+                    الرمز البريدي مطلوب
+                  </mat-error>
+                  <mat-error *ngIf="f['ngoPostalCode'].hasError('pattern')">
+                    يجب إدخال 5 أرقام فقط
+                  </mat-error>
+                </mat-form-field>
+
+                <!-- Additional Code -->
+                <mat-form-field appearance="outline">
+                  <mat-label>الرمز الإضافي</mat-label>
+                  <input matInput formControlName="ngoAdditionalCode"
+                         maxlength="4"
+                         placeholder="0000">
+                  <mat-error *ngIf="f['ngoAdditionalCode'].hasError('required')">
+                    الرمز الإضافي مطلوب
+                  </mat-error>
+                  <mat-error *ngIf="f['ngoAdditionalCode'].hasError('pattern')">
+                    يجب إدخال 4 أرقام فقط
+                  </mat-error>
+                </mat-form-field>
+              </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="form-actions">
+              <button mat-button type="button" (click)="onCancel()">
+                {{ isViewMode ? 'رجوع' : 'إلغاء' }}
+              </button>
+              <button *ngIf="!isViewMode" mat-raised-button type="submit" class="save-btn"
+                      [disabled]="isSaving">
+                <mat-spinner *ngIf="isSaving" diameter="20" class="inline-spinner"></mat-spinner>
+                <span *ngIf="!isSaving">حفظ المدعى عليه</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+      </form>
+    </mat-card-content>
+  </mat-card>
+</div>

@@ -155,12 +155,12 @@ public class Plaintiff : BaseEntity
     /// <summary>
     /// Commercial registration start date.
     /// </summary>
-    public DateTime? CRStartDate { get; set; }
+    public DateOnly? CRStartDate { get; set; }
 
     /// <summary>
     /// Commercial registration end date.
     /// </summary>
-    public DateTime? CREndDate { get; set; }
+    public DateOnly? CREndDate { get; set; }
 
     #endregion
 

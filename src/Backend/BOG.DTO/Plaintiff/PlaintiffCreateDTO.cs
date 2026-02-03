@@ -1,5 +1,7 @@
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 using BOG.DTO.Common;
+using BOG.DTO.Representative;
 
 namespace BOG.DTO.Plaintiff;
 
@@ -213,13 +215,15 @@ public class PlaintiffCreateDTO
     /// Commercial registration start date (تاريخ بداية السجل) - SRS 6.3.3.
     /// Must be <= today.
     /// </summary>
-    public DateTime? CRStartDate { get; set; }
+    [JsonPropertyName("crStartDate")]
+    public DateOnly? CRStartDate { get; set; }
 
     /// <summary>
     /// Commercial registration end date (تاريخ نهاية السجل) - SRS 6.3.3.
     /// Must be > CRStartDate.
     /// </summary>
-    public DateTime? CREndDate { get; set; }
+    [JsonPropertyName("crEndDate")]
+    public DateOnly? CREndDate { get; set; }
 
     #endregion
 
@@ -342,6 +346,15 @@ public class PlaintiffCreateDTO
     /// </summary>
     [StringLength(200, ErrorMessage = "وصف الوقف يجب ألا يتجاوز 200 حرف")]
     public string? WaqfDescription { get; set; }
+
+    #endregion
+
+    #region Representatives
+
+    /// <summary>
+    /// List of representatives to create with the plaintiff.
+    /// </summary>
+    public List<RepresentativeCreateDTO>? Representatives { get; set; }
 
     #endregion
 }

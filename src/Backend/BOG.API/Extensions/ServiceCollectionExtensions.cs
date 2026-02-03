@@ -84,6 +84,10 @@ public static class ServiceCollectionExtensions
         // Case Registration Request repository
         services.AddScoped<ICaseRegistrationRequestRepository, CaseRegistrationRequestRepository>();
 
+        // Defendant repositories
+        services.AddScoped<IDefendantRepository, DefendantRepository>();
+        services.AddScoped<ICaseRequestDefendantRepository, CaseRequestDefendantRepository>();
+
         return services;
     }
 
@@ -109,6 +113,9 @@ public static class ServiceCollectionExtensions
 
         // Case Registration Request service
         services.AddScoped<ICaseRegistrationRequestBL, CaseRegistrationRequestBL>();
+
+        // Defendant service
+        services.AddScoped<IDefendantBL, DefendantBL>();
 
         return services;
     }

@@ -1,0 +1,88 @@
+<div class="defendant-form-container">
+  <!-- Header -->
+  <div class="form-header">
+    <h2 class="form-title">{{ isViewMode ? 'عرض مدعى عليه - جهة حكومية' : (isEditMode ? 'تعديل مدعى عليه - جهة حكومية' : 'إضافة مدعى عليه - جهة حكومية') }}</h2>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="isLoading" class="loading-container">
+    <mat-spinner diameter="40"></mat-spinner>
+  </div>
+
+  <!-- Form -->
+  <mat-card *ngIf="!isLoading">
+    <mat-card-content>
+      <form [formGroup]="form" (ngSubmit)="onSubmit()">
+
+        <div class="form-layout">
+          <!-- Internal Tabs (Left Side) -->
+          <div class="form-tabs">
+            <button type="button" class="tab-btn active">بيانات الجهة الحكومية</button>
+          </div>
+
+          <!-- Form Content (Right Side) -->
+          <div class="form-content">
+            <!-- Government Agency Selection -->
+            <div class="form-section">
+
+              <div class="form-row">
+                <!-- Agency Dropdown -->
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>الجهة الحكومية</mat-label>
+                  <mat-select formControlName="governmentAgencyId"
+                              (selectionChange)="onAgencyChange($event.value)">
+                    <mat-option *ngFor="let agency of governmentAgencies" [value]="agency.id">
+                      {{ agency.nameAr }}
+                    </mat-option>
+                  </mat-select>
+                  <mat-error *ngIf="f['governmentAgencyId'].hasError('required')">
+                    الجهة الحكومية مطلوبة
+                  </mat-error>
+                </mat-form-field>
+              </div>
+
+              <div class="form-row">
+                <!-- Headquarters (auto-filled, read-only) -->
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>المقر</mat-label>
+                  <input matInput formControlName="headquarters" readonly>
+                  <mat-error *ngIf="f['headquarters'].hasError('required')">
+                    المقر مطلوب
+                  </mat-error>
+                </mat-form-field>
+              </div>
+
+              <div class="form-row">
+                <!-- Additional Statement (optional) -->
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>بيان إضافي</mat-label>
+                  <textarea matInput formControlName="additionalStatement"
+                            rows="4"
+                            maxlength="4000"
+                            placeholder="أدخل أي بيانات إضافية (اختياري)"></textarea>
+                  <mat-hint align="end">{{ form.value.additionalStatement?.length || 0 }} / 4000</mat-hint>
+                  <mat-error *ngIf="f['additionalStatement'].hasError('maxlength')">
+                    البيان الإضافي يجب ألا يتجاوز 4000 حرف
+                  </mat-error>
+                </mat-form-field>
+              </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="form-actions">
+              <button mat-button type="button" (click)="onCancel()">
+                {{ isViewMode ? 'رجوع' : 'إلغاء' }}
+              </button>
+              <button *ngIf="!isViewMode" mat-raised-button type="submit" class="save-btn"
+                      [disabled]="isSaving">
+                <mat-spinner *ngIf="isSaving" diameter="20" class="inline-spinner"></mat-spinner>
+                <span *ngIf="!isSaving">حفظ المدعى عليه</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+      </form>
+    </mat-card-content>
+  </mat-card>
+</div>

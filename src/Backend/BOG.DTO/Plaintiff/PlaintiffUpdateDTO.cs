@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 using BOG.DTO.Common;
 
 namespace BOG.DTO.Plaintiff;
@@ -152,6 +153,41 @@ public class PlaintiffUpdateDTO
     public string? CommercialRegNumber { get; set; }
 
     /// <summary>
+    /// Commercial registration start date (تاريخ بداية السجل).
+    /// </summary>
+    [JsonPropertyName("crStartDate")]
+    public DateOnly? CRStartDate { get; set; }
+
+    /// <summary>
+    /// Commercial registration end date (تاريخ نهاية السجل).
+    /// </summary>
+    [JsonPropertyName("crEndDate")]
+    public DateOnly? CREndDate { get; set; }
+
+    /// <summary>
+    /// Country ID (الدولة) - for Type 5 (Unregistered Company).
+    /// </summary>
+    public int? CountryId { get; set; }
+
+    /// <summary>
+    /// Company address text (عنوان الشركة) - for Type 5 (Unregistered Company).
+    /// </summary>
+    [StringLength(500)]
+    public string? UnregisteredCompanyAddress { get; set; }
+
+    /// <summary>
+    /// City name (المدينة) - for Type 5 (Unregistered Company).
+    /// </summary>
+    [StringLength(100)]
+    public string? UnregisteredCompanyCity { get; set; }
+
+    /// <summary>
+    /// Description (وصف تقريبي) - for Type 5 (Unregistered Company).
+    /// </summary>
+    [StringLength(1000)]
+    public string? Description { get; set; }
+
+    /// <summary>
     /// License number.
     /// </summary>
     [StringLength(20)]
@@ -161,6 +197,17 @@ public class PlaintiffUpdateDTO
     /// License source ID.
     /// </summary>
     public int? LicenseSourceId { get; set; }
+
+    /// <summary>
+    /// NGO name (اسم الجمعية/المؤسسة) - for type 7 (NGO).
+    /// </summary>
+    [StringLength(200)]
+    public string? NGOName { get; set; }
+
+    /// <summary>
+    /// License date (تاريخ الترخيص) - for type 7 (NGO).
+    /// </summary>
+    public DateTime? LicenseDate { get; set; }
 
     /// <summary>
     /// Government agency ID.
@@ -178,6 +225,41 @@ public class PlaintiffUpdateDTO
     /// </summary>
     [StringLength(50)]
     public string? WaqfOversightType { get; set; }
+
+    /// <summary>
+    /// Court deed number (رقم صك المحكمة) - for type 8 (Waqf).
+    /// </summary>
+    [StringLength(10)]
+    public string? CourtDeedNumber { get; set; }
+
+    /// <summary>
+    /// Waqf name (اسم الوقف) - for type 8 (Waqf).
+    /// </summary>
+    [StringLength(200)]
+    public string? WaqfName { get; set; }
+
+    /// <summary>
+    /// Deed date (تاريخ صك المحكمة) - for type 8 (Waqf).
+    /// </summary>
+    public DateTime? DeedDate { get; set; }
+
+    /// <summary>
+    /// Deed source/issuer (مصدر الصك) - for type 8 (Waqf).
+    /// </summary>
+    [StringLength(100)]
+    public string? DeedSource { get; set; }
+
+    /// <summary>
+    /// Agency name (اسم الجهة) - for type 8 (Waqf) when WaqfOversightType is حكومية.
+    /// </summary>
+    [StringLength(200)]
+    public string? WaqfAgencyName { get; set; }
+
+    /// <summary>
+    /// Waqf description (وصف تقريبي) - for type 8 (Waqf).
+    /// </summary>
+    [StringLength(200)]
+    public string? WaqfDescription { get; set; }
 
     #endregion
 

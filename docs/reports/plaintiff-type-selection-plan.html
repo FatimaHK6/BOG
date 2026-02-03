@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plan: Moving Plaintiff Type Selection Outside Form</title>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        h1 {
+            color: #1a5f2a;
+            border-bottom: 3px solid #1a5f2a;
+            padding-bottom: 10px;
+            text-align: center;
+        }
+        h2 {
+            color: #2c7a3f;
+            border-bottom: 2px solid #e0e0e0;
+            padding-bottom: 8px;
+            margin-top: 40px;
+        }
+        h3 { color: #444; margin-top: 25px; }
+        .section {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .status-badge {
+            display: inline-block;
+            background-color: #2196F3;
+            color: white;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+            font-size: 14px;
+        }
+        th {
+            background-color: #1a5f2a;
+            color: white;
+            padding: 12px;
+            text-align: right;
+        }
+        td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #e0e0e0;
+            vertical-align: top;
+        }
+        tr:nth-child(even) { background-color: #f9f9f9; }
+        tr:hover { background-color: #e8f5e9; }
+        .check { color: #2e7d32; font-weight: bold; }
+        .check::before { content: "✓ "; }
+        .warning { color: #f57c00; font-weight: bold; }
+        .warning::before { content: "⚠ "; }
+        .current-box {
+            background: #ffebee;
+            padding: 15px;
+            border-radius: 8px;
+            border-right: 4px solid #c62828;
+            margin: 10px 0;
+        }
+        .new-box {
+            background: #e8f5e9;
+            padding: 15px;
+            border-radius: 8px;
+            border-right: 4px solid #2e7d32;
+            margin: 10px 0;
+        }
+        .code-block {
+            background: #263238;
+            color: #aed581;
+            padding: 15px;
+            border-radius: 8px;
+            overflow-x: auto;
+            direction: ltr;
+            text-align: left;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            margin: 10px 0;
+        }
+        .file-path {
+            background: #eceff1;
+            padding: 8px 12px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            direction: ltr;
+            text-align: left;
+            margin: 5px 0;
+            display: inline-block;
+        }
+        .effort-card {
+            display: inline-block;
+            background: linear-gradient(135deg, #1a5f2a, #2e7d32);
+            color: white;
+            padding: 20px 40px;
+            border-radius: 10px;
+            text-align: center;
+            margin: 20px 0;
+        }
+        .effort-number {
+            font-size: 48px;
+            font-weight: bold;
+        }
+        .effort-label {
+            font-size: 16px;
+        }
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 20px 0;
+        }
+        .no-change-list {
+            background: #e3f2fd;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 15px 0;
+        }
+        .no-change-list ul {
+            margin: 0;
+            padding-right: 20px;
+        }
+        .no-change-list li {
+            margin: 8px 0;
+            color: #1565c0;
+        }
+        .risk-low {
+            background: #c8e6c9;
+            color: #1b5e20;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        .summary-box {
+            background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+            padding: 25px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border-right: 5px solid #1a5f2a;
+        }
+    </style>
+</head>
+<body>
+    <h1>خطة نقل اختيار نوع المدعي خارج النموذج</h1>
+    <p style="text-align: center;">Plan: Moving Plaintiff Type Selection Outside Form</p>
+
+    <div style="text-align: center;">
+        <span class="status-badge">خطة للمراجعة - لم يتم التنفيذ</span>
+    </div>
+
+    <!-- Overview -->
+    <div class="section">
+        <h2>نظرة عامة</h2>
+        <p>تحليل النهج <strong>الأبسط</strong>: الإبقاء على نفس مكون النموذج الواحد، مع اختيار النوع <strong>قبل</strong> الدخول للنموذج (مثل قائمة المدعى عليه).</p>
+
+        <div class="effort-card">
+            <div class="effort-number">11-12</div>
+            <div class="effort-label">ساعة عمل (1.5 يوم)</div>
+        </div>
+    </div>
+
+    <!-- Flow Change -->
+    <div class="section">
+        <h2>تغيير تدفق العمل</h2>
+
+        <div class="comparison-grid">
+            <div class="current-box">
+                <h4 style="margin-top: 0; color: #c62828;">الحالي</h4>
+                <ol>
+                    <li>النقر على "إضافة مدعي"</li>
+                    <li>الانتقال إلى <code>/add</code></li>
+                    <li>النموذج يفتح بنوع فارغ</li>
+                    <li>المستخدم يختار النوع من القائمة المنسدلة</li>
+                    <li>الحقول تظهر بناءً على الاختيار</li>
+                </ol>
+            </div>
+            <div class="new-box">
+                <h4 style="margin-top: 0; color: #2e7d32;">الجديد</h4>
+                <ol>
+                    <li>النقر على "إضافة مدعي" ← تظهر قائمة الأنواع</li>
+                    <li>اختيار النوع من القائمة</li>
+                    <li>الانتقال إلى <code>/add?type=X</code></li>
+                    <li>النموذج يفتح بنوع محدد مسبقاً</li>
+                    <li>الحقول ظاهرة من البداية</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+
+    <!-- Files to Modify -->
+    <div class="section">
+        <h2>الملفات المطلوب تعديلها (4 ملفات فقط)</h2>
+
+        <h3>1. plaintiff-list.component.html</h3>
+        <span class="file-path">plaintiffs/components/plaintiff-list/plaintiff-list.component.html</span>
+        <p>إضافة قائمة اختيار النوع (مثل المدعى عليه)</p>
+        <div class="code-block">
+&lt;button mat-raised-button class="add-plaintiff-btn" [matMenuTriggerFor]="plaintiffTypeMenu"&gt;
+  &lt;mat-icon&gt;add&lt;/mat-icon&gt;
+  إضافة مدعي جديد
+&lt;/button&gt;
+&lt;mat-menu #plaintiffTypeMenu="matMenu" class="plaintiff-type-menu"&gt;
+  &lt;button mat-menu-item *ngFor="let type of plaintiffTypes"
+          (click)="onSelectPlaintiffType(type)"&gt;
+    {{ type.nameAr }}
+  &lt;/button&gt;
+&lt;/mat-menu&gt;
+        </div>
+
+        <h3>2. plaintiff-list.component.ts</h3>
+        <span class="file-path">plaintiffs/components/plaintiff-list/plaintiff-list.component.ts</span>
+        <p>إضافة مصفوفة الأنواع ودالة الاختيار</p>
+        <div class="code-block">
+// إضافة مصفوفة الأنواع
+plaintiffTypes = [
+  { id: 1, nameAr: 'فرد' },
+  { id: 2, nameAr: 'فرد بدون هوية' },
+  { id: 3, nameAr: 'صاحب مؤسسة' },
+  { id: 4, nameAr: 'شركة مسجلة' },
+  { id: 5, nameAr: 'شركة غير مسجلة' },
+  { id: 6, nameAr: 'جهة حكومية' },
+  { id: 7, nameAr: 'جمعية/مؤسسة أهلية' },
+  { id: 8, nameAr: 'وقف' }
+];
+
+// دالة اختيار النوع
+onSelectPlaintiffType(type: {id: number, nameAr: string}): void {
+  this.router.navigate(['/case-registration/plaintiffs/add'], {
+    queryParams: { requestId: this.requestId, type: type.id }
+  });
+}
+        </div>
+
+        <h3>3. plaintiff-form.component.ts</h3>
+        <span class="file-path">plaintiffs/components/plaintiff-form/plaintiff-form.component.ts</span>
+        <p>قراءة النوع من الرابط ومنع إعادة تعيين الحقول عند التحميل الأولي</p>
+        <div class="code-block">
+// في ngOnInit - قراءة النوع من query params
+ngOnInit(): void {
+  // ... الكود الحالي ...
+
+  // جديد: قراءة النوع من الرابط
+  const typeParam = this.route.snapshot.queryParams['type'];
+  if (typeParam && !this.plaintiffId) {
+    const typeId = +typeParam;
+    if (typeId >= 1 && typeId <= 8) {
+      this.isPatching = true; // منع إعادة التعيين
+      this.plaintiffForm.get('plaintiffTypeId')?.setValue(typeId);
+      this.updateFormValidation(typeId);
+      this.isPatching = false;
+    }
+  }
+}
+
+// في initForm - تعديل valueChanges listener
+this.plaintiffForm.get('plaintiffTypeId')?.valueChanges.subscribe(typeId => {
+  // فقط إعادة تعيين الحقول إذا غيّر المستخدم النوع يدوياً
+  if (!this.isPatching) {
+    this.resetTypeSpecificFields(typeId);
+  }
+  this.updateFormValidation(typeId);
+});
+        </div>
+
+        <h3>4. plaintiff-form.component.html</h3>
+        <span class="file-path">plaintiffs/components/plaintiff-form/plaintiff-form.component.html</span>
+        <p>تعطيل القائمة المنسدلة عند تحديد النوع مسبقاً من الرابط</p>
+        <div class="code-block">
+&lt;!-- تعطيل القائمة إذا تم تحديد النوع من الرابط --&gt;
+&lt;mat-form-field appearance="outline" class="full-width"&gt;
+  &lt;mat-label&gt;نوع المدعي&lt;/mat-label&gt;
+  &lt;mat-select formControlName="plaintiffTypeId" required
+              [disabled]="isTypePreselected"&gt;
+    &lt;mat-option *ngFor="let type of plaintiffTypes" [value]="type.id"&gt;
+      {{ type.nameAr }}
+    &lt;/mat-option&gt;
+  &lt;/mat-select&gt;
+&lt;/mat-form-field&gt;
+        </div>
+    </div>
+
+    <!-- What Does NOT Change -->
+    <div class="section">
+        <h2>ما لا يتغير</h2>
+
+        <div class="no-change-list">
+            <ul>
+                <li class="check">منطق التحقق من الصحة <code>updateFormValidation()</code></li>
+                <li class="check">منطق إعادة تعيين الحقول <code>resetTypeSpecificFields()</code></li>
+                <li class="check">دوال المساعدة <code>isIndividual()</code>, <code>isBusinessOwner()</code>, etc.</li>
+                <li class="check">getter <code>selectedPlaintiffType</code></li>
+                <li class="check">نافذة الممثلين (تستخدم getter)</li>
+                <li class="check">رفع المرفقات (تستخدم getter)</li>
+                <li class="check">تكامل أبشر</li>
+                <li class="check">وضع التعديل (Edit mode)</li>
+                <li class="check">وضع العرض (View mode)</li>
+                <li class="check">استدعاءات API</li>
+                <li class="check">خطوات النموذج الأربعة (Stepper)</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Edge Cases -->
+    <div class="section">
+        <h2>الحالات الخاصة للمعالجة</h2>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>الحالة</th>
+                    <th>الحل</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>رابط مباشر <code>/add?type=99</code> (نوع غير صالح)</td>
+                    <td>التحقق أن النوع بين 1-8، إظهار خطأ إذا غير صالح</td>
+                </tr>
+                <tr>
+                    <td>المستخدم يحاول تغيير القائمة المنسدلة بعد التحديد المسبق</td>
+                    <td>تعطيل القائمة أو إظهار تحذير</td>
+                </tr>
+                <tr>
+                    <td>زر الرجوع من النموذج</td>
+                    <td>العودة إلى قائمة المدعين</td>
+                </tr>
+                <tr>
+                    <td>وضع التعديل - تغيير النوع؟</td>
+                    <td>السماح (السلوك الحالي)، إعادة تعيين الحقول</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Effort Estimation -->
+    <div class="section">
+        <h2>تقدير الجهد</h2>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>المهمة</th>
+                    <th>الساعات</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>إضافة قائمة الأنواع لمكون القائمة (HTML)</td>
+                    <td>1</td>
+                </tr>
+                <tr>
+                    <td>إضافة مصفوفة الأنواع والدالة (TS)</td>
+                    <td>1</td>
+                </tr>
+                <tr>
+                    <td>قراءة النوع من الرابط في ngOnInit</td>
+                    <td>1</td>
+                </tr>
+                <tr>
+                    <td>منع إعادة التعيين عند التحميل من الرابط</td>
+                    <td>2</td>
+                </tr>
+                <tr>
+                    <td>تعطيل/إخفاء القائمة المنسدلة</td>
+                    <td>1</td>
+                </tr>
+                <tr>
+                    <td>معالجة الحالات الخاصة</td>
+                    <td>2</td>
+                </tr>
+                <tr>
+                    <td>اختبار جميع التدفقات</td>
+                    <td>3-4</td>
+                </tr>
+                <tr style="background: #c8e6c9; font-weight: bold;">
+                    <td>المجموع</td>
+                    <td>11-12 ساعة</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Risk Assessment -->
+    <div class="section">
+        <h2>تقييم المخاطر</h2>
+
+        <div class="risk-low">
+            مستوى المخاطر: منخفض ✓
+        </div>
+
+        <table style="margin-top: 20px;">
+            <thead>
+                <tr>
+                    <th>الخطر</th>
+                    <th>المستوى</th>
+                    <th>السبب</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>تعطل التحقق من الصحة</td>
+                    <td class="check">منخفض</td>
+                    <td>نفس المنطق، فقط قيمة محددة مسبقاً</td>
+                </tr>
+                <tr>
+                    <td>تعطل وضع التعديل</td>
+                    <td class="check">منخفض</td>
+                    <td>لا تغيير في تدفق التعديل</td>
+                </tr>
+                <tr>
+                    <td>تعطل الممثلين</td>
+                    <td class="check">منخفض</td>
+                    <td>يستخدم getter، يعمل مع القيمة المحددة مسبقاً</td>
+                </tr>
+                <tr>
+                    <td>تعطل المرفقات</td>
+                    <td class="check">منخفض</td>
+                    <td>يستخدم getter، يعمل مع القيمة المحددة مسبقاً</td>
+                </tr>
+                <tr>
+                    <td>إرباك المستخدم</td>
+                    <td class="check">منخفض</td>
+                    <td>النوع يظهر في النموذج (معطل)</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Summary -->
+    <div class="section">
+        <h2>الملخص</h2>
+
+        <div class="summary-box">
+            <h3 style="margin-top: 0;">لماذا هذا النهج أفضل؟</h3>
+            <ul>
+                <li><strong>نفس مكون النموذج</strong> - لا تقسيم إلى 8 مكونات</li>
+                <li><strong>نفس منطق التحقق</strong> - لا تغيير في القواعد</li>
+                <li><strong>نفس قواعد العمل</strong> - BC01, BC02, BC03 تبقى كما هي</li>
+                <li><strong>تغيير التنقل فقط</strong> - أقل مخاطر</li>
+                <li><strong>11-12 ساعة مقابل 160-210 ساعة</strong> - توفير 95% من الجهد</li>
+            </ul>
+        </div>
+    </div>
+
+    <div style="text-align: center; margin-top: 40px; padding-top: 20px; border-top: 2px solid #e0e0e0; color: #666;">
+        <p><strong>خطة للمراجعة - لم يتم تنفيذ أي تغييرات</strong></p>
+        <p>Plan for Review - No Changes Implemented</p>
+        <p>February 2026</p>
+    </div>
+</body>
+</html>

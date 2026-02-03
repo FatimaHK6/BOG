@@ -7,7 +7,7 @@
         <mat-icon>save</mat-icon>
         حفظ كمسودة
       </button>
-      <button mat-raised-button color="primary" (click)="onAddPlaintiff()">
+      <button mat-raised-button class="add-plaintiff-btn" (click)="onAddPlaintiff()">
         <mat-icon>add</mat-icon>
         إضافة مدعي جديد
       </button>
@@ -23,7 +23,7 @@
   <div *ngIf="!isLoading && plaintiffs.length === 0" class="empty-state">
     <mat-icon class="empty-icon">person_off</mat-icon>
     <p>لا يوجد مدعين مسجلين</p>
-    <button mat-stroked-button color="primary" (click)="onAddPlaintiff()">
+    <button mat-stroked-button class="add-plaintiff-btn-outline" (click)="onAddPlaintiff()">
       إضافة مدعي
     </button>
   </div>

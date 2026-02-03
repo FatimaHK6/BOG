@@ -23,6 +23,36 @@
   gap: 10px;
 }
 
+/* Add Plaintiff Button - Gold/Amber to match Defendant */
+.add-plaintiff-btn {
+  background-color: #C4A35A !important;
+  color: white !important;
+  font-weight: 500;
+  border-radius: 6px !important;
+  padding: 0 16px;
+  height: 40px;
+
+  mat-icon {
+    margin-left: 6px;
+    margin-right: 0;
+  }
+
+  &:hover {
+    background-color: #B8963E !important;
+  }
+}
+
+/* Add Plaintiff Button Outline (for empty state) */
+.add-plaintiff-btn-outline {
+  border-color: #C4A35A !important;
+  color: #C4A35A !important;
+  font-weight: 500;
+
+  &:hover {
+    background-color: rgba(196, 163, 90, 0.08) !important;
+  }
+}
+
 /* Loading */
 .loading-container {
   display: flex;
