@@ -98,7 +98,10 @@ public class CaseRegistrationBL : ICaseRegistrationBL
         if (requestId <= 0)
             throw new ArgumentException("Invalid request ID.", nameof(requestId));
 
-        var request = await _requestRepository.GetByIdAsync(requestId, cancellationToken);
+        // Clear change tracker to ensure fresh load from database
+        _unitOfWork.ClearChangeTracker();
+
+        var request = await _requestRepository.GetWithDetailsAsync(requestId, cancellationToken);
 
         if (request == null || request.IsDeleted)
             return null;
@@ -207,9 +210,14 @@ public class CaseRegistrationBL : ICaseRegistrationBL
                             $"معرفات التصنيف غير صالحة: {string.Join(", ", invalidIds)}");
                     }
 
-                    // Soft delete existing classifications
-                    var existingClassifications = request.Classifications?.ToList() ?? new List<RequestClassification>();
-                    foreach (var classification in existingClassifications)
+                    // Ensure Classifications collection exists
+                    if (request.Classifications == null)
+                    {
+                        request.Classifications = new List<RequestClassification>();
+                    }
+
+                    // Soft delete all existing classifications
+                    foreach (var classification in request.Classifications)
                     {
                         classification.IsDeleted = true;
                     }
@@ -218,7 +226,7 @@ public class CaseRegistrationBL : ICaseRegistrationBL
                     int displayOrder = 0;
                     foreach (var classificationId in idList)
                     {
-                        request.Classifications?.Add(new RequestClassification
+                        var newClassification = new RequestClassification
                         {
                             CaseRegistrationRequestId = request.Id,
                             ClassificationId = classificationId,
@@ -226,19 +234,46 @@ public class CaseRegistrationBL : ICaseRegistrationBL
                             CreatedDate = DateTime.UtcNow,
                             ModifiedDate = DateTime.UtcNow,
                             IsDeleted = false
-                        });
+                        };
+                        request.Classifications.Add(newClassification);
                     }
                 }
                 else
                 {
                     // Empty list: soft delete all classifications
-                    var existingClassifications = request.Classifications?.ToList() ?? new List<RequestClassification>();
-                    foreach (var classification in existingClassifications)
+                    if (request.Classifications != null)
                     {
-                        classification.IsDeleted = true;
+                        foreach (var classification in request.Classifications)
+                        {
+                            classification.IsDeleted = true;
+                        }
+                    }
+                    else
+                    {
+                        // Ensure collection exists even if empty
+                        request.Classifications = new List<RequestClassification>();
                     }
                 }
             }
+        }
+
+        // Update contact information if provided
+        if (requestDict.ContainsKey("primaryMobile"))
+        {
+            var mobile = requestDict["primaryMobile"]?.ToString();
+            request.PrimaryMobile = string.IsNullOrWhiteSpace(mobile) ? null : mobile;
+        }
+
+        if (requestDict.ContainsKey("secondaryMobile"))
+        {
+            var mobile = requestDict["secondaryMobile"]?.ToString();
+            request.SecondaryMobile = string.IsNullOrWhiteSpace(mobile) ? null : mobile;
+        }
+
+        if (requestDict.ContainsKey("email"))
+        {
+            var email = requestDict["email"]?.ToString();
+            request.Email = string.IsNullOrWhiteSpace(email) ? null : email;
         }
 
         request.ModifiedDate = DateTime.UtcNow;
@@ -246,12 +281,19 @@ public class CaseRegistrationBL : ICaseRegistrationBL
         await _requestRepository.UpdateAsync(request, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
+        // CRITICAL: Clear change tracker to ensure fresh load from database
+        // Without this, EF Core might return cached entities that don't include
+        // the newly added classifications due to tracking state issues
+        _unitOfWork.ClearChangeTracker();
+
         // Reload with all details including classifications
         var updatedRequest = await _requestRepository.GetWithDetailsAsync(requestId, cancellationToken);
         if (updatedRequest == null)
             throw new InvalidOperationException($"Failed to reload request {requestId}");
 
-        return MapToViewModel(updatedRequest);
+        var result = MapToViewModel(updatedRequest);
+
+        return result;
     }
 
     /// <summary>
@@ -388,6 +430,10 @@ public class CaseRegistrationBL : ICaseRegistrationBL
     /// </summary>
     private static CaseRegistrationRequestVM MapToViewModel(CaseRegistrationRequest request)
     {
+        // Debug: Log classifications info
+        var allClassifications = request.Classifications ?? new List<RequestClassification>();
+        var activeClassifications = allClassifications.Where(rc => !rc.IsDeleted).ToList();
+
         return new CaseRegistrationRequestVM
         {
             Id = request.Id,
@@ -406,10 +452,9 @@ public class CaseRegistrationBL : ICaseRegistrationBL
             PlaintiffsCount = request.CaseRequestPlaintiffs?.Count ?? 0,
             DefendantsCount = request.CaseRequestDefendants?.Count ?? 0,
             AttachmentsCount = request.Attachments?.Where(a => !a.IsDeleted).Count() ?? 0,
-            ClassificationIds = request.Classifications?
-                .Where(rc => !rc.IsDeleted)
+            ClassificationIds = activeClassifications
                 .Select(rc => rc.ClassificationId)
-                .ToList() ?? new List<int>(),
+                .ToList(),
             PrimaryMobile = request.PrimaryMobile,
             SecondaryMobile = request.SecondaryMobile,
             Email = request.Email,
@@ -460,7 +505,11 @@ public class CaseRegistrationBL : ICaseRegistrationBL
                     Id = rc.Classification.Id,
                     NameAr = rc.Classification.NameAr,
                     NameEn = rc.Classification.Name,
-                    Code = rc.Classification.Description
+                    Code = rc.Classification.Description,
+                    Level1 = rc.Classification.Level1 ?? string.Empty,
+                    Level2 = rc.Classification.Level2 ?? string.Empty,
+                    Level3 = rc.Classification.Level3 ?? string.Empty,
+                    Level4 = rc.Classification.Level4 ?? string.Empty
                 })
                 .ToList() ?? new List<CaseClassificationVM>(),
             CreatedDate = request.CreatedDate,

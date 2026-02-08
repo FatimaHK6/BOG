@@ -34,6 +34,9 @@ export interface CaseRequestUpdateDTO {
   evidence?: string;
   requestStatusId?: number;
   classificationIds?: number[];
+  primaryMobile?: string;
+  secondaryMobile?: string;
+  email?: string;
 }
 
 export interface PagedResult<T> {

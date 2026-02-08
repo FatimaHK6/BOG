@@ -5,6 +5,7 @@ import { takeUntil } from 'rxjs/operators';
 import { CaseDataStateService } from '../../../services/case-data-state.service';
 import { CaseRegistrationApiService } from '../../../services/case-registration-api.service';
 import { ClaimsApiService } from '../../../services/claims-api.service';
+import { RelatedCaseApiService } from '../../../services/related-case-api.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 
 
@@ -35,6 +36,7 @@ export class CaseDataContainerComponent implements OnInit, OnDestroy {
     private caseDataState: CaseDataStateService,
     private caseRegistrationApi: CaseRegistrationApiService,
     private claimsApi: ClaimsApiService,
+    private relatedCaseApi: RelatedCaseApiService,
     private router: Router,
     private snackBar: MatSnackBar
   ) { }
@@ -77,15 +79,10 @@ export class CaseDataContainerComponent implements OnInit, OnDestroy {
     // Get current state
     const state = this.caseDataState.getAllData();
 
-    // Create payload for main request data (REMOVE claims from here)
+    // Create payload for main request data (WITHOUT related cases)
     const requestPayload = {
       subject: state.subject,
       evidence: state.evidence,
-      relatedCases: state.relatedCases.map(rc => ({
-        courtId: rc.courtId,
-        caseNumber: rc.caseNumber,
-        caseYear: rc.caseYear
-      })),
       classificationIds: state.classificationIds,
       primaryMobile: state.primaryMobile,
       secondaryMobile: state.secondaryMobile,
@@ -95,25 +92,54 @@ export class CaseDataContainerComponent implements OnInit, OnDestroy {
     // Create payload for claims
     const claimsPayload = state.claims.map(c => ({ claimText: c.claimText }));
 
+    // Create payload for related cases
+    const relatedCasesPayload = state.relatedCases.map(rc => ({
+      courtId: rc.courtId,
+      caseNumber: rc.caseNumber,
+      caseYear: rc.caseYear
+    }));
+
     // Save main request data first
+    console.log('[DEBUG] Saving classifications:', requestPayload.classificationIds);
+    console.log('[DEBUG] Full request payload:', requestPayload);
     this.caseRegistrationApi.update(this.requestId, requestPayload).subscribe({
-      next: () => {
+      next: (response) => {
+        console.log('[DEBUG] Save response classificationIds:', response.classificationIds);
+        console.log('[DEBUG] Full save response:', response);
+
+        // CRITICAL: Update state from response to ensure UI reflects saved data
+        const savedClassifications = response.classificationIds || [];
+        this.caseDataState.updateClassifications(savedClassifications);
+        console.log('[DEBUG] State updated with classifications:', savedClassifications);
+
         // Then save claims using dedicated API
         this.claimsApi.updateClaims(this.requestId, claimsPayload).subscribe({
           next: () => {
-            this.isSaving = false;
-            this.saveSuccess = true;
+            // Then save related cases using dedicated API
+            this.relatedCaseApi.updateRelatedCases(this.requestId, { relatedCases: relatedCasesPayload }).subscribe({
+              next: () => {
+                this.isSaving = false;
+                this.saveSuccess = true;
 
-            // Show success message
-            this.snackBar.open('تم حفظ البيانات بنجاح', 'إغلاق', { duration: 3000 });
+                // Show success message
+                this.snackBar.open('تم حفظ البيانات بنجاح', 'إغلاق', { duration: 3000 });
 
-            // Emit save complete event
-            this.saveComplete.emit({ success: true });
+                // Emit save complete event
+                this.saveComplete.emit({ success: true });
 
-            // Reset success indicator after 2 seconds
-            setTimeout(() => {
-              this.saveSuccess = false;
-            }, 2000);
+                // Reset success indicator after 2 seconds
+                setTimeout(() => {
+                  this.saveSuccess = false;
+                }, 2000);
+              },
+              error: (error: any) => {
+                this.isSaving = false;
+                this.saveError = 'فشل في حفظ الدعاوى المرتبطة';
+                console.error('Error saving related cases:', error);
+                this.snackBar.open('فشل في حفظ الدعاوى المرتبطة', 'إغلاق', { duration: 5000 });
+                this.saveComplete.emit({ success: false, error: this.saveError || undefined });
+              }
+            });
           },
           error: (error: any) => {
             this.isSaving = false;
