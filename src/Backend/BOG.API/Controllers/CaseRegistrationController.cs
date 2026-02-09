@@ -3,6 +3,7 @@ using BOG.DTO.CaseRegistration;
 using BOG.VM.CaseRegistration;
 using BOG.VM.Shared;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace BOG.API.Controllers;
 
@@ -100,6 +101,44 @@ public class CaseRegistrationController : ControllerBase
     }
 
     /// <summary>
+    /// Gets a case registration request with all details (plaintiffs, defendants, classifications, attachments, etc.).
+    /// </summary>
+    /// <param name="id">The request ID</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>The complete request details including all related entities</returns>
+    [HttpGet("{id}/details")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<CaseRegistrationRequestDetailsVM>> GetRequestDetails(
+        [FromRoute] int id,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            if (id <= 0)
+                return BadRequest(new { message = "Invalid request ID." });
+
+            var request = await _caseRegistrationBL.GetRequestWithDetailsAsync(id, cancellationToken);
+            if (request == null)
+                return NotFound(new { message = $"Request with ID {id} not found." });
+
+            return Ok(request);
+        }
+        catch (ArgumentException ex)
+        {
+            _logger.LogWarning("Invalid argument: {Message}", ex.Message);
+            return BadRequest(new { message = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error retrieving request details with ID {RequestId}", id);
+            return StatusCode(StatusCodes.Status500InternalServerError,
+                new { message = "An error occurred while retrieving the request details." });
+        }
+    }
+
+    /// <summary>
     /// Updates a case registration request (Draft status only).
     /// </summary>
     /// <param name="id">The request ID to update</param>
@@ -124,19 +163,33 @@ public class CaseRegistrationController : ControllerBase
             _logger.LogInformation("Request {RequestId} updated", id);
             return Ok(request);
         }
+        catch (ArgumentException argEx)
+        {
+            _logger.LogWarning("Validation failed for request {RequestId}: {Message}", id, argEx.Message);
+            return BadRequest(new { message = argEx.Message });
+        }
         catch (InvalidOperationException ex)
         {
             _logger.LogWarning("Failed to update request: {Message}", ex.Message);
             return NotFound(new { message = ex.Message });
         }
-        catch (ArgumentException ex)
+        catch (DbUpdateException dbEx)
         {
-            _logger.LogWarning("Invalid argument: {Message}", ex.Message);
-            return BadRequest(new { message = ex.Message });
+            _logger.LogError(dbEx, "Database error updating request {RequestId}", id);
+            var innerMessage = dbEx.InnerException?.Message ?? "";
+
+            if (innerMessage.Contains("FK_"))
+                return BadRequest(new { message = "خطأ في البيانات المرجعية: تأكد من صحة المحكمة ونوع الدعوى" });
+            if (innerMessage.Contains("String or binary data would be truncated"))
+                return BadRequest(new { message = "البيانات المدخلة تتجاوز الحد المسموح" });
+
+            return StatusCode(StatusCodes.Status500InternalServerError,
+                new { message = "خطأ في قاعدة البيانات" });
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error updating request {RequestId}", id);
+            _logger.LogError(ex, "Unexpected error updating request {RequestId}: {ExceptionType}",
+                id, ex.GetType().Name);
             return StatusCode(StatusCodes.Status500InternalServerError,
                 new { message = "An error occurred while updating the request." });
         }
@@ -224,6 +277,48 @@ public class CaseRegistrationController : ControllerBase
             _logger.LogError(ex, "Error taking action on request {RequestId}", id);
             return StatusCode(StatusCodes.Status500InternalServerError,
                 new { message = "An error occurred while processing the action." });
+        }
+    }
+
+    /// <summary>
+    /// Complete request processing with final decision.
+    /// POST /api/case-requests/{id}/complete
+    /// Unified endpoint for Register, SendToJudge, Reject, RequestCompletion decisions
+    /// ALWAYS requires Case Type (نوع الدعوى) for all decision types
+    /// </summary>
+    [HttpPost("{id}/complete")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<CaseRegistrationRequestVM>> CompleteRequest(
+        [FromRoute] int id,
+        [FromBody] RequestDecisionDTO decision,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            if (id <= 0)
+                return BadRequest(new { message = "Invalid request ID." });
+
+            var result = await _requestActionBL.CompleteRequestAsync(id, decision, cancellationToken);
+            _logger.LogInformation("Request {RequestId} completed with decision: {Decision}",
+                id, decision.DecisionType);
+            return Ok(result);
+        }
+        catch (InvalidOperationException ex)
+        {
+            _logger.LogWarning(ex, "Cannot complete request {RequestId}", id);
+            return BadRequest(new { message = ex.Message });
+        }
+        catch (ArgumentException ex)
+        {
+            _logger.LogWarning("Invalid argument: {Message}", ex.Message);
+            return BadRequest(new { message = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error completing request {RequestId}", id);
+            return StatusCode(500, new { message = "حدث خطأ أثناء معالجة الطلب" });
         }
     }
 

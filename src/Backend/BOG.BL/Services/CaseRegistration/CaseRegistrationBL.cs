@@ -67,14 +67,14 @@ public class CaseRegistrationBL : ICaseRegistrationBL
             throw new InvalidOperationException("معرف المحكمة مطلوب وصحيح");
 
         // Create new request in Draft state (1)
-        // Use a default user ID (9999 for tests, in production this should come from HttpContext)
+        // Use a default user ID (1 for tests, in production this should come from HttpContext)
         var request = new CaseRegistrationRequest
         {
             CourtId = dto.CourtId,
             Subject = dto.Subject,
             Evidence = dto.Evidence,
             RequestStatusId = 1, // Draft
-            CreatedByUserId = 9999, // TODO: Get from HttpContext.User in production
+            CreatedByUserId = 1, // TODO: Get from HttpContext.User in production
             CreatedDate = DateTime.UtcNow,
             ModifiedDate = DateTime.UtcNow
         };
@@ -151,14 +151,17 @@ public class CaseRegistrationBL : ICaseRegistrationBL
         if (requestData is CaseRegistrationUpdateDTO updateDto)
         {
             requestDict = new Dictionary<string, object>();
-            if (!string.IsNullOrWhiteSpace(updateDto.Subject))
-                requestDict["subject"] = updateDto.Subject;
-            if (!string.IsNullOrWhiteSpace(updateDto.Evidence))
-                requestDict["evidence"] = updateDto.Evidence;
-            if (updateDto.CourtId.HasValue && updateDto.CourtId > 0)
-                requestDict["courtId"] = updateDto.CourtId;
-            if (updateDto.ClassificationIds != null)
-                requestDict["classificationIds"] = updateDto.ClassificationIds;
+            // Always add fields to dictionary - let the update logic handle null/empty values
+            requestDict["subject"] = updateDto.Subject;
+            requestDict["evidence"] = updateDto.Evidence;
+            requestDict["courtId"] = updateDto.CourtId;
+            requestDict["caseTypeId"] = updateDto.CaseTypeId;
+            requestDict["notes"] = updateDto.Notes;
+            requestDict["classificationIds"] = updateDto.ClassificationIds ?? new List<int>();
+            // Add contact information fields
+            requestDict["primaryMobile"] = updateDto.PrimaryMobile;
+            requestDict["secondaryMobile"] = updateDto.SecondaryMobile;
+            requestDict["email"] = updateDto.Email;
         }
         else if (requestData is IDictionary<string, object> dictData)
         {
@@ -170,14 +173,64 @@ public class CaseRegistrationBL : ICaseRegistrationBL
         }
 
         // Update fields
+        // Subject - validate length if provided
         if (requestDict.ContainsKey("subject"))
-            request.Subject = requestDict["subject"]?.ToString();
+        {
+            var subject = requestDict["subject"]?.ToString();
+            if (!string.IsNullOrWhiteSpace(subject))
+            {
+                if (subject.Length > 4000)
+                    throw new ArgumentException("الموضوع لا يمكن أن يتجاوز 4000 حرف");
+                request.Subject = subject;
+            }
+            // If empty, keep existing value (don't clear required field)
+        }
 
+        // Evidence - validate length if provided
         if (requestDict.ContainsKey("evidence"))
-            request.Evidence = requestDict["evidence"]?.ToString();
+        {
+            var evidence = requestDict["evidence"]?.ToString();
+            if (!string.IsNullOrWhiteSpace(evidence))
+            {
+                if (evidence.Length > 4000)
+                    throw new ArgumentException("الأدلة لا يمكن أن تتجاوز 4000 حرف");
+                request.Evidence = evidence;
+            }
+            // If empty, keep existing value (don't clear required field)
+        }
 
         if (requestDict.ContainsKey("courtId"))
-            request.CourtId = Convert.ToInt32(requestDict["courtId"]);
+        {
+            if (requestDict["courtId"] != null && int.TryParse(requestDict["courtId"]?.ToString(), out int courtId) && courtId > 0)
+                request.CourtId = courtId;
+        }
+
+        // CaseTypeId - validate if provided
+        if (requestDict.ContainsKey("caseTypeId"))
+        {
+            if (requestDict["caseTypeId"] != null && int.TryParse(requestDict["caseTypeId"]?.ToString(), out int caseTypeId) && caseTypeId > 0)
+            {
+                if (caseTypeId < 1 || caseTypeId > 2)
+                    throw new ArgumentException("نوع الدعوى غير صحيح (يجب أن يكون 1 أو 2)");
+                request.CaseTypeId = caseTypeId;
+            }
+        }
+
+        // Notes - optional field
+        if (requestDict.ContainsKey("notes"))
+        {
+            var notes = requestDict["notes"]?.ToString();
+            if (!string.IsNullOrWhiteSpace(notes))
+            {
+                if (notes.Length > 4000)
+                    throw new ArgumentException("الملاحظات لا يمكن أن تتجاوز 4000 حرف");
+                request.Notes = notes;
+            }
+            else
+            {
+                request.Notes = null; // Allow clearing optional field
+            }
+        }
 
         // Handle classifications update
         if (requestDict.ContainsKey("classificationIds"))
@@ -258,22 +311,54 @@ public class CaseRegistrationBL : ICaseRegistrationBL
         }
 
         // Update contact information if provided
+        // Primary Mobile - validate format if provided
         if (requestDict.ContainsKey("primaryMobile"))
         {
             var mobile = requestDict["primaryMobile"]?.ToString();
-            request.PrimaryMobile = string.IsNullOrWhiteSpace(mobile) ? null : mobile;
+            if (!string.IsNullOrWhiteSpace(mobile))
+            {
+                if (!System.Text.RegularExpressions.Regex.IsMatch(mobile, @"^05\d{8}$"))
+                    throw new ArgumentException("رقم الجوال الأساسي يجب أن يكون 10 أرقام ويبدأ بـ 05");
+                request.PrimaryMobile = mobile;
+            }
+            else
+            {
+                request.PrimaryMobile = null; // Allow clearing optional field
+            }
         }
 
+        // Secondary Mobile - validate format if provided
         if (requestDict.ContainsKey("secondaryMobile"))
         {
             var mobile = requestDict["secondaryMobile"]?.ToString();
-            request.SecondaryMobile = string.IsNullOrWhiteSpace(mobile) ? null : mobile;
+            if (!string.IsNullOrWhiteSpace(mobile))
+            {
+                if (!System.Text.RegularExpressions.Regex.IsMatch(mobile, @"^05\d{8}$"))
+                    throw new ArgumentException("رقم الجوال الثانوي يجب أن يكون 10 أرقام ويبدأ بـ 05");
+                request.SecondaryMobile = mobile;
+            }
+            else
+            {
+                request.SecondaryMobile = null; // Allow clearing optional field
+            }
         }
 
+        // Email - validate format if provided
         if (requestDict.ContainsKey("email"))
         {
             var email = requestDict["email"]?.ToString();
-            request.Email = string.IsNullOrWhiteSpace(email) ? null : email;
+            if (!string.IsNullOrWhiteSpace(email))
+            {
+                if (email.Length > 255)
+                    throw new ArgumentException("البريد الإلكتروني لا يمكن أن يتجاوز 255 حرف");
+                if (!System.Text.RegularExpressions.Regex.IsMatch(email, @"^[^\s@]+@[^\s@]+\.[^\s@]+$"))
+                    throw new ArgumentException("صيغة البريد الإلكتروني غير صحيحة");
+                request.Email = email;
+            }
+            else
+            {
+                request.Email = null; // Allow clearing optional field
+            }
         }
 
         request.ModifiedDate = DateTime.UtcNow;

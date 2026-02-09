@@ -152,10 +152,25 @@ export class CaseDataContainerComponent implements OnInit, OnDestroy {
       },
       error: (error: any) => {
         this.isSaving = false;
-        this.saveError = error?.error?.message || 'حدث خطأ أثناء حفظ البيانات';
+
+        // Extract detailed error message
+        let errorMessage = 'حدث خطأ أثناء حفظ البيانات';
+
+        if (error?.error?.message) {
+          errorMessage = error.error.message;
+        }
+
+        // Log full error for debugging
         console.error('Error saving case data:', error);
-        this.snackBar.open(this.saveError || 'حدث خطأ أثناء حفظ البيانات', 'إغلاق', { duration: 5000 });
-        this.saveComplete.emit({ success: false, error: this.saveError || undefined });
+        console.error('Error response:', error?.error);
+
+        this.saveError = errorMessage;
+        this.snackBar.open(errorMessage, 'إغلاق', {
+          duration: 7000,  // Longer for detailed messages
+          panelClass: ['error-snackbar']
+        });
+
+        this.saveComplete.emit({ success: false, error: errorMessage });
       }
     });
   }
