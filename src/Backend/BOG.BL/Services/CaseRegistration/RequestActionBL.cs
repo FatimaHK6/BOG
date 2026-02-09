@@ -356,6 +356,11 @@ public class RequestActionBL : IRequestActionBL
         await _requestRepository.UpdateAsync(request, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
+        // **CRITICAL**: Clear change tracker and reload to get fresh data for validation
+        _unitOfWork.ClearChangeTracker();
+        request = await _requestRepository.GetWithDetailsAsync(requestId, cancellationToken)
+            ?? throw new InvalidOperationException($"الطلب {requestId} غير موجود");
+
         // Validate for Register and SendToJudge decisions
         if (decision.DecisionType == "Register" || decision.DecisionType == "SendToJudge")
         {
