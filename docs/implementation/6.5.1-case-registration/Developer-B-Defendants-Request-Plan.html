@@ -1,0 +1,1124 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Developer B: Defendants & Request Management Module - BOG</title>
+    <style>
+        :root {
+            --primary-color: #059669;
+            --secondary-color: #047857;
+            --accent-color: #10b981;
+            --info-color: #2563eb;
+            --warning-color: #d97706;
+            --danger-color: #dc2626;
+            --bg-color: #ecfdf5;
+            --card-bg: #ffffff;
+            --text-color: #1e293b;
+            --border-color: #a7f3d0;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', 'Arial', Tahoma, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.8;
+            direction: rtl;
+        }
+
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+
+        header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 40px 20px;
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 5px solid var(--accent-color);
+        }
+
+        header .badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.2);
+            padding: 8px 20px;
+            border-radius: 25px;
+            font-size: 1rem;
+            margin-bottom: 15px;
+        }
+
+        header h1 { font-size: 2rem; margin-bottom: 10px; }
+        header p { font-size: 1rem; opacity: 0.9; }
+
+        .meta-info {
+            background: var(--card-bg);
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-right: 4px solid var(--primary-color);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .meta-item { flex: 1; min-width: 200px; }
+        .meta-item strong { color: var(--primary-color); }
+
+        .toc {
+            background: var(--card-bg);
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .toc h2 { color: var(--primary-color); margin-bottom: 15px; font-size: 1.3rem; }
+        .toc ol { padding-right: 25px; }
+        .toc li { margin: 8px 0; }
+        .toc a { color: var(--primary-color); text-decoration: none; }
+        .toc a:hover { text-decoration: underline; }
+
+        .section {
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        h2 {
+            color: var(--primary-color);
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid var(--accent-color);
+        }
+
+        h3 {
+            color: var(--text-color);
+            font-size: 1.2rem;
+            margin: 25px 0 15px 0;
+        }
+
+        h4 {
+            color: #475569;
+            font-size: 1.1rem;
+            margin: 20px 0 10px 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+            font-size: 0.95rem;
+        }
+
+        th, td {
+            border: 1px solid var(--border-color);
+            padding: 12px 15px;
+            text-align: right;
+        }
+
+        th {
+            background: var(--primary-color);
+            color: white;
+            font-weight: 600;
+        }
+
+        tr:nth-child(even) { background-color: #ecfdf5; }
+        tr:hover { background-color: #d1fae5; }
+
+        pre {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            direction: ltr;
+            text-align: left;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            margin: 15px 0;
+        }
+
+        code {
+            font-family: 'Consolas', 'Monaco', monospace;
+            background: #d1fae5;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.9em;
+            color: #047857;
+        }
+
+        pre code { background: none; padding: 0; color: inherit; }
+
+        .file-tree {
+            background: #ecfdf5;
+            padding: 20px;
+            border-radius: 8px;
+            font-family: monospace;
+            direction: ltr;
+            text-align: left;
+            white-space: pre;
+            overflow-x: auto;
+            margin: 15px 0;
+            border: 1px solid var(--border-color);
+        }
+
+        .note {
+            background: #fef3c7;
+            border-right: 4px solid var(--warning-color);
+            padding: 15px 20px;
+            border-radius: 0 8px 8px 0;
+            margin: 15px 0;
+        }
+
+        .info {
+            background: #dbeafe;
+            border-right: 4px solid var(--info-color);
+            padding: 15px 20px;
+            border-radius: 0 8px 8px 0;
+            margin: 15px 0;
+        }
+
+        .success {
+            background: #d1fae5;
+            border-right: 4px solid var(--primary-color);
+            padding: 15px 20px;
+            border-radius: 0 8px 8px 0;
+            margin: 15px 0;
+        }
+
+        .danger {
+            background: #fee2e2;
+            border-right: 4px solid var(--danger-color);
+            padding: 15px 20px;
+            border-radius: 0 8px 8px 0;
+            margin: 15px 0;
+        }
+
+        ul, ol { padding-right: 25px; margin: 10px 0; }
+        li { margin: 5px 0; }
+
+        .priority-high { color: var(--danger-color); font-weight: bold; }
+        .priority-medium { color: var(--warning-color); font-weight: bold; }
+        .priority-low { color: var(--primary-color); font-weight: bold; }
+
+        .status-flow {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 15px 0;
+        }
+
+        .status-item {
+            background: #f1f5f9;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+        }
+
+        .status-arrow {
+            color: var(--primary-color);
+            font-weight: bold;
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: #64748b;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 768px) {
+            .container { padding: 10px; }
+            .section { padding: 15px; }
+            table { font-size: 0.85rem; }
+            th, td { padding: 8px; }
+            .meta-info { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="badge">Developer B</div>
+        <h1>Defendants & Request Management Module</h1>
+        <h1>Defendants & Request Management Module</h1>
+        <p>Use Cases 6.5.1.1.11 - 6.5.1.1.24 | 14 Use Cases</p>
+    </header>
+
+    <div class="container">
+        <div class="meta-info">
+            <div class="meta-item"><strong>Scope:</strong> UC 6.5.1.1.11 - 6.5.1.1.24 (14 use cases)</div>
+            <div class="meta-item"><strong>Dependency:</strong> Phase 1 (Database) must be completed first</div>
+        </div>
+
+        <div class="toc">
+            <h2>Table of Contents</h2>
+            <ol>
+                <li><a href="#usecases">Use Cases</a></li>
+                <li><a href="#files">Required Files</a></li>
+                <li><a href="#endpoints">API Endpoints</a></li>
+                <li><a href="#status">Status Transitions</a></li>
+                <li><a href="#rules">Business Rules</a></li>
+                <li><a href="#integrations">Integrations</a></li>
+                <li><a href="#notifications">Notifications</a></li>
+                <li><a href="#testing">Test Scenarios</a></li>
+                <li><a href="#frontend">Frontend (واجهة المستخدم)</a></li>
+            </ol>
+        </div>
+
+        <div class="section" id="usecases">
+            <h2>1. Use Cases</h2>
+
+            <table>
+                <thead>
+                    <tr><th>UC #</th><th>Name (Arabic)</th><th>Name (English)</th><th>Priority</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td>6.5.1.1.11</td><td>Defendants</td><td>Defendants List</td><td class="priority-high">High</td></tr>
+                    <tr><td>6.5.1.1.12</td><td>Add Defendant</td><td>Add Defendant</td><td class="priority-high">High</td></tr>
+                    <tr><td>6.5.1.1.13</td><td>Defendant Details</td><td>View Defendant</td><td class="priority-medium">Medium</td></tr>
+                    <tr><td>6.5.1.1.14</td><td>Edit Defendant</td><td>Edit Defendant</td><td class="priority-medium">Medium</td></tr>
+                    <tr><td>6.5.1.1.15</td><td>Additional Info</td><td>Additional Info</td><td class="priority-medium">Medium</td></tr>
+                    <tr><td>6.5.1.1.16</td><td>View Info</td><td>View Additional Info</td><td class="priority-low">Low</td></tr>
+                    <tr><td>6.5.1.1.17</td><td>Request Attachments</td><td>Request Attachments</td><td class="priority-medium">Medium</td></tr>
+                    <tr><td>6.5.1.1.18</td><td>Add Deficiencies</td><td>Add Deficiencies</td><td class="priority-high">High</td></tr>
+                    <tr><td>6.5.1.1.19</td><td>View Deficiencies</td><td>View Deficiencies</td><td class="priority-low">Low</td></tr>
+                    <tr><td>6.5.1.1.20</td><td>Search</td><td>Search Requests</td><td class="priority-high">High</td></tr>
+                    <tr><td>6.5.1.1.21</td><td>Edit Request</td><td>Edit Request</td><td class="priority-medium">Medium</td></tr>
+                    <tr><td>6.5.1.1.22</td><td>Request Details</td><td>View Request Details</td><td class="priority-medium">Medium</td></tr>
+                    <tr><td>6.5.1.1.23</td><td>Take Action</td><td>Take Action</td><td class="priority-high">High</td></tr>
+                    <tr><td>6.5.1.1.24</td><td>Register Case</td><td>Register New Case</td><td class="priority-high">High</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="section" id="files">
+            <h2>2. Required Files</h2>
+
+            <h3>2.1 Data Access Layer (BOG.DAL)</h3>
+
+            <h4>Interfaces (BOG.DAL/Interfaces/)</h4>
+            <pre><code>// IDefendantRepository.cs
+public interface IDefendantRepository : IRepository&lt;Defendant&gt;
+{
+    Task&lt;IEnumerable&lt;Defendant&gt;&gt; GetByRequestIdAsync(int requestId);
+    Task&lt;Defendant?&gt; GetByIdentityAsync(int requestId, string identityNumber, int defendantTypeId);
+    Task&lt;bool&gt; ExistsByIdentityAsync(int requestId, string identityNumber, int defendantTypeId);
+}
+
+// ICaseRegistrationRequestRepository.cs
+public interface ICaseRegistrationRequestRepository : IRepository&lt;CaseRegistrationRequest&gt;
+{
+    Task&lt;CaseRegistrationRequest?&gt; GetWithDetailsAsync(int requestId);
+    Task&lt;IEnumerable&lt;CaseRegistrationRequest&gt;&gt; SearchAsync(SearchRequestDTO criteria);
+    Task&lt;IEnumerable&lt;CaseRegistrationRequest&gt;&gt; GetPendingCompletionExpiredAsync();
+}</code></pre>
+
+            <h4>Implementations (BOG.DAL/Repositories/)</h4>
+            <div class="file-tree">BOG.DAL/Repositories/
++-- DefendantRepository.cs
++-- CaseRegistrationRequestRepository.cs
++-- RequestAttachmentRepository.cs
++-- RequestDeficiencyRepository.cs
++-- AdditionalInfoRepository.cs</div>
+
+            <h3>2.2 Data Transfer Objects (BOG.DTO)</h3>
+
+            <h4>Defendant DTOs (BOG.DTO/Defendant/)</h4>
+            <pre><code>// DefendantCreateDTO.cs
+public class DefendantCreateDTO
+{
+    public int DefendantTypeId { get; set; }           // Required: 1-6
+    public string FullName { get; set; }               // Required: Max 200 chars
+
+    // Optional identity (for individuals)
+    public int? IdentityTypeId { get; set; }
+    public string? IdentityNumber { get; set; }
+
+    // Optional address
+    public string? AddressText { get; set; }
+    public AddressDTO? Address { get; set; }
+
+    // For companies
+    public string? CommercialRegNumber { get; set; }
+
+    // For government agencies
+    public int? GovernmentAgencyId { get; set; }
+    public string? AdditionalStatement { get; set; }
+}</code></pre>
+
+            <h4>Request DTOs (BOG.DTO/CaseRegistration/)</h4>
+            <pre><code>// TakeActionDTO.cs
+public class TakeActionDTO
+{
+    public string Action { get; set; }                 // Register/SendToJudge/Reject/RequestCompletion
+    public string? Notes { get; set; }                 // Required for Reject
+    public List&lt;RequestDeficiencyDTO&gt;? Deficiencies { get; set; } // For RequestCompletion
+}
+
+// SearchRequestDTO.cs
+public class SearchRequestDTO
+{
+    public int? CourtId { get; set; }
+    public int? DisputeTypeId { get; set; }
+    public string? CaseNumber { get; set; }
+    public DateTime? CaseDate { get; set; }
+    public int? CaseYear { get; set; }
+    public string? IdentityNumber { get; set; }
+    public string? MobileNumber { get; set; }
+    public string? PartyName { get; set; }             // Partial match
+    public int? StatusId { get; set; }
+    public int PageNumber { get; set; } = 1;
+    public int PageSize { get; set; } = 20;
+}</code></pre>
+
+            <h3>2.3 View Models (BOG.VM)</h3>
+
+            <h4>Defendant VMs (BOG.VM/Defendant/)</h4>
+            <pre><code>// DefendantVM.cs
+public class DefendantVM
+{
+    public int Id { get; set; }
+    public int DefendantTypeId { get; set; }
+    public string DefendantTypeName { get; set; }
+    public string FullName { get; set; }
+    public string? IdentityNumber { get; set; }
+    public string? AddressText { get; set; }
+    public int? DataSourceId { get; set; }             // Data source (1=Absher, 2=User)
+    public string? DataSourceName { get; set; }        // Data source name
+    public string? CommercialRegNumber { get; set; }
+    public string? GovernmentAgencyName { get; set; }
+    public DateTime CreatedDate { get; set; }
+}</code></pre>
+
+            <h3>2.4 Business Logic Layer (BOG.BL)</h3>
+
+            <h4>Interfaces (BOG.BL/Interfaces/)</h4>
+            <pre><code>// IDefendantBL.cs
+public interface IDefendantBL
+{
+    Task&lt;DefendantVM&gt; CreateDefendantAsync(int requestId, DefendantCreateDTO dto);
+    Task&lt;DefendantVM?&gt; GetDefendantByIdAsync(int defendantId);
+    Task&lt;IEnumerable&lt;DefendantListVM&gt;&gt; GetDefendantsByRequestIdAsync(int requestId);
+    Task&lt;DefendantVM&gt; UpdateDefendantAsync(int defendantId, DefendantUpdateDTO dto);
+    Task DeleteDefendantAsync(int defendantId);
+}
+
+// IRequestActionBL.cs
+public interface IRequestActionBL
+{
+    Task&lt;CaseRegistrationRequestVM&gt; TakeActionAsync(int requestId, TakeActionDTO dto);
+    Task&lt;CaseRegistrationRequestVM&gt; RegisterCaseAsync(int requestId);
+    Task&lt;CaseRegistrationRequestVM&gt; SendToJudgeDeskAsync(int requestId);
+    Task&lt;CaseRegistrationRequestVM&gt; RejectRequestAsync(int requestId, string reason);
+    Task&lt;CaseRegistrationRequestVM&gt; RequestCompletionAsync(int requestId, List&lt;RequestDeficiencyDTO&gt; deficiencies);
+    Task ProcessExpiredCompletionRequestsAsync(); // Background task
+}</code></pre>
+
+            <h3>2.5 API Controllers (BOG.API/Controllers/)</h3>
+
+            <pre><code>// DefendantsController.cs
+[ApiController]
+[Route("api")]
+public class DefendantsController : ControllerBase
+{
+    // GET /api/case-requests/{requestId}/defendants
+    // POST /api/case-requests/{requestId}/defendants
+    // GET /api/defendants/{id}
+    // PUT /api/defendants/{id}
+    // DELETE /api/defendants/{id}
+}
+
+// CaseRegistrationController.cs
+[ApiController]
+[Route("api/case-requests")]
+public class CaseRegistrationController : ControllerBase
+{
+    // POST /api/case-requests
+    // GET /api/case-requests/{id}
+    // PUT /api/case-requests/{id}
+    // POST /api/case-requests/{id}/submit
+    // GET /api/case-requests/search
+    // POST /api/case-requests/{id}/action
+    // GET/POST/DELETE for attachments and deficiencies...
+}</code></pre>
+        </div>
+
+        <div class="section" id="endpoints">
+            <h2>3. API Endpoints</h2>
+
+            <h3>3.1 Defendants Controller</h3>
+            <table>
+                <thead><tr><th>Method</th><th>Route</th><th>Description</th></tr></thead>
+                <tbody>
+                    <tr><td>GET</td><td>/api/case-requests/{requestId}/defendants</td><td>Get defendants list for request</td></tr>
+                    <tr><td>POST</td><td>/api/case-requests/{requestId}/defendants</td><td>Add defendant</td></tr>
+                    <tr><td>GET</td><td>/api/defendants/{id}</td><td>Get defendant details</td></tr>
+                    <tr><td>PUT</td><td>/api/defendants/{id}</td><td>Update defendant</td></tr>
+                    <tr><td>DELETE</td><td>/api/defendants/{id}</td><td>Delete defendant</td></tr>
+                </tbody>
+            </table>
+
+            <h3>3.2 Case Registration Controller</h3>
+            <table>
+                <thead><tr><th>Method</th><th>Route</th><th>Description</th></tr></thead>
+                <tbody>
+                    <tr><td>POST</td><td>/api/case-requests</td><td>Create new request (draft)</td></tr>
+                    <tr><td>GET</td><td>/api/case-requests/{id}</td><td>Get request details</td></tr>
+                    <tr><td>PUT</td><td>/api/case-requests/{id}</td><td>Update request</td></tr>
+                    <tr><td>POST</td><td>/api/case-requests/{id}/submit</td><td>Submit request</td></tr>
+                    <tr><td>GET</td><td>/api/case-requests/search</td><td>Search requests</td></tr>
+                    <tr><td>POST</td><td>/api/case-requests/{id}/action</td><td>Take action</td></tr>
+                    <tr><td>GET</td><td>/api/case-requests/{id}/attachments</td><td>Get attachments list</td></tr>
+                    <tr><td>POST</td><td>/api/case-requests/{id}/attachments</td><td>Add attachment</td></tr>
+                    <tr><td>DELETE</td><td>/api/case-requests/{id}/attachments/{attachmentId}</td><td>Delete attachment</td></tr>
+                    <tr><td>GET</td><td>/api/case-requests/{id}/deficiencies</td><td>Get deficiencies list</td></tr>
+                    <tr><td>POST</td><td>/api/case-requests/{id}/deficiencies</td><td>Add deficiency</td></tr>
+                    <tr><td>GET</td><td>/api/case-requests/{id}/additional-info</td><td>Get additional info</td></tr>
+                    <tr><td>PUT</td><td>/api/case-requests/{id}/additional-info</td><td>Update additional info</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="section" id="status">
+            <h2>4. Status Transitions</h2>
+
+            <table>
+                <thead><tr><th>From</th><th>Action</th><th>To</th><th>Validation</th></tr></thead>
+                <tbody>
+                    <tr><td>None (0)</td><td>Save</td><td>Draft (1)</td><td>-</td></tr>
+                    <tr><td>Draft (1)</td><td>Submit</td><td>New Request (3)</td><td>ERR001-007</td></tr>
+                    <tr><td>New Request (3)</td><td>Register</td><td>Registered (6)</td><td>Data complete</td></tr>
+                    <tr><td>New Request (3)</td><td>Send to Judge</td><td>On Judge Desk (5)</td><td>-</td></tr>
+                    <tr><td>New Request (3)</td><td>Reject</td><td>Rejected (10)</td><td>Notes required</td></tr>
+                    <tr><td>New Request (3)</td><td>Request Completion</td><td>Pending Completion (8)</td><td>Deficiencies required</td></tr>
+                    <tr><td>On Judge Desk (5)</td><td>Register</td><td>Registered (6)</td><td>Judge approval</td></tr>
+                    <tr><td>On Judge Desk (5)</td><td>Reject</td><td>Rejected (10)</td><td>Notes required</td></tr>
+                    <tr><td>On Judge Desk (5)</td><td>Request Completion</td><td>Pending Completion (8)</td><td>Deficiencies required</td></tr>
+                    <tr><td>Pending Completion (8)</td><td>Complete</td><td>Verifying (9)</td><td>Documents submitted</td></tr>
+                    <tr><td>Pending Completion (8)</td><td>Timeout (30 days)</td><td>Rejected (10)</td><td>Auto</td></tr>
+                    <tr><td>Verifying (9)</td><td>Accept</td><td>New Request (3)</td><td>Deficiencies complete</td></tr>
+                    <tr><td>Verifying (9)</td><td>Reject</td><td>Pending Completion (8)</td><td>Deficiencies incomplete</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="section" id="rules">
+            <h2>5. Business Rules</h2>
+
+            <table>
+                <thead><tr><th>Code</th><th>Rule</th><th>Implementation</th></tr></thead>
+                <tbody>
+                    <tr><td>ERR001</td><td>At least one plaintiff required</td><td>ValidateForSubmissionAsync</td></tr>
+                    <tr><td>ERR002</td><td>At least one defendant required</td><td>ValidateForSubmissionAsync</td></tr>
+                    <tr><td>ERR003</td><td>Mandatory attachments incomplete</td><td>ValidateForSubmissionAsync</td></tr>
+                    <tr><td>ERR004</td><td>Applicant not set</td><td>ValidateForSubmissionAsync</td></tr>
+                    <tr><td>ERR005</td><td>Classifications not set</td><td>ValidateForSubmissionAsync</td></tr>
+                    <tr><td>ERR006</td><td>Subject empty</td><td>ValidateForSubmissionAsync</td></tr>
+                    <tr><td>ERR007</td><td>Evidence empty</td><td>ValidateForSubmissionAsync</td></tr>
+                    <tr><td>ERR013</td><td>Defendant already exists</td><td>DefendantBL.Create</td></tr>
+                    <tr><td>BR04</td><td>PDF only, Max 4MB</td><td>RequestAttachmentBL</td></tr>
+                    <tr><td>BR05</td><td>Auto-reject after 30 days</td><td>ProcessExpiredCompletionRequestsAsync</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="section" id="integrations">
+            <h2>6. Integrations</h2>
+
+            <h3>6.0 Data Source Table</h3>
+            <table>
+                <thead><tr><th>Id</th><th>Name</th><th>NameAr</th><th>Description</th></tr></thead>
+                <tbody>
+                    <tr><td>1</td><td>FromAbsher</td><td>From Absher</td><td>Data fetched from Absher system</td></tr>
+                    <tr><td>2</td><td>FromUser</td><td>From User</td><td>Data entered manually</td></tr>
+                </tbody>
+            </table>
+
+            <div class="info">
+                <strong>Note:</strong> Use <code>DataSourceId</code> instead of <code>IsAbsherVerified</code> to track data source for defendants.
+            </div>
+
+            <h3>6.1 SMS Service</h3>
+            <pre><code>// BOG.Integration/Interfaces/ISmsService.cs
+public interface ISmsService
+{
+    Task&lt;SmsResult&gt; SendSmsAsync(string mobileNumber, string message);
+    Task&lt;SmsResult&gt; SendSmsAsync(string mobileNumber, string templateCode, Dictionary&lt;string, string&gt; parameters);
+    Task&lt;List&lt;SmsResult&gt;&gt; SendBulkSmsAsync(List&lt;string&gt; mobileNumbers, string message);
+}</code></pre>
+
+            <h4>SMS Templates</h4>
+            <table>
+                <thead><tr><th>Code</th><th>Template (Arabic)</th></tr></thead>
+                <tbody>
+                    <tr><td>REQUEST_SUBMITTED</td><td>Case registration request {RequestNumber} received successfully</td></tr>
+                    <tr><td>REQUEST_REGISTERED</td><td>Your case {CaseNumber} has been registered at Administrative Court</td></tr>
+                    <tr><td>REQUEST_REJECTED</td><td>Request {RequestNumber} rejected. Reason: {Reason}</td></tr>
+                    <tr><td>COMPLETION_REQUIRED</td><td>Completion required for request {RequestNumber} within 30 days</td></tr>
+                    <tr><td>DEFICIENCY_REMINDER</td><td>Reminder: Complete request {RequestNumber}. {DaysRemaining} days remaining</td></tr>
+                    <tr><td>AUTO_REJECTED</td><td>Request {RequestNumber} auto-rejected due to incomplete deficiencies</td></tr>
+                </tbody>
+            </table>
+
+            <h4>Usage in RequestActionBL</h4>
+            <pre><code>public async Task&lt;CaseRegistrationRequestVM&gt; RegisterCaseAsync(int requestId)
+{
+    // ... registration logic ...
+
+    // Send SMS notification
+    await _smsService.SendSmsAsync(
+        applicant.MobileNumber,
+        SmsTemplates.RequestRegistered,
+        new Dictionary&lt;string, string&gt;
+        {
+            ["CaseNumber"] = caseResult.CaseNumber,
+            ["CourtName"] = request.Court.NameAr
+        });
+
+    // ...
+}</code></pre>
+
+            <h3>6.2 Email Service</h3>
+            <pre><code>// BOG.Integration/Interfaces/IEmailService.cs
+public interface IEmailService
+{
+    Task&lt;EmailResult&gt; SendEmailAsync(string toEmail, string subject, string body, bool isHtml = true);
+    Task&lt;EmailResult&gt; SendEmailAsync(string toEmail, string templateCode, Dictionary&lt;string, string&gt; parameters);
+    Task&lt;EmailResult&gt; SendEmailWithAttachmentAsync(string toEmail, string subject, string body,
+        List&lt;EmailAttachment&gt; attachments);
+}</code></pre>
+
+            <h4>Email Templates</h4>
+            <table>
+                <thead><tr><th>Code</th><th>Subject</th><th>Content</th></tr></thead>
+                <tbody>
+                    <tr><td>REQUEST_SUBMITTED</td><td>Case registration request received - {RequestNumber}</td><td>Confirmation with request number</td></tr>
+                    <tr><td>REQUEST_REGISTERED</td><td>Case registered - {CaseNumber}</td><td>Case details, court, and department</td></tr>
+                    <tr><td>COMPLETION_REQUIRED</td><td>Completion required - Request {RequestNumber}</td><td>Deficiencies list and deadline</td></tr>
+                </tbody>
+            </table>
+
+            <h3>6.3 Case Management Service</h3>
+            <pre><code>// BOG.Integration/Interfaces/ICaseManagementService.cs
+public interface ICaseManagementService
+{
+    Task&lt;CaseRegistrationResult&gt; RegisterCaseAsync(CaseRegistrationData caseData);
+    Task&lt;CaseStatusResult&gt; GetCaseStatusAsync(string caseNumber);
+    Task&lt;bool&gt; UpdateCaseAsync(string caseNumber, CaseUpdateData updateData);
+}</code></pre>
+
+            <h4>Registration Data</h4>
+            <pre><code>// BOG.Integration/DTOs/CaseManagement/CaseRegistrationData.cs
+public class CaseRegistrationData
+{
+    public int RequestId { get; set; }
+    public int CourtId { get; set; }
+    public int DepartmentId { get; set; }
+    public int DisputeTypeId { get; set; }
+    public string Subject { get; set; }
+    public string Claims { get; set; }
+    public List&lt;CasePlaintiffData&gt; Plaintiffs { get; set; }
+    public List&lt;CaseDefendantData&gt; Defendants { get; set; }
+}
+
+// BOG.Integration/DTOs/CaseManagement/CaseRegistrationResult.cs
+public class CaseRegistrationResult
+{
+    public bool IsSuccess { get; set; }
+    public string? CaseNumber { get; set; }          // Case number
+    public string? RegistrationNumber { get; set; } // Registration number
+    public DateTime? RegistrationDate { get; set; }
+    public string? ErrorCode { get; set; }
+    public string? ErrorMessage { get; set; }
+}</code></pre>
+
+            <h4>Usage in RequestActionBL</h4>
+            <pre><code>public async Task&lt;CaseRegistrationRequestVM&gt; RegisterCaseAsync(int requestId)
+{
+    var request = await _requestRepository.GetWithDetailsAsync(requestId);
+
+    // Prepare case data
+    var caseData = new CaseRegistrationData
+    {
+        RequestId = request.Id,
+        CourtId = request.CourtId,
+        DepartmentId = request.DepartmentId,
+        DisputeTypeId = request.DisputeTypeId,
+        Subject = request.Subject,
+        Claims = request.Claims,
+        Plaintiffs = request.Plaintiffs.Select(p =&gt; new CasePlaintiffData
+        {
+            FullName = p.FullName,
+            IdentityNumber = p.IdentityNumber,
+            // ...
+        }).ToList(),
+        Defendants = request.Defendants.Select(d =&gt; new CaseDefendantData
+        {
+            FullName = d.FullName,
+            // ...
+        }).ToList()
+    };
+
+    // Register case in system
+    var result = await _caseManagementService.RegisterCaseAsync(caseData);
+
+    if (!result.IsSuccess)
+    {
+        throw new BusinessException($"Case registration failed: {result.ErrorMessageAr}");
+    }
+
+    // Update request with case number
+    request.CaseNumber = result.CaseNumber;
+    request.RegistrationNumber = result.RegistrationNumber;
+    request.RegistrationDate = result.RegistrationDate;
+    request.RequestStatusId = (int)RequestStatus.Registered;
+
+    await _unitOfWork.SaveChangesAsync();
+
+    // Send notifications...
+}</code></pre>
+
+            <h3>6.4 Configuration (appsettings.json)</h3>
+            <pre><code>{
+  "Integration": {
+    "Sms": {
+      "UseMock": true,
+      "Provider": "Unifonic",
+      "ApiKey": "",
+      "SenderId": "BOG"
+    },
+    "Email": {
+      "UseMock": true,
+      "SmtpHost": "smtp.example.sa",
+      "SmtpPort": 587,
+      "FromEmail": "noreply@bog.gov.sa",
+      "FromName": "Board of Grievances"
+    },
+    "CaseManagement": {
+      "UseMock": true,
+      "BaseUrl": "https://cms.bog.gov.sa/api",
+      "Version": "v4"
+    }
+  }
+}</code></pre>
+        </div>
+
+        <div class="section" id="notifications">
+            <h2>7. Notifications</h2>
+
+            <table>
+                <thead><tr><th>Event</th><th>Type</th><th>Recipient</th></tr></thead>
+                <tbody>
+                    <tr><td>Request -> Registered</td><td>SMS + Email</td><td>Applicant</td></tr>
+                    <tr><td>Request -> Rejected</td><td>SMS + Email</td><td>Applicant</td></tr>
+                    <tr><td>Request -> Pending Completion</td><td>SMS + Email</td><td>Applicant</td></tr>
+                    <tr><td>Pending Completion -> Rejected (Timeout)</td><td>SMS + Email</td><td>Applicant</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="section" id="testing">
+            <h2>8. Test Scenarios</h2>
+
+            <ol>
+                <li><strong>Create New Request</strong>
+                    <ul>
+                        <li>POST /api/case-requests (create draft)</li>
+                        <li>Verify status = Draft (1)</li>
+                    </ul>
+                </li>
+                <li><strong>Add Defendant</strong>
+                    <ul>
+                        <li>POST /api/case-requests/1/defendants</li>
+                        <li>Verify only FullName is required</li>
+                    </ul>
+                </li>
+                <li><strong>Submit Request</strong>
+                    <ul>
+                        <li>POST /api/case-requests/1/submit</li>
+                        <li>Verify all validation errors</li>
+                    </ul>
+                </li>
+                <li><strong>Take Action - Register</strong>
+                    <ul>
+                        <li>POST /api/case-requests/1/action with Action="Register"</li>
+                        <li>Verify status changes to Registered (6)</li>
+                        <li>Verify SMS and Email sent</li>
+                    </ul>
+                </li>
+                <li><strong>Take Action - Request Completion</strong>
+                    <ul>
+                        <li>POST /api/case-requests/1/action with Action="RequestCompletion"</li>
+                        <li>Verify deficiencies added</li>
+                        <li>Verify CompletionDeadline set</li>
+                    </ul>
+                </li>
+                <li><strong>Search Requests</strong>
+                    <ul>
+                        <li>GET /api/case-requests/search with various criteria</li>
+                        <li>Verify pagination works</li>
+                    </ul>
+                </li>
+                <li><strong>Duplicate Check</strong>
+                    <ul>
+                        <li>Add same defendant twice</li>
+                        <li>Verify ERR013 returned</li>
+                    </ul>
+                </li>
+                <li><strong>Case Management Integration</strong>
+                    <ul>
+                        <li>Register request</li>
+                        <li>Verify case number received from case management system</li>
+                    </ul>
+                </li>
+            </ol>
+
+            <h3>DI Registration (ServiceCollectionExtensions.cs)</h3>
+            <pre><code>// Repositories
+services.AddScoped&lt;IDefendantRepository, DefendantRepository&gt;();
+services.AddScoped&lt;ICaseRegistrationRequestRepository, CaseRegistrationRequestRepository&gt;();
+services.AddScoped&lt;IRequestAttachmentRepository, RequestAttachmentRepository&gt;();
+services.AddScoped&lt;IRequestDeficiencyRepository, RequestDeficiencyRepository&gt;();
+services.AddScoped&lt;IAdditionalInfoRepository, AdditionalInfoRepository&gt;();
+
+// Business Logic
+services.AddScoped&lt;IDefendantBL, DefendantBL&gt;();
+services.AddScoped&lt;ICaseRegistrationBL, CaseRegistrationBL&gt;();
+services.AddScoped&lt;IRequestActionBL, RequestActionBL&gt;();
+services.AddScoped&lt;IRequestAttachmentBL, RequestAttachmentBL&gt;();</code></pre>
+
+            <h3>Verification Commands</h3>
+            <pre><code># Build
+dotnet build src/Backend/BOG.sln
+
+# Run
+dotnet run --project src/Backend/BOG.API
+
+# Test with Swagger
+# https://localhost:5001/swagger</code></pre>
+
+            <div class="success">
+                <strong>References:</strong>
+                <ul>
+                    <li><strong>SRS:</strong> <code>docs/srs/use-cases/6.5.1-case-registration/SRS_UC_6.5.1_Full_AR.md</code></li>
+                    <li><strong>Main Plan:</strong> <code>docs/implementation/UC-6.5.1-Implementation-Plan.md</code></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="section" id="frontend">
+            <h2>9. Frontend (واجهة المستخدم)</h2>
+
+            <h3>9.1 Folder Structure</h3>
+            <div class="file-tree">src/Frontend/bog-app/src/app/features/case-registration/
++-- defendants/
+|   +-- components/
+|   |   +-- defendant-list/
+|   |   +-- defendant-form/
+|   |   +-- defendant-details/
+|   +-- models/
+|   |   +-- defendant.model.ts
+|   |   +-- defendant-type.model.ts
+|   +-- services/
+|   |   +-- defendant.service.ts
+|   +-- defendants.module.ts
++-- case-data/
+|   +-- components/
+|   |   +-- case-data-form/
+|   |   +-- additional-info/
+|   |   +-- request-attachments/
+|   +-- models/
+|   |   +-- case-data.model.ts
+|   +-- services/
+|   |   +-- case-data.service.ts
++-- deficiencies/
+|   +-- components/
+|   |   +-- deficiency-list/
+|   |   +-- deficiency-form/
+|   |   +-- complete-deficiency/
+|   +-- models/
+|   |   +-- deficiency.model.ts
+|   +-- services/
+|   |   +-- deficiency.service.ts
++-- request-management/
+    +-- components/
+    |   +-- request-search/
+    |   +-- request-details/
+    |   +-- submit-request/
+    |   +-- take-action-dialog/
+    |   +-- rejection-dialog/
+    +-- models/
+    |   +-- case-registration-request.model.ts
+    |   +-- search-criteria.model.ts
+    |   +-- take-action.model.ts
+    +-- services/
+        +-- case-registration.service.ts
+        +-- request-action.service.ts</div>
+
+            <h3>9.2 Main Components</h3>
+
+            <h4>Defendant List Component</h4>
+            <pre><code>// defendant-list.component.ts
+@Component({
+  selector: 'app-defendant-list',
+  templateUrl: './defendant-list.component.html'
+})
+export class DefendantListComponent implements OnInit {
+  defendants: DefendantListVM[] = [];
+  displayedColumns = ['type', 'fullName', 'identityNumber', 'actions'];
+
+  onAddDefendant(): void {
+    // Open defendant form dialog
+  }
+
+  onDeleteDefendant(id: number): void {
+    // Confirm and delete
+  }
+}</code></pre>
+
+            <h4>Defendant Form Component</h4>
+            <pre><code>// defendant-form.component.ts
+@Component({
+  selector: 'app-defendant-form',
+  templateUrl: './defendant-form.component.html'
+})
+export class DefendantFormComponent implements OnInit {
+  @Input() requestId: number;
+  defendantForm: FormGroup;
+  defendantTypes: DefendantType[] = [];
+
+  ngOnInit(): void {
+    this.defendantForm = this.fb.group({
+      defendantTypeId: ['', Validators.required],
+      fullName: ['', [Validators.required, Validators.maxLength(200)]],
+      identityNumber: [null],
+      addressText: ['']
+    });
+  }
+
+  onSubmit(): void {
+    if (this.defendantForm.valid) {
+      // Save defendant
+    }
+  }
+}</code></pre>
+
+            <h4>Request Search Component</h4>
+            <pre><code>// request-search.component.ts
+@Component({
+  selector: 'app-request-search',
+  templateUrl: './request-search.component.html'
+})
+export class RequestSearchComponent implements OnInit {
+  searchForm: FormGroup;
+  requests: CaseRegistrationListVM[] = [];
+  totalCount = 0;
+  pageSize = 20;
+
+  displayedColumns = ['id', 'court', 'disputeType', 'applicant',
+                      'status', 'createdDate', 'actions'];
+
+  onSearch(): void {
+    // Execute search with criteria
+  }
+
+  onPageChange(event: PageEvent): void {
+    // Handle pagination
+  }
+}</code></pre>
+
+            <h4>Take Action Dialog Component</h4>
+            <pre><code>// take-action-dialog.component.ts
+@Component({
+  selector: 'app-take-action-dialog',
+  templateUrl: './take-action-dialog.component.html'
+})
+export class TakeActionDialogComponent implements OnInit {
+  actionForm: FormGroup;
+  actions = [
+    { value: 'Register', label: 'قيد الدعوى' },
+    { value: 'SendToJudge', label: 'إرسال لمكتب القاضي' },
+    { value: 'RequestCompletion', label: 'طلب استكمال' },
+    { value: 'Reject', label: 'رفض' }
+  ];
+
+  deficiencyLocations = [
+    'الموضوع', 'الطلبات', 'البيّنات', 'المعلومات الإضافية', 'المرفقات'
+  ];
+
+  onActionChange(): void {
+    // Show/hide fields based on action
+  }
+
+  addDeficiency(): void {
+    // Add deficiency to list
+  }
+
+  onSubmit(): void {
+    // Execute action
+  }
+}</code></pre>
+
+            <h3>9.3 Models</h3>
+            <pre><code>// defendant.model.ts
+export interface Defendant {
+  id: number;
+  defendantTypeId: number;
+  defendantTypeName: string;
+  fullName: string;
+  identityNumber?: string;
+  addressText?: string;
+  dataSourceId?: number;
+  createdDate: Date;
+}
+
+// case-registration-request.model.ts
+export interface CaseRegistrationRequest {
+  id: number;
+  requestStatusId: number;
+  requestStatusName: string;
+  courtName: string;
+  disputeTypeName: string;
+  subject?: string;
+  claims?: string;
+  evidence?: string;
+  applicantName?: string;
+  plaintiffsCount: number;
+  defendantsCount: number;
+  createdDate: Date;
+}
+
+// take-action.model.ts
+export interface TakeActionDTO {
+  action: 'Register' | 'SendToJudge' | 'Reject' | 'RequestCompletion';
+  notes?: string;
+  deficiencies?: RequestDeficiencyDTO[];
+}
+
+// deficiency.model.ts
+export interface RequestDeficiency {
+  id: number;
+  deficiencyLocation: string;
+  deficiencyDescription: string;
+  isResolved: boolean;
+  createdDate: Date;
+}</code></pre>
+
+            <h3>9.4 Services</h3>
+            <pre><code>// defendant.service.ts
+@Injectable({ providedIn: 'root' })
+export class DefendantService {
+  private apiUrl = `${environment.apiUrl}/api`;
+
+  getDefendants(requestId: number): Observable&lt;DefendantListVM[]&gt; {
+    return this.http.get&lt;DefendantListVM[]&gt;(
+      `${this.apiUrl}/case-requests/${requestId}/defendants`
+    );
+  }
+
+  createDefendant(requestId: number, defendant: DefendantCreateDTO): Observable&lt;Defendant&gt; {
+    return this.http.post&lt;Defendant&gt;(
+      `${this.apiUrl}/case-requests/${requestId}/defendants`, defendant
+    );
+  }
+}
+
+// case-registration.service.ts
+@Injectable({ providedIn: 'root' })
+export class CaseRegistrationService {
+  private apiUrl = `${environment.apiUrl}/api/case-requests`;
+
+  searchRequests(criteria: SearchCriteria): Observable&lt;PagedResult&lt;CaseRegistrationListVM&gt;&gt; {
+    return this.http.get&lt;PagedResult&lt;CaseRegistrationListVM&gt;&gt;(
+      `${this.apiUrl}/search`, { params: criteria as any }
+    );
+  }
+
+  submitRequest(id: number): Observable&lt;CaseRegistrationRequest&gt; {
+    return this.http.post&lt;CaseRegistrationRequest&gt;(`${this.apiUrl}/${id}/submit`, {});
+  }
+}
+
+// request-action.service.ts
+@Injectable({ providedIn: 'root' })
+export class RequestActionService {
+  private apiUrl = `${environment.apiUrl}/api/case-requests`;
+
+  takeAction(requestId: number, dto: TakeActionDTO): Observable&lt;CaseRegistrationRequest&gt; {
+    return this.http.post&lt;CaseRegistrationRequest&gt;(
+      `${this.apiUrl}/${requestId}/action`, dto
+    );
+  }
+}</code></pre>
+
+            <h3>9.5 Validation Messages</h3>
+            <table>
+                <thead><tr><th>Code</th><th>Arabic Message</th><th>Usage</th></tr></thead>
+                <tbody>
+                    <tr><td>ERR001</td><td>يجب إضافة مدعي واحد على الأقل</td><td>On submission</td></tr>
+                    <tr><td>ERR002</td><td>يجب إضافة مدعى عليه واحد على الأقل</td><td>On submission</td></tr>
+                    <tr><td>ERR003</td><td>المرفقات الإلزامية غير مكتملة</td><td>On submission</td></tr>
+                    <tr><td>ERR004</td><td>يجب تحديد مقدم الطلب</td><td>On submission</td></tr>
+                    <tr><td>ERR005</td><td>يجب تحديد التصنيفات</td><td>On submission</td></tr>
+                    <tr><td>ERR006</td><td>يجب إدخال موضوع الدعوى</td><td>On submission</td></tr>
+                    <tr><td>ERR007</td><td>يجب إدخال البيّنات</td><td>On submission</td></tr>
+                    <tr><td>ERR013</td><td>المدعى عليه موجود مسبقاً</td><td>When adding defendant</td></tr>
+                    <tr><td>REJECT_NOTES</td><td>يجب إدخال سبب الرفض</td><td>On rejection</td></tr>
+                </tbody>
+            </table>
+
+            <h3>9.6 Component Generation Commands</h3>
+            <pre><code># Navigate to project
+cd src/Frontend/bog-app
+
+# Generate modules
+ng generate module features/case-registration/defendants --routing
+ng generate module features/case-registration/case-data --routing
+ng generate module features/case-registration/deficiencies --routing
+ng generate module features/case-registration/request-management --routing
+
+# Defendant components
+ng generate component features/case-registration/defendants/components/defendant-list
+ng generate component features/case-registration/defendants/components/defendant-form
+ng generate component features/case-registration/defendants/components/defendant-details
+
+# Case data components
+ng generate component features/case-registration/case-data/components/case-data-form
+ng generate component features/case-registration/case-data/components/additional-info
+ng generate component features/case-registration/case-data/components/request-attachments
+
+# Deficiency components
+ng generate component features/case-registration/deficiencies/components/deficiency-list
+ng generate component features/case-registration/deficiencies/components/deficiency-form
+ng generate component features/case-registration/deficiencies/components/complete-deficiency
+
+# Request management components
+ng generate component features/case-registration/request-management/components/request-search
+ng generate component features/case-registration/request-management/components/request-details
+ng generate component features/case-registration/request-management/components/submit-request
+ng generate component features/case-registration/request-management/components/take-action-dialog
+ng generate component features/case-registration/request-management/components/rejection-dialog
+
+# Shared components
+ng generate component features/case-registration/shared/components/status-badge
+
+# Services
+ng generate service features/case-registration/defendants/services/defendant
+ng generate service features/case-registration/case-data/services/case-data
+ng generate service features/case-registration/deficiencies/services/deficiency
+ng generate service features/case-registration/request-management/services/case-registration
+ng generate service features/case-registration/request-management/services/request-action</code></pre>
+        </div>
+
+        <footer>
+            <p>Developer B: Defendants & Request Management Module - BOG Legal Case Management System</p>
+            <p>Generated: 2026-01-15</p>
+        </footer>
+    </div>
+</body>
+</html>

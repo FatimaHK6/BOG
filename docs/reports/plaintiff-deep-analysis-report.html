@@ -1,0 +1,2269 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تقرير التحليل العميق الشامل - قيود الحقول UC 6.5.1</title>
+    <style>
+        :root {
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-tertiary: #334155;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --accent-red: #ef4444;
+            --accent-yellow: #f59e0b;
+            --accent-green: #22c55e;
+            --accent-blue: #3b82f6;
+            --accent-purple: #a855f7;
+            --border-color: #475569;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            padding: 20px;
+        }
+
+        .container { max-width: 1600px; margin: 0 auto; }
+
+        header {
+            background: linear-gradient(135deg, var(--accent-red), #991b1b);
+            padding: 30px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        header h1 { font-size: 2rem; margin-bottom: 10px; }
+        header p { opacity: 0.9; }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .summary-card {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            border: 1px solid var(--border-color);
+        }
+
+        .summary-card.critical { border-color: var(--accent-red); background: linear-gradient(180deg, rgba(239,68,68,0.2), var(--bg-secondary)); }
+        .summary-card.warning { border-color: var(--accent-yellow); background: linear-gradient(180deg, rgba(245,158,11,0.2), var(--bg-secondary)); }
+        .summary-card.success { border-color: var(--accent-green); background: linear-gradient(180deg, rgba(34,197,94,0.2), var(--bg-secondary)); }
+
+        .summary-card .number { font-size: 2.5rem; font-weight: bold; display: block; }
+        .summary-card.critical .number { color: var(--accent-red); }
+        .summary-card.warning .number { color: var(--accent-yellow); }
+        .summary-card.success .number { color: var(--accent-green); }
+        .summary-card .label { color: var(--text-secondary); font-size: 0.85rem; }
+
+        section {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 25px;
+            border: 1px solid var(--border-color);
+        }
+
+        section h2 {
+            color: var(--accent-blue);
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--border-color);
+            font-size: 1.5rem;
+        }
+
+        section h3 {
+            color: var(--text-primary);
+            margin: 25px 0 15px 0;
+            padding: 12px;
+            background: var(--bg-tertiary);
+            border-radius: 8px;
+            border-right: 4px solid var(--accent-purple);
+        }
+
+        section h4 {
+            color: var(--accent-blue);
+            margin: 20px 0 10px 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+            font-size: 0.85rem;
+        }
+
+        th, td {
+            padding: 10px 8px;
+            text-align: right;
+            border: 1px solid var(--border-color);
+            vertical-align: top;
+        }
+
+        th {
+            background: var(--bg-tertiary);
+            color: var(--accent-blue);
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+        }
+
+        tr:nth-child(even) { background: rgba(51, 65, 85, 0.3); }
+        tr:hover { background: rgba(59, 130, 246, 0.1); }
+
+        .status-ok { color: var(--accent-green); font-weight: bold; }
+        .status-missing { color: var(--accent-red); font-weight: bold; }
+        .status-warning { color: var(--accent-yellow); font-weight: bold; }
+        .status-mismatch { color: var(--accent-purple); font-weight: bold; }
+
+        .constraint-box {
+            background: var(--bg-primary);
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 0.8rem;
+            display: inline-block;
+            margin: 2px;
+        }
+
+        .constraint-box.required { border: 1px solid var(--accent-red); color: var(--accent-red); }
+        .constraint-box.optional { border: 1px solid var(--text-secondary); color: var(--text-secondary); }
+        .constraint-box.pattern { border: 1px solid var(--accent-purple); color: var(--accent-purple); }
+        .constraint-box.length { border: 1px solid var(--accent-blue); color: var(--accent-blue); }
+        .constraint-box.date { border: 1px solid var(--accent-yellow); color: var(--accent-yellow); }
+
+        .issue-card {
+            background: var(--bg-tertiary);
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px 0;
+            border-right: 4px solid var(--accent-red);
+        }
+
+        .issue-card.warning { border-right-color: var(--accent-yellow); }
+        .issue-card h4 { color: var(--accent-red); margin-bottom: 8px; }
+        .issue-card.warning h4 { color: var(--accent-yellow); }
+
+        .issue-card code {
+            background: var(--bg-primary);
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-family: monospace;
+            color: var(--accent-blue);
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 15px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin: 2px;
+        }
+
+        .badge-critical { background: var(--accent-red); color: white; }
+        .badge-warning { background: var(--accent-yellow); color: black; }
+        .badge-info { background: var(--accent-blue); color: white; }
+        .badge-success { background: var(--accent-green); color: white; }
+        .badge-mismatch { background: var(--accent-purple); color: white; }
+
+        .toc {
+            background: var(--bg-tertiary);
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            columns: 2;
+        }
+
+        .toc h3 { margin: 0 0 15px 0; background: none; padding: 0; column-span: all; }
+        .toc ul { list-style: none; }
+        .toc li { margin: 6px 0; break-inside: avoid; }
+        .toc a { color: var(--accent-blue); text-decoration: none; }
+        .toc a:hover { text-decoration: underline; }
+
+        .layer-comparison {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+            margin: 15px 0;
+        }
+
+        .layer-box {
+            background: var(--bg-primary);
+            border-radius: 8px;
+            padding: 10px;
+            text-align: center;
+            border: 1px solid var(--border-color);
+        }
+
+        .layer-box h5 {
+            color: var(--text-secondary);
+            font-size: 0.75rem;
+            margin-bottom: 8px;
+        }
+
+        .progress-bar {
+            height: 8px;
+            background: var(--bg-tertiary);
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+
+        .progress-fill { height: 100%; border-radius: 4px; }
+        .progress-fill.critical { background: var(--accent-red); }
+        .progress-fill.warning { background: var(--accent-yellow); }
+        .progress-fill.good { background: var(--accent-green); }
+
+        .fix-section {
+            background: linear-gradient(135deg, rgba(34,197,94,0.1), var(--bg-secondary));
+            border: 1px solid var(--accent-green);
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px 0;
+        }
+
+        .fix-section h4 { color: var(--accent-green); margin-bottom: 10px; }
+
+        pre {
+            background: var(--bg-primary);
+            padding: 15px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 0.8rem;
+            direction: ltr;
+            text-align: left;
+        }
+
+        code { font-family: 'Consolas', 'Monaco', monospace; }
+
+        .constraint-detail {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        .field-row-critical { background: rgba(239, 68, 68, 0.15) !important; }
+        .field-row-warning { background: rgba(245, 158, 11, 0.15) !important; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>تقرير التحليل العميق الشامل - قيود الحقول</h1>
+            <p>نموذج المدعين - UC 6.5.1 | مقارنة كاملة لقيود الحقول</p>
+            <p>تاريخ التقرير: 2026-01-22 | SRS V2.5</p>
+        </header>
+
+        <div class="summary-grid">
+            <div class="summary-card critical">
+                <span class="number">18</span>
+                <span class="label">حقول مفقودة</span>
+            </div>
+            <div class="summary-card warning">
+                <span class="number">24</span>
+                <span class="label">قيود غير متطابقة</span>
+            </div>
+            <div class="summary-card" style="border-color: var(--accent-purple);">
+                <span class="number" style="color: var(--accent-purple);">8</span>
+                <span class="label">أسماء حقول خاطئة</span>
+            </div>
+            <div class="summary-card" style="border-color: var(--accent-yellow); background: linear-gradient(180deg, rgba(245,158,11,0.3), var(--bg-secondary));">
+                <span class="number" style="color: var(--accent-yellow);">5</span>
+                <span class="label">قواعد عمل شرطية</span>
+            </div>
+            <div class="summary-card success">
+                <span class="number">50</span>
+                <span class="label">حقول متوافقة 100%</span>
+            </div>
+            <div class="summary-card">
+                <span class="number" style="color: var(--accent-blue);">101</span>
+                <span class="label">إجمالي الحقول</span>
+            </div>
+        </div>
+
+        <div class="toc">
+            <h3>فهرس المحتويات</h3>
+            <ul>
+                <li><a href="#legend">دليل الرموز والقيود</a></li>
+                <li><a href="#business-rules" style="color: var(--accent-purple); font-weight: bold;">⚡ قواعد العمل الشرطية (جديد)</a></li>
+                <li><a href="#personal">قيود البيانات الشخصية (6.3.1)</a></li>
+                <li><a href="#contact">قيود بيانات التواصل</a></li>
+                <li><a href="#address">قيود العنوان الوطني (6.3.2)</a></li>
+                <li><a href="#cr">قيود السجل التجاري (6.3.3)</a></li>
+                <li><a href="#ngo">قيود الجمعية (6.3.4)</a></li>
+                <li><a href="#gov">قيود الجهة الحكومية (6.3.5)</a></li>
+                <li><a href="#registered">قيود الشركة المسجلة (6.3.6)</a></li>
+                <li><a href="#unregistered">قيود الشركة غير المسجلة (6.3.7)</a></li>
+                <li><a href="#business-owner">قيود صاحب المؤسسة (6.3.8)</a></li>
+                <li><a href="#individual">قيود الفرد (6.3.9)</a></li>
+                <li><a href="#individual-noid">قيود الفرد بدون هوية (6.3.10)</a></li>
+                <li><a href="#waqf">قيود الوقف (6.3.11)</a></li>
+                <li><a href="#mismatches">ملخص التناقضات</a></li>
+                <li><a href="#fixes">الإصلاحات المطلوبة</a></li>
+            </ul>
+        </div>
+
+        <section id="legend">
+            <h2>دليل الرموز والقيود</h2>
+            <div class="layer-comparison">
+                <div class="layer-box">
+                    <h5>SRS</h5>
+                    <p>وثيقة المتطلبات</p>
+                </div>
+                <div class="layer-box">
+                    <h5>Backend DTO</h5>
+                    <p>DataAnnotations</p>
+                </div>
+                <div class="layer-box">
+                    <h5>Backend Validator</h5>
+                    <p>FluentValidation</p>
+                </div>
+                <div class="layer-box">
+                    <h5>Frontend Form</h5>
+                    <p>Angular Validators</p>
+                </div>
+                <div class="layer-box">
+                    <h5>Frontend HTML</h5>
+                    <p>Template Attributes</p>
+                </div>
+            </div>
+
+            <h4>أنواع القيود:</h4>
+            <p>
+                <span class="constraint-box required">Required</span> حقل إجباري
+                <span class="constraint-box optional">Optional</span> حقل اختياري
+                <span class="constraint-box length">MaxLength(n)</span> الحد الأقصى للأحرف
+                <span class="constraint-box pattern">Pattern</span> نمط regex
+                <span class="constraint-box date">DateConstraint</span> قيد تاريخ
+            </p>
+
+            <h4>حالات الحقول:</h4>
+            <p>
+                <span class="badge badge-success">✓ متوافق</span>
+                <span class="badge badge-critical">❌ مفقود</span>
+                <span class="badge badge-warning">⚠️ قيد مختلف</span>
+                <span class="badge badge-mismatch">⇄ اسم مختلف</span>
+            </p>
+        </section>
+
+        <!-- ==================== CONDITIONAL BUSINESS RULES ==================== -->
+        <section id="business-rules" style="background: linear-gradient(180deg, rgba(168,85,247,0.15), var(--bg-secondary)); border-color: var(--accent-purple);">
+            <h2 style="color: var(--accent-purple);">⚡ قواعد العمل الشرطية (Conditional Business Rules)</h2>
+            <p style="margin-bottom: 20px; color: var(--text-secondary);">قواعد تعتمد على قيم حقول أخرى - يجب تطبيقها في Backend و Frontend</p>
+
+            <div style="background: var(--bg-tertiary); padding: 20px; border-radius: 10px; margin-bottom: 20px; border-right: 4px solid var(--accent-yellow);">
+                <h3 style="color: var(--accent-yellow); margin: 0 0 15px 0; padding: 0; background: none; border: none;">🔐 قاعدة الجنسية (Nationality Rule)</h3>
+                <table style="margin-bottom: 0;">
+                    <thead>
+                        <tr>
+                            <th style="width: 200px;">الشرط</th>
+                            <th>السلوك المطلوب</th>
+                            <th style="width: 120px;">Backend</th>
+                            <th style="width: 120px;">Frontend</th>
+                            <th style="width: 80px;">الحالة</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>نوع الهوية = هوية وطنية</strong><br><code>identityTypeId == 1</code></td>
+                            <td>
+                                <ul style="margin: 0; padding-right: 20px;">
+                                    <li>الجنسية = "سعودي" (قيمة ثابتة)</li>
+                                    <li>الحقل <strong>للعرض فقط</strong> (readonly)</li>
+                                    <li>يتم تعيين nationalityId تلقائياً</li>
+                                </ul>
+                            </td>
+                            <td class="status-warning">❌ غير مطبق</td>
+                            <td class="status-warning">❌ غير مطبق</td>
+                            <td class="status-warning">⚠️ P0</td>
+                        </tr>
+                        <tr>
+                            <td><strong>نوع الهوية = هوية مقيم</strong><br><code>identityTypeId == 2</code></td>
+                            <td>
+                                <ul style="margin: 0; padding-right: 20px;">
+                                    <li>اختيار من قائمة الجنسيات</li>
+                                    <li><strong>استثناء "سعودي"</strong> من القائمة</li>
+                                    <li>الحقل قابل للتعديل (editable)</li>
+                                </ul>
+                            </td>
+                            <td class="status-warning">❌ غير مطبق</td>
+                            <td class="status-warning">❌ غير مطبق</td>
+                            <td class="status-warning">⚠️ P0</td>
+                        </tr>
+                        <tr>
+                            <td><strong>نوع الهوية = جواز سفر</strong><br><code>identityTypeId == 3</code></td>
+                            <td>
+                                <ul style="margin: 0; padding-right: 20px;">
+                                    <li>اختيار من قائمة الجنسيات</li>
+                                    <li><strong>استثناء "سعودي"</strong> من القائمة</li>
+                                    <li>الحقل قابل للتعديل (editable)</li>
+                                </ul>
+                            </td>
+                            <td class="status-warning">❌ غير مطبق</td>
+                            <td class="status-warning">❌ غير مطبق</td>
+                            <td class="status-warning">⚠️ P0</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h4 style="color: var(--accent-blue); margin-top: 20px;">التطبيق المطلوب:</h4>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 10px;">
+                    <div style="background: var(--bg-secondary); padding: 15px; border-radius: 8px;">
+                        <h5 style="color: var(--accent-green); margin-bottom: 10px;">Backend (FluentValidation)</h5>
+                        <pre style="background: #1a1a2e; padding: 10px; border-radius: 5px; font-size: 0.8rem; overflow-x: auto;"><code>// PlaintiffCreateDTOValidator.cs
+RuleFor(x => x.NationalityId)
+    .NotNull()
+    .When(x => x.IdentityTypeId == 1)
+    .WithMessage("يجب تعيين الجنسية السعودية");
+
+RuleFor(x => x.NationalityId)
+    .NotNull()
+    .Must(id => id != SAUDI_NATIONALITY_ID)
+    .When(x => x.IdentityTypeId == 2 || x.IdentityTypeId == 3)
+    .WithMessage("لا يمكن اختيار الجنسية السعودية لهذا النوع من الهوية");</code></pre>
+                    </div>
+                    <div style="background: var(--bg-secondary); padding: 15px; border-radius: 8px;">
+                        <h5 style="color: var(--accent-green); margin-bottom: 10px;">Frontend (TypeScript)</h5>
+                        <pre style="background: #1a1a2e; padding: 10px; border-radius: 5px; font-size: 0.8rem; overflow-x: auto;"><code>// plaintiff-form.component.ts
+onIdentityTypeChange(typeId: number) {
+  const nationalityControl = this.plaintiffForm.get('nationalityId');
+
+  if (typeId === 1) { // هوية وطنية
+    nationalityControl?.setValue(SAUDI_NATIONALITY_ID);
+    nationalityControl?.disable();
+  } else { // مقيم أو جواز
+    nationalityControl?.enable();
+    nationalityControl?.setValue(null);
+    // فلترة قائمة الجنسيات لاستثناء السعودي
+    this.filteredNationalities = this.nationalities
+      .filter(n => n.id !== SAUDI_NATIONALITY_ID);
+  }
+}</code></pre>
+                    </div>
+                </div>
+            </div>
+
+            <!-- BC01 & BC02 Rules -->
+            <div style="background: var(--bg-tertiary); padding: 20px; border-radius: 10px; margin-top: 20px; border-right: 4px solid var(--accent-blue);">
+                <h3 style="color: var(--accent-blue); margin: 0 0 15px 0; padding: 0; background: none; border: none;">👔 قاعدة حالة العمل (BC01 & BC02)</h3>
+                <p style="color: var(--text-secondary); margin-bottom: 15px;">تُطبق على: فرد (Type 1)، صاحب مؤسسة (Type 3)</p>
+
+                <table style="margin-bottom: 15px;">
+                    <thead>
+                        <tr>
+                            <th style="width: 80px;">الكود</th>
+                            <th style="width: 180px;">الشرط</th>
+                            <th>السلوك المطلوب</th>
+                            <th style="width: 100px;">Backend</th>
+                            <th style="width: 100px;">Frontend</th>
+                            <th style="width: 70px;">الحالة</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td rowspan="3"><strong>BC01</strong><br><small>جهة العمل</small></td>
+                            <td><code>employmentStatus == 'حكومي'</code></td>
+                            <td>✅ إظهار حقل "جهة العمل" (مطلوب)</td>
+                            <td class="status-warning">❌ حقل مفقود</td>
+                            <td class="status-warning">❌ حقل مفقود</td>
+                            <td class="status-warning">⚠️ P0</td>
+                        </tr>
+                        <tr>
+                            <td><code>employmentStatus == 'خاص'</code></td>
+                            <td>✅ إظهار حقل "جهة العمل" (مطلوب)</td>
+                            <td class="status-warning">❌ حقل مفقود</td>
+                            <td class="status-warning">❌ حقل مفقود</td>
+                            <td class="status-warning">⚠️ P0</td>
+                        </tr>
+                        <tr>
+                            <td><code>employmentStatus == 'بدون عمل'</code></td>
+                            <td>🚫 إخفاء حقل "جهة العمل"</td>
+                            <td class="status-warning">❌ حقل مفقود</td>
+                            <td class="status-warning">❌ حقل مفقود</td>
+                            <td class="status-warning">⚠️ P0</td>
+                        </tr>
+                        <tr style="border-top: 2px solid var(--border-color);">
+                            <td rowspan="3"><strong>BC02</strong><br><small>عنوان العمل</small></td>
+                            <td><code>employmentStatus == 'خاص'</code></td>
+                            <td>✅ إظهار نموذج "عنوان العمل"</td>
+                            <td class="status-warning">❌ لا يوجد تحقق</td>
+                            <td class="status-warning">❌ لا يوجد تحقق</td>
+                            <td class="status-warning">⚠️ P0</td>
+                        </tr>
+                        <tr>
+                            <td><code>employmentStatus == 'حكومي'</code></td>
+                            <td>🚫 إخفاء نموذج "عنوان العمل"</td>
+                            <td class="status-warning">❌ لا يوجد تحقق</td>
+                            <td class="status-warning">❌ لا يوجد تحقق</td>
+                            <td class="status-warning">⚠️ P0</td>
+                        </tr>
+                        <tr>
+                            <td><code>employmentStatus == 'بدون عمل'</code></td>
+                            <td>🚫 إخفاء نموذج "عنوان العمل"</td>
+                            <td class="status-warning">❌ لا يوجد تحقق</td>
+                            <td class="status-warning">❌ لا يوجد تحقق</td>
+                            <td class="status-warning">⚠️ P0</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div style="background: rgba(239,68,68,0.2); padding: 15px; border-radius: 8px; margin-bottom: 15px; border: 1px solid var(--accent-red);">
+                    <h5 style="color: var(--accent-red); margin-bottom: 10px;">❌ حقل مفقود: حالة العمل (employmentStatusId)</h5>
+                    <p style="margin: 0;">هذا الحقل غير موجود في Backend أو Frontend. يجب إضافته أولاً:</p>
+                    <ul style="margin: 10px 0 0 0; padding-right: 20px;">
+                        <li>Entity: <code>public int? EmploymentStatusId { get; set; }</code></li>
+                        <li>Lookup Table: <code>EmploymentStatus</code> (1=حكومي, 2=خاص, 3=بدون عمل)</li>
+                        <li>Frontend: dropdown + conditional logic</li>
+                    </ul>
+                </div>
+
+                <h4 style="color: var(--accent-blue); margin-top: 20px;">التطبيق المطلوب:</h4>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 10px;">
+                    <div style="background: var(--bg-secondary); padding: 15px; border-radius: 8px;">
+                        <h5 style="color: var(--accent-green); margin-bottom: 10px;">Backend (FluentValidation)</h5>
+                        <pre style="background: #1a1a2e; padding: 10px; border-radius: 5px; font-size: 0.8rem; overflow-x: auto;"><code>// PlaintiffCreateDTOValidator.cs
+// BC01: جهة العمل مطلوبة إذا حكومي أو خاص
+RuleFor(x => x.Employer)
+    .NotEmpty()
+    .When(x => x.EmploymentStatusId == 1 || x.EmploymentStatusId == 2)
+    .WithMessage("جهة العمل مطلوبة");
+
+RuleFor(x => x.Employer)
+    .Null()
+    .When(x => x.EmploymentStatusId == 3)
+    .WithMessage("لا يمكن إدخال جهة العمل عند اختيار بدون عمل");
+
+// BC02: عنوان العمل مطلوب إذا خاص فقط
+RuleFor(x => x.WorkAddress)
+    .NotNull()
+    .When(x => x.EmploymentStatusId == 2)
+    .WithMessage("عنوان العمل مطلوب للقطاع الخاص");
+
+RuleFor(x => x.WorkAddress)
+    .Null()
+    .When(x => x.EmploymentStatusId == 1 || x.EmploymentStatusId == 3)
+    .WithMessage("لا يمكن إدخال عنوان العمل");</code></pre>
+                    </div>
+                    <div style="background: var(--bg-secondary); padding: 15px; border-radius: 8px;">
+                        <h5 style="color: var(--accent-green); margin-bottom: 10px;">Frontend (TypeScript)</h5>
+                        <pre style="background: #1a1a2e; padding: 10px; border-radius: 5px; font-size: 0.8rem; overflow-x: auto;"><code>// plaintiff-form.component.ts
+onEmploymentStatusChange(statusId: number) {
+  const employerControl = this.plaintiffForm.get('employer');
+  const workAddressGroup = this.plaintiffForm.get('workAddress');
+
+  // BC01: جهة العمل
+  if (statusId === 1 || statusId === 2) { // حكومي أو خاص
+    this.showEmployer = true;
+    employerControl?.setValidators([Validators.required]);
+  } else { // بدون عمل
+    this.showEmployer = false;
+    employerControl?.clearValidators();
+    employerControl?.setValue(null);
+  }
+
+  // BC02: عنوان العمل
+  if (statusId === 2) { // خاص فقط
+    this.showWorkAddress = true;
+  } else { // حكومي أو بدون عمل
+    this.showWorkAddress = false;
+    workAddressGroup?.reset();
+  }
+
+  employerControl?.updateValueAndValidity();
+}</code></pre>
+                    </div>
+                </div>
+            </div>
+
+            <!-- BC03 Rule - Waqf Agency Name -->
+            <div style="background: var(--bg-tertiary); padding: 20px; border-radius: 10px; margin-top: 20px; border-right: 4px solid var(--accent-green);">
+                <h3 style="color: var(--accent-green); margin: 0 0 15px 0; padding: 0; background: none; border: none;">🕌 قاعدة اسم الجهة - الوقف (BC03)</h3>
+                <p style="color: var(--text-secondary); margin-bottom: 15px;">تُطبق على: وقف (Type 8)</p>
+
+                <table style="margin-bottom: 15px;">
+                    <thead>
+                        <tr>
+                            <th style="width: 200px;">الشرط</th>
+                            <th>السلوك المطلوب</th>
+                            <th style="width: 100px;">Backend</th>
+                            <th style="width: 100px;">Frontend</th>
+                            <th style="width: 70px;">الحالة</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>waqfOversightType == 'حكومية'</code></td>
+                            <td>✅ إظهار حقل "اسم الجهة" (waqfAgencyName) - <strong>مطلوب</strong></td>
+                            <td class="status-warning">❌ غير مطبق</td>
+                            <td class="status-warning">❌ غير مطبق</td>
+                            <td class="status-warning">⚠️ P0</td>
+                        </tr>
+                        <tr>
+                            <td><code>waqfOversightType == 'خاصة'</code> (أهلي)</td>
+                            <td>🚫 إخفاء حقل "اسم الجهة" (waqfAgencyName)</td>
+                            <td class="status-warning">❌ غير مطبق</td>
+                            <td class="status-warning">❌ غير مطبق</td>
+                            <td class="status-warning">⚠️ P0</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 10px;">
+                    <div style="background: var(--bg-secondary); padding: 15px; border-radius: 8px;">
+                        <h5 style="color: var(--accent-green); margin-bottom: 10px;">Backend (FluentValidation)</h5>
+                        <pre style="background: #1a1a2e; padding: 10px; border-radius: 5px; font-size: 0.8rem; overflow-x: auto;"><code>// BC03: اسم الجهة مطلوب إذا نظارة حكومية
+RuleFor(x => x.WaqfAgencyName)
+    .NotEmpty()
+    .When(x => x.WaqfOversightType == "حكومية")
+    .WithMessage("اسم الجهة مطلوب للوقف الحكومي");
+
+RuleFor(x => x.WaqfAgencyName)
+    .Null()
+    .When(x => x.WaqfOversightType == "خاصة")
+    .WithMessage("لا يمكن إدخال اسم الجهة للوقف الأهلي");</code></pre>
+                    </div>
+                    <div style="background: var(--bg-secondary); padding: 15px; border-radius: 8px;">
+                        <h5 style="color: var(--accent-green); margin-bottom: 10px;">Frontend (TypeScript)</h5>
+                        <pre style="background: #1a1a2e; padding: 10px; border-radius: 5px; font-size: 0.8rem; overflow-x: auto;"><code>// plaintiff-form.component.ts
+onWaqfOversightChange(type: string) {
+  const agencyControl = this.plaintiffForm.get('waqfAgencyName');
+
+  if (type === 'حكومية') {
+    this.showWaqfAgencyName = true;
+    agencyControl?.setValidators([Validators.required,
+      Validators.maxLength(200)]);
+  } else { // خاصة (أهلي)
+    this.showWaqfAgencyName = false;
+    agencyControl?.clearValidators();
+    agencyControl?.setValue(null);
+  }
+  agencyControl?.updateValueAndValidity();
+}</code></pre>
+                    </div>
+                </div>
+            </div>
+
+            <!-- BC04 Rule - Address Fields -->
+            <div style="background: var(--bg-tertiary); padding: 20px; border-radius: 10px; margin-top: 20px; border-right: 4px solid var(--accent-red);">
+                <h3 style="color: var(--accent-red); margin: 0 0 15px 0; padding: 0; background: none; border: none;">📍 قاعدة حقول العنوان (BC04)</h3>
+                <p style="color: var(--text-secondary); margin-bottom: 15px;">تُطبق على: جميع نماذج العنوان الوطني (6.3.2)</p>
+
+                <div style="background: rgba(239,68,68,0.2); padding: 15px; border-radius: 8px; margin-bottom: 15px; border: 1px solid var(--accent-red);">
+                    <h5 style="color: var(--accent-red); margin-bottom: 10px;">⚠️ تغيير جوهري في متطلبات العنوان</h5>
+                    <p style="margin: 0;">فقط حقلي <strong>المنطقة</strong> و<strong>المدينة</strong> إجباريان. بقية الحقول اختيارية.</p>
+                </div>
+
+                <table style="margin-bottom: 15px;">
+                    <thead>
+                        <tr>
+                            <th>الحقل</th>
+                            <th style="width: 100px;">SRS (BC04)</th>
+                            <th style="width: 100px;">Backend</th>
+                            <th style="width: 100px;">Frontend</th>
+                            <th style="width: 70px;">الحالة</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>المنطقة (regionId)</strong></td>
+                            <td class="status-ok">✅ إجباري</td>
+                            <td class="status-ok">Required</td>
+                            <td class="status-warning">No Required</td>
+                            <td class="status-warning">⚠️</td>
+                        </tr>
+                        <tr>
+                            <td><strong>المدينة (cityId)</strong></td>
+                            <td class="status-ok">✅ إجباري</td>
+                            <td class="status-ok">Required</td>
+                            <td class="status-warning">No Required</td>
+                            <td class="status-warning">⚠️</td>
+                        </tr>
+                        <tr>
+                            <td>الحي (districtId)</td>
+                            <td style="color: var(--accent-yellow);">اختياري</td>
+                            <td class="status-warning">Required ❌</td>
+                            <td>Optional ✓</td>
+                            <td class="status-warning">⚠️ Backend</td>
+                        </tr>
+                        <tr>
+                            <td>الشارع (street)</td>
+                            <td style="color: var(--accent-yellow);">اختياري</td>
+                            <td class="status-warning">Required ❌</td>
+                            <td>Optional ✓</td>
+                            <td class="status-warning">⚠️ Backend</td>
+                        </tr>
+                        <tr>
+                            <td>رقم المبنى (buildingNumber)</td>
+                            <td style="color: var(--accent-yellow);">اختياري</td>
+                            <td class="status-warning">Required ❌</td>
+                            <td>Optional ✓</td>
+                            <td class="status-warning">⚠️ Backend</td>
+                        </tr>
+                        <tr>
+                            <td>رقم الوحدة (unitNumber)</td>
+                            <td style="color: var(--accent-yellow);">اختياري</td>
+                            <td class="status-warning">Required ❌</td>
+                            <td class="status-missing">❌ مفقود</td>
+                            <td class="status-warning">⚠️</td>
+                        </tr>
+                        <tr>
+                            <td>الرمز البريدي (postalCode)</td>
+                            <td style="color: var(--accent-yellow);">اختياري</td>
+                            <td class="status-warning">Required ❌</td>
+                            <td>Optional ✓</td>
+                            <td class="status-warning">⚠️ Backend</td>
+                        </tr>
+                        <tr>
+                            <td>الرمز الإضافي (additionalCode)</td>
+                            <td style="color: var(--accent-yellow);">اختياري</td>
+                            <td class="status-warning">Required ❌</td>
+                            <td>Optional ✓</td>
+                            <td class="status-warning">⚠️ Backend</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h4 style="color: var(--accent-blue); margin-top: 15px;">التطبيق المطلوب:</h4>
+                <div style="background: var(--bg-secondary); padding: 15px; border-radius: 8px;">
+                    <h5 style="color: var(--accent-green); margin-bottom: 10px;">Backend - إزالة Required من حقول العنوان</h5>
+                    <pre style="background: #1a1a2e; padding: 10px; border-radius: 5px; font-size: 0.8rem; overflow-x: auto;"><code>// AddressCreateDTOValidator.cs - تعديل
+// فقط المنطقة والمدينة مطلوبان
+RuleFor(x => x.RegionId).NotNull().WithMessage("المنطقة مطلوبة");
+RuleFor(x => x.CityId).NotNull().WithMessage("المدينة مطلوبة");
+
+// بقية الحقول اختيارية - إزالة NotEmpty/NotNull
+// RuleFor(x => x.DistrictId).NotNull() ← حذف
+// RuleFor(x => x.Street).NotEmpty() ← حذف
+// etc...</code></pre>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== PERSONAL DATA ==================== -->
+        <section id="personal">
+            <h2>قيود البيانات الشخصية (6.3.1)</h2>
+            <p>تُستخدم للأنواع: 1 (فرد)، 3 (صاحب مؤسسة)</p>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 120px;">الحقل</th>
+                        <th style="width: 80px;">SRS إجباري</th>
+                        <th>SRS القيود</th>
+                        <th>Backend DTO</th>
+                        <th>Backend Validator</th>
+                        <th>Frontend Form</th>
+                        <th>Frontend HTML</th>
+                        <th style="width: 80px;">الحالة</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>نوع الهوية</strong><br><code>identityTypeId</code></td>
+                        <td class="status-ok">نعم</td>
+                        <td>اختيار: 1/2/3<br>(وطنية/مقيم/جواز)</td>
+                        <td>int?<br>No annotation</td>
+                        <td class="status-ok">NotNull()<br>InclusiveBetween(1,3)</td>
+                        <td class="status-ok">Validators.required<br>(Type 1,3)</td>
+                        <td class="status-ok">mat-select ✓</td>
+                        <td class="status-ok">✓</td>
+                    </tr>
+                    <tr>
+                        <td><strong>رقم الهوية</strong><br><code>identityNumber</code></td>
+                        <td class="status-ok">نعم</td>
+                        <td>10 أرقام (وطنية/مقيم)<br>20 حرف (جواز)</td>
+                        <td class="status-ok">StringLength(20)</td>
+                        <td class="status-ok">NotEmpty()<br>MaxLength(20)<br>ERR014: ^1\d{9}$<br>ERR015: ^2\d{9}$</td>
+                        <td class="status-ok">required<br>maxLength(20)<br>identityNumber()</td>
+                        <td class="status-ok">mat-error ✓</td>
+                        <td class="status-ok">✓</td>
+                    </tr>
+                    <tr>
+                        <td><strong>تاريخ الميلاد</strong><br><code>birthDate</code></td>
+                        <td class="status-ok">نعم</td>
+                        <td>لا يمكن أن يكون<br>في المستقبل</td>
+                        <td>DateTime?<br>No annotation</td>
+                        <td class="status-ok">NotNull()<br>Must(<= Today)</td>
+                        <td class="status-ok">required<br>notFutureDate()</td>
+                        <td class="status-ok">mat-datepicker ✓</td>
+                        <td class="status-ok">✓</td>
+                    </tr>
+                    <tr>
+                        <td><strong>الجنس</strong><br><code>gender</code></td>
+                        <td class="status-ok">نعم</td>
+                        <td>ذكر / أنثى</td>
+                        <td class="status-ok">StringLength(10)<br>Regex: ^(ذكر|أنثى)$</td>
+                        <td class="status-ok">NotEmpty()<br>Matches(^(ذكر|أنثى)$)</td>
+                        <td class="status-ok">required<br>gender()</td>
+                        <td class="status-ok">mat-select<br>value="ذكر/أنثى" ✓</td>
+                        <td class="status-ok">✓</td>
+                    </tr>
+                    <tr>
+                        <td><strong>الاسم الأول</strong><br><code>firstName</code></td>
+                        <td class="status-ok">نعم</td>
+                        <td>نص</td>
+                        <td class="status-ok">StringLength(100)</td>
+                        <td class="status-ok">NotEmpty()<br>MaxLength(100)</td>
+                        <td class="status-ok">required<br>maxLength(100)</td>
+                        <td class="status-ok">required ✓</td>
+                        <td class="status-ok">✓</td>
+                    </tr>
+                    <tr>
+                        <td><strong>اسم الأب</strong><br><code>fatherName</code></td>
+                        <td class="status-ok">نعم</td>
+                        <td>نص</td>
+                        <td class="status-ok">StringLength(100)</td>
+                        <td class="status-ok">NotEmpty()<br>MaxLength(100)</td>
+                        <td class="status-ok">required<br>maxLength(100)</td>
+                        <td class="status-ok">✓</td>
+                        <td class="status-ok">✓</td>
+                    </tr>
+                    <tr>
+                        <td><strong>اسم الجد</strong><br><code>grandfatherName</code></td>
+                        <td>لا</td>
+                        <td>نص</td>
+                        <td class="status-ok">StringLength(100)</td>
+                        <td class="status-ok">MaxLength(100)</td>
+                        <td class="status-ok">maxLength(100)</td>
+                        <td class="status-ok">✓</td>
+                        <td class="status-ok">✓</td>
+                    </tr>
+                    <tr class="field-row-warning">
+                        <td><strong>اسم الفخذ</strong><br><code>clanName</code></td>
+                        <td>لا</td>
+                        <td>نص</td>
+                        <td class="status-ok">StringLength(100)</td>
+                        <td class="status-ok">MaxLength(100)</td>
+                        <td class="status-ok">maxLength(100)</td>
+                        <td class="status-warning">❌ غير معروض</td>
+                        <td class="status-warning">⚠️</td>
+                    </tr>
+                    <tr>
+                        <td><strong>اسم العائلة</strong><br><code>familyName</code></td>
+                        <td class="status-ok">نعم</td>
+                        <td>نص</td>
+                        <td class="status-ok">StringLength(100)</td>
+                        <td class="status-ok">NotEmpty()<br>MaxLength(100)</td>
+                        <td class="status-ok">required<br>maxLength(100)</td>
+                        <td class="status-ok">required ✓</td>
+                        <td class="status-ok">✓</td>
+                    </tr>
+                    <tr>
+                        <td><strong>تاريخ إصدار الهوية</strong><br><code>identityIssueDate</code></td>
+                        <td class="status-ok">نعم</td>
+                        <td>تاريخ</td>
+                        <td>DateTime?</td>
+                        <td class="status-ok">NotNull()<br>Must(<= Today)</td>
+                        <td class="status-ok">required<br>notFutureDate()</td>
+                        <td class="status-ok">mat-datepicker ✓</td>
+                        <td class="status-ok">✓</td>
+                    </tr>
+                    <tr>
+                        <td><strong>تاريخ انتهاء الهوية</strong><br><code>identityExpiryDate</code></td>
+                        <td class="status-ok">نعم</td>
+                        <td>تاريخ</td>
+                        <td>DateTime?</td>
+                        <td class="status-ok">NotNull()<br>Must(> IssueDate)</td>
+                        <td class="status-ok">required<br>dateAfter(issueDate)</td>
+                        <td class="status-ok">mat-datepicker ✓</td>
+                        <td class="status-ok">✓</td>
+                    </tr>
+                    <tr>
+                        <td><strong>الجنسية</strong><br><code>nationalityId</code></td>
+                        <td class="status-ok">نعم</td>
+                        <td><strong>قاعدة شرطية:</strong><br>
+                            • هوية وطنية → سعودي (readonly)<br>
+                            • مقيم/جواز → اختيار (بدون سعودي)</td>
+                        <td>int?</td>
+                        <td class="status-warning">NotNull() فقط<br>❌ بدون قاعدة شرطية</td>
+                        <td class="status-warning">required فقط<br>❌ بدون فلترة/readonly</td>
+                        <td class="status-warning">mat-select<br>❌ بدون تحكم شرطي</td>
+                        <td class="status-warning">⚠️ P0</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <!-- ==================== CONTACT DATA ==================== -->
+        <section id="contact">
+            <h2>قيود بيانات التواصل</h2>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 120px;">الحقل</th>
+                        <th style="width: 80px;">SRS إجباري</th>
+                        <th>SRS القيود</th>
+                        <th>Backend DTO</th>
+                        <th>Backend Validator</th>
+                        <th>Frontend Form</th>
+                        <th>Frontend HTML</th>
+                        <th style="width: 80px;">الحالة</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>رقم الجوال</strong><br><code>mobileNumber</code></td>
+                        <td class="status-ok">نعم</td>
+                        <td>10 أرقام<br>يبدأ بـ 05</td>
+                        <td class="status-ok">StringLength(10)<br>Regex: ^05\d{8}$</td>
+                        <td class="status-ok">NotEmpty()<br>Matches(^05\d{8}$)</td>
+                        <td class="status-ok">required<br>mobileNumber()</td>
+                        <td class="status-ok">placeholder="05xxxxxxxx"<br>mat-error ✓</td>
+                        <td class="status-ok">✓</td>
+                    </tr>
+                    <tr>
+                        <td><strong>البريد الإلكتروني</strong><br><code>email</code></td>
+                        <td>لا</td>
+                        <td>صيغة صحيحة</td>
+                        <td class="status-ok">EmailAddress<br>StringLength(255)</td>
+                        <td class="status-ok">MaxLength(255)<br>EmailAddress()</td>
+                        <td class="status-ok">Validators.email<br>maxLength(255)</td>
+                        <td class="status-ok">type="email" ✓</td>
+                        <td class="status-ok">✓</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <!-- ==================== ADDRESS ==================== -->
+        <section id="address">
+            <h2>قيود العنوان الوطني (6.3.2)</h2>
+            <p class="status-warning">⚠️ يوجد مشاكل حرجة في هذا النموذج</p>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 120px;">الحقل</th>
+                        <th style="width: 80px;">SRS إجباري</th>
+                        <th>SRS القيود</th>
+                        <th>Backend DTO</th>
+                        <th>Backend Validator</th>
+                        <th>Frontend Form</th>
+                        <th>Frontend HTML</th>
+                        <th style="width: 80px;">الحالة</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="field-row-warning">
+                        <td><strong>المنطقة</strong><br><code>regionId</code></td>
+                        <td class="status-ok">نعم</td>
+                        <td>من 13 منطقة</td>
+                        <td class="status-ok">[Required]<br>int</td>
+                        <td class="status-ok">Required</td>
+                        <td class="status-warning">❌ No Required</td>
+                        <td class="status-ok">mat-select ✓</td>
+                        <td class="status-warning">⚠️</td>
+                    </tr>
+                    <tr class="field-row-warning">
+                        <td><strong>المدينة</strong><br><code>cityId</code></td>
+                        <td class="status-ok">نعم</td>
+                        <td>من مدن المنطقة</td>
+                        <td class="status-ok">[Required]<br>int</td>
+                        <td class="status-ok">Required</td>
+                        <td class="status-warning">❌ No Required</td>
+                        <td class="status-ok">mat-select ✓</td>
+                        <td class="status-warning">⚠️</td>
+                    </tr>
+                    <tr class="field-row-critical">
+                        <td><strong>الحي</strong><br><code>districtId</code></td>
+                        <td class="status-ok">نعم</td>
+                        <td>من أحياء المدينة<br><strong>اختيار (ID)</strong></td>
+                        <td class="status-ok">[Required]<br>int DistrictId</td>
+                        <td class="status-ok">Required</td>
+                        <td class="status-missing">❌ district: string<br>(نص بدلاً من ID)</td>
+                        <td class="status-missing">❌ input text<br>(يجب أن يكون dropdown)</td>
+                        <td class="status-missing">❌</td>
+                    </tr>
+                    <tr class="field-row-warning">
+                        <td><strong>الشارع</strong><br><code>street</code></td>
+                        <td class="status-ok">نعم</td>
+                        <td>حد أقصى <strong>200</strong> حرف</td>
+                        <td class="status-ok">[Required]<br>StringLength(200)</td>
+                        <td class="status-ok">Required<br>MaxLength(200)</td>
+                        <td class="status-warning">maxLength(<strong>100</strong>) ⚠️<br>No Required</td>
+                        <td class="status-warning">❌ No maxlength attr</td>
+                        <td class="status-warning">⚠️</td>
+                    </tr>
+                    <tr>
+                        <td><strong>رقم المبنى</strong><br><code>buildingNumber</code></td>
+                        <td class="status-ok">نعم</td>
+                        <td><strong>4 أرقام</strong> فقط</td>
+                        <td class="status-ok">[Required]<br>Regex: ^\d{4}$</td>
+                        <td class="status-ok">Required<br>Regex: ^\d{4}$</td>
+                        <td class="status-ok">buildingNumber()</td>
+                        <td class="status-ok">placeholder="4 أرقام" ✓</td>
+                        <td class="status-ok">✓</td>
+                    </tr>
+                    <tr class="field-row-critical">
+                        <td><strong>رقم الوحدة</strong><br><code>unitNumber</code></td>
+                        <td class="status-ok">نعم</td>
+                        <td><strong>أرقام فقط</strong></td>
+                        <td class="status-ok">[Required]<br>Regex: ^\d+$</td>
+                        <td class="status-ok">Required<br>Regex: ^\d+$</td>
+                        <td class="status-missing">❌ غير موجود</td>
+                        <td class="status-missing">❌ غير موجود</td>
+                        <td class="status-missing">❌ حرج</td>
+                    </tr>
+                    <tr>
+                        <td><strong>الرمز البريدي</strong><br><code>postalCode</code></td>
+                        <td class="status-ok">نعم</td>
+                        <td><strong>5 أرقام</strong> فقط</td>
+                        <td class="status-ok">[Required]<br>Regex: ^\d{5}$</td>
+                        <td class="status-ok">Required<br>Regex: ^\d{5}$</td>
+                        <td class="status-ok">postalCode()</td>
+                        <td class="status-ok">placeholder="5 أرقام" ✓</td>
+                        <td class="status-ok">✓</td>
+                    </tr>
+                    <tr>
+                        <td><strong>الرمز الإضافي</strong><br><code>additionalCode</code></td>
+                        <td class="status-ok">نعم</td>
+                        <td><strong>4 أرقام</strong> فقط</td>
+                        <td class="status-ok">[Required]<br>Regex: ^\d{4}$</td>
+                        <td class="status-ok">Required<br>Regex: ^\d{4}$</td>
+                        <td class="status-ok">additionalNumber()</td>
+                        <td class="status-ok">placeholder="4 أرقام" ✓</td>
+                        <td class="status-ok">✓</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="issue-card">
+                <h4>مشكلة حرجة: حقل رقم الوحدة (UnitNumber)</h4>
+                <p>الحقل موجود في <code>AddressCreateDTO.cs</code> لكنه <strong>غير موجود تماماً</strong> في الواجهة الأمامية.</p>
+                <p>SRS 6.3.2 يحدد: "رقم الوحدة - إجباري - أرقام فقط"</p>
+            </div>
+
+            <div class="issue-card">
+                <h4>مشكلة حرجة: حقل الحي كنص بدلاً من ID</h4>
+                <p>Backend: <code>DistrictId: int</code> (FK إلى جدول الأحياء)</p>
+                <p>Frontend: <code>district: string</code> (حقل نصي)</p>
+                <p>يجب تغييره إلى dropdown يحمل الأحياء من API</p>
+            </div>
+        </section>
+
+        <!-- ==================== COMMERCIAL REGISTRATION ==================== -->
+        <section id="cr">
+            <h2>قيود السجل التجاري (6.3.3)</h2>
+            <p>تُستخدم للأنواع: 3 (صاحب مؤسسة)، 4 (شركة مسجلة)</p>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 140px;">الحقل</th>
+                        <th style="width: 80px;">SRS إجباري</th>
+                        <th>SRS القيود</th>
+                        <th>Backend DTO</th>
+                        <th>Backend Validator</th>
+                        <th>Frontend Form</th>
+                        <th>Frontend HTML</th>
+                        <th style="width: 80px;">الحالة</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>رقم السجل التجاري</strong><br><code>commercialRegNumber</code></td>
+                        <td class="status-ok">نعم</td>
+                        <td><strong>10 أرقام</strong> فقط</td>
+                        <td class="status-ok">StringLength(20)</td>
+                        <td class="status-ok">NotEmpty()<br>Matches(^\d{10}$)</td>
+                        <td class="status-ok">required<br>commercialRegNumber()</td>
+                        <td class="status-ok">placeholder="10 أرقام" ✓</td>
+                        <td class="status-ok">✓</td>
+                    </tr>
+                    <tr>
+                        <td><strong>اسم المؤسسة/الشركة</strong><br><code>companyName</code></td>
+                        <td class="status-ok">نعم</td>
+                        <td>نص <strong>عربي</strong><br>حد أقصى <strong>200</strong> حرف</td>
+                        <td class="status-ok">StringLength(200)</td>
+                        <td class="status-ok">NotEmpty()<br>MaxLength(200)<br>Matches(Arabic)</td>
+                        <td class="status-ok">required<br>maxLength(200)<br>arabicOnly()</td>
+                        <td class="status-ok">mat-error arabicOnly ✓</td>
+                        <td class="status-ok">✓</td>
+                    </tr>
+                    <tr>
+                        <td><strong>تاريخ بداية السجل</strong><br><code>crStartDate</code></td>
+                        <td class="status-ok">نعم</td>
+                        <td><strong><= تاريخ اليوم</strong></td>
+                        <td>DateTime?</td>
+                        <td class="status-ok">NotNull()<br>Must(<= Today)</td>
+                        <td class="status-ok">required<br>notFutureDate()</td>
+                        <td class="status-ok">mat-error notFutureDate ✓</td>
+                        <td class="status-ok">✓</td>
+                    </tr>
+                    <tr>
+                        <td><strong>تاريخ نهاية السجل</strong><br><code>crEndDate</code></td>
+                        <td class="status-ok">نعم</td>
+                        <td><strong>> تاريخ البداية</strong></td>
+                        <td>DateTime?</td>
+                        <td class="status-ok">NotNull()<br>Must(> StartDate)</td>
+                        <td class="status-ok">required<br>dateAfter(crStartDate)</td>
+                        <td class="status-ok">mat-error dateAfter ✓</td>
+                        <td class="status-ok">✓</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <!-- ==================== NGO ==================== -->
+        <section id="ngo">
+            <h2>قيود الجمعية/المؤسسة الأهلية (6.3.4) - النوع 7</h2>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 140px;">الحقل</th>
+                        <th style="width: 80px;">SRS إجباري</th>
+                        <th>SRS القيود</th>
+                        <th>Backend DTO</th>
+                        <th>Backend Validator</th>
+                        <th>Frontend Form</th>
+                        <th>Frontend HTML</th>
+                        <th style="width: 80px;">الحالة</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>رقم الترخيص</strong><br><code>licenseNumber</code></td>
+                        <td class="status-ok">نعم</td>
+                        <td><strong>10 أرقام</strong></td>
+                        <td class="status-ok">StringLength(10)<br>Regex: ^\d{10}$</td>
+                        <td class="status-ok">NotEmpty()<br>Matches(^\d{10}$)</td>
+                        <td class="status-ok">required<br>licenseNumber()</td>
+                        <td class="status-ok">placeholder="10 أرقام" ✓</td>
+                        <td class="status-ok">✓</td>
+                    </tr>
+                    <tr>
+                        <td><strong>مصدر الترخيص</strong><br><code>licenseSourceId</code></td>
+                        <td class="status-ok">نعم</td>
+                        <td>من قاعدة البيانات</td>
+                        <td>int?</td>
+                        <td class="status-ok">NotNull()</td>
+                        <td class="status-ok">required</td>
+                        <td class="status-ok">mat-select ✓</td>
+                        <td class="status-ok">✓</td>
+                    </tr>
+                    <tr>
+                        <td><strong>اسم الجمعية</strong><br><code>ngoName</code></td>
+                        <td class="status-ok">نعم</td>
+                        <td>نص <strong>عربي</strong><br>حد أقصى <strong>200</strong> حرف</td>
+                        <td class="status-ok">StringLength(200)</td>
+                        <td class="status-ok">NotEmpty()<br>MaxLength(200)<br>Matches(Arabic)</td>
+                        <td class="status-ok">required<br>maxLength(200)<br>arabicOnly()</td>
+                        <td class="status-ok">mat-error arabicOnly ✓</td>
+                        <td class="status-ok">✓</td>
+                    </tr>
+                    <tr>
+                        <td><strong>تاريخ الترخيص</strong><br><code>licenseDate</code></td>
+                        <td class="status-ok">نعم</td>
+                        <td>تاريخ</td>
+                        <td>DateTime?</td>
+                        <td class="status-ok">NotNull()<br>Must(<= Today)</td>
+                        <td class="status-ok">required<br>notFutureDate()</td>
+                        <td class="status-ok">mat-error notFutureDate ✓</td>
+                        <td class="status-ok">✓</td>
+                    </tr>
+                    <tr class="field-row-critical">
+                        <td><strong>عنوان الجمعية</strong><br><code>ngoAddress</code></td>
+                        <td class="status-ok">نعم</td>
+                        <td>نموذج 6.3.2</td>
+                        <td class="status-ok">AddressCreateDTO?<br>NGOAddress</td>
+                        <td class="status-ok">NotNull()</td>
+                        <td class="status-missing">❌ لا يوجد FormGroup</td>
+                        <td class="status-missing">❌ غير معروض</td>
+                        <td class="status-missing">❌ حرج</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <!-- ==================== GOVERNMENT AGENCY ==================== -->
+        <section id="gov">
+            <h2>قيود الجهة الحكومية (6.3.5) - النوع 6</h2>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 140px;">الحقل</th>
+                        <th style="width: 80px;">SRS إجباري</th>
+                        <th>SRS القيود</th>
+                        <th>Backend DTO</th>
+                        <th>Backend Validator</th>
+                        <th>Frontend Form</th>
+                        <th>Frontend HTML</th>
+                        <th style="width: 80px;">الحالة</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>الجهة</strong><br><code>governmentAgencyId</code></td>
+                        <td class="status-ok">نعم</td>
+                        <td>من قاعدة البيانات</td>
+                        <td>int?</td>
+                        <td class="status-ok">NotNull()</td>
+                        <td class="status-ok">required</td>
+                        <td class="status-ok">mat-select ✓</td>
+                        <td class="status-ok">✓</td>
+                    </tr>
+                    <tr class="field-row-critical">
+                        <td><strong>المقر</strong><br><code>headquarters</code></td>
+                        <td class="status-ok">نعم</td>
+                        <td>يُعبأ تلقائياً</td>
+                        <td class="status-ok">StringLength(200)</td>
+                        <td class="status-ok">NotEmpty()<br>MaxLength(200)</td>
+                        <td class="status-ok">headquarters<br>maxLength(200)</td>
+                        <td class="status-missing">❌ غير معروض</td>
+                        <td class="status-missing">❌</td>
+                    </tr>
+                    <tr>
+                        <td><strong>بيان إضافي</strong><br><code>additionalStatement</code></td>
+                        <td>لا</td>
+                        <td>حد أقصى <strong>4000</strong> حرف</td>
+                        <td class="status-ok">StringLength(4000)</td>
+                        <td class="status-ok">MaxLength(4000)</td>
+                        <td class="status-ok">maxLength(4000)</td>
+                        <td class="status-warning">لا يوجد hint<br>للحد الأقصى</td>
+                        <td class="status-warning">⚠️</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <!-- ==================== REGISTERED COMPANY ==================== -->
+        <section id="registered">
+            <h2>قيود الشركة المسجلة (6.3.6) - النوع 4</h2>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 140px;">الحقل</th>
+                        <th style="width: 80px;">SRS إجباري</th>
+                        <th>SRS القيود</th>
+                        <th>Backend DTO</th>
+                        <th>Backend Validator</th>
+                        <th>Frontend Form</th>
+                        <th>Frontend HTML</th>
+                        <th style="width: 80px;">الحالة</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>بيانات السجل التجاري</strong></td>
+                        <td class="status-ok">نعم</td>
+                        <td>نموذج 6.3.3</td>
+                        <td class="status-ok">✓ (راجع 6.3.3)</td>
+                        <td class="status-ok">✓</td>
+                        <td class="status-ok">✓</td>
+                        <td class="status-ok">✓</td>
+                        <td class="status-ok">✓</td>
+                    </tr>
+                    <tr class="field-row-critical">
+                        <td><strong>عنوان الشركة</strong><br><code>companyAddress</code></td>
+                        <td class="status-ok">نعم</td>
+                        <td>نموذج 6.3.2</td>
+                        <td class="status-ok">AddressCreateDTO?<br>CompanyAddress</td>
+                        <td class="status-ok">NotNull()</td>
+                        <td class="status-missing">❌ لا يوجد FormGroup</td>
+                        <td class="status-missing">❌ غير معروض</td>
+                        <td class="status-missing">❌ حرج</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <!-- ==================== UNREGISTERED COMPANY ==================== -->
+        <section id="unregistered">
+            <h2>قيود الشركة غير المسجلة (6.3.7) - النوع 5</h2>
+            <p class="status-warning">⚠️ يوجد مشاكل حرجة وتناقضات في أسماء الحقول</p>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 140px;">الحقل</th>
+                        <th style="width: 80px;">SRS إجباري</th>
+                        <th>SRS القيود</th>
+                        <th>Backend DTO</th>
+                        <th>Backend Validator</th>
+                        <th>Frontend Form</th>
+                        <th>Frontend HTML</th>
+                        <th style="width: 80px;">الحالة</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="field-row-critical">
+                        <td><strong>رقم السجل التجاري</strong><br><code>commercialRegNumber</code></td>
+                        <td class="status-ok">نعم</td>
+                        <td>حد أقصى <strong>20</strong> حرف</td>
+                        <td class="status-ok">StringLength(20)</td>
+                        <td class="status-ok">NotEmpty()<br>MaxLength(20)</td>
+                        <td class="status-ok">commercialRegNumber<br>maxLength(20)</td>
+                        <td class="status-missing">❌ غير معروض</td>
+                        <td class="status-missing">❌</td>
+                    </tr>
+                    <tr class="field-row-warning">
+                        <td><strong>اسم الشركة</strong><br><code>companyName</code></td>
+                        <td class="status-ok">نعم</td>
+                        <td>نص <strong>عربي</strong><br>حد أقصى <strong>200</strong> حرف</td>
+                        <td class="status-ok">StringLength(200)</td>
+                        <td class="status-ok">NotEmpty()<br>MaxLength(200)</td>
+                        <td class="status-warning">companyName ✓</td>
+                        <td class="status-mismatch">⇄ unregisteredCompanyName<br>(اسم مختلف)</td>
+                        <td class="status-mismatch">⇄</td>
+                    </tr>
+                    <tr class="field-row-critical">
+                        <td><strong>عنوان الشركة</strong><br><code>unregisteredCompanyAddress</code></td>
+                        <td class="status-ok">نعم</td>
+                        <td>نص</td>
+                        <td class="status-ok">StringLength(500)</td>
+                        <td class="status-ok">NotEmpty()<br>MaxLength(500)</td>
+                        <td class="status-ok">unregisteredCompanyAddress<br>maxLength(500)</td>
+                        <td class="status-missing">❌ غير معروض</td>
+                        <td class="status-missing">❌</td>
+                    </tr>
+                    <tr class="field-row-warning">
+                        <td><strong>الدولة</strong><br><code>countryId</code></td>
+                        <td class="status-ok">نعم</td>
+                        <td>من قاعدة البيانات</td>
+                        <td>int?</td>
+                        <td class="status-ok">NotNull()</td>
+                        <td class="status-warning">countryId ✓</td>
+                        <td class="status-mismatch">⇄ unregisteredCountryId<br>(اسم مختلف)</td>
+                        <td class="status-mismatch">⇄</td>
+                    </tr>
+                    <tr>
+                        <td><strong>المدينة</strong><br><code>unregisteredCompanyCity</code></td>
+                        <td class="status-ok">نعم</td>
+                        <td>حد أقصى <strong>100</strong> حرف</td>
+                        <td class="status-ok">StringLength(100)</td>
+                        <td class="status-ok">NotEmpty()<br>MaxLength(100)</td>
+                        <td class="status-ok">unregisteredCity<br>maxLength(100)</td>
+                        <td class="status-ok">✓</td>
+                        <td class="status-ok">✓</td>
+                    </tr>
+                    <tr class="field-row-warning">
+                        <td><strong>وصف تقريبي</strong><br><code>description</code></td>
+                        <td class="status-ok">نعم</td>
+                        <td>حد أقصى <strong>1000</strong> حرف</td>
+                        <td class="status-ok">StringLength(1000)</td>
+                        <td class="status-ok">NotEmpty()<br>MaxLength(1000)</td>
+                        <td class="status-warning">description ✓</td>
+                        <td class="status-mismatch">⇄ unregisteredDescription<br>(اسم مختلف)</td>
+                        <td class="status-mismatch">⇄</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <!-- ==================== BUSINESS OWNER ==================== -->
+        <section id="business-owner">
+            <h2>قيود صاحب المؤسسة (6.3.8) - النوع 3</h2>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 140px;">الحقل</th>
+                        <th style="width: 80px;">SRS إجباري</th>
+                        <th>SRS القيود</th>
+                        <th>Backend DTO</th>
+                        <th>Backend Validator</th>
+                        <th>Frontend Form</th>
+                        <th>Frontend HTML</th>
+                        <th style="width: 80px;">الحالة</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>البيانات الشخصية</strong></td>
+                        <td class="status-ok">نعم</td>
+                        <td>نموذج 6.3.1</td>
+                        <td class="status-ok">✓</td>
+                        <td class="status-ok">✓</td>
+                        <td class="status-ok">✓</td>
+                        <td class="status-ok">✓</td>
+                        <td class="status-ok">✓</td>
+                    </tr>
+                    <tr>
+                        <td><strong>بيانات السجل التجاري</strong></td>
+                        <td class="status-ok">نعم</td>
+                        <td>نموذج 6.3.3</td>
+                        <td class="status-ok">✓</td>
+                        <td class="status-ok">✓</td>
+                        <td class="status-ok">✓</td>
+                        <td class="status-ok">✓</td>
+                        <td class="status-ok">✓</td>
+                    </tr>
+                    <tr class="field-row-warning">
+                        <td><strong>عنوان السكن</strong><br><code>residenceAddress</code></td>
+                        <td class="status-ok">نعم</td>
+                        <td>نموذج 6.3.2</td>
+                        <td class="status-ok">AddressCreateDTO?</td>
+                        <td class="status-ok">NotNull()</td>
+                        <td class="status-warning">❌ No Required validator</td>
+                        <td class="status-ok">✓</td>
+                        <td class="status-warning">⚠️</td>
+                    </tr>
+                    <tr class="field-row-warning">
+                        <td><strong>عنوان المؤسسة</strong><br><code>businessAddress</code></td>
+                        <td class="status-ok">نعم</td>
+                        <td>نموذج 6.3.2</td>
+                        <td class="status-ok">AddressCreateDTO?</td>
+                        <td class="status-ok">NotNull()</td>
+                        <td class="status-warning">❌ No Required validator</td>
+                        <td class="status-ok">✓</td>
+                        <td class="status-warning">⚠️</td>
+                    </tr>
+                    <tr class="field-row-critical">
+                        <td><strong>المهنة</strong><br><code>profession</code></td>
+                        <td class="status-ok">نعم</td>
+                        <td>حد أقصى <strong>200</strong> حرف</td>
+                        <td class="status-ok">StringLength(200)</td>
+                        <td class="status-ok">NotEmpty()<br>MaxLength(200)</td>
+                        <td class="status-ok">profession<br>required</td>
+                        <td class="status-missing">❌ غير معروض<br>في قالب Type 3</td>
+                        <td class="status-missing">❌</td>
+                    </tr>
+                    <tr class="field-row-critical">
+                        <td><strong>جهة العمل</strong><br><code>employer</code></td>
+                        <td class="status-warning">نعم*</td>
+                        <td>حد أقصى <strong>200</strong> حرف</td>
+                        <td class="status-ok">StringLength(200)</td>
+                        <td class="status-warning">MaxLength(200)<br>❌ No Required</td>
+                        <td class="status-ok">employer<br>maxLength(200)</td>
+                        <td class="status-missing">❌ غير معروض<br>في قالب Type 3</td>
+                        <td class="status-missing">❌</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <!-- ==================== INDIVIDUAL ==================== -->
+        <section id="individual">
+            <h2>قيود الفرد (6.3.9) - النوع 1</h2>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 140px;">الحقل</th>
+                        <th style="width: 80px;">SRS إجباري</th>
+                        <th>SRS القيود</th>
+                        <th>Backend DTO</th>
+                        <th>Backend Validator</th>
+                        <th>Frontend Form</th>
+                        <th>Frontend HTML</th>
+                        <th style="width: 80px;">الحالة</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>البيانات الشخصية</strong></td>
+                        <td class="status-ok">نعم</td>
+                        <td>نموذج 6.3.1</td>
+                        <td class="status-ok">✓</td>
+                        <td class="status-ok">✓</td>
+                        <td class="status-ok">✓</td>
+                        <td class="status-ok">✓</td>
+                        <td class="status-ok">✓</td>
+                    </tr>
+                    <tr class="field-row-warning">
+                        <td><strong>عنوان السكن</strong><br><code>residenceAddress</code></td>
+                        <td class="status-ok">نعم</td>
+                        <td>نموذج 6.3.2</td>
+                        <td class="status-ok">AddressCreateDTO?</td>
+                        <td class="status-ok">NotNull()</td>
+                        <td class="status-warning">❌ No Required validator</td>
+                        <td class="status-ok">✓</td>
+                        <td class="status-warning">⚠️</td>
+                    </tr>
+                    <tr>
+                        <td><strong>عنوان العمل</strong><br><code>workAddress</code></td>
+                        <td>لا</td>
+                        <td>نموذج 6.3.2</td>
+                        <td class="status-ok">AddressCreateDTO?</td>
+                        <td class="status-ok">Optional</td>
+                        <td class="status-ok">workAddress</td>
+                        <td class="status-ok">✓</td>
+                        <td class="status-ok">✓</td>
+                    </tr>
+                    <tr>
+                        <td><strong>المهنة</strong><br><code>profession</code></td>
+                        <td class="status-ok">نعم</td>
+                        <td>حد أقصى <strong>200</strong> حرف</td>
+                        <td class="status-ok">StringLength(200)</td>
+                        <td class="status-ok">NotEmpty()<br>MaxLength(200)</td>
+                        <td class="status-ok">profession<br>required</td>
+                        <td class="status-mismatch">⇄ occupation<br>(اسم مختلف)</td>
+                        <td class="status-mismatch">⇄</td>
+                    </tr>
+                    <tr class="field-row-warning">
+                        <td><strong>جهة العمل</strong><br><code>employer</code></td>
+                        <td class="status-warning">نعم*</td>
+                        <td>حد أقصى <strong>200</strong> حرف</td>
+                        <td class="status-ok">StringLength(200)</td>
+                        <td class="status-warning">MaxLength(200)<br>❌ No Required</td>
+                        <td class="status-ok">employer<br>maxLength(200)</td>
+                        <td class="status-mismatch">⇄ employerName<br>(اسم مختلف)</td>
+                        <td class="status-mismatch">⇄</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <!-- ==================== INDIVIDUAL NO ID ==================== -->
+        <section id="individual-noid">
+            <h2>قيود الفرد بدون هوية (6.3.10) - النوع 2</h2>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 140px;">الحقل</th>
+                        <th style="width: 80px;">SRS إجباري</th>
+                        <th>SRS القيود</th>
+                        <th>Backend DTO</th>
+                        <th>Backend Validator</th>
+                        <th>Frontend Form</th>
+                        <th>Frontend HTML</th>
+                        <th style="width: 80px;">الحالة</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="field-row-critical">
+                        <td><strong>رقم الوثيقة</strong><br><code>documentNumber</code></td>
+                        <td>لا</td>
+                        <td>حد أقصى <strong>20</strong> حرف</td>
+                        <td class="status-ok">StringLength(20)</td>
+                        <td class="status-ok">MaxLength(20)</td>
+                        <td class="status-ok">documentNumber<br>maxLength(20)</td>
+                        <td class="status-missing">❌ غير معروض<br>للنوع 2</td>
+                        <td class="status-missing">❌</td>
+                    </tr>
+                    <tr>
+                        <td><strong>تاريخ الميلاد</strong><br><code>birthDate</code></td>
+                        <td class="status-ok">نعم</td>
+                        <td>لا يمكن في المستقبل</td>
+                        <td>DateTime?</td>
+                        <td class="status-ok">NotNull()<br>Must(<= Today)</td>
+                        <td class="status-ok">required<br>notFutureDate()</td>
+                        <td class="status-ok">✓</td>
+                        <td class="status-ok">✓</td>
+                    </tr>
+                    <tr>
+                        <td><strong>الجنس</strong><br><code>gender</code></td>
+                        <td class="status-ok">نعم</td>
+                        <td>ذكر / أنثى</td>
+                        <td class="status-ok">Regex: ^(ذكر|أنثى)$</td>
+                        <td class="status-ok">NotEmpty()<br>Matches</td>
+                        <td class="status-ok">required<br>gender()</td>
+                        <td class="status-ok">✓</td>
+                        <td class="status-ok">✓</td>
+                    </tr>
+                    <tr>
+                        <td><strong>الاسم الأول</strong><br><code>firstName</code></td>
+                        <td class="status-ok">نعم</td>
+                        <td>نص <strong>عربي</strong> فقط</td>
+                        <td class="status-ok">StringLength(100)</td>
+                        <td class="status-ok">NotEmpty()<br>MaxLength(100)<br>Matches(Arabic)</td>
+                        <td class="status-ok">required<br>arabicOnly()</td>
+                        <td class="status-ok">✓</td>
+                        <td class="status-ok">✓</td>
+                    </tr>
+                    <tr>
+                        <td><strong>اسم الأب</strong><br><code>fatherName</code></td>
+                        <td>لا</td>
+                        <td>نص</td>
+                        <td class="status-ok">StringLength(100)</td>
+                        <td class="status-ok">Optional</td>
+                        <td class="status-ok">maxLength(100)</td>
+                        <td class="status-ok">✓</td>
+                        <td class="status-ok">✓</td>
+                    </tr>
+                    <tr>
+                        <td><strong>اسم العائلة</strong><br><code>familyName</code></td>
+                        <td class="status-ok">نعم</td>
+                        <td>نص</td>
+                        <td class="status-ok">StringLength(100)</td>
+                        <td class="status-ok">NotEmpty()<br>MaxLength(100)</td>
+                        <td class="status-ok">required<br>maxLength(100)</td>
+                        <td class="status-ok">✓</td>
+                        <td class="status-ok">✓</td>
+                    </tr>
+                    <tr>
+                        <td><strong>الجنسية</strong><br><code>nationalityId</code></td>
+                        <td>لا</td>
+                        <td>اختيار</td>
+                        <td>int?</td>
+                        <td class="status-ok">Optional</td>
+                        <td class="status-ok">optional</td>
+                        <td class="status-ok">✓</td>
+                        <td class="status-ok">✓</td>
+                    </tr>
+                    <tr class="field-row-warning">
+                        <td><strong>عنوان السكن</strong><br><code>residenceAddress</code></td>
+                        <td class="status-ok">نعم</td>
+                        <td>نموذج 6.3.2</td>
+                        <td class="status-ok">AddressCreateDTO?</td>
+                        <td class="status-ok">NotNull()</td>
+                        <td class="status-warning">❌ No Required validator</td>
+                        <td class="status-ok">✓</td>
+                        <td class="status-warning">⚠️</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <!-- ==================== WAQF ==================== -->
+        <section id="waqf">
+            <h2>قيود الوقف (6.3.11) - النوع 8</h2>
+            <p class="status-warning">⚠️ يوجد مشاكل حرجة متعددة</p>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 140px;">الحقل</th>
+                        <th style="width: 80px;">SRS إجباري</th>
+                        <th>SRS القيود</th>
+                        <th>Backend DTO</th>
+                        <th>Backend Validator</th>
+                        <th>Frontend Form</th>
+                        <th>Frontend HTML</th>
+                        <th style="width: 80px;">الحالة</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>رقم صك المحكمة</strong><br><code>courtDeedNumber</code></td>
+                        <td class="status-ok">نعم</td>
+                        <td><strong>10 أرقام</strong></td>
+                        <td class="status-ok">StringLength(10)<br>Regex: ^\d{10}$</td>
+                        <td class="status-ok">NotEmpty()<br>Matches(^\d{10}$)</td>
+                        <td class="status-ok">required<br>courtDeedNumber()</td>
+                        <td class="status-ok">placeholder="10 أرقام" ✓</td>
+                        <td class="status-ok">✓</td>
+                    </tr>
+                    <tr>
+                        <td><strong>اسم الوقف</strong><br><code>waqfName</code></td>
+                        <td class="status-ok">نعم</td>
+                        <td>نص <strong>عربي</strong><br>حد أقصى <strong>200</strong> حرف</td>
+                        <td class="status-ok">StringLength(200)</td>
+                        <td class="status-ok">NotEmpty()<br>MaxLength(200)<br>Matches(Arabic)</td>
+                        <td class="status-ok">required<br>maxLength(200)<br>arabicOnly()</td>
+                        <td class="status-ok">✓</td>
+                        <td class="status-ok">✓</td>
+                    </tr>
+                    <tr>
+                        <td><strong>تاريخ صك المحكمة</strong><br><code>deedDate</code></td>
+                        <td class="status-ok">نعم</td>
+                        <td><strong><= تاريخ اليوم</strong></td>
+                        <td>DateTime?</td>
+                        <td class="status-ok">NotNull()<br>Must(<= Today)</td>
+                        <td class="status-ok">required<br>notFutureDate()</td>
+                        <td class="status-ok">mat-error notFutureDate ✓</td>
+                        <td class="status-ok">✓</td>
+                    </tr>
+                    <tr>
+                        <td><strong>مصدر الصك</strong><br><code>deedSource</code></td>
+                        <td class="status-ok">نعم</td>
+                        <td>حد أقصى <strong>100</strong> حرف</td>
+                        <td class="status-ok">StringLength(100)</td>
+                        <td class="status-ok">NotEmpty()<br>MaxLength(100)</td>
+                        <td class="status-ok">required<br>maxLength(100)</td>
+                        <td class="status-ok">mat-error required ✓</td>
+                        <td class="status-ok">✓</td>
+                    </tr>
+                    <tr>
+                        <td><strong>نظارة الوقف</strong><br><code>waqfOversightType</code></td>
+                        <td class="status-ok">نعم</td>
+                        <td>خاصة / حكومية</td>
+                        <td class="status-ok">StringLength(20)<br>Regex: ^(خاصة|حكومية)$</td>
+                        <td class="status-ok">NotEmpty()<br>Matches</td>
+                        <td class="status-ok">required<br>waqfOversightType()</td>
+                        <td class="status-ok">mat-select<br>value="خاصة/حكومية" ✓</td>
+                        <td class="status-ok">✓</td>
+                    </tr>
+                    <tr class="field-row-critical">
+                        <td><strong>اسم الجهة</strong><br><code>waqfAgencyName</code></td>
+                        <td class="status-warning">نعم*</td>
+                        <td>إجباري إذا كانت<br>النظارة = حكومية<br>حد أقصى <strong>200</strong> حرف</td>
+                        <td class="status-ok">StringLength(200)</td>
+                        <td class="status-ok">When(حكومية)<br>NotEmpty()<br>MaxLength(200)</td>
+                        <td class="status-warning">waqfAgencyName<br>❌ No conditional</td>
+                        <td class="status-missing">❌ غير معروض</td>
+                        <td class="status-missing">❌</td>
+                    </tr>
+                    <tr class="field-row-critical">
+                        <td><strong>عنوان الوقف</strong><br><code>waqfAddress</code></td>
+                        <td class="status-ok">نعم</td>
+                        <td>نموذج 6.3.2</td>
+                        <td class="status-ok">AddressCreateDTO?<br>WaqfAddress</td>
+                        <td class="status-ok">NotNull()</td>
+                        <td class="status-missing">❌ لا يوجد FormGroup</td>
+                        <td class="status-missing">❌ غير معروض</td>
+                        <td class="status-missing">❌ حرج</td>
+                    </tr>
+                    <tr class="field-row-critical">
+                        <td><strong>وصف تقريبي</strong><br><code>waqfDescription</code></td>
+                        <td class="status-ok">نعم</td>
+                        <td>حد أقصى <strong>200</strong> حرف</td>
+                        <td class="status-ok">StringLength(200)</td>
+                        <td class="status-ok">NotEmpty()<br>MaxLength(200)</td>
+                        <td class="status-ok">waqfDescription<br>required<br>maxLength(200)</td>
+                        <td class="status-missing">❌ غير معروض</td>
+                        <td class="status-missing">❌</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <!-- ==================== MISMATCHES SUMMARY ==================== -->
+        <section id="mismatches">
+            <h2>ملخص التناقضات وعدم التطابق</h2>
+
+            <h3>1. حقول مفقودة تماماً (18 حقل)</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>الحقل</th>
+                        <th>النوع</th>
+                        <th>موجود في Backend</th>
+                        <th>موجود في Frontend</th>
+                        <th>الأولوية</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="field-row-critical" style="background: rgba(245,158,11,0.3);">
+                        <td><strong>employmentStatusId</strong><br><small>حالة العمل</small></td>
+                        <td>1 - فرد<br>3 - صاحب مؤسسة</td>
+                        <td class="status-missing">❌</td>
+                        <td class="status-missing">❌</td>
+                        <td><span class="badge" style="background: var(--accent-yellow); color: #000;">P0 - BC01/BC02</span></td>
+                    </tr>
+                    <tr class="field-row-critical">
+                        <td>unitNumber</td>
+                        <td>جميع العناوين</td>
+                        <td class="status-ok">✓</td>
+                        <td class="status-missing">❌</td>
+                        <td><span class="badge badge-critical">حرج</span></td>
+                    </tr>
+                    <tr class="field-row-critical">
+                        <td>companyAddress</td>
+                        <td>4 - شركة مسجلة</td>
+                        <td class="status-ok">✓</td>
+                        <td class="status-missing">❌</td>
+                        <td><span class="badge badge-critical">حرج</span></td>
+                    </tr>
+                    <tr class="field-row-critical">
+                        <td>ngoAddress</td>
+                        <td>7 - جمعية</td>
+                        <td class="status-ok">✓</td>
+                        <td class="status-missing">❌</td>
+                        <td><span class="badge badge-critical">حرج</span></td>
+                    </tr>
+                    <tr class="field-row-critical">
+                        <td>waqfAddress</td>
+                        <td>8 - وقف</td>
+                        <td class="status-ok">✓</td>
+                        <td class="status-missing">❌</td>
+                        <td><span class="badge badge-critical">حرج</span></td>
+                    </tr>
+                    <tr class="field-row-critical">
+                        <td>headquarters</td>
+                        <td>6 - جهة حكومية</td>
+                        <td class="status-ok">✓</td>
+                        <td class="status-missing">❌</td>
+                        <td><span class="badge badge-critical">حرج</span></td>
+                    </tr>
+                    <tr class="field-row-critical">
+                        <td>waqfAgencyName</td>
+                        <td>8 - وقف</td>
+                        <td class="status-ok">✓</td>
+                        <td class="status-missing">❌</td>
+                        <td><span class="badge badge-critical">حرج</span></td>
+                    </tr>
+                    <tr class="field-row-critical">
+                        <td>waqfDescription</td>
+                        <td>8 - وقف</td>
+                        <td class="status-ok">✓</td>
+                        <td class="status-missing">❌</td>
+                        <td><span class="badge badge-critical">حرج</span></td>
+                    </tr>
+                    <tr class="field-row-critical">
+                        <td>documentNumber</td>
+                        <td>2 - فرد بدون هوية</td>
+                        <td class="status-ok">✓</td>
+                        <td class="status-missing">❌</td>
+                        <td><span class="badge badge-critical">حرج</span></td>
+                    </tr>
+                    <tr class="field-row-critical">
+                        <td>commercialRegNumber (HTML)</td>
+                        <td>5 - شركة غير مسجلة</td>
+                        <td class="status-ok">✓</td>
+                        <td class="status-missing">❌ (غير معروض)</td>
+                        <td><span class="badge badge-critical">حرج</span></td>
+                    </tr>
+                    <tr class="field-row-critical">
+                        <td>unregisteredCompanyAddress (HTML)</td>
+                        <td>5 - شركة غير مسجلة</td>
+                        <td class="status-ok">✓</td>
+                        <td class="status-missing">❌ (غير معروض)</td>
+                        <td><span class="badge badge-critical">حرج</span></td>
+                    </tr>
+                    <tr class="field-row-critical">
+                        <td>profession (HTML for Type 3)</td>
+                        <td>3 - صاحب مؤسسة</td>
+                        <td class="status-ok">✓</td>
+                        <td class="status-missing">❌ (غير معروض)</td>
+                        <td><span class="badge badge-critical">حرج</span></td>
+                    </tr>
+                    <tr class="field-row-critical">
+                        <td>employer (HTML for Type 3)</td>
+                        <td>3 - صاحب مؤسسة</td>
+                        <td class="status-ok">✓</td>
+                        <td class="status-missing">❌ (غير معروض)</td>
+                        <td><span class="badge badge-critical">حرج</span></td>
+                    </tr>
+                    <tr class="field-row-warning">
+                        <td>clanName (HTML)</td>
+                        <td>1, 2, 3</td>
+                        <td class="status-ok">✓</td>
+                        <td class="status-missing">❌ (غير معروض)</td>
+                        <td><span class="badge badge-warning">متوسط</span></td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>2. تناقض في أسماء الحقول (8 حقول)</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Backend/Form Name</th>
+                        <th>HTML Name</th>
+                        <th>النوع</th>
+                        <th>الحالة</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="field-row-warning">
+                        <td><code>profession</code></td>
+                        <td><code>occupation</code></td>
+                        <td>1 - فرد</td>
+                        <td class="status-mismatch">⇄ اسم مختلف</td>
+                    </tr>
+                    <tr class="field-row-warning">
+                        <td><code>employer</code></td>
+                        <td><code>employerName</code></td>
+                        <td>1 - فرد</td>
+                        <td class="status-mismatch">⇄ اسم مختلف</td>
+                    </tr>
+                    <tr class="field-row-warning">
+                        <td><code>companyName</code></td>
+                        <td><code>unregisteredCompanyName</code></td>
+                        <td>5 - شركة غير مسجلة</td>
+                        <td class="status-mismatch">⇄ اسم مختلف</td>
+                    </tr>
+                    <tr class="field-row-warning">
+                        <td><code>countryId</code></td>
+                        <td><code>unregisteredCountryId</code></td>
+                        <td>5 - شركة غير مسجلة</td>
+                        <td class="status-mismatch">⇄ اسم مختلف</td>
+                    </tr>
+                    <tr class="field-row-warning">
+                        <td><code>description</code></td>
+                        <td><code>unregisteredDescription</code></td>
+                        <td>5 - شركة غير مسجلة</td>
+                        <td class="status-mismatch">⇄ اسم مختلف</td>
+                    </tr>
+                    <tr class="field-row-warning">
+                        <td><code>districtId</code> (int)</td>
+                        <td><code>district</code> (string)</td>
+                        <td>جميع العناوين</td>
+                        <td class="status-mismatch">⇄ نوع مختلف</td>
+                    </tr>
+                    <tr class="field-row-warning">
+                        <td><code>additionalCode</code></td>
+                        <td><code>additionalNumber</code></td>
+                        <td>جميع العناوين</td>
+                        <td class="status-mismatch">⇄ اسم مختلف</td>
+                    </tr>
+                    <tr class="field-row-warning">
+                        <td><code>street</code></td>
+                        <td><code>streetName</code></td>
+                        <td>جميع العناوين</td>
+                        <td class="status-mismatch">⇄ اسم مختلف</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>3. قيود مختلفة (23 قيد)</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>الحقل</th>
+                        <th>SRS</th>
+                        <th>Backend</th>
+                        <th>Frontend</th>
+                        <th>المشكلة</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="field-row-warning">
+                        <td>street</td>
+                        <td>MaxLength(200)</td>
+                        <td>MaxLength(200)</td>
+                        <td>MaxLength(100)</td>
+                        <td class="status-warning">Frontend أقل من المطلوب</td>
+                    </tr>
+                    <tr class="field-row-warning">
+                        <td>regionId (Address)</td>
+                        <td>Required</td>
+                        <td>Required</td>
+                        <td>No Required</td>
+                        <td class="status-warning">Frontend لا يفرض Required</td>
+                    </tr>
+                    <tr class="field-row-warning">
+                        <td>cityId (Address)</td>
+                        <td>Required</td>
+                        <td>Required</td>
+                        <td>No Required</td>
+                        <td class="status-warning">Frontend لا يفرض Required</td>
+                    </tr>
+                    <tr class="field-row-warning">
+                        <td>districtId (Address)</td>
+                        <td>Required (ID)</td>
+                        <td>Required (ID)</td>
+                        <td>String (text)</td>
+                        <td class="status-warning">نوع خاطئ في Frontend</td>
+                    </tr>
+                    <tr class="field-row-warning">
+                        <td>street (Address)</td>
+                        <td>Required</td>
+                        <td>Required</td>
+                        <td>No Required</td>
+                        <td class="status-warning">Frontend لا يفرض Required</td>
+                    </tr>
+                    <tr class="field-row-warning">
+                        <td>buildingNumber (Address)</td>
+                        <td>Required</td>
+                        <td>Required</td>
+                        <td>No Required</td>
+                        <td class="status-warning">Frontend لا يفرض Required</td>
+                    </tr>
+                    <tr class="field-row-warning">
+                        <td>postalCode (Address)</td>
+                        <td>Required</td>
+                        <td>Required</td>
+                        <td>No Required</td>
+                        <td class="status-warning">Frontend لا يفرض Required</td>
+                    </tr>
+                    <tr class="field-row-warning">
+                        <td>additionalCode (Address)</td>
+                        <td>Required</td>
+                        <td>Required</td>
+                        <td>No Required</td>
+                        <td class="status-warning">Frontend لا يفرض Required</td>
+                    </tr>
+                    <tr class="field-row-warning">
+                        <td>residenceAddress (Type 1)</td>
+                        <td>Required</td>
+                        <td>NotNull()</td>
+                        <td>No Required</td>
+                        <td class="status-warning">Frontend لا يفرض Required</td>
+                    </tr>
+                    <tr class="field-row-warning">
+                        <td>residenceAddress (Type 2)</td>
+                        <td>Required</td>
+                        <td>NotNull()</td>
+                        <td>No Required</td>
+                        <td class="status-warning">Frontend لا يفرض Required</td>
+                    </tr>
+                    <tr class="field-row-warning">
+                        <td>residenceAddress (Type 3)</td>
+                        <td>Required</td>
+                        <td>NotNull()</td>
+                        <td>No Required</td>
+                        <td class="status-warning">Frontend لا يفرض Required</td>
+                    </tr>
+                    <tr class="field-row-warning">
+                        <td>businessAddress (Type 3)</td>
+                        <td>Required</td>
+                        <td>NotNull()</td>
+                        <td>No Required</td>
+                        <td class="status-warning">Frontend لا يفرض Required</td>
+                    </tr>
+                    <tr class="field-row-warning">
+                        <td>employer (Type 1,3)</td>
+                        <td>Required*</td>
+                        <td>Optional</td>
+                        <td>Optional</td>
+                        <td class="status-warning">SRS يقول إجباري*</td>
+                    </tr>
+                    <tr class="field-row-warning">
+                        <td>waqfAgencyName (Type 8)</td>
+                        <td>Required when حكومية</td>
+                        <td>When(حكومية)</td>
+                        <td>No conditional</td>
+                        <td class="status-warning">Frontend لا يفرض الشرط</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3 style="color: var(--accent-yellow); margin-top: 30px;">4. قواعد العمل الشرطية (5 قواعد)</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 100px;">الكود</th>
+                        <th>الوصف</th>
+                        <th>الأنواع</th>
+                        <th style="width: 100px;">Backend</th>
+                        <th style="width: 100px;">Frontend</th>
+                        <th style="width: 80px;">الأولوية</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="field-row-warning" style="background: rgba(245,158,11,0.2);">
+                        <td><strong>Nationality</strong></td>
+                        <td>
+                            • هوية وطنية → سعودي (readonly)<br>
+                            • مقيم/جواز → اختيار بدون سعودي
+                        </td>
+                        <td>1, 3</td>
+                        <td class="status-warning">❌ غير مطبق</td>
+                        <td class="status-warning">❌ غير مطبق</td>
+                        <td><span class="badge" style="background: var(--accent-yellow); color: #000;">P0</span></td>
+                    </tr>
+                    <tr class="field-row-warning" style="background: rgba(245,158,11,0.2);">
+                        <td><strong>BC01</strong></td>
+                        <td>
+                            • حكومي/خاص → إظهار جهة العمل (مطلوب)<br>
+                            • بدون عمل → إخفاء جهة العمل
+                        </td>
+                        <td>1, 3</td>
+                        <td class="status-warning">❌ حقل مفقود</td>
+                        <td class="status-warning">❌ حقل مفقود</td>
+                        <td><span class="badge" style="background: var(--accent-yellow); color: #000;">P0</span></td>
+                    </tr>
+                    <tr class="field-row-warning" style="background: rgba(245,158,11,0.2);">
+                        <td><strong>BC02</strong></td>
+                        <td>
+                            • خاص → إظهار عنوان العمل<br>
+                            • حكومي/بدون عمل → إخفاء عنوان العمل
+                        </td>
+                        <td>1, 3</td>
+                        <td class="status-warning">❌ لا يوجد تحقق</td>
+                        <td class="status-warning">❌ لا يوجد تحقق</td>
+                        <td><span class="badge" style="background: var(--accent-yellow); color: #000;">P0</span></td>
+                    </tr>
+                    <tr class="field-row-warning" style="background: rgba(34,197,94,0.2);">
+                        <td><strong>BC03</strong></td>
+                        <td>
+                            • نظارة حكومية → إظهار اسم الجهة (مطلوب)<br>
+                            • نظارة خاصة (أهلي) → إخفاء اسم الجهة
+                        </td>
+                        <td>8 (وقف)</td>
+                        <td class="status-warning">❌ غير مطبق</td>
+                        <td class="status-warning">❌ غير مطبق</td>
+                        <td><span class="badge" style="background: var(--accent-yellow); color: #000;">P0</span></td>
+                    </tr>
+                    <tr class="field-row-warning" style="background: rgba(239,68,68,0.2);">
+                        <td><strong>BC04</strong></td>
+                        <td>
+                            • فقط المنطقة والمدينة إجباريان<br>
+                            • بقية حقول العنوان اختيارية
+                        </td>
+                        <td>جميع العناوين</td>
+                        <td class="status-warning">❌ كل الحقول Required</td>
+                        <td class="status-ok">✓ Optional</td>
+                        <td><span class="badge" style="background: var(--accent-red);">P0</span></td>
+                    </tr>
+                </tbody>
+            </table>
+            <p style="margin-top: 10px; color: var(--accent-red);"><strong>⚠️ ملاحظة:</strong> تطبيق BC01 و BC02 يتطلب أولاً إضافة حقل <code>employmentStatusId</code> و Lookup Table للحالات.</p>
+            <p style="margin-top: 5px; color: var(--accent-red);"><strong>⚠️ ملاحظة:</strong> BC04 يتطلب تعديل Backend لإزالة Required من حقول العنوان (ما عدا المنطقة والمدينة).</p>
+        </section>
+
+        <!-- ==================== FIXES ==================== -->
+        <section id="fixes">
+            <h2>الإصلاحات المطلوبة - مرتبة حسب الأولوية</h2>
+
+            <h3>أولوية حرجة (P0) - يجب إصلاحها فوراً</h3>
+
+            <div class="fix-section">
+                <h4>1. إضافة حقل رقم الوحدة (unitNumber)</h4>
+                <p><strong>الملفات:</strong></p>
+                <ul>
+                    <li><code>plaintiff-form.component.ts</code> - إضافة للـ FormGroup</li>
+                    <li><code>plaintiff-form.component.html</code> - إضافة الحقل لجميع العناوين</li>
+                </ul>
+                <pre><code>// في createAddressFormGroup()
+unitNumber: ['', [Validators.required, Validators.pattern(/^\d+$/)]],</code></pre>
+            </div>
+
+            <div class="fix-section">
+                <h4>2. إضافة companyAddress للنوع 4</h4>
+                <p>إضافة FormGroup وقالب HTML مشابه لـ residenceAddress</p>
+            </div>
+
+            <div class="fix-section">
+                <h4>3. إضافة ngoAddress للنوع 7</h4>
+                <p>إضافة FormGroup وقالب HTML مشابه لـ residenceAddress</p>
+            </div>
+
+            <div class="fix-section">
+                <h4>4. إضافة waqfAddress للنوع 8</h4>
+                <p>إضافة FormGroup وقالب HTML مشابه لـ residenceAddress</p>
+            </div>
+
+            <div class="fix-section">
+                <h4>5. عرض الحقول المفقودة في HTML</h4>
+                <ul>
+                    <li>headquarters للنوع 6</li>
+                    <li>waqfAgencyName و waqfDescription للنوع 8</li>
+                    <li>documentNumber للنوع 2</li>
+                    <li>commercialRegNumber و unregisteredCompanyAddress للنوع 5</li>
+                    <li>profession و employer للنوع 3</li>
+                </ul>
+            </div>
+
+            <div class="fix-section" style="background: rgba(245,158,11,0.2); border: 2px solid var(--accent-yellow);">
+                <h4 style="color: var(--accent-yellow);">6. ⚡ تطبيق قواعد العمل الشرطية (جديد)</h4>
+
+                <h5 style="margin-top: 15px;">6.1 إضافة حقل حالة العمل (employmentStatusId)</h5>
+                <p><strong>Backend:</strong></p>
+                <pre><code>// 1. إضافة Lookup Table
+CREATE TABLE EmploymentStatuses (
+    Id INT PRIMARY KEY,
+    NameAr NVARCHAR(50),
+    NameEn NVARCHAR(50)
+);
+INSERT INTO EmploymentStatuses VALUES (1, 'حكومي', 'Government');
+INSERT INTO EmploymentStatuses VALUES (2, 'خاص', 'Private');
+INSERT INTO EmploymentStatuses VALUES (3, 'بدون عمل', 'Unemployed');
+
+// 2. إضافة للـ Entity
+public int? EmploymentStatusId { get; set; }
+public virtual EmploymentStatus? EmploymentStatus { get; set; }
+
+// 3. إضافة للـ DTO
+public int? EmploymentStatusId { get; set; }</code></pre>
+
+                <p><strong>Frontend:</strong></p>
+                <pre><code>// plaintiff-form.component.ts
+employmentStatusId: [null, Validators.required],
+
+// HTML - بعد المهنة
+&lt;mat-form-field&gt;
+  &lt;mat-label&gt;حالة العمل&lt;/mat-label&gt;
+  &lt;mat-select formControlName="employmentStatusId"&gt;
+    &lt;mat-option [value]="1"&gt;حكومي&lt;/mat-option&gt;
+    &lt;mat-option [value]="2"&gt;خاص&lt;/mat-option&gt;
+    &lt;mat-option [value]="3"&gt;بدون عمل&lt;/mat-option&gt;
+  &lt;/mat-select&gt;
+&lt;/mat-form-field&gt;</code></pre>
+
+                <h5 style="margin-top: 15px;">6.2 تطبيق قاعدة الجنسية (Nationality Rule)</h5>
+                <p>راجع قسم "قواعد العمل الشرطية" أعلاه للكود التفصيلي</p>
+
+                <h5 style="margin-top: 15px;">6.3 تطبيق BC01 (جهة العمل) + BC02 (عنوان العمل)</h5>
+                <p>راجع قسم "قواعد العمل الشرطية" أعلاه للكود التفصيلي</p>
+            </div>
+
+            <h3>أولوية عالية (P1)</h3>
+
+            <div class="fix-section">
+                <h4>7. تصحيح أسماء الحقول</h4>
+                <ul>
+                    <li><code>occupation</code> → <code>profession</code></li>
+                    <li><code>employerName</code> → <code>employer</code></li>
+                    <li><code>unregisteredCompanyName</code> → <code>companyName</code></li>
+                    <li><code>unregisteredCountryId</code> → <code>countryId</code></li>
+                    <li><code>unregisteredDescription</code> → <code>description</code></li>
+                </ul>
+            </div>
+
+            <div class="fix-section">
+                <h4>8. تغيير district إلى dropdown</h4>
+                <p>تغيير من input text إلى mat-select مع تحميل الأحياء من API</p>
+                <pre><code>// إضافة للـ FormGroup
+districtId: [null, Validators.required],
+
+// HTML
+&lt;mat-select formControlName="districtId"&gt;
+  &lt;mat-option *ngFor="let district of districts" [value]="district.id"&gt;
+    {{ district.nameAr }}
+  &lt;/mat-option&gt;
+&lt;/mat-select&gt;</code></pre>
+            </div>
+
+            <div class="fix-section">
+                <h4>9. إضافة Required validators للعناوين</h4>
+                <pre><code>// في createAddressFormGroup()
+regionId: [null, Validators.required],
+cityId: [null, Validators.required],
+districtId: [null, Validators.required],
+streetName: ['', [Validators.required, Validators.maxLength(200)]],
+buildingNumber: ['', [Validators.required, CustomValidators.buildingNumber()]],
+unitNumber: ['', [Validators.required, Validators.pattern(/^\d+$/)]],
+postalCode: ['', [Validators.required, CustomValidators.postalCode()]],
+additionalNumber: ['', [Validators.required, CustomValidators.additionalNumber()]]</code></pre>
+            </div>
+
+            <h3>أولوية متوسطة (P2)</h3>
+
+            <div class="fix-section">
+                <h4>10. تصحيح maxLength للشارع</h4>
+                <p>تغيير من 100 إلى 200 في createAddressFormGroup()</p>
+            </div>
+
+            <div class="fix-section">
+                <h4>11. إضافة تحقق شرطي لـ waqfAgencyName</h4>
+                <pre><code>// في updateFormValidation() للنوع 8
+this.plaintiffForm.get('waqfOversightType')?.valueChanges.subscribe(value => {
+  const agencyNameControl = this.plaintiffForm.get('waqfAgencyName');
+  if (value === 'حكومية') {
+    agencyNameControl?.setValidators([Validators.required, Validators.maxLength(200)]);
+  } else {
+    agencyNameControl?.setValidators([Validators.maxLength(200)]);
+  }
+  agencyNameControl?.updateValueAndValidity();
+});</code></pre>
+            </div>
+
+            <div class="fix-section">
+                <h4>12. عرض حقل اسم الفخذ (clanName)</h4>
+                <p>إضافة الحقل في قالب الأفراد (اختياري)</p>
+            </div>
+
+            <div class="fix-section">
+                <h4>13. إضافة hint للحد الأقصى في البيان الإضافي</h4>
+                <pre><code>&lt;mat-hint align="end"&gt;
+  {{ plaintiffForm.get('additionalStatement')?.value?.length || 0 }}/4000
+&lt;/mat-hint&gt;</code></pre>
+            </div>
+        </section>
+
+        <footer style="text-align: center; padding: 30px; color: var(--text-secondary); border-top: 1px solid var(--border-color); margin-top: 30px;">
+            <p><strong>تقرير التحليل العميق الشامل - قيود الحقول</strong></p>
+            <p>تم إنشاء هذا التقرير بواسطة Claude Code</p>
+            <p>تاريخ: 2026-01-22 | SRS V2.5 - UC 6.5.1</p>
+            <p style="margin-top: 10px;">
+                <span class="badge badge-critical">18 حقل مفقود</span>
+                <span class="badge badge-warning">24 قيد مختلف</span>
+                <span class="badge badge-mismatch">8 أسماء خاطئة</span>
+                <span class="badge" style="background: var(--accent-yellow); color: #000;">5 قواعد شرطية</span>
+                <span class="badge badge-success">50 حقل متوافق 100%</span>
+            </p>
+        </footer>
+    </div>
+</body>
+</html>

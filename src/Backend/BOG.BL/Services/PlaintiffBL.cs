@@ -2,11 +2,13 @@ using BOG.BL.Interfaces;
 using BOG.DAL.Interfaces;
 using BOG.DbModel.Entities.CaseRegistration;
 using BOG.DbModel.Entities.Common;
+using BOG.DTO.Common;
 using BOG.DTO.Plaintiff;
 using BOG.Integration.Interfaces;
 using BOG.VM.Common;
 using BOG.VM.Plaintiff;
 using BOG.VM.Representative;
+using Microsoft.Extensions.Logging;
 
 namespace BOG.BL.Services;
 
@@ -18,9 +20,11 @@ public class PlaintiffBL : IPlaintiffBL
 {
     private readonly IPlaintiffRepository _plaintiffRepository;
     private readonly ICaseRequestPlaintiffRepository _caseRequestPlaintiffRepository;
+    private readonly IRepresentativeRepository _representativeRepository;
     private readonly IAddressRepository _addressRepository;
     private readonly IAbsherService _absherService;
     private readonly IUnitOfWork _unitOfWork;
+    private readonly ILogger<PlaintiffBL> _logger;
 
     // Plaintiff type constants
     private const int PlaintiffTypeIndividual = 1;
@@ -29,15 +33,19 @@ public class PlaintiffBL : IPlaintiffBL
     public PlaintiffBL(
         IPlaintiffRepository plaintiffRepository,
         ICaseRequestPlaintiffRepository caseRequestPlaintiffRepository,
+        IRepresentativeRepository representativeRepository,
         IAddressRepository addressRepository,
         IAbsherService absherService,
-        IUnitOfWork unitOfWork)
+        IUnitOfWork unitOfWork,
+        ILogger<PlaintiffBL> logger)
     {
         _plaintiffRepository = plaintiffRepository ?? throw new ArgumentNullException(nameof(plaintiffRepository));
         _caseRequestPlaintiffRepository = caseRequestPlaintiffRepository ?? throw new ArgumentNullException(nameof(caseRequestPlaintiffRepository));
+        _representativeRepository = representativeRepository ?? throw new ArgumentNullException(nameof(representativeRepository));
         _addressRepository = addressRepository ?? throw new ArgumentNullException(nameof(addressRepository));
         _absherService = absherService ?? throw new ArgumentNullException(nameof(absherService));
         _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
     public async Task<IEnumerable<PlaintiffListVM>> GetByRequestIdAsync(int requestId, CancellationToken cancellationToken = default)
@@ -64,6 +72,15 @@ public class PlaintiffBL : IPlaintiffBL
                 requestId, dto.IdentityNumber, dto.PlaintiffTypeId, cancellationToken);
             if (exists)
                 throw new InvalidOperationException("ERR011: المدّعي موجود مسبقاً بنفس رقم الهوية");
+        }
+
+        // ERR011: Check for duplicate plaintiff by document number (Type 2 - Individual without ID)
+        if (dto.PlaintiffTypeId == PlaintiffTypeIndividualNoId && !string.IsNullOrEmpty(dto.DocumentNumber))
+        {
+            var existsByDoc = await _plaintiffRepository.ExistsByDocumentNumberAsync(
+                requestId, dto.DocumentNumber, cancellationToken);
+            if (existsByDoc)
+                throw new InvalidOperationException("ERR011: المدّعي موجود مسبقاً بنفس رقم الوثيقة");
         }
 
         // For Individual type, integrate with Absher
@@ -94,7 +111,97 @@ public class PlaintiffBL : IPlaintiffBL
             }
         }
 
-        // Create plaintiff entity
+        // Create addresses from DTO FIRST (before plaintiff) so FK can be set immediately
+        int? residenceAddressId = null;
+        int? workAddressId = null;
+        int? businessAddressId = null;
+        int? companyAddressId = null;
+        int? ngoAddressId = null;
+        int? waqfAddressId = null;
+        int? selectedAddressId = null;
+
+        // Residence Address
+        if (dto.ResidenceAddress != null && dto.ResidenceAddress.RegionId > 0 && dto.ResidenceAddress.CityId > 0)
+        {
+            var address = CreateAddressFromDTO(dto.ResidenceAddress, "Residence");
+            await _addressRepository.AddAsync(address, cancellationToken);
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
+            residenceAddressId = address.Id;
+        }
+
+        // Work Address
+        if (dto.WorkAddress != null && dto.WorkAddress.RegionId > 0 && dto.WorkAddress.CityId > 0)
+        {
+            var address = CreateAddressFromDTO(dto.WorkAddress, "Work");
+            await _addressRepository.AddAsync(address, cancellationToken);
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
+            workAddressId = address.Id;
+        }
+
+        // Business Address (for Business Owner - Type 3)
+        if (dto.BusinessAddress != null && dto.BusinessAddress.RegionId > 0 && dto.BusinessAddress.CityId > 0)
+        {
+            var address = CreateAddressFromDTO(dto.BusinessAddress, "Business");
+            await _addressRepository.AddAsync(address, cancellationToken);
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
+            businessAddressId = address.Id;
+        }
+
+        // Company Address (for Registered Company - Type 4)
+        if (dto.CompanyAddress != null && dto.CompanyAddress.RegionId > 0 && dto.CompanyAddress.CityId > 0)
+        {
+            var address = CreateAddressFromDTO(dto.CompanyAddress, "Company");
+            await _addressRepository.AddAsync(address, cancellationToken);
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
+            companyAddressId = address.Id;
+        }
+
+        // NGO Address (for NGO - Type 7)
+        if (dto.NGOAddress != null && dto.NGOAddress.RegionId > 0 && dto.NGOAddress.CityId > 0)
+        {
+            var address = CreateAddressFromDTO(dto.NGOAddress, "NGO");
+            await _addressRepository.AddAsync(address, cancellationToken);
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
+            ngoAddressId = address.Id;
+        }
+
+        // Waqf Address (for Waqf - Type 8)
+        if (dto.WaqfAddress != null && dto.WaqfAddress.RegionId > 0 && dto.WaqfAddress.CityId > 0)
+        {
+            var address = CreateAddressFromDTO(dto.WaqfAddress, "Waqf");
+            await _addressRepository.AddAsync(address, cancellationToken);
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
+            waqfAddressId = address.Id;
+        }
+
+        // Selected Address (العنوان المختار - for correspondence)
+        if (dto.SelectedAddress != null && dto.SelectedAddress.RegionId > 0 && dto.SelectedAddress.CityId > 0)
+        {
+            var address = CreateAddressFromDTO(dto.SelectedAddress, "Selected");
+            await _addressRepository.AddAsync(address, cancellationToken);
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
+            selectedAddressId = address.Id;
+        }
+
+        // === DEBUG: Log before creating entity ===
+        _logger.LogWarning("=== CREATING PLAINTIFF ENTITY ===");
+        _logger.LogWarning("PlaintiffTypeId: {TypeId}", dto.PlaintiffTypeId);
+
+        // Type 5 (Unregistered Company) fields - DEBUG
+        _logger.LogWarning("=== BL: TYPE 5 FIELDS FROM DTO ===");
+        _logger.LogWarning("BL DTO CountryId: {CountryId}", dto.CountryId);
+        _logger.LogWarning("BL DTO UnregisteredCompanyCity: {City}", dto.UnregisteredCompanyCity);
+        _logger.LogWarning("BL DTO Description: {Desc}", dto.Description);
+        _logger.LogWarning("BL DTO CompanyName: {Name}", dto.CompanyName);
+        _logger.LogWarning("BL DTO CommercialRegNumber: {RegNum}", dto.CommercialRegNumber);
+
+        _logger.LogWarning("Waqf Fields - WaqfName: {WaqfName}, CourtDeedNumber: {Deed}, DeedDate: {Date}",
+            dto.WaqfName, dto.CourtDeedNumber, dto.DeedDate);
+        _logger.LogWarning("Waqf Fields - DeedSource: {Source}, OversightType: {Type}, Description: {Desc}",
+            dto.DeedSource, dto.WaqfOversightType, dto.WaqfDescription);
+        _logger.LogWarning("WaqfAddressId will be: {AddressId}", waqfAddressId);
+
+        // Create plaintiff entity with address FKs already set
         var plaintiff = new Plaintiff
         {
             PlaintiffTypeId = dto.PlaintiffTypeId,
@@ -103,31 +210,79 @@ public class PlaintiffBL : IPlaintiffBL
             FirstName = dto.FirstName,
             FatherName = dto.FatherName,
             GrandfatherName = dto.GrandfatherName,
+            ClanName = dto.ClanName,
             FamilyName = dto.FamilyName,
             BirthDate = dto.BirthDate,
             Gender = dto.Gender,
             NationalityId = dto.NationalityId,
+            IdentityIssueDate = dto.IdentityIssueDate,
+            IdentityExpiryDate = dto.IdentityExpiryDate,
             DataSourceId = dataSourceId,
             MobileNumber = dto.MobileNumber,
             Email = dto.Email,
+            EmploymentStatusId = dto.EmploymentStatusId,
+            Employer = dto.Employer,
+            Profession = dto.Profession,
+            // Business/Company fields
             CommercialRegNumber = dto.CommercialRegNumber,
             CompanyName = dto.CompanyName,
+            CRStartDate = dto.CRStartDate,
+            CREndDate = dto.CREndDate,
+            // Unregistered Company fields
+            UnregisteredCompanyAddress = dto.UnregisteredCompanyAddress,
+            CountryId = dto.CountryId,
+            UnregisteredCompanyCity = dto.UnregisteredCompanyCity,
+            Description = dto.Description,
+            // Government Agency fields
             GovernmentAgencyId = dto.GovernmentAgencyId,
+            Headquarters = dto.Headquarters,
             AdditionalStatement = dto.AdditionalStatement,
+            // NGO fields
             LicenseNumber = dto.LicenseNumber,
-            LicenseSource = dto.LicenseSource,
+            LicenseSourceId = dto.LicenseSourceId,
+            NGOName = dto.NGOName,
             LicenseDate = dto.LicenseDate,
+            // Waqf fields
             CourtDeedNumber = dto.CourtDeedNumber,
+            WaqfName = dto.WaqfName,
             DeedDate = dto.DeedDate,
             DeedSource = dto.DeedSource,
             WaqfOversightType = dto.WaqfOversightType,
-            IsApplicant = false,
+            WaqfAgencyName = dto.WaqfAgencyName,
+            WaqfDescription = dto.WaqfDescription,
+            // Individual without ID (Type 2)
+            DocumentNumber = dto.DocumentNumber,
+            // Address FKs - set from addresses created above
+            ResidenceAddressId = residenceAddressId,
+            WorkAddressId = workAddressId,
+            BusinessAddressId = businessAddressId,
+            CompanyAddressId = companyAddressId,
+            NGOAddressId = ngoAddressId,
+            WaqfAddressId = waqfAddressId,
+            SelectedAddressId = selectedAddressId,
+            // Additional Data (بيانات إضافية)
+            IsApplicant = dto.IsApplicant,
             IsActive = true,
             CreatedDate = DateTime.UtcNow
         };
 
         await _plaintiffRepository.AddAsync(plaintiff, cancellationToken);
-        await _unitOfWork.SaveChangesAsync(cancellationToken);
+        var rowsSaved = await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        // === DEBUG: Log after save ===
+        _logger.LogWarning("=== PLAINTIFF SAVED TO DB ===");
+        _logger.LogWarning("Rows saved: {Rows}, Plaintiff ID: {Id}", rowsSaved, plaintiff.Id);
+
+        // Type 5 (Unregistered Company) fields after save
+        _logger.LogWarning("=== BL: TYPE 5 FIELDS AFTER SAVE ===");
+        _logger.LogWarning("Saved CountryId: {CountryId}", plaintiff.CountryId);
+        _logger.LogWarning("Saved UnregisteredCompanyCity: {City}", plaintiff.UnregisteredCompanyCity);
+        _logger.LogWarning("Saved Description: {Desc}", plaintiff.Description);
+        _logger.LogWarning("Saved CompanyName: {Name}", plaintiff.CompanyName);
+
+        _logger.LogWarning("Saved Waqf Fields - WaqfName: {WaqfName}, CourtDeedNumber: {Deed}",
+            plaintiff.WaqfName, plaintiff.CourtDeedNumber);
+        _logger.LogWarning("Saved Waqf Fields - WaqfAddressId: {AddressId}", plaintiff.WaqfAddressId);
 
         // Create junction table entry
         var caseRequestPlaintiff = new CaseRequestPlaintiff
@@ -140,16 +295,25 @@ public class PlaintiffBL : IPlaintiffBL
         await _caseRequestPlaintiffRepository.AddAsync(caseRequestPlaintiff, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-        // Fetch addresses from Absher if available
-        if (dataSourceId == 1 && !string.IsNullOrEmpty(dto.IdentityNumber))
+        // Clear other applicants if this one is set as applicant
+        if (dto.IsApplicant)
+        {
+            await ClearOtherApplicantsAsync(plaintiff.Id, cancellationToken);
+        }
+
+        // Fetch addresses from Absher if available (only if no addresses from form)
+        bool hasAddressFromForm = residenceAddressId.HasValue || workAddressId.HasValue;
+        if (dataSourceId == 1 && !string.IsNullOrEmpty(dto.IdentityNumber) && !hasAddressFromForm)
         {
             var addressData = await _absherService.GetNationalAddressAsync(dto.IdentityNumber, cancellationToken);
             if (addressData != null)
             {
+                bool absherAddressesCreated = false;
+
                 // Create residence address
                 if (!string.IsNullOrEmpty(addressData.ResidenceCity))
                 {
-                    var residenceAddress = await _addressRepository.CreateFromAbsherDataAsync(
+                    var absherResidenceAddress = await _addressRepository.CreateFromAbsherDataAsync(
                         addressData.ResidenceBuildingNumber ?? "",
                         addressData.ResidenceStreetName ?? "",
                         addressData.ResidenceDistrict ?? "",
@@ -160,13 +324,14 @@ public class PlaintiffBL : IPlaintiffBL
                         cancellationToken);
 
                     await _unitOfWork.SaveChangesAsync(cancellationToken);
-                    plaintiff.ResidenceAddressId = residenceAddress.Id;
+                    plaintiff.ResidenceAddressId = absherResidenceAddress.Id;
+                    absherAddressesCreated = true;
                 }
 
                 // Create work address
                 if (!string.IsNullOrEmpty(addressData.WorkCity))
                 {
-                    var workAddress = await _addressRepository.CreateFromAbsherDataAsync(
+                    var absherWorkAddress = await _addressRepository.CreateFromAbsherDataAsync(
                         addressData.WorkBuildingNumber ?? "",
                         addressData.WorkStreetName ?? "",
                         addressData.WorkDistrict ?? "",
@@ -177,12 +342,136 @@ public class PlaintiffBL : IPlaintiffBL
                         cancellationToken);
 
                     await _unitOfWork.SaveChangesAsync(cancellationToken);
-                    plaintiff.WorkAddressId = workAddress.Id;
+                    plaintiff.WorkAddressId = absherWorkAddress.Id;
+                    absherAddressesCreated = true;
                 }
 
-                await _plaintiffRepository.UpdateAsync(plaintiff, cancellationToken);
-                await _unitOfWork.SaveChangesAsync(cancellationToken);
+                if (absherAddressesCreated)
+                {
+                    await _plaintiffRepository.UpdateAsync(plaintiff, cancellationToken);
+                    await _unitOfWork.SaveChangesAsync(cancellationToken);
+                }
             }
+        }
+
+        // Create representatives if provided
+        if (dto.Representatives?.Any() == true)
+        {
+            _logger.LogInformation("Creating {Count} representatives for plaintiff {PlaintiffId}", dto.Representatives.Count, plaintiff.Id);
+
+            foreach (var repDto in dto.Representatives)
+            {
+                var representative = new Representative
+                {
+                    PlaintiffId = plaintiff.Id,
+                    RepresentativeTypeId = repDto.RepresentativeTypeId,
+                    IdentityTypeId = repDto.IdentityTypeId,
+                    IdentityNumber = repDto.IdentityNumber,
+                    FirstName = repDto.FirstName,
+                    FatherName = repDto.FatherName,
+                    GrandfatherName = repDto.GrandfatherName,
+                    FamilyName = repDto.FamilyName,
+                    ClanName = repDto.ClanName,
+                    BirthDate = repDto.BirthDate,
+                    Gender = repDto.Gender,
+                    NationalityId = repDto.NationalityId,
+                    IdentityIssueDate = repDto.IdentityIssueDate,
+                    IdentityExpiryDate = repDto.IdentityExpiryDate,
+                    // Residence Address (عنوان السكن)
+                    ResidenceRegionId = repDto.ResidenceRegionId,
+                    ResidenceCityId = repDto.ResidenceCityId,
+                    ResidenceDistrict = repDto.ResidenceDistrict,
+                    ResidenceStreet = repDto.ResidenceStreet,
+                    ResidenceBuildingNumber = repDto.ResidenceBuildingNumber,
+                    ResidenceUnitNumber = repDto.ResidenceUnitNumber,
+                    ResidencePostalCode = repDto.ResidencePostalCode,
+                    ResidenceAdditionalCode = repDto.ResidenceAdditionalCode,
+                    // Employment Data (بيانات العمل)
+                    EmploymentStatus = repDto.EmploymentStatus,
+                    Employer = repDto.Employer,
+                    Profession = repDto.Profession,
+                    // Work Address (عنوان العمل)
+                    WorkRegionId = repDto.WorkRegionId,
+                    WorkCityId = repDto.WorkCityId,
+                    WorkDistrict = repDto.WorkDistrict,
+                    WorkStreet = repDto.WorkStreet,
+                    WorkBuildingNumber = repDto.WorkBuildingNumber,
+                    WorkUnitNumber = repDto.WorkUnitNumber,
+                    WorkPostalCode = repDto.WorkPostalCode,
+                    WorkAdditionalCode = repDto.WorkAdditionalCode,
+                    // Contact Info
+                    MobileNumber = repDto.MobileNumber,
+                    Email = repDto.Email,
+                    // Lawyer License (بيانات رخصة المحاماة)
+                    LawyerLicenseNumber = repDto.LawyerLicenseNumber,
+                    LawyerLicenseDate = repDto.LawyerLicenseDate,
+                    LawyerLicenseExpiryDate = repDto.LawyerLicenseExpiryDate,
+                    // Authorization (بيانات الوكالة)
+                    AuthorizationNumber = repDto.AuthorizationNumber,
+                    AuthorizationDate = repDto.AuthorizationDate,
+                    AuthorizationSource = repDto.AuthorizationSource,
+                    AuthorizationSourceType = repDto.AuthorizationSourceType,
+                    // Liquidator (مصفي)
+                    DecisionNumber = repDto.DecisionNumber,
+                    DecisionDate = repDto.DecisionDate,
+                    DecisionSource = repDto.DecisionSource,
+                    // Guardian (ولي)
+                    DeedNumber = repDto.DeedNumber,
+                    DeedDate = repDto.DeedDate,
+                    DeedSource = repDto.DeedSource,
+                    GuardianshipType = repDto.GuardianshipType,
+                    // CompanyRepresentative fields (ممثل الشركة - Type 6)
+                    RepresentationDocSource = repDto.RepresentationDocSource,
+                    RepresentativeCapacity = repDto.RepresentativeCapacity,
+                    RepresentationDocType = repDto.RepresentationDocType,
+                    RepresentationDocNumber = repDto.RepresentationDocNumber,
+                    // AgencyRepresentative fields
+                    RepresentationLetterNumber = repDto.RepresentationLetterNumber,
+                    RepresentationLetterDate = repDto.RepresentationLetterDate,
+                    RepresentationLetterSource = repDto.RepresentationLetterSource,
+                    DataSourceId = 2, // FromUser
+                    IsActive = true,
+                    CreatedDate = DateTime.UtcNow,
+                    // Initialize attachments collection
+                    Attachments = new List<RepresentativeAttachment>()
+                };
+
+                // Add attachments for representative (صورة التمثيل)
+                if (repDto.Attachments != null && repDto.Attachments.Count > 0)
+                {
+                    _logger.LogInformation("Creating {Count} attachments for representative", repDto.Attachments.Count);
+                    foreach (var attachmentDto in repDto.Attachments)
+                    {
+                        var storedFileName = $"rep_{Guid.NewGuid()}{Path.GetExtension(attachmentDto.FileName)}";
+                        var attachment = new RepresentativeAttachment
+                        {
+                            AttachmentTypeId = attachmentDto.AttachmentTypeId,
+                            FileName = attachmentDto.FileName,
+                            StoredFileName = storedFileName,
+                            ContentType = attachmentDto.ContentType,
+                            FileSizeBytes = attachmentDto.FileSizeBytes,
+                            Description = attachmentDto.Description,
+                            UploadDate = DateTime.UtcNow,
+                            IsActive = true,
+                            CreatedDate = DateTime.UtcNow
+                        };
+
+                        // TODO: Save file content to storage if FileContent is provided
+                        // if (!string.IsNullOrEmpty(attachmentDto.FileContent))
+                        // {
+                        //     var bytes = Convert.FromBase64String(attachmentDto.FileContent);
+                        //     await _fileStorage.SaveAsync(storedFileName, bytes);
+                        // }
+
+                        representative.Attachments.Add(attachment);
+                    }
+                }
+
+                await _representativeRepository.AddAsync(representative, cancellationToken);
+            }
+
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
+            _logger.LogInformation("Successfully created {Count} representatives", dto.Representatives.Count);
         }
 
         return await GetByIdAsync(plaintiff.Id, cancellationToken) ?? throw new InvalidOperationException("Failed to create plaintiff");
@@ -190,38 +479,355 @@ public class PlaintiffBL : IPlaintiffBL
 
     public async Task<PlaintiffVM> UpdateAsync(int id, PlaintiffUpdateDTO dto, CancellationToken cancellationToken = default)
     {
+        _logger.LogInformation("=== UpdateAsync START for ID: {Id} ===", id);
+        _logger.LogInformation("DTO received - FirstName: {FirstName}, FatherName: {FatherName}, MobileNumber: {Mobile}, Gender: {Gender}",
+            dto?.FirstName, dto?.FatherName, dto?.MobileNumber, dto?.Gender);
+
         if (dto == null)
             throw new ArgumentNullException(nameof(dto));
 
+        // Use GetByIdAsync (tracked) for updates, not GetWithDetailsAsync (untracked)
         var plaintiff = await _plaintiffRepository.GetByIdAsync(id, cancellationToken) as Plaintiff;
         if (plaintiff == null || plaintiff.IsDeleted)
             throw new InvalidOperationException($"المدعي رقم {id} غير موجود");
 
-        // Update fields (only non-Absher fields can be updated if data is from Absher)
-        if (plaintiff.DataSourceId != 1) // Not from Absher - allow name updates
+        _logger.LogInformation("BEFORE update - FirstName: {FirstName}, FatherName: {FatherName}, MobileNumber: {Mobile}, DataSourceId: {DataSource}",
+            plaintiff.FirstName, plaintiff.FatherName, plaintiff.MobileNumber, plaintiff.DataSourceId);
+
+        // Update PlaintiffTypeId if provided (always allowed)
+        if (dto.PlaintiffTypeId.HasValue)
         {
-            if (!string.IsNullOrEmpty(dto.FirstName)) plaintiff.FirstName = dto.FirstName;
-            if (!string.IsNullOrEmpty(dto.FatherName)) plaintiff.FatherName = dto.FatherName;
-            if (!string.IsNullOrEmpty(dto.GrandfatherName)) plaintiff.GrandfatherName = dto.GrandfatherName;
-            if (!string.IsNullOrEmpty(dto.FamilyName)) plaintiff.FamilyName = dto.FamilyName;
+            _logger.LogInformation("Changing PlaintiffTypeId from {Old} to {New}", plaintiff.PlaintiffTypeId, dto.PlaintiffTypeId.Value);
+            plaintiff.PlaintiffTypeId = dto.PlaintiffTypeId.Value;
+
+            // Clear type-specific fields when changing plaintiff type
+            var newTypeId = dto.PlaintiffTypeId.Value;
+
+            // Clear Government Agency fields if not Type 6
+            if (newTypeId != 6)
+            {
+                plaintiff.GovernmentAgencyId = null;
+                plaintiff.Headquarters = null;
+            }
+
+            // Clear Waqf fields if not Type 8
+            if (newTypeId != 8)
+            {
+                plaintiff.WaqfName = null;
+                plaintiff.WaqfAddressId = null;
+                plaintiff.WaqfAgencyName = null;
+                plaintiff.WaqfDescription = null;
+                plaintiff.WaqfOversightType = null;
+                plaintiff.CourtDeedNumber = null;
+                plaintiff.DeedDate = null;
+                plaintiff.DeedSource = null;
+            }
+
+            // Clear NGO fields if not Type 7
+            if (newTypeId != 7)
+            {
+                plaintiff.NGOName = null;
+                plaintiff.NGOAddressId = null;
+                plaintiff.LicenseNumber = null;
+                plaintiff.LicenseDate = null;
+                plaintiff.LicenseSourceId = null;
+            }
+
+            // Clear Company fields if not Type 4 or 5
+            if (newTypeId != 4 && newTypeId != 5)
+            {
+                plaintiff.CompanyName = null;
+                plaintiff.CompanyAddressId = null;
+                plaintiff.UnregisteredCompanyAddress = null;
+                plaintiff.UnregisteredCompanyCity = null;
+            }
+
+            // Clear Registered Company fields if not Type 4
+            if (newTypeId != 4)
+            {
+                plaintiff.CommercialRegNumber = null;
+                plaintiff.CRStartDate = null;
+                plaintiff.CREndDate = null;
+            }
+
+            // Clear Business Owner fields if not Type 3
+            if (newTypeId != 3)
+            {
+                plaintiff.BusinessAddressId = null;
+            }
+
+            // Clear Individual fields if not Type 1 or 2
+            if (newTypeId != 1 && newTypeId != 2)
+            {
+                plaintiff.EmploymentStatusId = null;
+                plaintiff.Employer = null;
+                plaintiff.Profession = null;
+                plaintiff.WorkAddressId = null;
+            }
         }
+
+        // Update fields (only non-Absher fields can be updated if data is from Absher)
+        bool isFromAbsher = plaintiff.DataSourceId == 1;
+        _logger.LogInformation("IsFromAbsher: {IsFromAbsher}", isFromAbsher);
+
+        if (!isFromAbsher) // Not from Absher - allow identity and name updates
+        {
+            // Identity data
+            if (dto.IdentityTypeId.HasValue) plaintiff.IdentityTypeId = dto.IdentityTypeId;
+            if (dto.IdentityNumber != null) plaintiff.IdentityNumber = dto.IdentityNumber;
+            if (dto.IdentityIssueDate.HasValue) plaintiff.IdentityIssueDate = dto.IdentityIssueDate;
+            if (dto.IdentityExpiryDate.HasValue) plaintiff.IdentityExpiryDate = dto.IdentityExpiryDate;
+
+            // Personal data
+            if (dto.FirstName != null) plaintiff.FirstName = dto.FirstName;
+            if (dto.FatherName != null) plaintiff.FatherName = dto.FatherName;
+            if (dto.GrandfatherName != null) plaintiff.GrandfatherName = dto.GrandfatherName;
+            if (dto.ClanName != null) plaintiff.ClanName = dto.ClanName;
+            if (dto.FamilyName != null) plaintiff.FamilyName = dto.FamilyName;
+            if (dto.Gender != null) plaintiff.Gender = dto.Gender;
+            if (dto.BirthDate.HasValue) plaintiff.BirthDate = dto.BirthDate;
+            if (dto.NationalityId.HasValue) plaintiff.NationalityId = dto.NationalityId;
+        }
+
+        // Document number (for Type 2 - can be updated if not readonly)
+        if (dto.DocumentNumber != null) plaintiff.DocumentNumber = dto.DocumentNumber;
 
         // Contact info can always be updated
         if (dto.MobileNumber != null) plaintiff.MobileNumber = dto.MobileNumber;
         if (dto.Email != null) plaintiff.Email = dto.Email;
 
-        // Other fields
-        if (dto.CompanyName != null) plaintiff.CompanyName = dto.CompanyName;
-        if (dto.AdditionalStatement != null) plaintiff.AdditionalStatement = dto.AdditionalStatement;
+        // Employment data
+        if (dto.EmploymentStatusId.HasValue) plaintiff.EmploymentStatusId = dto.EmploymentStatusId;
         if (dto.Employer != null) plaintiff.Employer = dto.Employer;
         if (dto.Profession != null) plaintiff.Profession = dto.Profession;
 
+        // Business/Company data
+        if (dto.CompanyName != null) plaintiff.CompanyName = dto.CompanyName;
+        if (dto.CommercialRegNumber != null) plaintiff.CommercialRegNumber = dto.CommercialRegNumber;
+        if (dto.CRStartDate.HasValue) plaintiff.CRStartDate = dto.CRStartDate;
+        if (dto.CREndDate.HasValue) plaintiff.CREndDate = dto.CREndDate;
+
+        // Unregistered Company (Type 5) specific fields
+        if (dto.CountryId.HasValue) plaintiff.CountryId = dto.CountryId > 0 ? dto.CountryId : null;
+        if (dto.UnregisteredCompanyCity != null) plaintiff.UnregisteredCompanyCity = dto.UnregisteredCompanyCity;
+        if (dto.Description != null) plaintiff.Description = dto.Description;
+
+        if (dto.LicenseNumber != null) plaintiff.LicenseNumber = dto.LicenseNumber;
+        if (dto.LicenseSourceId.HasValue) plaintiff.LicenseSourceId = dto.LicenseSourceId > 0 ? dto.LicenseSourceId : null;
+        if (dto.NGOName != null) plaintiff.NGOName = dto.NGOName;
+        if (dto.LicenseDate.HasValue) plaintiff.LicenseDate = dto.LicenseDate;
+        // Treat GovernmentAgencyId = 0 as null to avoid FK constraint errors
+        if (dto.GovernmentAgencyId.HasValue) plaintiff.GovernmentAgencyId = dto.GovernmentAgencyId > 0 ? dto.GovernmentAgencyId : null;
+        if (dto.Headquarters != null) plaintiff.Headquarters = dto.Headquarters;
+        if (dto.WaqfOversightType != null) plaintiff.WaqfOversightType = dto.WaqfOversightType;
+
+        // Additional info
+        if (dto.AdditionalStatement != null) plaintiff.AdditionalStatement = dto.AdditionalStatement;
+
+        // Handle IsApplicant - IMPORTANT: Don't return early, save all changes first
+        bool needToSetAsApplicant = dto.IsApplicant.HasValue && dto.IsApplicant.Value && !plaintiff.IsApplicant;
+
+        if (dto.IsApplicant.HasValue)
+        {
+            plaintiff.IsApplicant = dto.IsApplicant.Value;
+        }
+
+        // Update Residence Address
+        if (dto.ResidenceAddress != null)
+        {
+            if (plaintiff.ResidenceAddressId.HasValue)
+            {
+                // Load and update existing address
+                var existingAddress = await _addressRepository.GetByIdAsync(plaintiff.ResidenceAddressId.Value, cancellationToken) as Address;
+                if (existingAddress != null)
+                {
+                    UpdateAddress(existingAddress, dto.ResidenceAddress);
+                    await _addressRepository.UpdateAsync(existingAddress, cancellationToken);
+                }
+            }
+            else
+            {
+                // Create new address
+                var address = CreateAddressFromDTO(dto.ResidenceAddress, "Residence");
+                await _addressRepository.AddAsync(address, cancellationToken);
+                await _unitOfWork.SaveChangesAsync(cancellationToken);
+                plaintiff.ResidenceAddressId = address.Id;
+            }
+        }
+
+        // Update Work Address
+        if (dto.WorkAddress != null)
+        {
+            if (plaintiff.WorkAddressId.HasValue)
+            {
+                // Load and update existing address
+                var existingAddress = await _addressRepository.GetByIdAsync(plaintiff.WorkAddressId.Value, cancellationToken) as Address;
+                if (existingAddress != null)
+                {
+                    UpdateAddress(existingAddress, dto.WorkAddress);
+                    await _addressRepository.UpdateAsync(existingAddress, cancellationToken);
+                }
+            }
+            else
+            {
+                // Create new address
+                var address = CreateAddressFromDTO(dto.WorkAddress, "Work");
+                await _addressRepository.AddAsync(address, cancellationToken);
+                await _unitOfWork.SaveChangesAsync(cancellationToken);
+                plaintiff.WorkAddressId = address.Id;
+            }
+        }
+
+        // Update Business Address (for Business Owner - Type 6)
+        if (dto.BusinessAddress != null && dto.BusinessAddress.RegionId > 0 && dto.BusinessAddress.CityId > 0)
+        {
+            if (plaintiff.BusinessAddressId.HasValue)
+            {
+                var existingAddress = await _addressRepository.GetByIdAsync(plaintiff.BusinessAddressId.Value, cancellationToken) as Address;
+                if (existingAddress != null)
+                {
+                    UpdateAddress(existingAddress, dto.BusinessAddress);
+                    await _addressRepository.UpdateAsync(existingAddress, cancellationToken);
+                }
+            }
+            else
+            {
+                var address = CreateAddressFromDTO(dto.BusinessAddress, "Business");
+                await _addressRepository.AddAsync(address, cancellationToken);
+                await _unitOfWork.SaveChangesAsync(cancellationToken);
+                plaintiff.BusinessAddressId = address.Id;
+            }
+        }
+
+        // Update Company Address (for Registered Company - Type 2)
+        if (dto.CompanyAddress != null && dto.CompanyAddress.RegionId > 0 && dto.CompanyAddress.CityId > 0)
+        {
+            if (plaintiff.CompanyAddressId.HasValue)
+            {
+                var existingAddress = await _addressRepository.GetByIdAsync(plaintiff.CompanyAddressId.Value, cancellationToken) as Address;
+                if (existingAddress != null)
+                {
+                    UpdateAddress(existingAddress, dto.CompanyAddress);
+                    await _addressRepository.UpdateAsync(existingAddress, cancellationToken);
+                }
+            }
+            else
+            {
+                var address = CreateAddressFromDTO(dto.CompanyAddress, "Company");
+                await _addressRepository.AddAsync(address, cancellationToken);
+                await _unitOfWork.SaveChangesAsync(cancellationToken);
+                plaintiff.CompanyAddressId = address.Id;
+            }
+        }
+
+        // Update NGO Address (for NGO - Type 4)
+        if (dto.NGOAddress != null && dto.NGOAddress.RegionId > 0 && dto.NGOAddress.CityId > 0)
+        {
+            if (plaintiff.NGOAddressId.HasValue)
+            {
+                var existingAddress = await _addressRepository.GetByIdAsync(plaintiff.NGOAddressId.Value, cancellationToken) as Address;
+                if (existingAddress != null)
+                {
+                    UpdateAddress(existingAddress, dto.NGOAddress);
+                    await _addressRepository.UpdateAsync(existingAddress, cancellationToken);
+                }
+            }
+            else
+            {
+                var address = CreateAddressFromDTO(dto.NGOAddress, "NGO");
+                await _addressRepository.AddAsync(address, cancellationToken);
+                await _unitOfWork.SaveChangesAsync(cancellationToken);
+                plaintiff.NGOAddressId = address.Id;
+            }
+        }
+
+        // Update Waqf Address (for Waqf - Type 5)
+        if (dto.WaqfAddress != null && dto.WaqfAddress.RegionId > 0 && dto.WaqfAddress.CityId > 0)
+        {
+            if (plaintiff.WaqfAddressId.HasValue)
+            {
+                var existingAddress = await _addressRepository.GetByIdAsync(plaintiff.WaqfAddressId.Value, cancellationToken) as Address;
+                if (existingAddress != null)
+                {
+                    UpdateAddress(existingAddress, dto.WaqfAddress);
+                    await _addressRepository.UpdateAsync(existingAddress, cancellationToken);
+                }
+            }
+            else
+            {
+                var address = CreateAddressFromDTO(dto.WaqfAddress, "Waqf");
+                await _addressRepository.AddAsync(address, cancellationToken);
+                await _unitOfWork.SaveChangesAsync(cancellationToken);
+                plaintiff.WaqfAddressId = address.Id;
+            }
+        }
+
+        // Update Selected Address (العنوان المختار)
+        if (dto.SelectedAddress != null && dto.SelectedAddress.RegionId > 0 && dto.SelectedAddress.CityId > 0)
+        {
+            if (plaintiff.SelectedAddressId.HasValue)
+            {
+                var existingAddress = await _addressRepository.GetByIdAsync(plaintiff.SelectedAddressId.Value, cancellationToken) as Address;
+                if (existingAddress != null)
+                {
+                    UpdateAddress(existingAddress, dto.SelectedAddress);
+                    await _addressRepository.UpdateAsync(existingAddress, cancellationToken);
+                }
+            }
+            else
+            {
+                var address = CreateAddressFromDTO(dto.SelectedAddress, "Selected");
+                await _addressRepository.AddAsync(address, cancellationToken);
+                await _unitOfWork.SaveChangesAsync(cancellationToken);
+                plaintiff.SelectedAddressId = address.Id;
+            }
+        }
+
         plaintiff.ModifiedDate = DateTime.UtcNow;
 
-        await _plaintiffRepository.UpdateAsync(plaintiff, cancellationToken);
-        await _unitOfWork.SaveChangesAsync(cancellationToken);
+        _logger.LogInformation("AFTER update - FirstName: {FirstName}, FatherName: {FatherName}, MobileNumber: {Mobile}",
+            plaintiff.FirstName, plaintiff.FatherName, plaintiff.MobileNumber);
 
-        return await GetByIdAsync(id, cancellationToken) ?? throw new InvalidOperationException("Failed to update plaintiff");
+        await _plaintiffRepository.UpdateAsync(plaintiff, cancellationToken);
+        _logger.LogInformation("Called UpdateAsync on repository");
+
+        var rowsAffected = await _unitOfWork.SaveChangesAsync(cancellationToken);
+        _logger.LogInformation("SaveChangesAsync completed - Rows affected: {RowsAffected}", rowsAffected);
+
+        // If setting as applicant, clear other applicants (after our changes are saved)
+        if (needToSetAsApplicant)
+        {
+            _logger.LogInformation("Setting plaintiff {Id} as applicant - clearing others", id);
+            await ClearOtherApplicantsAsync(id, cancellationToken);
+        }
+
+        var result = await GetByIdAsync(id, cancellationToken) ?? throw new InvalidOperationException("Failed to update plaintiff");
+        _logger.LogInformation("=== UpdateAsync END - Returning FirstName: {FirstName} ===", result.FirstName);
+
+        return result;
+    }
+
+    /// <summary>
+    /// Clears IsApplicant flag from all other plaintiffs in the same case request.
+    /// </summary>
+    private async Task ClearOtherApplicantsAsync(int currentPlaintiffId, CancellationToken cancellationToken)
+    {
+        // Get request ID from junction table
+        var associations = await _caseRequestPlaintiffRepository.GetByPlaintiffIdAsync(currentPlaintiffId, cancellationToken);
+        var requestId = associations.FirstOrDefault()?.CaseRegistrationRequestId;
+
+        if (requestId.HasValue)
+        {
+            // Clear previous applicants
+            var requestPlaintiffs = await _plaintiffRepository.GetByRequestIdAsync(requestId.Value, cancellationToken);
+            foreach (var p in requestPlaintiffs.Where(p => p.IsApplicant && p.Id != currentPlaintiffId))
+            {
+                p.IsApplicant = false;
+                p.ModifiedDate = DateTime.UtcNow;
+                await _plaintiffRepository.UpdateAsync(p, cancellationToken);
+            }
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
+        }
     }
 
     public async Task DeleteAsync(int id, CancellationToken cancellationToken = default)
@@ -372,27 +978,73 @@ public class PlaintiffBL : IPlaintiffBL
             PlaintiffTypeId = plaintiff.PlaintiffTypeId,
             PlaintiffTypeName = plaintiff.PlaintiffType?.Name ?? "",
             PlaintiffTypeNameAr = plaintiff.PlaintiffType?.NameAr ?? "",
+            // Personal data - include IDs for editing
+            IdentityTypeId = plaintiff.IdentityTypeId,
+            IdentityTypeName = plaintiff.IdentityType?.NameAr,
+            IdentityNumber = plaintiff.IdentityNumber,
             FirstName = plaintiff.FirstName,
             FatherName = plaintiff.FatherName,
             GrandfatherName = plaintiff.GrandfatherName,
+            ClanName = plaintiff.ClanName,
             FamilyName = plaintiff.FamilyName,
-            IdentityTypeName = plaintiff.IdentityType?.NameAr,
-            IdentityNumber = plaintiff.IdentityNumber,
             BirthDate = plaintiff.BirthDate,
             Gender = plaintiff.Gender,
+            NationalityId = plaintiff.NationalityId,
+            IdentityIssueDate = plaintiff.IdentityIssueDate,
+            IdentityExpiryDate = plaintiff.IdentityExpiryDate,
+            DocumentNumber = plaintiff.DocumentNumber,
+            // Data source
             DataSourceId = plaintiff.DataSourceId,
             DataSourceName = plaintiff.DataSource?.NameAr,
+            // Contact
             MobileNumber = plaintiff.MobileNumber,
             Email = plaintiff.Email,
+            // Employment - include ID for editing
+            EmploymentStatusId = plaintiff.EmploymentStatusId,
+            Employer = plaintiff.Employer,
+            Profession = plaintiff.Profession,
+            // Business/Company
             CommercialRegNumber = plaintiff.CommercialRegNumber,
             CompanyName = plaintiff.CompanyName,
+            CRStartDate = plaintiff.CRStartDate,
+            CREndDate = plaintiff.CREndDate,
+            // Unregistered Company - include ID for editing
+            UnregisteredCompanyAddress = plaintiff.UnregisteredCompanyAddress,
+            CountryId = plaintiff.CountryId,
+            CountryName = plaintiff.Country?.NameAr,
+            UnregisteredCompanyCity = plaintiff.UnregisteredCompanyCity,
+            Description = plaintiff.Description,
+            // Government Agency - include ID for editing
+            GovernmentAgencyId = plaintiff.GovernmentAgencyId,
             GovernmentAgencyName = plaintiff.GovernmentAgency?.NameAr,
+            Headquarters = plaintiff.Headquarters,
             AdditionalStatement = plaintiff.AdditionalStatement,
+            // NGO - include ID for editing
+            LicenseNumber = plaintiff.LicenseNumber,
+            LicenseSourceId = plaintiff.LicenseSourceId,
+            LicenseSourceName = plaintiff.LicenseSource?.NameAr,
+            NGOName = plaintiff.NGOName,
+            LicenseDate = plaintiff.LicenseDate,
+            // Waqf
+            CourtDeedNumber = plaintiff.CourtDeedNumber,
+            WaqfName = plaintiff.WaqfName,
+            DeedDate = plaintiff.DeedDate,
+            DeedSource = plaintiff.DeedSource,
+            WaqfOversightType = plaintiff.WaqfOversightType,
+            WaqfAgencyName = plaintiff.WaqfAgencyName,
+            WaqfDescription = plaintiff.WaqfDescription,
+            // Status
             IsApplicant = plaintiff.IsApplicant,
             CreatedDate = plaintiff.CreatedDate,
+            // Addresses
             ResidenceAddress = plaintiff.ResidenceAddress != null ? MapToAddressVM(plaintiff.ResidenceAddress) : null,
             WorkAddress = plaintiff.WorkAddress != null ? MapToAddressVM(plaintiff.WorkAddress) : null,
+            BusinessAddress = plaintiff.BusinessAddress != null ? MapToAddressVM(plaintiff.BusinessAddress) : null,
+            CompanyAddress = plaintiff.CompanyAddress != null ? MapToAddressVM(plaintiff.CompanyAddress) : null,
+            NGOAddress = plaintiff.NGOAddress != null ? MapToAddressVM(plaintiff.NGOAddress) : null,
+            WaqfAddress = plaintiff.WaqfAddress != null ? MapToAddressVM(plaintiff.WaqfAddress) : null,
             SelectedAddress = plaintiff.SelectedAddress != null ? MapToAddressVM(plaintiff.SelectedAddress) : null,
+            // Related data
             Representatives = plaintiff.Representatives?
                 .Where(r => !r.IsDeleted && r.IsActive)
                 .Select(MapToRepresentativeVM)
@@ -402,6 +1054,37 @@ public class PlaintiffBL : IPlaintiffBL
                 .Select(MapToAttachmentVM)
                 .ToList() ?? new List<PlaintiffAttachmentVM>()
         };
+    }
+
+    private static Address CreateAddressFromDTO(AddressCreateDTO dto, string addressType)
+    {
+        return new Address
+        {
+            RegionId = dto.RegionId,
+            CityId = dto.CityId,
+            District = dto.DistrictId?.ToString(),
+            StreetName = dto.Street,
+            BuildingNumber = dto.BuildingNumber,
+            UnitNumber = dto.UnitNumber,
+            PostalCode = dto.PostalCode,
+            AdditionalNumber = dto.AdditionalCode,
+            AddressType = addressType,
+            IsActive = true,
+            CreatedDate = DateTime.UtcNow
+        };
+    }
+
+    private static void UpdateAddress(Address address, AddressCreateDTO dto)
+    {
+        address.RegionId = dto.RegionId;
+        address.CityId = dto.CityId;
+        address.District = dto.DistrictId?.ToString();
+        address.StreetName = dto.Street;
+        address.BuildingNumber = dto.BuildingNumber;
+        address.UnitNumber = dto.UnitNumber;
+        address.PostalCode = dto.PostalCode;
+        address.AdditionalNumber = dto.AdditionalCode;
+        address.ModifiedDate = DateTime.UtcNow;
     }
 
     private static AddressVM MapToAddressVM(Address address)
@@ -414,7 +1097,11 @@ public class PlaintiffBL : IPlaintiffBL
             District = address.District,
             City = address.City,
             CityId = address.CityId,
+            CityName = address.City_?.NameAr,
             RegionId = address.RegionId,
+            RegionName = address.Region?.NameAr,
+            DistrictId = int.TryParse(address.District, out var districtId) ? districtId : null,
+            DistrictName = address.District, // District is stored as string name
             PostalCode = address.PostalCode,
             AdditionalNumber = address.AdditionalNumber,
             UnitNumber = address.UnitNumber,
@@ -431,23 +1118,81 @@ public class PlaintiffBL : IPlaintiffBL
             RepresentativeTypeId = rep.RepresentativeTypeId,
             RepresentativeTypeNameAr = rep.RepresentativeType?.NameAr ?? "",
             RepresentativeTypeName = rep.RepresentativeType?.Name ?? "",
+            IdentityTypeId = rep.IdentityTypeId,
             IdentityTypeName = rep.IdentityType?.NameAr ?? "",
             IdentityNumber = rep.IdentityNumber,
             FirstName = rep.FirstName,
             FatherName = rep.FatherName,
             GrandfatherName = rep.GrandfatherName,
             FamilyName = rep.FamilyName,
+            ClanName = rep.ClanName,
             BirthDate = rep.BirthDate,
+            Gender = rep.Gender,
+            NationalityId = rep.NationalityId,
+            IdentityIssueDate = rep.IdentityIssueDate,
+            IdentityExpiryDate = rep.IdentityExpiryDate,
             DataSourceId = rep.DataSourceId,
             DataSourceName = rep.DataSource?.NameAr,
+            // Residence Address (عنوان السكن)
+            ResidenceRegionId = rep.ResidenceRegionId,
+            ResidenceCityId = rep.ResidenceCityId,
+            ResidenceDistrict = rep.ResidenceDistrict,
+            ResidenceStreet = rep.ResidenceStreet,
+            ResidenceBuildingNumber = rep.ResidenceBuildingNumber,
+            ResidenceUnitNumber = rep.ResidenceUnitNumber,
+            ResidencePostalCode = rep.ResidencePostalCode,
+            ResidenceAdditionalCode = rep.ResidenceAdditionalCode,
+            // Employment Data (بيانات العمل)
+            EmploymentStatus = rep.EmploymentStatus,
+            Employer = rep.Employer,
+            Profession = rep.Profession,
+            // Work Address (عنوان العمل)
+            WorkRegionId = rep.WorkRegionId,
+            WorkCityId = rep.WorkCityId,
+            WorkDistrict = rep.WorkDistrict,
+            WorkStreet = rep.WorkStreet,
+            WorkBuildingNumber = rep.WorkBuildingNumber,
+            WorkUnitNumber = rep.WorkUnitNumber,
+            WorkPostalCode = rep.WorkPostalCode,
+            WorkAdditionalCode = rep.WorkAdditionalCode,
+            // Contact Info
             MobileNumber = rep.MobileNumber,
             Email = rep.Email,
+            // Lawyer License (بيانات رخصة المحاماة)
+            LawyerLicenseNumber = rep.LawyerLicenseNumber,
+            LawyerLicenseDate = rep.LawyerLicenseDate,
+            LawyerLicenseExpiryDate = rep.LawyerLicenseExpiryDate,
+            // Authorization (بيانات الوكالة)
             AuthorizationNumber = rep.AuthorizationNumber,
             AuthorizationDate = rep.AuthorizationDate,
             AuthorizationSource = rep.AuthorizationSource,
             AuthorizationSourceType = rep.AuthorizationSourceType,
+            // Liquidator (مصفي)
+            DecisionNumber = rep.DecisionNumber,
+            DecisionDate = rep.DecisionDate,
+            DecisionSource = rep.DecisionSource,
+            // Guardian (ولي)
+            DeedNumber = rep.DeedNumber,
+            DeedDate = rep.DeedDate,
+            DeedSource = rep.DeedSource,
             GuardianshipType = rep.GuardianshipType,
-            CreatedDate = rep.CreatedDate
+            CreatedDate = rep.CreatedDate,
+            // Attachments (صورة التمثيل)
+            Attachments = rep.Attachments?.Where(a => !a.IsDeleted && a.IsActive)
+                .Select(a => new RepresentativeAttachmentVM
+                {
+                    Id = a.Id,
+                    RepresentativeId = a.RepresentativeId,
+                    AttachmentTypeId = a.AttachmentTypeId,
+                    AttachmentTypeName = a.AttachmentType?.Name ?? "",
+                    AttachmentTypeNameAr = a.AttachmentType?.NameAr ?? "",
+                    FileName = a.FileName,
+                    FileSizeBytes = a.FileSizeBytes,
+                    ContentType = a.ContentType,
+                    DownloadUrl = $"/api/representatives/{a.RepresentativeId}/attachments/{a.Id}/download",
+                    UploadDate = a.UploadDate,
+                    Description = a.Description
+                }).ToList() ?? new List<RepresentativeAttachmentVM>()
         };
     }
 

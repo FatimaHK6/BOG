@@ -1,3 +1,5 @@
+using BOG.DbModel.Entities.Lookups;
+
 namespace BOG.DbModel.Entities.Common;
 
 /// <summary>
@@ -69,4 +71,14 @@ public class Address : BaseEntity
     /// Whether the address is active.
     /// </summary>
     public bool IsActive { get; set; } = true;
+
+    /// <summary>
+    /// Navigation property for Region.
+    /// </summary>
+    public virtual Region? Region { get; set; }
+
+    /// <summary>
+    /// Navigation property for City.
+    /// </summary>
+    public virtual City? City_ { get; set; }
 }

@@ -76,6 +76,28 @@ public class PlaintiffRepository : Repository<Plaintiff>, IPlaintiffRepository
                 cancellationToken);
     }
 
+    public async Task<bool> ExistsByDocumentNumberAsync(int requestId, string documentNumber, CancellationToken cancellationToken = default)
+    {
+        if (string.IsNullOrWhiteSpace(documentNumber))
+            return false;
+
+        var plaintiffIds = await _applicationDbContext.Set<CaseRequestPlaintiff>()
+            .AsNoTracking()
+            .Where(crp => crp.CaseRegistrationRequestId == requestId && !crp.IsDeleted)
+            .Select(crp => crp.PlaintiffId)
+            .ToListAsync(cancellationToken);
+
+        return await _dbSet
+            .AsNoTracking()
+            .AnyAsync(p =>
+                plaintiffIds.Contains(p.Id) &&
+                p.DocumentNumber == documentNumber &&
+                p.PlaintiffTypeId == 2 && // Type 2: Individual without ID
+                !p.IsDeleted &&
+                p.IsActive,
+                cancellationToken);
+    }
+
     public async Task<Plaintiff?> GetWithDetailsAsync(int id, CancellationToken cancellationToken = default)
     {
         return await _dbSet
@@ -84,13 +106,45 @@ public class PlaintiffRepository : Repository<Plaintiff>, IPlaintiffRepository
             .Include(p => p.IdentityType)
             .Include(p => p.DataSource)
             .Include(p => p.GovernmentAgency)
+            .Include(p => p.LicenseSource)
+            .Include(p => p.Country)
+            // Address navigation properties with Region and City
             .Include(p => p.ResidenceAddress)
+                .ThenInclude(a => a!.Region)
+            .Include(p => p.ResidenceAddress)
+                .ThenInclude(a => a!.City_)
             .Include(p => p.WorkAddress)
+                .ThenInclude(a => a!.Region)
+            .Include(p => p.WorkAddress)
+                .ThenInclude(a => a!.City_)
+            .Include(p => p.BusinessAddress)
+                .ThenInclude(a => a!.Region)
+            .Include(p => p.BusinessAddress)
+                .ThenInclude(a => a!.City_)
+            .Include(p => p.CompanyAddress)
+                .ThenInclude(a => a!.Region)
+            .Include(p => p.CompanyAddress)
+                .ThenInclude(a => a!.City_)
+            .Include(p => p.NGOAddress)
+                .ThenInclude(a => a!.Region)
+            .Include(p => p.NGOAddress)
+                .ThenInclude(a => a!.City_)
+            .Include(p => p.WaqfAddress)
+                .ThenInclude(a => a!.Region)
+            .Include(p => p.WaqfAddress)
+                .ThenInclude(a => a!.City_)
             .Include(p => p.SelectedAddress)
+                .ThenInclude(a => a!.Region)
+            .Include(p => p.SelectedAddress)
+                .ThenInclude(a => a!.City_)
+            // Representatives
             .Include(p => p.Representatives.Where(r => !r.IsDeleted && r.IsActive))
                 .ThenInclude(r => r.RepresentativeType)
             .Include(p => p.Representatives.Where(r => !r.IsDeleted && r.IsActive))
                 .ThenInclude(r => r.DataSource)
+            .Include(p => p.Representatives.Where(r => !r.IsDeleted && r.IsActive))
+                .ThenInclude(r => r.Attachments.Where(a => !a.IsDeleted && a.IsActive))
+                    .ThenInclude(a => a.AttachmentType)
             .Include(p => p.Attachments.Where(a => !a.IsDeleted && a.IsActive))
                 .ThenInclude(a => a.AttachmentType)
             .FirstOrDefaultAsync(p => p.Id == id && !p.IsDeleted && p.IsActive, cancellationToken);

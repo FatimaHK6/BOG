@@ -1,0 +1,907 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تقرير المشكلات - وحدة المدّعين</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, 'Arabic Typesetting', sans-serif; background: #f0f2f5; color: #1a1a2e; line-height: 1.8; direction: rtl; text-align: right; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+
+        /* Header */
+        .report-header { background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%); color: white; padding: 40px; border-radius: 12px; margin-bottom: 30px; }
+        .report-header h1 { font-size: 30px; margin-bottom: 8px; }
+        .report-header .subtitle { font-size: 16px; opacity: 0.85; }
+        .report-header .meta { display: flex; gap: 30px; margin-top: 20px; font-size: 14px; opacity: 0.75; flex-wrap: wrap; }
+
+        /* Summary Cards */
+        .summary-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 30px; }
+        .summary-card { background: white; border-radius: 10px; padding: 24px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.08); border-top: 4px solid; }
+        .summary-card.critical { border-color: #e74c3c; }
+        .summary-card.high { border-color: #e67e22; }
+        .summary-card.medium { border-color: #f39c12; }
+        .summary-card.low { border-color: #3498db; }
+        .summary-card .count { font-size: 42px; font-weight: 700; }
+        .summary-card.critical .count { color: #e74c3c; }
+        .summary-card.high .count { color: #e67e22; }
+        .summary-card.medium .count { color: #f39c12; }
+        .summary-card.low .count { color: #3498db; }
+        .summary-card .label { font-size: 14px; color: #666; margin-top: 4px; }
+
+        /* Test Results Card */
+        .test-results { background: white; border-radius: 10px; padding: 24px; margin-bottom: 30px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); border-right: 4px solid #27ae60; }
+        .test-results h2 { color: #27ae60; margin-bottom: 16px; font-size: 20px; }
+        .test-bar { display: flex; gap: 8px; flex-wrap: wrap; }
+        .test-spec { background: #eafaf1; border: 1px solid #27ae60; border-radius: 6px; padding: 8px 14px; font-size: 13px; direction: ltr; text-align: left; }
+        .test-spec .name { font-weight: 600; color: #1a1a2e; }
+        .test-spec .result { color: #27ae60; font-weight: 700; }
+        .test-total { margin-top: 16px; font-size: 18px; font-weight: 700; color: #27ae60; }
+
+        /* Section */
+        .section { background: white; border-radius: 10px; padding: 30px; margin-bottom: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+        .section h2 { font-size: 22px; color: #1a1a2e; margin-bottom: 6px; padding-bottom: 12px; border-bottom: 2px solid #eee; }
+        .section h2 .badge { font-size: 13px; background: #eee; padding: 3px 10px; border-radius: 12px; margin-right: 10px; vertical-align: middle; }
+        .section-desc { color: #666; font-size: 14px; margin-bottom: 20px; }
+
+        /* Issue Card */
+        .issue { border: 1px solid #e0e0e0; border-radius: 8px; margin-bottom: 16px; overflow: hidden; }
+        .issue-header { display: flex; align-items: center; gap: 12px; padding: 14px 18px; background: #fafafa; border-bottom: 1px solid #e0e0e0; flex-wrap: wrap; }
+        .issue-id { font-weight: 700; color: #555; font-size: 13px; min-width: 50px; direction: ltr; }
+        .issue-title { font-weight: 600; font-size: 15px; flex: 1; min-width: 200px; }
+        .severity-badge { padding: 3px 12px; border-radius: 12px; font-size: 12px; font-weight: 700; color: white; }
+        .severity-badge.critical { background: #e74c3c; }
+        .severity-badge.high { background: #e67e22; }
+        .severity-badge.medium { background: #f39c12; color: #333; }
+        .severity-badge.low { background: #3498db; }
+        .category-badge { padding: 3px 10px; border-radius: 12px; font-size: 11px; background: #e8eaf6; color: #3f51b5; font-weight: 600; }
+        .issue-body { padding: 16px 18px; font-size: 14px; }
+        .issue-body p { margin-bottom: 8px; }
+        .issue-body .file-ref { font-family: 'Consolas', 'Courier New', monospace; background: #f5f5f5; padding: 2px 8px; border-radius: 4px; font-size: 13px; color: #d63384; direction: ltr; display: inline-block; }
+        .issue-body .impact { background: #fff3e0; padding: 10px 14px; border-radius: 6px; margin-top: 10px; border-right: 3px solid #e67e22; }
+        .issue-body .impact strong { color: #e67e22; }
+        .issue-body ul { margin: 8px 20px 8px 0; }
+        .issue-body li { margin-bottom: 4px; }
+        .issue-body code { direction: ltr; display: inline-block; background: #f5f5f5; padding: 1px 6px; border-radius: 3px; font-family: 'Consolas', monospace; font-size: 13px; }
+
+        /* Deployment Assessment */
+        .deployment { background: linear-gradient(135deg, #fdedec, #fdf2e9); border: 2px solid #e74c3c; border-radius: 10px; padding: 30px; margin-bottom: 24px; }
+        .deployment h2 { color: #c0392b; margin-bottom: 16px; }
+        .deployment .verdict { font-size: 24px; font-weight: 700; color: #e74c3c; margin-bottom: 12px; }
+        .deployment ul { margin-right: 20px; }
+        .deployment li { margin-bottom: 6px; }
+
+        /* Priority Table */
+        table { width: 100%; border-collapse: collapse; margin-top: 16px; }
+        th { background: #1a1a2e; color: white; padding: 12px 16px; text-align: right; font-size: 13px; }
+        td { padding: 10px 16px; border-bottom: 1px solid #eee; font-size: 13px; }
+        tr:hover td { background: #f8f9fa; }
+
+        /* Footer */
+        .footer { text-align: center; padding: 20px; color: #999; font-size: 13px; }
+
+        @media (max-width: 768px) {
+            .summary-grid { grid-template-columns: repeat(2, 1fr); }
+            .test-bar { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <!-- Header -->
+    <div class="report-header">
+        <h1>تقرير المشكلات - وحدة المدّعين</h1>
+        <div class="subtitle">تحليل شامل لمشكلات الواجهة الأمامية والخلفية وفجوات التوافق مع وثيقة متطلبات النظام (SRS)</div>
+        <div class="meta">
+            <span>التاريخ: 2026-02-08</span>
+            <span>الوحدة: تسجيل الدعاوى &gt; المدّعين (UC 6.5.1)</span>
+            <span>الفرع: MohamedShafik</span>
+            <span>إجمالي المشكلات: 45</span>
+        </div>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="summary-grid">
+        <div class="summary-card critical">
+            <div class="count">9</div>
+            <div class="label">حرجة</div>
+        </div>
+        <div class="summary-card high">
+            <div class="count">12</div>
+            <div class="label">عالية</div>
+        </div>
+        <div class="summary-card medium">
+            <div class="count">18</div>
+            <div class="label">متوسطة</div>
+        </div>
+        <div class="summary-card low">
+            <div class="count">6</div>
+            <div class="label">منخفضة</div>
+        </div>
+    </div>
+
+    <!-- Test Results -->
+    <div class="test-results">
+        <h2>نتائج اختبارات Cypress E2E (طبقة الواجهة)</h2>
+        <div class="test-bar">
+            <div class="test-spec"><span class="name">plaintiff-list</span> <span class="result">10/10</span></div>
+            <div class="test-spec"><span class="name">plaintiff-stepper</span> <span class="result">12/12</span></div>
+            <div class="test-spec"><span class="name">type1-individual</span> <span class="result">18/18</span></div>
+            <div class="test-spec"><span class="name">type2-no-id</span> <span class="result">11/11</span></div>
+            <div class="test-spec"><span class="name">type3-business-owner</span> <span class="result">16/16</span></div>
+            <div class="test-spec"><span class="name">type4-registered-company</span> <span class="result">10/10</span></div>
+            <div class="test-spec"><span class="name">type5-unregistered-company</span> <span class="result">9/9</span></div>
+            <div class="test-spec"><span class="name">type6-gov-agency</span> <span class="result">8/8</span></div>
+            <div class="test-spec"><span class="name">type7-ngo</span> <span class="result">10/10</span></div>
+            <div class="test-spec"><span class="name">type8-waqf</span> <span class="result">13/13</span></div>
+            <div class="test-spec"><span class="name">representative-dialog</span> <span class="result">40/40</span></div>
+        </div>
+        <div class="test-total">157 / 157 اختبار ناجح (جميعها تعتمد على محاكاة API - اختبار واجهة المستخدم فقط)</div>
+    </div>
+
+    <!-- Deployment Assessment -->
+    <div class="deployment">
+        <h2>تقييم جاهزية النشر</h2>
+        <div class="verdict">غير جاهز للنشر على بيئة الإنتاج</div>
+        <p>يجب معالجة العوائق التالية قبل النشر:</p>
+        <ul>
+            <li><strong>9 مشكلات حرجة</strong> &mdash; انتهاكات قيود المفاتيح الخارجية (FK)، تقييد مفرط في التحقق من العناوين</li>
+            <li><strong>12 مشكلة عالية الخطورة</strong> &mdash; حالات سباق، تحققات مفقودة في الخادم، تخزين ملفات غير مكتمل، عدم توافق مع SRS</li>
+            <li><strong>عدم وجود اختبارات تكامل للخادم</strong> &mdash; اختبارات Cypress تحاكي جميع استدعاءات API؛ التدفق الفعلي للـ API وقاعدة البيانات غير مُختبر</li>
+            <li><strong>تخزين ملفات الممثلين غير مُنفّذ</strong> &mdash; يتم حفظ سجلات المرفقات لكن لا يتم تخزين الملفات فعلياً</li>
+        </ul>
+    </div>
+
+    <!-- ================================================================== -->
+    <!-- القسم أ: مشكلات الواجهة الأمامية -->
+    <!-- ================================================================== -->
+    <div class="section">
+        <h2>أ. مشكلات الواجهة الأمامية (Frontend) <span class="badge">22 مشكلة</span></h2>
+        <p class="section-desc">المشكلات المكتشفة في مكونات Angular والخدمات والقوالب</p>
+
+        <!-- FE-01 -->
+        <div class="issue">
+            <div class="issue-header">
+                <span class="issue-id">FE-01</span>
+                <span class="issue-title">القيمة الافتراضية لـ requestId تساوي 0 &mdash; انتهاك قيد المفتاح الخارجي عند الحفظ</span>
+                <span class="severity-badge critical">حرجة</span>
+                <span class="category-badge">خلل برمجي</span>
+            </div>
+            <div class="issue-body">
+                <p><span class="file-ref">plaintiff-form.component.ts:31</span></p>
+                <p><code>requestId: number = 0</code> &mdash; عندما يكون معامل الاستعلام <code>requestId</code> مفقوداً أو غير صالح، يرسل النموذج <code>CaseRegistrationRequestId = 0</code> إلى الخادم، وهذا المعرّف غير موجود في قاعدة البيانات.</p>
+                <p>يتم إرسال طلب POST إلى <code>/api/case-requests/0/plaintiffs</code> مما يسبب انتهاك قيد المفتاح الخارجي في SQL. يرى المستخدم رسالة "حدث خطأ أثناء إنشاء المدعي".</p>
+                <div class="impact"><strong>الأثر:</strong> إنشاء المدّعي معطّل بالكامل عندما لا يوجد requestId في عنوان URL.</div>
+            </div>
+        </div>
+
+        <!-- FE-02 -->
+        <div class="issue">
+            <div class="issue-header">
+                <span class="issue-id">FE-02</span>
+                <span class="issue-title">تقييد مفرط في التحقق من العنوان &mdash; جميع الحقول الـ 8 مطلوبة بدلاً من 2 فقط (BC04)</span>
+                <span class="severity-badge critical">حرجة</span>
+                <span class="category-badge">عدم توافق مع SRS</span>
+            </div>
+            <div class="issue-body">
+                <p><span class="file-ref">plaintiff-form.component.ts:625-919</span> (جميع أنواع المدّعين)</p>
+                <p>وفقاً لقاعدة العمل BC04 في وثيقة SRS، فقط <code>regionId</code> و <code>cityId</code> إلزاميان في نموذج العنوان الوطني. لكن التطبيق يضع <code>Validators.required</code> على جميع حقول العنوان الـ 8 (الحي، الشارع، رقم المبنى، رقم الوحدة، الرمز البريدي، الرمز الإضافي) لجميع أنواع المدّعين.</p>
+                <p>الأنواع المتأثرة: 1، 2، 3، 4، 7، 8 &mdash; كل نوع يحتوي على قسم عنوان.</p>
+                <div class="impact"><strong>الأثر:</strong> لا يستطيع المستخدم حفظ المدّعي بدون ملء جميع حقول العنوان، رغم أن SRS يتطلب المنطقة + المدينة فقط. هذا يمنع إرسال النموذج.</div>
+            </div>
+        </div>
+
+        <!-- FE-03 -->
+        <div class="issue">
+            <div class="issue-header">
+                <span class="issue-id">FE-03</span>
+                <span class="issue-title">النوع 1: حقل المهنة غير محقق كحقل إلزامي</span>
+                <span class="severity-badge critical">حرجة</span>
+                <span class="category-badge">عدم توافق مع SRS</span>
+            </div>
+            <div class="issue-body">
+                <p><span class="file-ref">plaintiff-form.component.ts:537</span></p>
+                <p>تحدد وثيقة SRS القسم 2.5 أن المهنة (المهنة) إلزامية للنوع 1 - فرد ("المهنة - نص - نعم"). لكن لم يتم تعيين <code>Validators.required</code> لحقل المهنة في <code>updateFormValidation()</code> للنوع 1. يتم تعيينه فقط بشكل مشروط من خلال منطق BC01.</p>
+                <div class="impact"><strong>الأثر:</strong> يمكن حفظ مدّعي النوع 1 بدون مهنة، وهذا يخالف متطلبات SRS.</div>
+            </div>
+        </div>
+
+        <!-- FE-04 -->
+        <div class="issue">
+            <div class="issue-header">
+                <span class="issue-id">FE-04</span>
+                <span class="issue-title">حالة سباق (Race Condition) في تحميل الممثلين</span>
+                <span class="severity-badge high">عالية</span>
+                <span class="category-badge">خلل برمجي</span>
+            </div>
+            <div class="issue-body">
+                <p><span class="file-ref">plaintiff-list.component.ts:367-409</span></p>
+                <p>تستخدم الدالة <code>loadAllRepresentatives()</code> عدّاداً داخل نطاق مغلق مع اشتراكات API متزامنة. إذا اختلف ترتيب استجابات API عن ترتيب <code>forEach</code>، يمكن أن يحدث تلف في الحالة. اشتراكات متعددة تعمل بشكل مستقل بدون مزامنة.</p>
+                <div class="impact"><strong>الأثر:</strong> قد لا يتم تحميل الممثلين بشكل صحيح أو قد يُعرضون للمدّعي الخطأ.</div>
+            </div>
+        </div>
+
+        <!-- FE-05 -->
+        <div class="issue">
+            <div class="issue-header">
+                <span class="issue-id">FE-05</span>
+                <span class="issue-title">BR08: التحقق من أبشر غير مفعّل عند الحفظ</span>
+                <span class="severity-badge high">عالية</span>
+                <span class="category-badge">عدم توافق مع SRS</span>
+            </div>
+            <div class="issue-body">
+                <p><span class="file-ref">plaintiff-form.component.ts:1559</span></p>
+                <p>تتطلب قاعدة العمل BR08 التحقق من أبشر للنوع 1 (فرد) قبل الحفظ. واجهة المستخدم تعرض مؤشر تحذير لكن دالة <code>onSave()</code> لا تتحقق من <code>isAbsherVerified</code>. يمكن تجاوز التحقق من أبشر بالكامل.</p>
+                <div class="impact"><strong>الأثر:</strong> يمكن إنشاء مدّعين أفراد بدون التحقق من أبشر، مما يخالف BR08.</div>
+            </div>
+        </div>
+
+        <!-- FE-06 -->
+        <div class="issue">
+            <div class="issue-header">
+                <span class="issue-id">FE-06</span>
+                <span class="issue-title">حقول أبشر للقراءة فقط يمكن تعديلها برمجياً</span>
+                <span class="severity-badge high">عالية</span>
+                <span class="category-badge">أمان</span>
+            </div>
+            <div class="issue-body">
+                <p><span class="file-ref">plaintiff-form.component.html:85-161</span></p>
+                <p>الحقول المسترجعة من أبشر تستخدم خاصية HTML <code>[readonly]</code> لكن عناصر التحكم في النموذج تبقى مُفعّلة. يمكن تغيير القيم عبر أدوات مطور المتصفح (DevTools) أو <code>form.patchValue()</code>. يجب استخدام <code>formControl.disable()</code> بدلاً من ذلك.</p>
+                <div class="impact"><strong>الأثر:</strong> يمكن التلاعب بالبيانات المتحقق منها عبر أبشر (الاسم، تاريخ الميلاد، الهوية).</div>
+            </div>
+        </div>
+
+        <!-- FE-07 -->
+        <div class="issue">
+            <div class="issue-header">
+                <span class="issue-id">FE-07</span>
+                <span class="issue-title">قيود أنواع الممثلين غير مُطبّقة على الخادم</span>
+                <span class="severity-badge high">عالية</span>
+                <span class="category-badge">عدم توافق مع SRS</span>
+            </div>
+            <div class="issue-body">
+                <p><span class="file-ref">representative-dialog.component.ts (ALLOWED_REPRESENTATIVE_TYPES)</span></p>
+                <p>كل نوع مدّعي يسمح بأنواع ممثلين محددة (مثلاً: النوع 5 يسمح بـ"وكيل" فقط). الواجهة الأمامية تقوم بالتصفية بشكل صحيح، لكن لا يوجد تحقق على جانب الخادم. يمكن لطلب POST مصطنع تجاوز تقييد الواجهة الأمامية.</p>
+                <div class="impact"><strong>الأثر:</strong> يمكن حفظ أنواع ممثلين غير صالحة لمدّعي عن طريق تجاوز الواجهة.</div>
+            </div>
+        </div>
+
+        <!-- FE-08 -->
+        <div class="issue">
+            <div class="issue-header">
+                <span class="issue-id">FE-08</span>
+                <span class="issue-title">قيود أنواع المرفقات غير مُطبّقة حسب نوع المدّعي (BC01)</span>
+                <span class="severity-badge high">عالية</span>
+                <span class="category-badge">عدم توافق مع SRS</span>
+            </div>
+            <div class="issue-body">
+                <p><span class="file-ref">plaintiff-form.component.html:1482-1486</span></p>
+                <p>تنص قاعدة العمل BC01 في SRS على أن لكل نوع مدّعي أنواع مرفقات محددة مسموح بها. التطبيق الحالي يقبل أي نوع مرفق لأي نوع مدّعي. لا توجد خريطة ربط بين نوع المدّعي وأنواع المرفقات المسموحة.</p>
+                <div class="impact"><strong>الأثر:</strong> يمكن رفع أنواع مرفقات خاطئة لأي نوع مدّعي.</div>
+            </div>
+        </div>
+
+        <!-- FE-09 -->
+        <div class="issue">
+            <div class="issue-header">
+                <span class="issue-id">FE-09</span>
+                <span class="issue-title">الرجوع إلى بيانات تجريبية بدون تنبيه المستخدم</span>
+                <span class="severity-badge medium">متوسطة</span>
+                <span class="category-badge">تجربة المستخدم</span>
+            </div>
+            <div class="issue-body">
+                <p><span class="file-ref">plaintiff-list.component.ts:156</span></p>
+                <p>عند فشل استدعاء API، يتم استدعاء <code>loadDemoData()</code> بصمت. يرى المستخدم بيانات وهمية/تجريبية بدون أي إشارة إلى أنها ليست بيانات حقيقية. لا تظهر رسالة خطأ أو شريط تنبيه.</p>
+                <div class="impact"><strong>الأثر:</strong> قد يتخذ المستخدمون قرارات بناءً على بيانات تجريبية ظناً منهم أنها حقيقية.</div>
+            </div>
+        </div>
+
+        <!-- FE-10 -->
+        <div class="issue">
+            <div class="issue-header">
+                <span class="issue-id">FE-10</span>
+                <span class="issue-title">معرّفات المرفقات المؤقتة تستخدم Date.now() &mdash; خطر التصادم</span>
+                <span class="severity-badge medium">متوسطة</span>
+                <span class="category-badge">خلل برمجي</span>
+            </div>
+            <div class="issue-body">
+                <p><span class="file-ref">representative-dialog.component.ts:898</span></p>
+                <p>يتم إنشاء معرّفات المرفقات المؤقتة بـ <code>Date.now()</code>. رفع ملفين سريعين خلال نفس الميلي ثانية يحصلان على نفس المعرّف، مما يسبب حذف المرفق الخطأ.</p>
+                <div class="impact"><strong>الأثر:</strong> رفع الملفات السريع قد يتسبب في تصادم وحذف الملف الخطأ.</div>
+            </div>
+        </div>
+
+        <!-- FE-11 -->
+        <div class="issue">
+            <div class="issue-header">
+                <span class="issue-id">FE-11</span>
+                <span class="issue-title">معرّفات الجنسية ونوع الهوية مُثبّتة في الكود</span>
+                <span class="severity-badge medium">متوسطة</span>
+                <span class="category-badge">صيانة</span>
+            </div>
+            <div class="issue-body">
+                <p><span class="file-ref">plaintiff-form.component.ts:96,322</span></p>
+                <p><code>SAUDI_NATIONALITY_ID = 1</code> ومعرّفات أنواع الهوية (1، 2، 3) مُثبّتة في الكود. إذا تغيرت هذه المعرّفات في قاعدة البيانات، سيتعطل منطق تعيين الجنسية التلقائي ومنطق نوع الهوية بصمت.</p>
+                <div class="impact"><strong>الأثر:</strong> التطبيق يتعطل إذا تغيرت معرّفات جداول البحث.</div>
+            </div>
+        </div>
+
+        <!-- FE-12 -->
+        <div class="issue">
+            <div class="issue-header">
+                <span class="issue-id">FE-12</span>
+                <span class="issue-title">عناصر التحكم المُعطّلة تُستبعد من form.value</span>
+                <span class="severity-badge medium">متوسطة</span>
+                <span class="category-badge">خلل برمجي</span>
+            </div>
+            <div class="issue-body">
+                <p><span class="file-ref">plaintiff-form.component.ts:180</span></p>
+                <p>في وضع العرض، يتم تعطيل النموذج، لكن Angular يستبعد عناصر التحكم المُعطّلة من <code>form.value</code>. إذا استخدم أي منطق حفظ <code>form.value</code> بدلاً من <code>form.getRawValue()</code>، ستُفقد البيانات.</p>
+                <div class="impact"><strong>الأثر:</strong> احتمال فقدان بيانات إذا كانت عناصر التحكم المُعطّلة مطلوبة لعمليات الحفظ.</div>
+            </div>
+        </div>
+
+        <!-- FE-13 -->
+        <div class="issue">
+            <div class="issue-header">
+                <span class="issue-id">FE-13</span>
+                <span class="issue-title">معالجة أخطاء صامتة في تحميل الممثلين</span>
+                <span class="severity-badge medium">متوسطة</span>
+                <span class="category-badge">تجربة المستخدم</span>
+            </div>
+            <div class="issue-body">
+                <p><span class="file-ref">plaintiff-list.component.ts:398-406</span></p>
+                <p>معالج الخطأ يزيد العدّاد لكن لا يعرض أي رسالة خطأ للمستخدم. يفشل تحميل الممثلين بصمت بدون أي إشارة.</p>
+                <div class="impact"><strong>الأثر:</strong> المستخدم لا يعلم أن بيانات الممثلين فشلت في التحميل.</div>
+            </div>
+        </div>
+
+        <!-- FE-14 -->
+        <div class="issue">
+            <div class="issue-header">
+                <span class="issue-id">FE-14</span>
+                <span class="issue-title">مقارنة NaN في منطق تبديل النوع</span>
+                <span class="severity-badge medium">متوسطة</span>
+                <span class="category-badge">خلل برمجي</span>
+            </div>
+            <div class="issue-body">
+                <p><span class="file-ref">plaintiff-form.component.ts:268-277</span></p>
+                <p>إذا كان <code>plaintiffTypeId</code> غير معرّف أو نص فارغ، فإن <code>Number()</code> تُرجع <code>NaN</code>. فحص <code>if (typeIdNum)</code> يعمل (NaN قيمة خاطئة) لكن يجب التعامل مع هذه الحالة بشكل صريح مع رسالة للمستخدم.</p>
+                <div class="impact"><strong>الأثر:</strong> تبديل النوع يفشل بصمت مع قيم غير صالحة.</div>
+            </div>
+        </div>
+
+        <!-- FE-15 -->
+        <div class="issue">
+            <div class="issue-header">
+                <span class="issue-id">FE-15</span>
+                <span class="issue-title">النوع 5: عنوان الشركة غير المسجلة غير إلزامي</span>
+                <span class="severity-badge medium">متوسطة</span>
+                <span class="category-badge">عدم توافق مع SRS</span>
+            </div>
+            <div class="issue-body">
+                <p><span class="file-ref">plaintiff-form.component.ts:801-823</span> (محققات النوع 5)</p>
+                <p>يحدد القسم 2.9 من SRS أن حقل عنوان الشركة غير المسجلة إلزامي. لم يتم تعيين <code>Validators.required</code> لهذا الحقل في إعداد محققات النوع 5.</p>
+                <div class="impact"><strong>الأثر:</strong> يمكن حفظ مدّعي النوع 5 بدون عنوان الشركة.</div>
+            </div>
+        </div>
+
+        <!-- FE-16 -->
+        <div class="issue">
+            <div class="issue-header">
+                <span class="issue-id">FE-16</span>
+                <span class="issue-title">تناقض في الحد الأقصى لطول حقل مصدر القرار</span>
+                <span class="severity-badge medium">متوسطة</span>
+                <span class="category-badge">تحقق</span>
+            </div>
+            <div class="issue-body">
+                <p><span class="file-ref">representative-dialog.component.html:387 مقابل 576</span></p>
+                <p>نوع الممثل "المصفّي" يستخدم <code>maxlength="200"</code> لحقل <code>decisionSource</code>، لكن نوع "أمين التفليسة" يستخدم <code>maxlength="20"</code> لنفس الحقل المفهومي. يجب أن يكونا متسقين.</p>
+                <div class="impact"><strong>الأثر:</strong> تناقض في التحقق من النموذج بين أنواع الممثلين.</div>
+            </div>
+        </div>
+
+        <!-- FE-17 -->
+        <div class="issue">
+            <div class="issue-header">
+                <span class="issue-id">FE-17</span>
+                <span class="issue-title">خدمة المدّعين بدون تحقق من الطلب</span>
+                <span class="severity-badge medium">متوسطة</span>
+                <span class="category-badge">تحقق</span>
+            </div>
+            <div class="issue-body">
+                <p><span class="file-ref">plaintiff.service.ts:23-26</span></p>
+                <p><code>getPlaintiffs(requestId)</code> والدوال الأخرى لا تتحقق من أن <code>requestId > 0</code> قبل إجراء استدعاءات API. يتم إرسال طلبات خاطئة إلى API بقيمة requestId=0.</p>
+                <div class="impact"><strong>الأثر:</strong> أخطاء 400/500 غير ضرورية من الخادم.</div>
+            </div>
+        </div>
+
+        <!-- FE-18 -->
+        <div class="issue">
+            <div class="issue-header">
+                <span class="issue-id">FE-18</span>
+                <span class="issue-title">عدم تطابق نوع خصائص التاريخ في نموذج المدّعي</span>
+                <span class="severity-badge medium">متوسطة</span>
+                <span class="category-badge">خلل برمجي</span>
+            </div>
+            <div class="issue-body">
+                <p><span class="file-ref">plaintiff.model.ts (عدة أسطر)</span></p>
+                <p>خصائص التاريخ معرّفة كـ <code>Date</code> لكن الخادم يُرجع نص ISO. لا توجد طبقة تحويل. مقارنات التواريخ والتنسيق قد تفشل.</p>
+                <div class="impact"><strong>الأثر:</strong> أخطاء في عرض ومقارنة التواريخ في وضع التعديل.</div>
+            </div>
+        </div>
+
+        <!-- FE-19 -->
+        <div class="issue">
+            <div class="issue-header">
+                <span class="issue-id">FE-19</span>
+                <span class="issue-title">عدم التحقق من حدود عدد الممثلين</span>
+                <span class="severity-badge medium">متوسطة</span>
+                <span class="category-badge">عدم توافق مع SRS</span>
+            </div>
+            <div class="issue-body">
+                <p><span class="file-ref">plaintiff-form.component.ts (الخطوة 2)</span></p>
+                <p>لا يوجد تحقق من الحد الأدنى أو الأقصى لعدد الممثلين لكل مدّعي. قد تتطلب SRS وجود ممثل واحد على الأقل من نوع مسموح لبعض أنواع المدّعين.</p>
+                <div class="impact"><strong>الأثر:</strong> النموذج يقبل 0 ممثلين عندما قد يكون واحد مطلوباً.</div>
+            </div>
+        </div>
+
+        <!-- FE-20 -->
+        <div class="issue">
+            <div class="issue-header">
+                <span class="issue-id">FE-20</span>
+                <span class="issue-title">خاصية File في RepresentativeVM تتعطل بعد دورة API</span>
+                <span class="severity-badge medium">متوسطة</span>
+                <span class="category-badge">خلل برمجي</span>
+            </div>
+            <div class="issue-body">
+                <p><span class="file-ref">plaintiff.model.ts:220-232</span></p>
+                <p>خاصية <code>file?: File</code> لحالة الرفع المؤقتة مختلطة مع خصائص المرفقات المحفوظة. تُفقد هذه الخاصية بعد استدعاء API لأن كائنات <code>File</code> لا يمكن تسلسلها.</p>
+                <div class="impact"><strong>الأثر:</strong> حالة رفع الملف تُفقد بعد الحفظ؛ المرفق يظهر مفقوداً في وضع التعديل.</div>
+            </div>
+        </div>
+
+        <!-- FE-21 -->
+        <div class="issue">
+            <div class="issue-header">
+                <span class="issue-id">FE-21</span>
+                <span class="issue-title">فحص null مفقود لقائمة الجنسيات المُصفّاة</span>
+                <span class="severity-badge low">منخفضة</span>
+                <span class="category-badge">خلل برمجي</span>
+            </div>
+            <div class="issue-body">
+                <p><span class="file-ref">representative-dialog.component.ts:182-191</span></p>
+                <p>يتم تعيين <code>filteredNationalities</code> قبل تحميل <code>nationalities</code> من الخدمة. يمكن أن يؤدي ذلك إلى قائمة جنسيات فارغة عند فتح الحوار.</p>
+                <div class="impact"><strong>الأثر:</strong> قائمة الجنسيات قد تظهر فارغة على الاتصالات البطيئة.</div>
+            </div>
+        </div>
+
+        <!-- FE-22 -->
+        <div class="issue">
+            <div class="issue-header">
+                <span class="issue-id">FE-22</span>
+                <span class="issue-title">أرقام سحرية في جمل switch</span>
+                <span class="severity-badge low">منخفضة</span>
+                <span class="category-badge">جودة الكود</span>
+            </div>
+            <div class="issue-body">
+                <p><span class="file-ref">plaintiff-form.component.ts:598-941</span></p>
+                <p>معرّفات أنواع المدّعين (1-8) ومعرّفات حالة العمل (1,2,3) مُثبّتة كأرقام سحرية في جمل switch ضخمة. يجب استخدام enum أو ثوابت لسهولة الصيانة.</p>
+                <div class="impact"><strong>الأثر:</strong> الكود أصعب في الصيانة؛ أخطاء صامتة إذا تغيرت المعرّفات.</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================================================================== -->
+    <!-- القسم ب: مشكلات الخادم -->
+    <!-- ================================================================== -->
+    <div class="section">
+        <h2>ب. مشكلات الخادم (Backend) <span class="badge">14 مشكلة</span></h2>
+        <p class="section-desc">المشكلات المكتشفة في وحدات التحكم API، منطق الأعمال، الوصول للبيانات، DTOs، والكيانات</p>
+
+        <!-- BE-01 -->
+        <div class="issue">
+            <div class="issue-header">
+                <span class="issue-id">BE-01</span>
+                <span class="issue-title">PlaintiffAttachmentCreateDTO يفتقر لحقل FileSizeBytes والتحقق</span>
+                <span class="severity-badge critical">حرجة</span>
+                <span class="category-badge">سلامة البيانات</span>
+            </div>
+            <div class="issue-body">
+                <p><span class="file-ref">BOG.DTO/Plaintiff/PlaintiffAttachmentDTO.cs:1-42</span></p>
+                <p>يقبل الـ DTO محتوى <code>FileContent</code> (Base64) لكن لا يحتوي على حقل <code>FileSizeBytes</code>. الكيان يتطلبه. لا يوجد محقق FluentValidation لهذا الـ DTO. تعليق وحدة التحكم يذكر "PDF فقط، بحد أقصى 4 ميجابايت (BR04)" لكن لا يوجد تحقق فعلي في الكود.</p>
+                <ul>
+                    <li>لا يوجد تحقق من حد حجم الملف (4 ميجابايت حسب BR04)</li>
+                    <li>لا يوجد فحص صحة Base64</li>
+                    <li>لا يوجد فحص للتأكد من أن الملف PDF فعلاً</li>
+                </ul>
+                <div class="impact"><strong>الأثر:</strong> يُقبل أي نوع/حجم ملف؛ لا يُطبّق BR04. قاعدة البيانات قد ترفض بسبب حقل FileSizeBytes المفقود.</div>
+            </div>
+        </div>
+
+        <!-- BE-02 -->
+        <div class="issue">
+            <div class="issue-header">
+                <span class="issue-id">BE-02</span>
+                <span class="issue-title">تخزين ملفات مرفقات الممثلين غير مُنفّذ</span>
+                <span class="severity-badge critical">حرجة</span>
+                <span class="category-badge">تنفيذ غير مكتمل</span>
+            </div>
+            <div class="issue-body">
+                <p><span class="file-ref">BOG.BL/Services/PlaintiffBL.cs:459-464</span></p>
+                <p>يوجد تعليق TODO يشير إلى أن معالجة محتوى الملف غير مُنفّذة: <em>"TODO: Save file content to storage if FileContent is provided"</em>. يتم إنشاء سجلات بيانات المرفقات الوصفية في قاعدة البيانات، لكن لا يتم تخزين بايتات الملف الفعلية في أي مكان.</p>
+                <div class="impact"><strong>الأثر:</strong> مرفقات الممثلين تبدو وكأنها رُفعت بنجاح لكن الملفات تُفقد نهائياً.</div>
+            </div>
+        </div>
+
+        <!-- BE-03 -->
+        <div class="issue">
+            <div class="issue-header">
+                <span class="issue-id">BE-03</span>
+                <span class="issue-title">سجلات عناوين يتيمة عند فشل حفظ المدّعي</span>
+                <span class="severity-badge high">عالية</span>
+                <span class="category-badge">سلامة البيانات</span>
+            </div>
+            <div class="issue-body">
+                <p><span class="file-ref">BOG.BL/Services/PlaintiffBL.cs:123-184, 269-270</span></p>
+                <p>يتم إنشاء سجلات العناوين باستدعاءات <code>SaveChangesAsync()</code> منفصلة (واحدة لكل نوع عنوان). إذا نجح عنوان واحد لكن فشل حفظ المدّعي في السطر 270، تبقى سجلات عناوين يتيمة في قاعدة البيانات بدون مرجع أب. لا يوجد نطاق معاملة (Transaction Scope) يغلف العملية بأكملها.</p>
+                <div class="impact"><strong>الأثر:</strong> قاعدة البيانات تتراكم فيها سجلات عناوين يتيمة بمرور الوقت.</div>
+            </div>
+        </div>
+
+        <!-- BE-04 -->
+        <div class="issue">
+            <div class="issue-header">
+                <span class="issue-id">BE-04</span>
+                <span class="issue-title">إنشاء الممثل بمعرّف مدّعي قد يكون غير صالح</span>
+                <span class="severity-badge high">عالية</span>
+                <span class="category-badge">سلامة البيانات</span>
+            </div>
+            <div class="issue-body">
+                <p><span class="file-ref">BOG.BL/Services/PlaintiffBL.cs:364-437</span></p>
+                <p>كيانات الممثلين تستخدم <code>PlaintiffId = plaintiff.Id</code> (السطر 366). إذا فشل حفظ المدّعي في السطر 270، فإن <code>plaintiff.Id</code> سيكون 0، مما يسبب انتهاكات قيد المفتاح الخارجي عند حفظ الممثلين في الأسطر 470-473.</p>
+                <div class="impact"><strong>الأثر:</strong> سلسلة أخطاء قيود المفاتيح الخارجية عند فشل إنشاء المدّعي.</div>
+            </div>
+        </div>
+
+        <!-- BE-05 -->
+        <div class="issue">
+            <div class="issue-header">
+                <span class="issue-id">BE-05</span>
+                <span class="issue-title">لا يوجد تحقق من المفاتيح الخارجية لمراجع جداول البحث</span>
+                <span class="severity-badge medium">متوسطة</span>
+                <span class="category-badge">سلامة البيانات</span>
+            </div>
+            <div class="issue-body">
+                <p><span class="file-ref">BOG.BL/Services/PlaintiffBL.cs:207-267</span></p>
+                <p>يتم إنشاء كيان المدّعي بمراجع FK اختيارية (<code>GovernmentAgencyId</code>، <code>CountryId</code>، <code>NationalityId</code>، <code>LicenseSourceId</code>) لكن لا يتم التحقق من وجودها في جداول البحث قبل الحفظ. قيود قاعدة البيانات تلتقط هذا، لكن رسائل الخطأ تكون غامضة.</p>
+                <div class="impact"><strong>الأثر:</strong> أخطاء SQL غامضة بدلاً من رسائل تحقق واضحة للمستخدم.</div>
+            </div>
+        </div>
+
+        <!-- BE-06 -->
+        <div class="issue">
+            <div class="issue-header">
+                <span class="issue-id">BE-06</span>
+                <span class="issue-title">عدم تطابق طول IdentityNumber في PlaintiffUpdateDTO</span>
+                <span class="severity-badge medium">متوسطة</span>
+                <span class="category-badge">تحقق</span>
+            </div>
+            <div class="issue-body">
+                <p><span class="file-ref">BOG.DTO/Plaintiff/PlaintiffUpdateDTO.cs:31</span></p>
+                <p><code>IdentityNumber</code> يستخدم <code>[StringLength(10)]</code> في UpdateDTO لكن <code>[StringLength(20)]</code> في CreateDTO. أرقام جوازات السفر يمكن أن تصل إلى 20 حرفاً. لا يمكن للمستخدمين تحديث بيانات الهوية لحاملي جوازات السفر.</p>
+                <div class="impact"><strong>الأثر:</strong> فشل التحديث لأرقام هوية جوازات السفر الأطول من 10 أحرف.</div>
+            </div>
+        </div>
+
+        <!-- BE-07 -->
+        <div class="issue">
+            <div class="issue-header">
+                <span class="issue-id">BE-07</span>
+                <span class="issue-title">لا يوجد FluentValidation لـ PlaintiffUpdateDTO</span>
+                <span class="severity-badge medium">متوسطة</span>
+                <span class="category-badge">تحقق</span>
+            </div>
+            <div class="issue-body">
+                <p><span class="file-ref">BOG.DTO/Plaintiff/PlaintiffUpdateDTO.cs</span></p>
+                <p>لا يوجد محقق FluentValidation لـ DTO التحديث. قواعد تحقق SRS لا تُطبّق أثناء التحديثات (مثلاً: متطلبات الحقول الخاصة بالنوع، عدم قابلية تعديل حقول الهوية من أبشر).</p>
+                <div class="impact"><strong>الأثر:</strong> تحديثات غير صالحة تُقبل من API؛ يمكن تجاوز قواعد SRS عبر التحديث.</div>
+            </div>
+        </div>
+
+        <!-- BE-08 -->
+        <div class="issue">
+            <div class="issue-header">
+                <span class="issue-id">BE-08</span>
+                <span class="issue-title">التعبير النمطي لـ SelectedAddressDTO حساس لحالة الأحرف</span>
+                <span class="severity-badge medium">متوسطة</span>
+                <span class="category-badge">تحقق</span>
+            </div>
+            <div class="issue-body">
+                <p><span class="file-ref">BOG.DTO/Plaintiff/SelectedAddressDTO.cs:14</span></p>
+                <p>التعبير النمطي <code>^(Residence|Work)$</code> حساس لحالة الأحرف. إذا أرسلت الواجهة "residence" أو "WORK" سيفشل التحقق. يجب أن يكون غير حساس لحالة الأحرف.</p>
+                <div class="impact"><strong>الأثر:</strong> ميزة العنوان المختار تفشل إذا أرسلت الواجهة حالة أحرف مختلفة.</div>
+            </div>
+        </div>
+
+        <!-- BE-09 -->
+        <div class="issue">
+            <div class="issue-header">
+                <span class="issue-id">BE-09</span>
+                <span class="issue-title">AddressSourceType إلزامي حتى عند تقديم CustomAddress</span>
+                <span class="severity-badge medium">متوسطة</span>
+                <span class="category-badge">خطأ منطقي</span>
+            </div>
+            <div class="issue-body">
+                <p><span class="file-ref">BOG.BL/Services/PlaintiffBL.cs:901-933</span></p>
+                <p><code>AddressSourceType</code> معلّم كـ <code>[Required]</code> في الـ DTO، لكن في السطر 927-929، عند تقديم <code>CustomAddress</code>، يتم تجاهل <code>AddressSourceType</code>. يجب على العميل تقديمه رغم أنه لا يُستخدم.</p>
+                <div class="impact"><strong>الأثر:</strong> عقد API مُربك؛ حقل إلزامي غير ضروري.</div>
+            </div>
+        </div>
+
+        <!-- BE-10 -->
+        <div class="issue">
+            <div class="issue-header">
+                <span class="issue-id">BE-10</span>
+                <span class="issue-title">تعليقات DTO تشير لمعرّفات أنواع خاطئة</span>
+                <span class="severity-badge medium">متوسطة</span>
+                <span class="category-badge">توثيق</span>
+            </div>
+            <div class="issue-body">
+                <p><span class="file-ref">BOG.DTO/Plaintiff/PlaintiffUpdateDTO.cs:300-315</span></p>
+                <p>التعليقات تشير لأنواع مدّعين خاطئة لأقسام العناوين:</p>
+                <ul>
+                    <li>السطر 300: يقول "Type 6" لـ BusinessAddress &mdash; يجب أن يكون "Type 3"</li>
+                    <li>السطر 305: يقول "Type 2" لـ CompanyAddress &mdash; يجب أن يكون "Type 4"</li>
+                    <li>السطر 310: يقول "Type 4" لـ NGOAddress &mdash; يجب أن يكون "Type 7"</li>
+                    <li>السطر 315: يقول "Type 5" لـ WaqfAddress &mdash; يجب أن يكون "Type 8"</li>
+                </ul>
+                <div class="impact"><strong>الأثر:</strong> معلومات مضللة للمطورين الذين يصونون الكود.</div>
+            </div>
+        </div>
+
+        <!-- BE-11 -->
+        <div class="issue">
+            <div class="issue-header">
+                <span class="issue-id">BE-11</span>
+                <span class="issue-title">تسجيل مفرط بمستوى LogWarning في بيئة الإنتاج</span>
+                <span class="severity-badge low">منخفضة</span>
+                <span class="category-badge">أداء</span>
+            </div>
+            <div class="issue-body">
+                <p><span class="file-ref">BOG.API/Controllers/PlaintiffsController.cs:67-91</span></p>
+                <p>يتم تسجيل قيم حقول DTO بمستوى <code>LogWarning</code> بدلاً من <code>LogDebug</code>. تُنفّذ هذه في بيئة الإنتاج وتسجّل بيانات شخصية حساسة للمدّعين (أرقام هوية، أسماء، إلخ).</p>
+                <div class="impact"><strong>الأثر:</strong> تسجيل بيانات شخصية حساسة في بيئة الإنتاج؛ عبء على الأداء.</div>
+            </div>
+        </div>
+
+        <!-- BE-12 -->
+        <div class="issue">
+            <div class="issue-header">
+                <span class="issue-id">BE-12</span>
+                <span class="issue-title">التحقق من الجنس يقبل صيغاً مختلطة</span>
+                <span class="severity-badge low">منخفضة</span>
+                <span class="category-badge">تحقق</span>
+            </div>
+            <div class="issue-body">
+                <p><span class="file-ref">BOG.BL/Services/PlaintiffBL.cs (Validator:88)</span></p>
+                <p>التحقق من الجنس يقبل القيم العربية ("ذكر"/"أنثى") والإنجليزية ("male"/"female") لكن لا يُوحّد القيمة. قاعدة البيانات قد تحتوي على صيغ مختلطة.</p>
+                <div class="impact"><strong>الأثر:</strong> بيانات غير متسقة في قاعدة البيانات؛ مشاكل في التصفية والتقارير.</div>
+            </div>
+        </div>
+
+        <!-- BE-13 -->
+        <div class="issue">
+            <div class="issue-header">
+                <span class="issue-id">BE-13</span>
+                <span class="issue-title">تصفية مزدوجة لـ IsDeleted/IsActive في PlaintiffRepository</span>
+                <span class="severity-badge low">منخفضة</span>
+                <span class="category-badge">أداء</span>
+            </div>
+            <div class="issue-body">
+                <p><span class="file-ref">BOG.DAL/Repositories/PlaintiffRepository.cs:25-32</span></p>
+                <p><code>GetByRequestIdAsync</code> تُصفّي مرتين: جدول الربط (<code>!crp.IsDeleted</code>) والمدّعي (<code>!p.IsDeleted && p.IsActive</code>). تكرار غير ضروري لكنه ليس خللاً.</p>
+                <div class="impact"><strong>الأثر:</strong> تعقيد بسيط غير ضروري في الاستعلام.</div>
+            </div>
+        </div>
+
+        <!-- BE-14 -->
+        <div class="issue">
+            <div class="issue-header">
+                <span class="issue-id">BE-14</span>
+                <span class="issue-title">GetByIdAsync قد تُرجع كياناً غير متتبع للتحديث</span>
+                <span class="severity-badge low">منخفضة</span>
+                <span class="category-badge">خلل برمجي</span>
+            </div>
+            <div class="issue-body">
+                <p><span class="file-ref">BOG.BL/Services/PlaintiffBL.cs:490</span></p>
+                <p>تستخدم <code>UpdateAsync</code> الدالة <code>GetByIdAsync(id)</code> التي قد تُرجع كياناً غير متتبع من المستودع الأساسي. قد يسبب خطأ "cannot track multiple instances" عند التحديث.</p>
+                <div class="impact"><strong>الأثر:</strong> أخطاء تعارض تتبع محتملة أثناء تحديث المدّعين.</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================================================================== -->
+    <!-- القسم ج: فجوات التوافق مع SRS -->
+    <!-- ================================================================== -->
+    <div class="section">
+        <h2>ج. فجوات التوافق مع وثيقة متطلبات النظام (SRS) <span class="badge">9 فجوات</span></h2>
+        <p class="section-desc">المتطلبات من SRS UC 6.5.1 غير المنعكسة في التنفيذ</p>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>مرجع SRS</th>
+                    <th>المتطلب</th>
+                    <th>الحالة الحالية</th>
+                    <th>الخطورة</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>SRS-01</td>
+                    <td>BC04 (القسم 2.3)</td>
+                    <td>فقط المنطقة والمدينة إلزاميان في العنوان الوطني</td>
+                    <td>جميع حقول العنوان الـ 8 مُعلّمة كإلزامية &mdash; تقييد مفرط</td>
+                    <td><span class="severity-badge critical">حرجة</span></td>
+                </tr>
+                <tr>
+                    <td>SRS-02</td>
+                    <td>القسم 2.5 (6.3.9)</td>
+                    <td>المهنة إلزامية للنوع 1 (فرد)</td>
+                    <td>لم يتم تعيين محقق إلزامي لحقل المهنة</td>
+                    <td><span class="severity-badge critical">حرجة</span></td>
+                </tr>
+                <tr>
+                    <td>SRS-03</td>
+                    <td>BR08 (القسم 3.2)</td>
+                    <td>التحقق من أبشر إلزامي قبل الحفظ للنوع 1</td>
+                    <td>يُعرض تحذير لكن لا يُمنع الحفظ</td>
+                    <td><span class="severity-badge high">عالية</span></td>
+                </tr>
+                <tr>
+                    <td>SRS-04</td>
+                    <td>القسم 2.1</td>
+                    <td>حقول أبشر يجب أن تكون غير قابلة للتعديل بعد التحقق</td>
+                    <td>تستخدم HTML readonly (يمكن تجاوزها)، وليس form disable</td>
+                    <td><span class="severity-badge high">عالية</span></td>
+                </tr>
+                <tr>
+                    <td>SRS-05</td>
+                    <td>القسم 2.16</td>
+                    <td>أنواع الممثلين مقيّدة حسب نوع المدّعي</td>
+                    <td>تصفية الواجهة تعمل؛ لا يوجد تحقق في الخادم</td>
+                    <td><span class="severity-badge high">عالية</span></td>
+                </tr>
+                <tr>
+                    <td>SRS-06</td>
+                    <td>القسم 3.4 BC01</td>
+                    <td>أنواع المرفقات مقيّدة حسب نوع المدّعي</td>
+                    <td>غير مُنفّذ &mdash; يُقبل أي نوع مرفق</td>
+                    <td><span class="severity-badge high">عالية</span></td>
+                </tr>
+                <tr>
+                    <td>SRS-07</td>
+                    <td>BR04 (القسم 3.4)</td>
+                    <td>المرفقات: PDF فقط، بحد أقصى 4 ميجابايت</td>
+                    <td>لا يوجد تحقق في الخادم &mdash; فقط تعليق في DTO</td>
+                    <td><span class="severity-badge high">عالية</span></td>
+                </tr>
+                <tr>
+                    <td>SRS-08</td>
+                    <td>القسم 2.9 (6.3.7)</td>
+                    <td>النوع 5: حقل عنوان الشركة إلزامي</td>
+                    <td>لا يوجد محقق إلزامي لعنوان الشركة غير المسجلة</td>
+                    <td><span class="severity-badge medium">متوسطة</span></td>
+                </tr>
+                <tr>
+                    <td>SRS-09</td>
+                    <td>القسم 3.5</td>
+                    <td>حدود عدد الممثلين لكل نوع مدّعي</td>
+                    <td>لا يوجد تحقق من الحد الأدنى/الأقصى لعدد الممثلين</td>
+                    <td><span class="severity-badge medium">متوسطة</span></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- ================================================================== -->
+    <!-- مصفوفة الأولويات -->
+    <!-- ================================================================== -->
+    <div class="section">
+        <h2>مصفوفة أولويات الإصلاح</h2>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>الأولوية</th>
+                    <th>رقم المشكلة</th>
+                    <th>الإجراء المطلوب</th>
+                    <th>الجهد</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><span class="severity-badge critical">P0</span></td>
+                    <td>FE-01</td>
+                    <td>إصلاح القيمة الافتراضية requestId=0 &mdash; التحقق قبل استدعاء API، إعادة التوجيه إذا كان مفقوداً</td>
+                    <td>صغير</td>
+                </tr>
+                <tr>
+                    <td><span class="severity-badge critical">P0</span></td>
+                    <td>FE-02, SRS-01</td>
+                    <td>إصلاح محققات العنوان: المنطقة + المدينة فقط إلزامية حسب BC04</td>
+                    <td>صغير</td>
+                </tr>
+                <tr>
+                    <td><span class="severity-badge critical">P0</span></td>
+                    <td>BE-02</td>
+                    <td>تنفيذ تخزين ملفات مرفقات الممثلين (حالياً TODO)</td>
+                    <td>متوسط</td>
+                </tr>
+                <tr>
+                    <td><span class="severity-badge critical">P0</span></td>
+                    <td>BE-01</td>
+                    <td>إضافة تحقق المرفقات: حجم الملف، حد 4 ميجابايت، فحص PDF</td>
+                    <td>متوسط</td>
+                </tr>
+                <tr>
+                    <td><span class="severity-badge high">P1</span></td>
+                    <td>FE-05, SRS-03</td>
+                    <td>تفعيل التحقق من أبشر BR08 عند وقت الحفظ للنوع 1</td>
+                    <td>صغير</td>
+                </tr>
+                <tr>
+                    <td><span class="severity-badge high">P1</span></td>
+                    <td>FE-07, SRS-05</td>
+                    <td>إضافة تحقق في الخادم لأنواع الممثلين حسب نوع المدّعي</td>
+                    <td>متوسط</td>
+                </tr>
+                <tr>
+                    <td><span class="severity-badge high">P1</span></td>
+                    <td>BE-03</td>
+                    <td>تغليف إنشاء المدّعي + العنوان في نطاق معاملة واحد (Transaction Scope)</td>
+                    <td>متوسط</td>
+                </tr>
+                <tr>
+                    <td><span class="severity-badge high">P1</span></td>
+                    <td>FE-08, SRS-06</td>
+                    <td>تنفيذ قيود أنواع المرفقات حسب نوع المدّعي</td>
+                    <td>متوسط</td>
+                </tr>
+                <tr>
+                    <td><span class="severity-badge medium">P2</span></td>
+                    <td>FE-03, SRS-02</td>
+                    <td>إضافة محقق إلزامي لحقل المهنة للنوع 1</td>
+                    <td>صغير</td>
+                </tr>
+                <tr>
+                    <td><span class="severity-badge medium">P2</span></td>
+                    <td>BE-06</td>
+                    <td>إصلاح عدم تطابق طول IdentityNumber في UpdateDTO (من 10 إلى 20)</td>
+                    <td>صغير</td>
+                </tr>
+                <tr>
+                    <td><span class="severity-badge medium">P2</span></td>
+                    <td>BE-07</td>
+                    <td>إنشاء محقق FluentValidation لـ PlaintiffUpdateDTO</td>
+                    <td>متوسط</td>
+                </tr>
+                <tr>
+                    <td><span class="severity-badge medium">P2</span></td>
+                    <td>FE-04</td>
+                    <td>استبدال الاشتراكات المتزامنة بـ forkJoin في loadAllRepresentatives</td>
+                    <td>صغير</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="footer">
+        تم إنشاؤه في 2026-02-08 &bull; تقرير مشكلات وحدة المدّعين &bull; الفرع: MohamedShafik
+    </div>
+</div>
+</body>
+</html>

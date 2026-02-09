@@ -1,0 +1,1593 @@
+<div class="plaintiff-form-container">
+  <!-- Loading -->
+  <div *ngIf="isLoading" class="loading-container">
+    <mat-spinner diameter="40"></mat-spinner>
+  </div>
+
+  <div *ngIf="!isLoading">
+    <!-- Header -->
+    <div class="form-header">
+      <h2 *ngIf="isViewMode">عرض بيانات المدعي</h2>
+      <h2 *ngIf="!isViewMode">{{ plaintiffId ? 'تعديل بيانات المدعي' : 'إضافة مدعي جديد' }}</h2>
+    </div>
+
+    <!-- Stepper -->
+    <mat-horizontal-stepper [linear]="false" [selectedIndex]="currentStep" (selectionChange)="currentStep = $event.selectedIndex">
+
+      <!-- Step 1: Personal Data -->
+      <mat-step [label]="steps[0].label">
+        <div class="step-content">
+          <h3>البيانات الشخصية</h3>
+
+          <form [formGroup]="plaintiffForm">
+            <!-- Plaintiff Type Display (readonly - type selected from menu before entering form) -->
+            <div class="plaintiff-type-display" *ngIf="selectedPlaintiffTypeName">
+              <mat-icon>person</mat-icon>
+              <span class="type-label">نوع المدعي:</span>
+              <span class="type-value">{{ selectedPlaintiffTypeName }}</span>
+            </div>
+
+            <!-- Individual Fields -->
+            <ng-container *ngIf="isIndividual()">
+              <!-- Identity Lookup - Type 1 only -->
+              <div class="form-row" *ngIf="isIndividualWithId()">
+                <mat-form-field appearance="outline" class="form-field">
+                  <mat-label>نوع الهوية</mat-label>
+                  <mat-select formControlName="identityTypeId">
+                    <mat-option *ngFor="let type of identityTypes" [value]="type.id">
+                      {{ type.nameAr }}
+                    </mat-option>
+                  </mat-select>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="form-field">
+                  <mat-label>رقم الهوية</mat-label>
+                  <input matInput formControlName="identityNumber" required>
+                  <button mat-icon-button matSuffix (click)="onLookupIdentity()"
+                          [disabled]="isLookingUp || plaintiffId"
+                          matTooltip="{{ plaintiffId ? 'التحقق من أبشر غير متاح في وضع التعديل' : 'البحث في أبشر' }}">
+                    <mat-icon>search</mat-icon>
+                  </button>
+                  <mat-error *ngIf="plaintiffForm.get('identityNumber')?.hasError('required')">رقم الهوية مطلوب</mat-error>
+                  <mat-error *ngIf="plaintiffForm.get('identityNumber')?.hasError('identityNumber')">
+                    {{ plaintiffForm.get('identityNumber')?.getError('identityNumber') }}
+                  </mat-error>
+                  <mat-error *ngIf="plaintiffForm.get('identityNumber')?.hasError('maxlength')">رقم الهوية يجب ألا يتجاوز 20 حرف</mat-error>
+                </mat-form-field>
+              </div>
+
+              <!-- Document Number - Type 2 only (فرد بدون هوية) -->
+              <!-- BC05: Document number is readonly after initial save -->
+              <div class="form-row" *ngIf="isIndividualWithoutId()">
+                <mat-form-field appearance="outline" class="form-field">
+                  <mat-label>رقم الوثيقة</mat-label>
+                  <input matInput formControlName="documentNumber">
+                  <mat-error *ngIf="plaintiffForm.get('documentNumber')?.hasError('maxlength')">رقم الوثيقة يجب ألا يتجاوز 20 حرف</mat-error>
+                </mat-form-field>
+              </div>
+
+              <!-- Absher Verification Status (BR08) -->
+              <div class="absher-status" *ngIf="requiresAbsherVerification()">
+                <div class="absher-verified" *ngIf="isAbsherVerified">
+                  <mat-icon>check_circle</mat-icon>
+                  <span>تم التحقق من البيانات عبر أبشر</span>
+                </div>
+                <div class="absher-required" *ngIf="!isAbsherVerified">
+                  <mat-icon>warning</mat-icon>
+                  <span>يجب الضغط على زر البحث للتحقق من البيانات عبر أبشر</span>
+                </div>
+              </div>
+
+              <!-- Name Fields -->
+              <div class="form-row">
+                <mat-form-field appearance="outline" class="form-field">
+                  <mat-label>الاسم الأول</mat-label>
+                  <input matInput formControlName="firstName" required [readonly]="isAbsherFieldsReadonly()">
+                  <mat-error *ngIf="plaintiffForm.get('firstName')?.hasError('required')">الاسم الأول مطلوب</mat-error>
+                  <mat-error *ngIf="plaintiffForm.get('firstName')?.hasError('arabicOnly')">الاسم الأول يجب أن يكون بالعربية فقط</mat-error>
+                  <mat-error *ngIf="plaintiffForm.get('firstName')?.hasError('maxlength')">الاسم الأول يجب ألا يتجاوز 100 حرف</mat-error>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="form-field">
+                  <mat-label>اسم الأب</mat-label>
+                  <input matInput formControlName="fatherName" [readonly]="isAbsherFieldsReadonly()">
+                  <mat-error *ngIf="plaintiffForm.get('fatherName')?.hasError('maxlength')">اسم الأب يجب ألا يتجاوز 100 حرف</mat-error>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="form-field">
+                  <mat-label>اسم الجد</mat-label>
+                  <input matInput formControlName="grandfatherName" [readonly]="isAbsherFieldsReadonly()">
+                  <mat-error *ngIf="plaintiffForm.get('grandfatherName')?.hasError('maxlength')">اسم الجد يجب ألا يتجاوز 100 حرف</mat-error>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="form-field">
+                  <mat-label>اسم الفخذ</mat-label>
+                  <input matInput formControlName="clanName" [readonly]="isAbsherFieldsReadonly()">
+                  <mat-error *ngIf="plaintiffForm.get('clanName')?.hasError('maxlength')">اسم الفخذ يجب ألا يتجاوز 100 حرف</mat-error>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="form-field">
+                  <mat-label>اسم العائلة</mat-label>
+                  <input matInput formControlName="familyName" required [readonly]="isAbsherFieldsReadonly()">
+                  <mat-error *ngIf="plaintiffForm.get('familyName')?.hasError('required')">اسم العائلة مطلوب</mat-error>
+                  <mat-error *ngIf="plaintiffForm.get('familyName')?.hasError('maxlength')">اسم العائلة يجب ألا يتجاوز 100 حرف</mat-error>
+                </mat-form-field>
+              </div>
+
+              <!-- Birth Date and Gender -->
+              <div class="form-row">
+                <mat-form-field appearance="outline" class="form-field">
+                  <mat-label>تاريخ الميلاد</mat-label>
+                  <input matInput [matDatepicker]="birthDatePicker" formControlName="birthDate" [readonly]="isAbsherFieldsReadonly()">
+                  <mat-datepicker-toggle matSuffix [for]="birthDatePicker" [disabled]="isAbsherFieldsReadonly()"></mat-datepicker-toggle>
+                  <mat-datepicker #birthDatePicker></mat-datepicker>
+                  <mat-error *ngIf="plaintiffForm.get('birthDate')?.hasError('required')">تاريخ الميلاد مطلوب</mat-error>
+                  <mat-error *ngIf="plaintiffForm.get('birthDate')?.hasError('notFutureDate')">تاريخ الميلاد لا يمكن أن يكون في المستقبل</mat-error>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="form-field">
+                  <mat-label>الجنس</mat-label>
+                  <mat-select formControlName="gender">
+                    <mat-option value="ذكر">ذكر</mat-option>
+                    <mat-option value="أنثى">أنثى</mat-option>
+                  </mat-select>
+                  <mat-error *ngIf="plaintiffForm.get('gender')?.hasError('required')">الجنس مطلوب</mat-error>
+                  <mat-error *ngIf="plaintiffForm.get('gender')?.hasError('gender')">الجنس يجب أن يكون 'ذكر' أو 'أنثى'</mat-error>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="form-field">
+                  <mat-label>الجنسية</mat-label>
+                  <mat-select formControlName="nationalityId">
+                    <mat-option *ngFor="let nationality of filteredNationalities" [value]="nationality.id">
+                      {{ nationality.nameAr }}
+                    </mat-option>
+                  </mat-select>
+                </mat-form-field>
+              </div>
+
+              <!-- Identity Dates - Type 1 only -->
+              <div class="form-row" *ngIf="isIndividualWithId()">
+                <mat-form-field appearance="outline" class="form-field">
+                  <mat-label>تاريخ إصدار الهوية</mat-label>
+                  <input matInput [matDatepicker]="identityIssuePicker" formControlName="identityIssueDate" [readonly]="isAbsherFieldsReadonly()">
+                  <mat-datepicker-toggle matSuffix [for]="identityIssuePicker" [disabled]="isAbsherFieldsReadonly()"></mat-datepicker-toggle>
+                  <mat-datepicker #identityIssuePicker></mat-datepicker>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="form-field">
+                  <mat-label>تاريخ انتهاء الهوية</mat-label>
+                  <input matInput [matDatepicker]="identityExpiryPicker" formControlName="identityExpiryDate" [readonly]="isAbsherFieldsReadonly()">
+                  <mat-datepicker-toggle matSuffix [for]="identityExpiryPicker" [disabled]="isAbsherFieldsReadonly()"></mat-datepicker-toggle>
+                  <mat-datepicker #identityExpiryPicker></mat-datepicker>
+                </mat-form-field>
+              </div>
+
+              <!-- Employment Data (BC01/BC02) - Type 1 only (not required for Type 2 per SRS 6.3.10) -->
+              <ng-container *ngIf="isIndividualWithId()">
+                <h4>بيانات العمل</h4>
+                <div class="form-row">
+                  <mat-form-field appearance="outline" class="form-field">
+                    <mat-label>حالة العمل</mat-label>
+                    <mat-select formControlName="employmentStatusId">
+                      <mat-option *ngFor="let status of employmentStatusOptions" [value]="status.id">
+                        {{ status.nameAr }}
+                      </mat-option>
+                    </mat-select>
+                    <mat-error *ngIf="plaintiffForm.get('employmentStatusId')?.hasError('required')">حالة العمل مطلوبة</mat-error>
+                  </mat-form-field>
+
+                  <!-- BC01: Show جهة العمل and المهنة when status = Government(1) or Private(2) -->
+                  <mat-form-field appearance="outline" class="form-field" *ngIf="showEmployer">
+                    <mat-label>جهة العمل</mat-label>
+                    <input matInput formControlName="employer">
+                    <mat-error *ngIf="plaintiffForm.get('employer')?.hasError('required')
+                                      && (plaintiffForm.get('employer')?.touched || submitted)">جهة العمل مطلوبة</mat-error>
+                    <mat-error *ngIf="plaintiffForm.get('employer')?.hasError('maxlength')">جهة العمل يجب ألا تتجاوز 200 حرف</mat-error>
+                  </mat-form-field>
+
+                  <!-- المهنة - hidden when بدون عمل -->
+                  <mat-form-field appearance="outline" class="form-field" *ngIf="showEmployer">
+                    <mat-label>المهنة</mat-label>
+                    <input matInput formControlName="profession">
+                    <mat-error *ngIf="plaintiffForm.get('profession')?.hasError('required')
+                                      && (plaintiffForm.get('profession')?.touched || submitted)">المهنة مطلوبة</mat-error>
+                    <mat-error *ngIf="plaintiffForm.get('profession')?.hasError('maxlength')">المهنة يجب ألا تتجاوز 200 حرف</mat-error>
+                  </mat-form-field>
+                </div>
+              </ng-container>
+            </ng-container>
+
+            <!-- Business Owner Fields (Type 3) - SRS Section 4.3 -->
+            <ng-container *ngIf="isBusinessOwner()">
+              <h4>بيانات صاحب المؤسسة</h4>
+              <!-- Personal Identity -->
+              <div class="form-row">
+                <mat-form-field appearance="outline" class="form-field">
+                  <mat-label>نوع الهوية</mat-label>
+                  <mat-select formControlName="identityTypeId" required>
+                    <mat-option *ngFor="let type of identityTypes" [value]="type.id">
+                      {{ type.nameAr }}
+                    </mat-option>
+                  </mat-select>
+                  <mat-error *ngIf="plaintiffForm.get('identityTypeId')?.hasError('required')
+                                    && (plaintiffForm.get('identityTypeId')?.touched || submitted)">نوع الهوية مطلوب</mat-error>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="form-field">
+                  <mat-label>رقم الهوية</mat-label>
+                  <input matInput formControlName="identityNumber" required maxlength="20">
+                  <button mat-icon-button matSuffix (click)="onLookupIdentity()"
+                          [disabled]="isLookingUp || plaintiffId"
+                          matTooltip="{{ plaintiffId ? 'التحقق من أبشر غير متاح في وضع التعديل' : 'البحث في أبشر' }}">
+                    <mat-icon>search</mat-icon>
+                  </button>
+                  <mat-error *ngIf="plaintiffForm.get('identityNumber')?.hasError('required')
+                                    && (plaintiffForm.get('identityNumber')?.touched || submitted)">رقم الهوية مطلوب</mat-error>
+                  <mat-error *ngIf="plaintiffForm.get('identityNumber')?.hasError('identityNumber')
+                                    && (plaintiffForm.get('identityNumber')?.touched || submitted)">رقم الهوية غير صحيح</mat-error>
+                </mat-form-field>
+              </div>
+
+              <div class="form-row">
+                <mat-form-field appearance="outline" class="form-field">
+                  <mat-label>الاسم الأول</mat-label>
+                  <input matInput formControlName="firstName" required maxlength="100">
+                  <mat-error *ngIf="plaintiffForm.get('firstName')?.hasError('required')
+                                    && (plaintiffForm.get('firstName')?.touched || submitted)">الاسم الأول مطلوب</mat-error>
+                  <mat-error *ngIf="plaintiffForm.get('firstName')?.hasError('maxlength')
+                                    && (plaintiffForm.get('firstName')?.touched || submitted)">الاسم الأول يجب ألا يتجاوز 100 حرف</mat-error>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="form-field">
+                  <mat-label>اسم الأب</mat-label>
+                  <input matInput formControlName="fatherName" required maxlength="100">
+                  <mat-error *ngIf="plaintiffForm.get('fatherName')?.hasError('required')
+                                    && (plaintiffForm.get('fatherName')?.touched || submitted)">اسم الأب مطلوب</mat-error>
+                  <mat-error *ngIf="plaintiffForm.get('fatherName')?.hasError('maxlength')
+                                    && (plaintiffForm.get('fatherName')?.touched || submitted)">اسم الأب يجب ألا يتجاوز 100 حرف</mat-error>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="form-field">
+                  <mat-label>اسم الجد</mat-label>
+                  <input matInput formControlName="grandfatherName" maxlength="100">
+                  <mat-error *ngIf="plaintiffForm.get('grandfatherName')?.hasError('maxlength')
+                                    && (plaintiffForm.get('grandfatherName')?.touched || submitted)">اسم الجد يجب ألا يتجاوز 100 حرف</mat-error>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="form-field">
+                  <mat-label>اسم الفخذ</mat-label>
+                  <input matInput formControlName="clanName" maxlength="100">
+                  <mat-error *ngIf="plaintiffForm.get('clanName')?.hasError('maxlength')
+                                    && (plaintiffForm.get('clanName')?.touched || submitted)">اسم الفخذ يجب ألا يتجاوز 100 حرف</mat-error>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="form-field">
+                  <mat-label>اسم العائلة</mat-label>
+                  <input matInput formControlName="familyName" required maxlength="100">
+                  <mat-error *ngIf="plaintiffForm.get('familyName')?.hasError('required')
+                                    && (plaintiffForm.get('familyName')?.touched || submitted)">اسم العائلة مطلوب</mat-error>
+                  <mat-error *ngIf="plaintiffForm.get('familyName')?.hasError('maxlength')
+                                    && (plaintiffForm.get('familyName')?.touched || submitted)">اسم العائلة يجب ألا يتجاوز 100 حرف</mat-error>
+                </mat-form-field>
+              </div>
+
+              <!-- Birth Date, Gender, Nationality - SRS Section 4.3 -->
+              <div class="form-row">
+                <mat-form-field appearance="outline" class="form-field">
+                  <mat-label>تاريخ الميلاد</mat-label>
+                  <input matInput [matDatepicker]="boBirthDatePicker" formControlName="birthDate" required>
+                  <mat-datepicker-toggle matSuffix [for]="boBirthDatePicker"></mat-datepicker-toggle>
+                  <mat-datepicker #boBirthDatePicker></mat-datepicker>
+                  <mat-error *ngIf="plaintiffForm.get('birthDate')?.hasError('required')
+                                    && (plaintiffForm.get('birthDate')?.touched || submitted)">تاريخ الميلاد مطلوب</mat-error>
+                  <mat-error *ngIf="plaintiffForm.get('birthDate')?.hasError('notFutureDate')
+                                    && (plaintiffForm.get('birthDate')?.touched || submitted)">تاريخ الميلاد لا يمكن أن يكون في المستقبل</mat-error>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="form-field">
+                  <mat-label>الجنس</mat-label>
+                  <mat-select formControlName="gender" required>
+                    <mat-option value="ذكر">ذكر</mat-option>
+                    <mat-option value="أنثى">أنثى</mat-option>
+                  </mat-select>
+                  <mat-error *ngIf="plaintiffForm.get('gender')?.hasError('required')
+                                    && (plaintiffForm.get('gender')?.touched || submitted)">الجنس مطلوب</mat-error>
+                  <mat-error *ngIf="plaintiffForm.get('gender')?.hasError('gender')
+                                    && (plaintiffForm.get('gender')?.touched || submitted)">الجنس يجب أن يكون 'ذكر' أو 'أنثى'</mat-error>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="form-field">
+                  <mat-label>الجنسية</mat-label>
+                  <mat-select formControlName="nationalityId" required>
+                    <mat-option *ngFor="let nationality of filteredNationalities" [value]="nationality.id">
+                      {{ nationality.nameAr }}
+                    </mat-option>
+                  </mat-select>
+                  <mat-error *ngIf="plaintiffForm.get('nationalityId')?.hasError('required')
+                                    && (plaintiffForm.get('nationalityId')?.touched || submitted)">الجنسية مطلوبة</mat-error>
+                </mat-form-field>
+              </div>
+
+              <!-- Identity Dates - SRS Section 4.3 -->
+              <div class="form-row">
+                <mat-form-field appearance="outline" class="form-field">
+                  <mat-label>تاريخ إصدار الهوية</mat-label>
+                  <input matInput [matDatepicker]="boIdentityIssuePicker" formControlName="identityIssueDate" required>
+                  <mat-datepicker-toggle matSuffix [for]="boIdentityIssuePicker"></mat-datepicker-toggle>
+                  <mat-datepicker #boIdentityIssuePicker></mat-datepicker>
+                  <mat-error *ngIf="plaintiffForm.get('identityIssueDate')?.hasError('required')
+                                    && (plaintiffForm.get('identityIssueDate')?.touched || submitted)">تاريخ إصدار الهوية مطلوب</mat-error>
+                  <mat-error *ngIf="plaintiffForm.get('identityIssueDate')?.hasError('notFutureDate')
+                                    && (plaintiffForm.get('identityIssueDate')?.touched || submitted)">تاريخ إصدار الهوية لا يمكن أن يكون في المستقبل</mat-error>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="form-field">
+                  <mat-label>تاريخ انتهاء الهوية</mat-label>
+                  <input matInput [matDatepicker]="boIdentityExpiryPicker" formControlName="identityExpiryDate" required>
+                  <mat-datepicker-toggle matSuffix [for]="boIdentityExpiryPicker"></mat-datepicker-toggle>
+                  <mat-datepicker #boIdentityExpiryPicker></mat-datepicker>
+                  <mat-error *ngIf="plaintiffForm.get('identityExpiryDate')?.hasError('required')
+                                    && (plaintiffForm.get('identityExpiryDate')?.touched || submitted)">تاريخ انتهاء الهوية مطلوب</mat-error>
+                  <mat-error *ngIf="plaintiffForm.get('identityExpiryDate')?.hasError('dateAfter')
+                                    && (plaintiffForm.get('identityExpiryDate')?.touched || submitted)">تاريخ انتهاء الهوية يجب أن يكون أكبر من تاريخ الإصدار</mat-error>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="form-field">
+                  <mat-label>رقم الجوال</mat-label>
+                  <input matInput formControlName="mobileNumber" required dir="ltr" placeholder="05xxxxxxxx" maxlength="10">
+                  <mat-error *ngIf="plaintiffForm.get('mobileNumber')?.hasError('required')
+                                    && (plaintiffForm.get('mobileNumber')?.touched || submitted)">رقم الجوال مطلوب</mat-error>
+                  <mat-error *ngIf="plaintiffForm.get('mobileNumber')?.hasError('mobileNumber')
+                                    && (plaintiffForm.get('mobileNumber')?.touched || submitted)">رقم الجوال يجب أن يبدأ بـ 05 ويتكون من 10 أرقام</mat-error>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="form-field">
+                  <mat-label>البريد الإلكتروني</mat-label>
+                  <input matInput formControlName="email" type="email" dir="ltr" maxlength="255">
+                  <mat-error *ngIf="plaintiffForm.get('email')?.hasError('email')
+                                    && (plaintiffForm.get('email')?.touched || submitted)">البريد الإلكتروني غير صحيح</mat-error>
+                  <mat-error *ngIf="plaintiffForm.get('email')?.hasError('maxlength')
+                                    && (plaintiffForm.get('email')?.touched || submitted)">البريد الإلكتروني يجب ألا يتجاوز 255 حرف</mat-error>
+                </mat-form-field>
+              </div>
+
+              <h4>بيانات المؤسسة</h4>
+              <div class="form-row">
+                <mat-form-field appearance="outline" class="form-field">
+                  <mat-label>رقم السجل التجاري</mat-label>
+                  <input matInput formControlName="commercialRegNumber" required placeholder="10 أرقام" maxlength="10">
+                  <mat-error *ngIf="plaintiffForm.get('commercialRegNumber')?.hasError('required')
+                                    && (plaintiffForm.get('commercialRegNumber')?.touched || submitted)">رقم السجل التجاري مطلوب</mat-error>
+                  <mat-error *ngIf="plaintiffForm.get('commercialRegNumber')?.hasError('commercialRegNumber')
+                                    && (plaintiffForm.get('commercialRegNumber')?.touched || submitted)">رقم السجل التجاري يجب أن يكون 10 أرقام فقط</mat-error>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="form-field">
+                  <mat-label>اسم المؤسسة</mat-label>
+                  <input matInput formControlName="companyName" required maxlength="200">
+                  <mat-error *ngIf="plaintiffForm.get('companyName')?.hasError('required')
+                                    && (plaintiffForm.get('companyName')?.touched || submitted)">اسم المؤسسة مطلوب</mat-error>
+                  <mat-error *ngIf="plaintiffForm.get('companyName')?.hasError('arabicOnly')
+                                    && (plaintiffForm.get('companyName')?.touched || submitted)">اسم المؤسسة يجب أن يكون بالعربية والأرقام فقط</mat-error>
+                  <mat-error *ngIf="plaintiffForm.get('companyName')?.hasError('maxlength')
+                                    && (plaintiffForm.get('companyName')?.touched || submitted)">اسم المؤسسة يجب ألا يتجاوز 200 حرف</mat-error>
+                </mat-form-field>
+              </div>
+
+              <div class="form-row">
+                <mat-form-field appearance="outline" class="form-field">
+                  <mat-label>تاريخ بداية السجل</mat-label>
+                  <input matInput [matDatepicker]="boRegStartPicker" formControlName="crStartDate" required>
+                  <mat-datepicker-toggle matSuffix [for]="boRegStartPicker"></mat-datepicker-toggle>
+                  <mat-datepicker #boRegStartPicker></mat-datepicker>
+                  <mat-error *ngIf="plaintiffForm.get('crStartDate')?.hasError('required')
+                                    && (plaintiffForm.get('crStartDate')?.touched || submitted)">تاريخ بداية السجل مطلوب</mat-error>
+                  <mat-error *ngIf="plaintiffForm.get('crStartDate')?.hasError('notFutureDate')
+                                    && (plaintiffForm.get('crStartDate')?.touched || submitted)">تاريخ بداية السجل لا يمكن أن يكون في المستقبل</mat-error>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="form-field">
+                  <mat-label>تاريخ نهاية السجل</mat-label>
+                  <input matInput [matDatepicker]="boRegEndPicker" formControlName="crEndDate" required>
+                  <mat-datepicker-toggle matSuffix [for]="boRegEndPicker"></mat-datepicker-toggle>
+                  <mat-datepicker #boRegEndPicker></mat-datepicker>
+                  <mat-error *ngIf="plaintiffForm.get('crEndDate')?.hasError('required')
+                                    && (plaintiffForm.get('crEndDate')?.touched || submitted)">تاريخ نهاية السجل مطلوب</mat-error>
+                  <mat-error *ngIf="plaintiffForm.get('crEndDate')?.hasError('dateAfter')
+                                    && (plaintiffForm.get('crEndDate')?.touched || submitted)">تاريخ نهاية السجل يجب أن يكون أكبر من تاريخ البداية</mat-error>
+                </mat-form-field>
+              </div>
+
+              <!-- Employment Data for Business Owner (BC01/BC02) - OPTIONAL per SRS 4.3 -->
+              <h4>بيانات العمل</h4>
+              <div class="form-row">
+                <mat-form-field appearance="outline" class="form-field">
+                  <mat-label>حالة العمل</mat-label>
+                  <mat-select formControlName="employmentStatusId">
+                    <mat-option *ngFor="let status of employmentStatusOptions" [value]="status.id">
+                      {{ status.nameAr }}
+                    </mat-option>
+                  </mat-select>
+                </mat-form-field>
+
+                <!-- BC01: Show جهة العمل when status = Government(1) or Private(2) -->
+                <mat-form-field appearance="outline" class="form-field" *ngIf="showEmployer">
+                  <mat-label>جهة العمل</mat-label>
+                  <input matInput formControlName="employer" maxlength="200">
+                  <mat-error *ngIf="plaintiffForm.get('employer')?.hasError('maxlength')
+                                    && (plaintiffForm.get('employer')?.touched || submitted)">جهة العمل يجب ألا تتجاوز 200 حرف</mat-error>
+                </mat-form-field>
+
+                <!-- المهنة - hidden when بدون عمل -->
+                <mat-form-field appearance="outline" class="form-field" *ngIf="showEmployer">
+                  <mat-label>المهنة</mat-label>
+                  <input matInput formControlName="profession" maxlength="200">
+                  <mat-error *ngIf="plaintiffForm.get('profession')?.hasError('maxlength')
+                                    && (plaintiffForm.get('profession')?.touched || submitted)">المهنة يجب ألا تتجاوز 200 حرف</mat-error>
+                </mat-form-field>
+              </div>
+
+              <!-- بيانات عنوان صاحب المؤسسة - Business Owner - SRS Section 4.3.2 -->
+              <div class="address-section" formGroupName="residenceAddress">
+                <h4>عنوان صاحب المؤسسة <span class="required-indicator">*</span></h4>
+                <div class="form-row">
+                  <mat-form-field appearance="outline" class="form-field">
+                    <mat-label>المنطقة</mat-label>
+                    <mat-select formControlName="regionId" required (selectionChange)="onResidenceRegionChange($event.value)">
+                      <mat-option *ngFor="let region of regions" [value]="region.id">
+                        {{ region.nameAr }}
+                      </mat-option>
+                    </mat-select>
+                    <mat-error *ngIf="plaintiffForm.get('residenceAddress.regionId')?.hasError('required')
+                                      && (plaintiffForm.get('residenceAddress.regionId')?.touched || submitted)">المنطقة مطلوبة</mat-error>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="form-field">
+                    <mat-label>المدينة</mat-label>
+                    <mat-select formControlName="cityId" required (selectionChange)="onCityChange()">
+                      <mat-option *ngFor="let city of residenceCities" [value]="city.id">
+                        {{ city.nameAr }}
+                      </mat-option>
+                    </mat-select>
+                    <mat-error *ngIf="plaintiffForm.get('residenceAddress.cityId')?.hasError('required')
+                                      && (plaintiffForm.get('residenceAddress.cityId')?.touched || submitted)">المدينة مطلوبة</mat-error>
+                  </mat-form-field>
+                </div>
+
+                <div class="form-row">
+                  <mat-form-field appearance="outline" class="form-field">
+                    <mat-label>الحي</mat-label>
+                    <input matInput formControlName="districtId" required maxlength="100">
+                    <mat-error *ngIf="plaintiffForm.get('residenceAddress.districtId')?.hasError('required')
+                                      && (plaintiffForm.get('residenceAddress.districtId')?.touched || submitted)">الحي مطلوب</mat-error>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="form-field">
+                    <mat-label>الشارع</mat-label>
+                    <input matInput formControlName="street" required maxlength="200">
+                    <mat-error *ngIf="plaintiffForm.get('residenceAddress.street')?.hasError('required')
+                                      && (plaintiffForm.get('residenceAddress.street')?.touched || submitted)">الشارع مطلوب</mat-error>
+                  </mat-form-field>
+                </div>
+
+                <div class="form-row">
+                  <mat-form-field appearance="outline" class="form-field">
+                    <mat-label>رقم المبنى</mat-label>
+                    <input matInput formControlName="buildingNumber" required placeholder="4 أرقام" maxlength="4">
+                    <mat-error *ngIf="plaintiffForm.get('residenceAddress.buildingNumber')?.hasError('required')
+                                      && (plaintiffForm.get('residenceAddress.buildingNumber')?.touched || submitted)">رقم المبنى مطلوب</mat-error>
+                    <mat-error *ngIf="plaintiffForm.get('residenceAddress.buildingNumber')?.hasError('pattern')
+                                      && (plaintiffForm.get('residenceAddress.buildingNumber')?.touched || submitted)">رقم المبنى يجب أن يكون 4 أرقام</mat-error>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="form-field">
+                    <mat-label>رقم الوحدة</mat-label>
+                    <input matInput formControlName="unitNumber" required placeholder="أرقام فقط">
+                    <mat-error *ngIf="plaintiffForm.get('residenceAddress.unitNumber')?.hasError('required')
+                                      && (plaintiffForm.get('residenceAddress.unitNumber')?.touched || submitted)">رقم الوحدة مطلوب</mat-error>
+                    <mat-error *ngIf="plaintiffForm.get('residenceAddress.unitNumber')?.hasError('pattern')
+                                      && (plaintiffForm.get('residenceAddress.unitNumber')?.touched || submitted)">رقم الوحدة يجب أن يكون أرقام فقط</mat-error>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="form-field">
+                    <mat-label>الرمز البريدي</mat-label>
+                    <input matInput formControlName="postalCode" required placeholder="5 أرقام" maxlength="5">
+                    <mat-error *ngIf="plaintiffForm.get('residenceAddress.postalCode')?.hasError('required')
+                                      && (plaintiffForm.get('residenceAddress.postalCode')?.touched || submitted)">الرمز البريدي مطلوب</mat-error>
+                    <mat-error *ngIf="plaintiffForm.get('residenceAddress.postalCode')?.hasError('pattern')
+                                      && (plaintiffForm.get('residenceAddress.postalCode')?.touched || submitted)">الرمز البريدي يجب أن يكون 5 أرقام</mat-error>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="form-field">
+                    <mat-label>الرمز الإضافي</mat-label>
+                    <input matInput formControlName="additionalCode" required placeholder="4 أرقام" maxlength="4">
+                    <mat-error *ngIf="plaintiffForm.get('residenceAddress.additionalCode')?.hasError('required')
+                                      && (plaintiffForm.get('residenceAddress.additionalCode')?.touched || submitted)">الرمز الإضافي مطلوب</mat-error>
+                    <mat-error *ngIf="plaintiffForm.get('residenceAddress.additionalCode')?.hasError('pattern')
+                                      && (plaintiffForm.get('residenceAddress.additionalCode')?.touched || submitted)">الرمز الإضافي يجب أن يكون 4 أرقام</mat-error>
+                  </mat-form-field>
+                </div>
+              </div>
+
+              <!-- عنوان العمل - Business Owner BC02 (shows only when employment = private) -->
+              <div class="address-section" formGroupName="workAddress" *ngIf="showWorkAddress">
+                <h4>عنوان العمل <span class="required-indicator">*</span></h4>
+                <div class="form-row">
+                  <mat-form-field appearance="outline" class="form-field">
+                    <mat-label>المنطقة</mat-label>
+                    <mat-select formControlName="regionId" required (selectionChange)="onWorkRegionChange($event.value)">
+                      <mat-option *ngFor="let region of regions" [value]="region.id">
+                        {{ region.nameAr }}
+                      </mat-option>
+                    </mat-select>
+                    <mat-error *ngIf="plaintiffForm.get('workAddress.regionId')?.hasError('required')
+                                      && (plaintiffForm.get('workAddress.regionId')?.touched || submitted)">المنطقة مطلوبة</mat-error>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="form-field">
+                    <mat-label>المدينة</mat-label>
+                    <mat-select formControlName="cityId" required (selectionChange)="onCityChange()">
+                      <mat-option *ngFor="let city of workCities" [value]="city.id">
+                        {{ city.nameAr }}
+                      </mat-option>
+                    </mat-select>
+                    <mat-error *ngIf="plaintiffForm.get('workAddress.cityId')?.hasError('required')
+                                      && (plaintiffForm.get('workAddress.cityId')?.touched || submitted)">المدينة مطلوبة</mat-error>
+                  </mat-form-field>
+                </div>
+
+                <div class="form-row">
+                  <mat-form-field appearance="outline" class="form-field">
+                    <mat-label>الحي</mat-label>
+                    <input matInput formControlName="districtId" required maxlength="100">
+                    <mat-error *ngIf="plaintiffForm.get('workAddress.districtId')?.hasError('required')
+                                      && (plaintiffForm.get('workAddress.districtId')?.touched || submitted)">الحي مطلوب</mat-error>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="form-field">
+                    <mat-label>الشارع</mat-label>
+                    <input matInput formControlName="street" required maxlength="200">
+                    <mat-error *ngIf="plaintiffForm.get('workAddress.street')?.hasError('required')
+                                      && (plaintiffForm.get('workAddress.street')?.touched || submitted)">الشارع مطلوب</mat-error>
+                  </mat-form-field>
+                </div>
+
+                <div class="form-row">
+                  <mat-form-field appearance="outline" class="form-field">
+                    <mat-label>رقم المبنى</mat-label>
+                    <input matInput formControlName="buildingNumber" required placeholder="4 أرقام" maxlength="4">
+                    <mat-error *ngIf="plaintiffForm.get('workAddress.buildingNumber')?.hasError('required')
+                                      && (plaintiffForm.get('workAddress.buildingNumber')?.touched || submitted)">رقم المبنى مطلوب</mat-error>
+                    <mat-error *ngIf="plaintiffForm.get('workAddress.buildingNumber')?.hasError('pattern')
+                                      && (plaintiffForm.get('workAddress.buildingNumber')?.touched || submitted)">رقم المبنى يجب أن يكون 4 أرقام</mat-error>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="form-field">
+                    <mat-label>رقم الوحدة</mat-label>
+                    <input matInput formControlName="unitNumber" required placeholder="أرقام فقط">
+                    <mat-error *ngIf="plaintiffForm.get('workAddress.unitNumber')?.hasError('required')
+                                      && (plaintiffForm.get('workAddress.unitNumber')?.touched || submitted)">رقم الوحدة مطلوب</mat-error>
+                    <mat-error *ngIf="plaintiffForm.get('workAddress.unitNumber')?.hasError('pattern')
+                                      && (plaintiffForm.get('workAddress.unitNumber')?.touched || submitted)">رقم الوحدة يجب أن يكون أرقام فقط</mat-error>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="form-field">
+                    <mat-label>الرمز البريدي</mat-label>
+                    <input matInput formControlName="postalCode" required placeholder="5 أرقام" maxlength="5">
+                    <mat-error *ngIf="plaintiffForm.get('workAddress.postalCode')?.hasError('required')
+                                      && (plaintiffForm.get('workAddress.postalCode')?.touched || submitted)">الرمز البريدي مطلوب</mat-error>
+                    <mat-error *ngIf="plaintiffForm.get('workAddress.postalCode')?.hasError('pattern')
+                                      && (plaintiffForm.get('workAddress.postalCode')?.touched || submitted)">الرمز البريدي يجب أن يكون 5 أرقام</mat-error>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="form-field">
+                    <mat-label>الرمز الإضافي</mat-label>
+                    <input matInput formControlName="additionalCode" required placeholder="4 أرقام" maxlength="4">
+                    <mat-error *ngIf="plaintiffForm.get('workAddress.additionalCode')?.hasError('required')
+                                      && (plaintiffForm.get('workAddress.additionalCode')?.touched || submitted)">الرمز الإضافي مطلوب</mat-error>
+                    <mat-error *ngIf="plaintiffForm.get('workAddress.additionalCode')?.hasError('pattern')
+                                      && (plaintiffForm.get('workAddress.additionalCode')?.touched || submitted)">الرمز الإضافي يجب أن يكون 4 أرقام</mat-error>
+                  </mat-form-field>
+                </div>
+              </div>
+
+              <!-- عنوان المؤسسة - Business Owner Only - SRS Section 4.3.7 -->
+              <div class="address-section" formGroupName="businessAddress">
+                <h4>عنوان المؤسسة <span class="required-indicator">*</span></h4>
+                <div class="form-row">
+                  <mat-form-field appearance="outline" class="form-field">
+                    <mat-label>المنطقة</mat-label>
+                    <mat-select formControlName="regionId" required (selectionChange)="onBusinessRegionChange($event.value)">
+                      <mat-option *ngFor="let region of regions" [value]="region.id">
+                        {{ region.nameAr }}
+                      </mat-option>
+                    </mat-select>
+                    <mat-error *ngIf="plaintiffForm.get('businessAddress.regionId')?.hasError('required')
+                                      && (plaintiffForm.get('businessAddress.regionId')?.touched || submitted)">المنطقة مطلوبة</mat-error>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="form-field">
+                    <mat-label>المدينة</mat-label>
+                    <mat-select formControlName="cityId" required (selectionChange)="onCityChange()">
+                      <mat-option *ngFor="let city of businessCities" [value]="city.id">
+                        {{ city.nameAr }}
+                      </mat-option>
+                    </mat-select>
+                    <mat-error *ngIf="plaintiffForm.get('businessAddress.cityId')?.hasError('required')
+                                      && (plaintiffForm.get('businessAddress.cityId')?.touched || submitted)">المدينة مطلوبة</mat-error>
+                  </mat-form-field>
+                </div>
+
+                <div class="form-row">
+                  <mat-form-field appearance="outline" class="form-field">
+                    <mat-label>الحي</mat-label>
+                    <input matInput formControlName="districtId" required maxlength="100">
+                    <mat-error *ngIf="plaintiffForm.get('businessAddress.districtId')?.hasError('required')
+                                      && (plaintiffForm.get('businessAddress.districtId')?.touched || submitted)">الحي مطلوب</mat-error>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="form-field">
+                    <mat-label>الشارع</mat-label>
+                    <input matInput formControlName="street" required maxlength="200">
+                    <mat-error *ngIf="plaintiffForm.get('businessAddress.street')?.hasError('required')
+                                      && (plaintiffForm.get('businessAddress.street')?.touched || submitted)">الشارع مطلوب</mat-error>
+                  </mat-form-field>
+                </div>
+
+                <div class="form-row">
+                  <mat-form-field appearance="outline" class="form-field">
+                    <mat-label>رقم المبنى</mat-label>
+                    <input matInput formControlName="buildingNumber" required placeholder="4 أرقام" maxlength="4">
+                    <mat-error *ngIf="plaintiffForm.get('businessAddress.buildingNumber')?.hasError('required')
+                                      && (plaintiffForm.get('businessAddress.buildingNumber')?.touched || submitted)">رقم المبنى مطلوب</mat-error>
+                    <mat-error *ngIf="plaintiffForm.get('businessAddress.buildingNumber')?.hasError('pattern')
+                                      && (plaintiffForm.get('businessAddress.buildingNumber')?.touched || submitted)">رقم المبنى يجب أن يكون 4 أرقام</mat-error>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="form-field">
+                    <mat-label>رقم الوحدة</mat-label>
+                    <input matInput formControlName="unitNumber" required placeholder="أرقام فقط">
+                    <mat-error *ngIf="plaintiffForm.get('businessAddress.unitNumber')?.hasError('required')
+                                      && (plaintiffForm.get('businessAddress.unitNumber')?.touched || submitted)">رقم الوحدة مطلوب</mat-error>
+                    <mat-error *ngIf="plaintiffForm.get('businessAddress.unitNumber')?.hasError('pattern')
+                                      && (plaintiffForm.get('businessAddress.unitNumber')?.touched || submitted)">رقم الوحدة يجب أن يكون أرقام فقط</mat-error>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="form-field">
+                    <mat-label>الرمز البريدي</mat-label>
+                    <input matInput formControlName="postalCode" required placeholder="5 أرقام" maxlength="5">
+                    <mat-error *ngIf="plaintiffForm.get('businessAddress.postalCode')?.hasError('required')
+                                      && (plaintiffForm.get('businessAddress.postalCode')?.touched || submitted)">الرمز البريدي مطلوب</mat-error>
+                    <mat-error *ngIf="plaintiffForm.get('businessAddress.postalCode')?.hasError('pattern')
+                                      && (plaintiffForm.get('businessAddress.postalCode')?.touched || submitted)">الرمز البريدي يجب أن يكون 5 أرقام</mat-error>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="form-field">
+                    <mat-label>الرمز الإضافي</mat-label>
+                    <input matInput formControlName="additionalCode" required placeholder="4 أرقام" maxlength="4">
+                    <mat-error *ngIf="plaintiffForm.get('businessAddress.additionalCode')?.hasError('required')
+                                      && (plaintiffForm.get('businessAddress.additionalCode')?.touched || submitted)">الرمز الإضافي مطلوب</mat-error>
+                    <mat-error *ngIf="plaintiffForm.get('businessAddress.additionalCode')?.hasError('pattern')
+                                      && (plaintiffForm.get('businessAddress.additionalCode')?.touched || submitted)">الرمز الإضافي يجب أن يكون 4 أرقام</mat-error>
+                  </mat-form-field>
+                </div>
+              </div>
+            </ng-container>
+
+            <!-- Registered Company Fields (Type 4) - SRS Section 4.4 -->
+            <ng-container *ngIf="isRegisteredCompany()">
+              <div class="form-row">
+                <mat-form-field appearance="outline" class="form-field">
+                  <mat-label>رقم السجل التجاري</mat-label>
+                  <input matInput formControlName="commercialRegNumber" required placeholder="10 أرقام">
+                  <mat-error *ngIf="plaintiffForm.get('commercialRegNumber')?.hasError('required')
+                                    && (plaintiffForm.get('commercialRegNumber')?.touched || submitted)">رقم السجل التجاري مطلوب</mat-error>
+                  <mat-error *ngIf="plaintiffForm.get('commercialRegNumber')?.hasError('commercialRegNumber')">رقم السجل التجاري يجب أن يكون 10 أرقام فقط</mat-error>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="form-field">
+                  <mat-label>اسم الشركة</mat-label>
+                  <input matInput formControlName="companyName" required>
+                  <mat-error *ngIf="plaintiffForm.get('companyName')?.hasError('required')
+                                    && (plaintiffForm.get('companyName')?.touched || submitted)">اسم الشركة مطلوب</mat-error>
+                  <mat-error *ngIf="plaintiffForm.get('companyName')?.hasError('arabicOnly')">اسم الشركة يجب أن يكون بالعربية فقط</mat-error>
+                  <mat-error *ngIf="plaintiffForm.get('companyName')?.hasError('maxlength')">اسم الشركة يجب ألا يتجاوز 200 حرف</mat-error>
+                </mat-form-field>
+              </div>
+
+              <div class="form-row">
+                <mat-form-field appearance="outline" class="form-field">
+                  <mat-label>تاريخ بداية السجل</mat-label>
+                  <input matInput [matDatepicker]="regStartPicker" formControlName="crStartDate">
+                  <mat-datepicker-toggle matSuffix [for]="regStartPicker"></mat-datepicker-toggle>
+                  <mat-datepicker #regStartPicker></mat-datepicker>
+                  <mat-error *ngIf="plaintiffForm.get('crStartDate')?.hasError('required')
+                                    && (plaintiffForm.get('crStartDate')?.touched || submitted)">تاريخ بداية السجل مطلوب</mat-error>
+                  <mat-error *ngIf="plaintiffForm.get('crStartDate')?.hasError('notFutureDate')">تاريخ بداية السجل لا يمكن أن يكون في المستقبل</mat-error>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="form-field">
+                  <mat-label>تاريخ نهاية السجل</mat-label>
+                  <input matInput [matDatepicker]="regEndPicker" formControlName="crEndDate">
+                  <mat-datepicker-toggle matSuffix [for]="regEndPicker"></mat-datepicker-toggle>
+                  <mat-datepicker #regEndPicker></mat-datepicker>
+                  <mat-error *ngIf="plaintiffForm.get('crEndDate')?.hasError('required')
+                                    && (plaintiffForm.get('crEndDate')?.touched || submitted)">تاريخ نهاية السجل مطلوب</mat-error>
+                  <mat-error *ngIf="plaintiffForm.get('crEndDate')?.hasError('dateAfter')">تاريخ نهاية السجل يجب أن يكون أكبر من تاريخ البداية</mat-error>
+                </mat-form-field>
+              </div>
+
+              <!-- Company Address - SRS 4.4 (All Fields Required) -->
+              <h4>عنوان الشركة <span class="required-indicator">*</span></h4>
+              <div class="address-section" formGroupName="companyAddress">
+                <div class="form-row">
+                  <mat-form-field appearance="outline" class="form-field">
+                    <mat-label>المنطقة</mat-label>
+                    <mat-select formControlName="regionId" (selectionChange)="onCompanyRegionChange($event.value)">
+                      <mat-option *ngFor="let region of regions" [value]="region.id">
+                        {{ region.nameAr }}
+                      </mat-option>
+                    </mat-select>
+                    <mat-error *ngIf="plaintiffForm.get('companyAddress.regionId')?.hasError('required')
+                                      && (plaintiffForm.get('companyAddress.regionId')?.touched || submitted)">المنطقة مطلوبة</mat-error>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="form-field">
+                    <mat-label>المدينة</mat-label>
+                    <mat-select formControlName="cityId">
+                      <mat-option *ngFor="let city of companyCities" [value]="city.id">
+                        {{ city.nameAr }}
+                      </mat-option>
+                    </mat-select>
+                    <mat-error *ngIf="plaintiffForm.get('companyAddress.cityId')?.hasError('required')
+                                      && (plaintiffForm.get('companyAddress.cityId')?.touched || submitted)">المدينة مطلوبة</mat-error>
+                  </mat-form-field>
+                </div>
+
+                <div class="form-row">
+                  <mat-form-field appearance="outline" class="form-field">
+                    <mat-label>الحي</mat-label>
+                    <input matInput formControlName="districtId">
+                    <mat-error *ngIf="plaintiffForm.get('companyAddress.districtId')?.hasError('required')
+                                      && (plaintiffForm.get('companyAddress.districtId')?.touched || submitted)">الحي مطلوب</mat-error>
+                    <mat-error *ngIf="plaintiffForm.get('companyAddress.districtId')?.hasError('maxlength')">الحي يجب ألا يتجاوز 100 حرف</mat-error>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="form-field">
+                    <mat-label>الشارع</mat-label>
+                    <input matInput formControlName="street">
+                    <mat-error *ngIf="plaintiffForm.get('companyAddress.street')?.hasError('required')
+                                      && (plaintiffForm.get('companyAddress.street')?.touched || submitted)">الشارع مطلوب</mat-error>
+                    <mat-error *ngIf="plaintiffForm.get('companyAddress.street')?.hasError('maxlength')">الشارع يجب ألا يتجاوز 200 حرف</mat-error>
+                  </mat-form-field>
+                </div>
+
+                <div class="form-row">
+                  <mat-form-field appearance="outline" class="form-field">
+                    <mat-label>رقم المبنى</mat-label>
+                    <input matInput formControlName="buildingNumber" placeholder="4 أرقام">
+                    <mat-error *ngIf="plaintiffForm.get('companyAddress.buildingNumber')?.hasError('required')
+                                      && (plaintiffForm.get('companyAddress.buildingNumber')?.touched || submitted)">رقم المبنى مطلوب</mat-error>
+                    <mat-error *ngIf="plaintiffForm.get('companyAddress.buildingNumber')?.hasError('pattern')">رقم المبنى يجب أن يكون 4 أرقام فقط</mat-error>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="form-field">
+                    <mat-label>رقم الوحدة</mat-label>
+                    <input matInput formControlName="unitNumber" placeholder="أرقام فقط">
+                    <mat-error *ngIf="plaintiffForm.get('companyAddress.unitNumber')?.hasError('required')
+                                      && (plaintiffForm.get('companyAddress.unitNumber')?.touched || submitted)">رقم الوحدة مطلوب</mat-error>
+                    <mat-error *ngIf="plaintiffForm.get('companyAddress.unitNumber')?.hasError('pattern')">رقم الوحدة يجب أن يكون أرقام فقط</mat-error>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="form-field">
+                    <mat-label>الرمز البريدي</mat-label>
+                    <input matInput formControlName="postalCode" placeholder="5 أرقام">
+                    <mat-error *ngIf="plaintiffForm.get('companyAddress.postalCode')?.hasError('required')
+                                      && (plaintiffForm.get('companyAddress.postalCode')?.touched || submitted)">الرمز البريدي مطلوب</mat-error>
+                    <mat-error *ngIf="plaintiffForm.get('companyAddress.postalCode')?.hasError('pattern')">الرمز البريدي يجب أن يكون 5 أرقام فقط</mat-error>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="form-field">
+                    <mat-label>الرقم الإضافي</mat-label>
+                    <input matInput formControlName="additionalCode" placeholder="4 أرقام">
+                    <mat-error *ngIf="plaintiffForm.get('companyAddress.additionalCode')?.hasError('required')
+                                      && (plaintiffForm.get('companyAddress.additionalCode')?.touched || submitted)">الرقم الإضافي مطلوب</mat-error>
+                    <mat-error *ngIf="plaintiffForm.get('companyAddress.additionalCode')?.hasError('pattern')">الرقم الإضافي يجب أن يكون 4 أرقام فقط</mat-error>
+                  </mat-form-field>
+                </div>
+              </div>
+            </ng-container>
+
+            <!-- Unregistered Company Fields (Type 5) - SRS Section 4.5 -->
+            <ng-container *ngIf="isUnregisteredCompany()">
+              <div class="form-row">
+                <mat-form-field appearance="outline" class="form-field">
+                  <mat-label>رقم السجل التجاري</mat-label>
+                  <input matInput formControlName="commercialRegNumber" required maxlength="20">
+                  <mat-error *ngIf="plaintiffForm.get('commercialRegNumber')?.hasError('required')
+                                    && (plaintiffForm.get('commercialRegNumber')?.touched || submitted)">رقم السجل التجاري مطلوب</mat-error>
+                  <mat-error *ngIf="plaintiffForm.get('commercialRegNumber')?.hasError('maxlength')
+                                    && (plaintiffForm.get('commercialRegNumber')?.touched || submitted)">رقم السجل التجاري يجب ألا يتجاوز 20 حرف</mat-error>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="form-field">
+                  <mat-label>اسم الشركة</mat-label>
+                  <input matInput formControlName="unregisteredCompanyName" required maxlength="200">
+                  <mat-error *ngIf="plaintiffForm.get('unregisteredCompanyName')?.hasError('required')
+                                    && (plaintiffForm.get('unregisteredCompanyName')?.touched || submitted)">اسم الشركة مطلوب</mat-error>
+                  <mat-error *ngIf="plaintiffForm.get('unregisteredCompanyName')?.hasError('maxlength')
+                                    && (plaintiffForm.get('unregisteredCompanyName')?.touched || submitted)">اسم الشركة يجب ألا يتجاوز 200 حرف</mat-error>
+                </mat-form-field>
+              </div>
+
+              <div class="form-row">
+                <mat-form-field appearance="outline" class="form-field">
+                  <mat-label>الدولة</mat-label>
+                  <mat-select formControlName="unregisteredCountryId" required>
+                    <mat-option *ngFor="let country of countries" [value]="country.id">
+                      {{ country.nameAr }}
+                    </mat-option>
+                  </mat-select>
+                  <mat-error *ngIf="plaintiffForm.get('unregisteredCountryId')?.hasError('required')
+                                    && (plaintiffForm.get('unregisteredCountryId')?.touched || submitted)">الدولة مطلوبة</mat-error>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="form-field">
+                  <mat-label>المدينة</mat-label>
+                  <input matInput formControlName="unregisteredCity" required maxlength="100">
+                  <mat-error *ngIf="plaintiffForm.get('unregisteredCity')?.hasError('required')
+                                    && (plaintiffForm.get('unregisteredCity')?.touched || submitted)">المدينة مطلوبة</mat-error>
+                  <mat-error *ngIf="plaintiffForm.get('unregisteredCity')?.hasError('maxlength')
+                                    && (plaintiffForm.get('unregisteredCity')?.touched || submitted)">المدينة يجب ألا تتجاوز 100 حرف</mat-error>
+                </mat-form-field>
+              </div>
+
+              <div class="form-row">
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>وصف تقريبي للشركة</mat-label>
+                  <textarea matInput formControlName="unregisteredDescription" rows="3" required maxlength="1000"
+                            placeholder="وصف الشركة (الحد الأقصى 1000 حرف)"></textarea>
+                  <mat-hint align="end">{{ plaintiffForm.get('unregisteredDescription')?.value?.length || 0 }}/1000</mat-hint>
+                  <mat-error *ngIf="plaintiffForm.get('unregisteredDescription')?.hasError('required')
+                                    && (plaintiffForm.get('unregisteredDescription')?.touched || submitted)">وصف تقريبي للشركة مطلوب</mat-error>
+                  <mat-error *ngIf="plaintiffForm.get('unregisteredDescription')?.hasError('maxlength')
+                                    && (plaintiffForm.get('unregisteredDescription')?.touched || submitted)">وصف الشركة يجب ألا يتجاوز 1000 حرف</mat-error>
+                </mat-form-field>
+              </div>
+            </ng-container>
+
+            <!-- NGO/Charity Fields (Type 7) - SRS Section 4.7 -->
+            <ng-container *ngIf="isNGO()">
+              <div class="form-row">
+                <mat-form-field appearance="outline" class="form-field">
+                  <mat-label>اسم الجمعية/المؤسسة</mat-label>
+                  <input matInput formControlName="ngoName" required maxlength="200">
+                  <mat-error *ngIf="plaintiffForm.get('ngoName')?.hasError('required')
+                                    && (plaintiffForm.get('ngoName')?.touched || submitted)">اسم الجمعية/المؤسسة مطلوب</mat-error>
+                  <mat-error *ngIf="plaintiffForm.get('ngoName')?.hasError('arabicOnly')
+                                    && (plaintiffForm.get('ngoName')?.touched || submitted)">اسم الجمعية/المؤسسة يجب أن يكون بالعربية والأرقام فقط</mat-error>
+                  <mat-error *ngIf="plaintiffForm.get('ngoName')?.hasError('maxlength')
+                                    && (plaintiffForm.get('ngoName')?.touched || submitted)">اسم الجمعية/المؤسسة يجب ألا يتجاوز 200 حرف</mat-error>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="form-field">
+                  <mat-label>رقم الترخيص</mat-label>
+                  <input matInput formControlName="licenseNumber" required placeholder="10 أرقام" maxlength="10">
+                  <mat-error *ngIf="plaintiffForm.get('licenseNumber')?.hasError('required')
+                                    && (plaintiffForm.get('licenseNumber')?.touched || submitted)">رقم الترخيص مطلوب</mat-error>
+                  <mat-error *ngIf="plaintiffForm.get('licenseNumber')?.hasError('licenseNumber')
+                                    && (plaintiffForm.get('licenseNumber')?.touched || submitted)">رقم الترخيص يجب أن يكون 10 أرقام فقط</mat-error>
+                </mat-form-field>
+              </div>
+
+              <div class="form-row">
+                <mat-form-field appearance="outline" class="form-field">
+                  <mat-label>مصدر الترخيص</mat-label>
+                  <mat-select formControlName="licenseSourceId" required>
+                    <mat-option *ngFor="let source of licenseSourceTypes" [value]="source.id">
+                      {{ source.nameAr }}
+                    </mat-option>
+                  </mat-select>
+                  <mat-error *ngIf="plaintiffForm.get('licenseSourceId')?.hasError('required')
+                                    && (plaintiffForm.get('licenseSourceId')?.touched || submitted)">مصدر الترخيص مطلوب</mat-error>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="form-field">
+                  <mat-label>تاريخ الترخيص</mat-label>
+                  <input matInput [matDatepicker]="licenseDatePicker" formControlName="licenseDate" required>
+                  <mat-datepicker-toggle matSuffix [for]="licenseDatePicker"></mat-datepicker-toggle>
+                  <mat-datepicker #licenseDatePicker></mat-datepicker>
+                  <mat-error *ngIf="plaintiffForm.get('licenseDate')?.hasError('required')
+                                    && (plaintiffForm.get('licenseDate')?.touched || submitted)">تاريخ الترخيص مطلوب</mat-error>
+                  <mat-error *ngIf="plaintiffForm.get('licenseDate')?.hasError('notFutureDate')
+                                    && (plaintiffForm.get('licenseDate')?.touched || submitted)">تاريخ الترخيص لا يمكن أن يكون في المستقبل</mat-error>
+                </mat-form-field>
+              </div>
+
+              <!-- NGO Address - SRS Section 4.7 - ALL FIELDS REQUIRED -->
+              <h4>عنوان الجمعية/المؤسسة <span class="required-indicator">*</span></h4>
+              <div class="address-section" formGroupName="ngoAddress">
+                <div class="form-row">
+                  <mat-form-field appearance="outline" class="form-field">
+                    <mat-label>المنطقة</mat-label>
+                    <mat-select formControlName="regionId" required (selectionChange)="onNgoRegionChange($event.value)">
+                      <mat-option *ngFor="let region of regions" [value]="region.id">
+                        {{ region.nameAr }}
+                      </mat-option>
+                    </mat-select>
+                    <mat-error *ngIf="plaintiffForm.get('ngoAddress.regionId')?.hasError('required')
+                                      && (plaintiffForm.get('ngoAddress.regionId')?.touched || submitted)">المنطقة مطلوبة</mat-error>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="form-field">
+                    <mat-label>المدينة</mat-label>
+                    <mat-select formControlName="cityId" required>
+                      <mat-option *ngFor="let city of ngoCities" [value]="city.id">
+                        {{ city.nameAr }}
+                      </mat-option>
+                    </mat-select>
+                    <mat-error *ngIf="plaintiffForm.get('ngoAddress.cityId')?.hasError('required')
+                                      && (plaintiffForm.get('ngoAddress.cityId')?.touched || submitted)">المدينة مطلوبة</mat-error>
+                  </mat-form-field>
+                </div>
+
+                <div class="form-row">
+                  <mat-form-field appearance="outline" class="form-field">
+                    <mat-label>الحي</mat-label>
+                    <input matInput formControlName="districtId" required maxlength="100">
+                    <mat-error *ngIf="plaintiffForm.get('ngoAddress.districtId')?.hasError('required')
+                                      && (plaintiffForm.get('ngoAddress.districtId')?.touched || submitted)">الحي مطلوب</mat-error>
+                    <mat-error *ngIf="plaintiffForm.get('ngoAddress.districtId')?.hasError('maxlength')
+                                      && (plaintiffForm.get('ngoAddress.districtId')?.touched || submitted)">الحي يجب ألا يتجاوز 100 حرف</mat-error>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="form-field">
+                    <mat-label>الشارع</mat-label>
+                    <input matInput formControlName="street" required maxlength="200">
+                    <mat-error *ngIf="plaintiffForm.get('ngoAddress.street')?.hasError('required')
+                                      && (plaintiffForm.get('ngoAddress.street')?.touched || submitted)">الشارع مطلوب</mat-error>
+                    <mat-error *ngIf="plaintiffForm.get('ngoAddress.street')?.hasError('maxlength')
+                                      && (plaintiffForm.get('ngoAddress.street')?.touched || submitted)">الشارع يجب ألا يتجاوز 200 حرف</mat-error>
+                  </mat-form-field>
+                </div>
+
+                <div class="form-row">
+                  <mat-form-field appearance="outline" class="form-field">
+                    <mat-label>رقم المبنى</mat-label>
+                    <input matInput formControlName="buildingNumber" required placeholder="4 أرقام" maxlength="4">
+                    <mat-error *ngIf="plaintiffForm.get('ngoAddress.buildingNumber')?.hasError('required')
+                                      && (plaintiffForm.get('ngoAddress.buildingNumber')?.touched || submitted)">رقم المبنى مطلوب</mat-error>
+                    <mat-error *ngIf="plaintiffForm.get('ngoAddress.buildingNumber')?.hasError('pattern')
+                                      && (plaintiffForm.get('ngoAddress.buildingNumber')?.touched || submitted)">رقم المبنى يجب أن يكون 4 أرقام فقط</mat-error>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="form-field">
+                    <mat-label>رقم الوحدة</mat-label>
+                    <input matInput formControlName="unitNumber" required placeholder="أرقام فقط">
+                    <mat-error *ngIf="plaintiffForm.get('ngoAddress.unitNumber')?.hasError('required')
+                                      && (plaintiffForm.get('ngoAddress.unitNumber')?.touched || submitted)">رقم الوحدة مطلوب</mat-error>
+                    <mat-error *ngIf="plaintiffForm.get('ngoAddress.unitNumber')?.hasError('pattern')
+                                      && (plaintiffForm.get('ngoAddress.unitNumber')?.touched || submitted)">رقم الوحدة يجب أن يكون أرقام فقط</mat-error>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="form-field">
+                    <mat-label>الرمز البريدي</mat-label>
+                    <input matInput formControlName="postalCode" required placeholder="5 أرقام" maxlength="5">
+                    <mat-error *ngIf="plaintiffForm.get('ngoAddress.postalCode')?.hasError('required')
+                                      && (plaintiffForm.get('ngoAddress.postalCode')?.touched || submitted)">الرمز البريدي مطلوب</mat-error>
+                    <mat-error *ngIf="plaintiffForm.get('ngoAddress.postalCode')?.hasError('pattern')
+                                      && (plaintiffForm.get('ngoAddress.postalCode')?.touched || submitted)">الرمز البريدي يجب أن يكون 5 أرقام فقط</mat-error>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="form-field">
+                    <mat-label>الرمز الإضافي</mat-label>
+                    <input matInput formControlName="additionalCode" required placeholder="4 أرقام" maxlength="4">
+                    <mat-error *ngIf="plaintiffForm.get('ngoAddress.additionalCode')?.hasError('required')
+                                      && (plaintiffForm.get('ngoAddress.additionalCode')?.touched || submitted)">الرمز الإضافي مطلوب</mat-error>
+                    <mat-error *ngIf="plaintiffForm.get('ngoAddress.additionalCode')?.hasError('pattern')
+                                      && (plaintiffForm.get('ngoAddress.additionalCode')?.touched || submitted)">الرمز الإضافي يجب أن يكون 4 أرقام فقط</mat-error>
+                  </mat-form-field>
+                </div>
+              </div>
+            </ng-container>
+
+            <!-- Government Agency Fields (Type 6) - SRS Section 4.6 -->
+            <ng-container *ngIf="isGovernmentAgency()">
+              <div class="form-row">
+                <mat-form-field appearance="outline" class="form-field">
+                  <mat-label>الجهة الحكومية</mat-label>
+                  <mat-select formControlName="governmentAgencyId" required (selectionChange)="onGovernmentAgencyChange($event.value)">
+                    <mat-option *ngFor="let agency of governmentAgencies" [value]="agency.id">
+                      {{ agency.nameAr }}
+                    </mat-option>
+                  </mat-select>
+                  <mat-error *ngIf="plaintiffForm.get('governmentAgencyId')?.hasError('required')
+                                    && (plaintiffForm.get('governmentAgencyId')?.touched || submitted)">الجهة الحكومية مطلوبة</mat-error>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="form-field">
+                  <mat-label>المقر</mat-label>
+                  <input matInput formControlName="headquarters" required [readonly]="isHeadquartersReadonly">
+                  <mat-error *ngIf="plaintiffForm.get('headquarters')?.hasError('required')
+                                    && (plaintiffForm.get('headquarters')?.touched || submitted)">المقر مطلوب</mat-error>
+                  <mat-error *ngIf="plaintiffForm.get('headquarters')?.hasError('maxlength')">المقر يجب ألا يتجاوز 200 حرف</mat-error>
+                </mat-form-field>
+              </div>
+
+              <div class="form-row">
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>بيان إضافي</mat-label>
+                  <textarea matInput formControlName="additionalStatement" rows="3" maxlength="4000"
+                            placeholder="بيان إضافي (الحد الأقصى 4000 حرف)"></textarea>
+                  <mat-hint align="end">{{ plaintiffForm.get('additionalStatement')?.value?.length || 0 }}/4000</mat-hint>
+                  <mat-error *ngIf="plaintiffForm.get('additionalStatement')?.hasError('maxlength')">البيان الإضافي يجب ألا يتجاوز 4000 حرف</mat-error>
+                </mat-form-field>
+              </div>
+            </ng-container>
+
+            <!-- Waqf Fields (Type 8) - SRS Section 4.8 -->
+            <ng-container *ngIf="isWaqf()">
+              <div class="form-row">
+                <mat-form-field appearance="outline" class="form-field">
+                  <mat-label>اسم الوقف</mat-label>
+                  <input matInput formControlName="waqfName" required maxlength="200">
+                  <mat-error *ngIf="plaintiffForm.get('waqfName')?.hasError('required')
+                                    && (plaintiffForm.get('waqfName')?.touched || submitted)">اسم الوقف مطلوب</mat-error>
+                  <mat-error *ngIf="plaintiffForm.get('waqfName')?.hasError('arabicOnly')
+                                    && (plaintiffForm.get('waqfName')?.touched || submitted)">اسم الوقف يجب أن يكون بالعربية والأرقام فقط</mat-error>
+                  <mat-error *ngIf="plaintiffForm.get('waqfName')?.hasError('maxlength')
+                                    && (plaintiffForm.get('waqfName')?.touched || submitted)">اسم الوقف يجب ألا يتجاوز 200 حرف</mat-error>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="form-field">
+                  <mat-label>رقم صك المحكمة</mat-label>
+                  <input matInput formControlName="courtDeedNumber" required placeholder="10 أرقام" maxlength="10">
+                  <mat-error *ngIf="plaintiffForm.get('courtDeedNumber')?.hasError('required')
+                                    && (plaintiffForm.get('courtDeedNumber')?.touched || submitted)">رقم صك المحكمة مطلوب</mat-error>
+                  <mat-error *ngIf="plaintiffForm.get('courtDeedNumber')?.hasError('courtDeedNumber')
+                                    && (plaintiffForm.get('courtDeedNumber')?.touched || submitted)">رقم صك المحكمة يجب أن يكون 10 أرقام فقط</mat-error>
+                </mat-form-field>
+              </div>
+
+              <div class="form-row">
+                <mat-form-field appearance="outline" class="form-field">
+                  <mat-label>تاريخ صك المحكمة</mat-label>
+                  <input matInput [matDatepicker]="waqfDatePicker" formControlName="deedDate" required>
+                  <mat-datepicker-toggle matSuffix [for]="waqfDatePicker"></mat-datepicker-toggle>
+                  <mat-datepicker #waqfDatePicker></mat-datepicker>
+                  <mat-error *ngIf="plaintiffForm.get('deedDate')?.hasError('required')
+                                    && (plaintiffForm.get('deedDate')?.touched || submitted)">تاريخ صك المحكمة مطلوب</mat-error>
+                  <mat-error *ngIf="plaintiffForm.get('deedDate')?.hasError('notFutureDate')
+                                    && (plaintiffForm.get('deedDate')?.touched || submitted)">تاريخ صك المحكمة لا يمكن أن يكون في المستقبل</mat-error>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="form-field">
+                  <mat-label>مصدر الصك</mat-label>
+                  <input matInput formControlName="deedSource" required maxlength="100">
+                  <mat-error *ngIf="plaintiffForm.get('deedSource')?.hasError('required')
+                                    && (plaintiffForm.get('deedSource')?.touched || submitted)">مصدر الصك مطلوب</mat-error>
+                  <mat-error *ngIf="plaintiffForm.get('deedSource')?.hasError('maxlength')
+                                    && (plaintiffForm.get('deedSource')?.touched || submitted)">مصدر الصك يجب ألا يتجاوز 100 حرف</mat-error>
+                </mat-form-field>
+              </div>
+
+              <div class="form-row">
+                <mat-form-field appearance="outline" class="form-field">
+                  <mat-label>نظارة الوقف</mat-label>
+                  <mat-select formControlName="waqfOversightType" required>
+                    <mat-option value="خاصة">خاصة (أهلية)</mat-option>
+                    <mat-option value="حكومية">حكومية</mat-option>
+                  </mat-select>
+                  <mat-error *ngIf="plaintiffForm.get('waqfOversightType')?.hasError('required')
+                                    && (plaintiffForm.get('waqfOversightType')?.touched || submitted)">نظارة الوقف مطلوبة</mat-error>
+                  <mat-error *ngIf="plaintiffForm.get('waqfOversightType')?.hasError('waqfOversightType')
+                                    && (plaintiffForm.get('waqfOversightType')?.touched || submitted)">نظارة الوقف يجب أن تكون 'خاصة' أو 'حكومية'</mat-error>
+                </mat-form-field>
+
+                <!-- Agency Name - BC03: shown when oversight is حكومية -->
+                <mat-form-field appearance="outline" class="form-field" *ngIf="showWaqfAgencyName">
+                  <mat-label>اسم الجهة</mat-label>
+                  <input matInput formControlName="waqfAgencyName" required maxlength="200">
+                  <mat-error *ngIf="plaintiffForm.get('waqfAgencyName')?.hasError('required')
+                                    && (plaintiffForm.get('waqfAgencyName')?.touched || submitted)">اسم الجهة مطلوب عند اختيار نظارة حكومية</mat-error>
+                  <mat-error *ngIf="plaintiffForm.get('waqfAgencyName')?.hasError('maxlength')
+                                    && (plaintiffForm.get('waqfAgencyName')?.touched || submitted)">اسم الجهة يجب ألا يتجاوز 200 حرف</mat-error>
+                </mat-form-field>
+              </div>
+
+              <div class="form-row">
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>وصف تقريبي للوقف</mat-label>
+                  <textarea matInput formControlName="waqfDescription" rows="3" required maxlength="200"
+                            placeholder="وصف الوقف (الحد الأقصى 200 حرف)"></textarea>
+                  <mat-hint align="end">{{ plaintiffForm.get('waqfDescription')?.value?.length || 0 }}/200</mat-hint>
+                  <mat-error *ngIf="plaintiffForm.get('waqfDescription')?.hasError('required')
+                                    && (plaintiffForm.get('waqfDescription')?.touched || submitted)">وصف تقريبي للوقف مطلوب</mat-error>
+                  <mat-error *ngIf="plaintiffForm.get('waqfDescription')?.hasError('maxlength')
+                                    && (plaintiffForm.get('waqfDescription')?.touched || submitted)">وصف الوقف يجب ألا يتجاوز 200 حرف</mat-error>
+                </mat-form-field>
+              </div>
+
+              <!-- Waqf Address - SRS Section 4.8 -->
+              <h4>عنوان الوقف <span class="required-indicator">*</span></h4>
+              <div class="address-section" formGroupName="waqfAddress">
+                <div class="form-row">
+                  <mat-form-field appearance="outline" class="form-field">
+                    <mat-label>المنطقة</mat-label>
+                    <mat-select formControlName="regionId" required (selectionChange)="onWaqfRegionChange($event.value)">
+                      <mat-option *ngFor="let region of regions" [value]="region.id">
+                        {{ region.nameAr }}
+                      </mat-option>
+                    </mat-select>
+                    <mat-error *ngIf="plaintiffForm.get('waqfAddress.regionId')?.hasError('required')
+                                      && (plaintiffForm.get('waqfAddress.regionId')?.touched || submitted)">المنطقة مطلوبة</mat-error>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="form-field">
+                    <mat-label>المدينة</mat-label>
+                    <mat-select formControlName="cityId" required>
+                      <mat-option *ngFor="let city of waqfCities" [value]="city.id">
+                        {{ city.nameAr }}
+                      </mat-option>
+                    </mat-select>
+                    <mat-error *ngIf="plaintiffForm.get('waqfAddress.cityId')?.hasError('required')
+                                      && (plaintiffForm.get('waqfAddress.cityId')?.touched || submitted)">المدينة مطلوبة</mat-error>
+                  </mat-form-field>
+                </div>
+
+                <div class="form-row">
+                  <mat-form-field appearance="outline" class="form-field">
+                    <mat-label>الحي</mat-label>
+                    <input matInput formControlName="districtId" required maxlength="100">
+                    <mat-error *ngIf="plaintiffForm.get('waqfAddress.districtId')?.hasError('required')
+                                      && (plaintiffForm.get('waqfAddress.districtId')?.touched || submitted)">الحي مطلوب</mat-error>
+                    <mat-error *ngIf="plaintiffForm.get('waqfAddress.districtId')?.hasError('maxlength')
+                                      && (plaintiffForm.get('waqfAddress.districtId')?.touched || submitted)">الحي يجب ألا يتجاوز 100 حرف</mat-error>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="form-field">
+                    <mat-label>الشارع</mat-label>
+                    <input matInput formControlName="street" required maxlength="200">
+                    <mat-error *ngIf="plaintiffForm.get('waqfAddress.street')?.hasError('required')
+                                      && (plaintiffForm.get('waqfAddress.street')?.touched || submitted)">الشارع مطلوب</mat-error>
+                    <mat-error *ngIf="plaintiffForm.get('waqfAddress.street')?.hasError('maxlength')
+                                      && (plaintiffForm.get('waqfAddress.street')?.touched || submitted)">الشارع يجب ألا يتجاوز 200 حرف</mat-error>
+                  </mat-form-field>
+                </div>
+
+                <div class="form-row">
+                  <mat-form-field appearance="outline" class="form-field">
+                    <mat-label>رقم المبنى</mat-label>
+                    <input matInput formControlName="buildingNumber" required placeholder="4 أرقام" maxlength="4">
+                    <mat-error *ngIf="plaintiffForm.get('waqfAddress.buildingNumber')?.hasError('required')
+                                      && (plaintiffForm.get('waqfAddress.buildingNumber')?.touched || submitted)">رقم المبنى مطلوب</mat-error>
+                    <mat-error *ngIf="plaintiffForm.get('waqfAddress.buildingNumber')?.hasError('pattern')
+                                      && (plaintiffForm.get('waqfAddress.buildingNumber')?.touched || submitted)">رقم المبنى يجب أن يكون 4 أرقام فقط</mat-error>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="form-field">
+                    <mat-label>رقم الوحدة</mat-label>
+                    <input matInput formControlName="unitNumber" required placeholder="أرقام فقط">
+                    <mat-error *ngIf="plaintiffForm.get('waqfAddress.unitNumber')?.hasError('required')
+                                      && (plaintiffForm.get('waqfAddress.unitNumber')?.touched || submitted)">رقم الوحدة مطلوب</mat-error>
+                    <mat-error *ngIf="plaintiffForm.get('waqfAddress.unitNumber')?.hasError('pattern')
+                                      && (plaintiffForm.get('waqfAddress.unitNumber')?.touched || submitted)">رقم الوحدة يجب أن يكون أرقام فقط</mat-error>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="form-field">
+                    <mat-label>الرمز البريدي</mat-label>
+                    <input matInput formControlName="postalCode" required placeholder="5 أرقام" maxlength="5">
+                    <mat-error *ngIf="plaintiffForm.get('waqfAddress.postalCode')?.hasError('required')
+                                      && (plaintiffForm.get('waqfAddress.postalCode')?.touched || submitted)">الرمز البريدي مطلوب</mat-error>
+                    <mat-error *ngIf="plaintiffForm.get('waqfAddress.postalCode')?.hasError('pattern')
+                                      && (plaintiffForm.get('waqfAddress.postalCode')?.touched || submitted)">الرمز البريدي يجب أن يكون 5 أرقام فقط</mat-error>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="form-field">
+                    <mat-label>الرمز الإضافي</mat-label>
+                    <input matInput formControlName="additionalCode" required placeholder="4 أرقام" maxlength="4">
+                    <mat-error *ngIf="plaintiffForm.get('waqfAddress.additionalCode')?.hasError('required')
+                                      && (plaintiffForm.get('waqfAddress.additionalCode')?.touched || submitted)">الرمز الإضافي مطلوب</mat-error>
+                    <mat-error *ngIf="plaintiffForm.get('waqfAddress.additionalCode')?.hasError('pattern')
+                                      && (plaintiffForm.get('waqfAddress.additionalCode')?.touched || submitted)">الرمز الإضافي يجب أن يكون 4 أرقام فقط</mat-error>
+                  </mat-form-field>
+                </div>
+              </div>
+            </ng-container>
+
+            <!-- Contact Information - Hidden for Waqf (Type 8), NGO (Type 7), Government Agency (Type 6), Registered Company (Type 4), and Unregistered Company (Type 5) -->
+            <ng-container *ngIf="!isWaqf() && !isNGO() && !isGovernmentAgency() && !isRegisteredCompany() && !isUnregisteredCompany()">
+              <h4>بيانات التواصل</h4>
+              <div class="form-row">
+                <mat-form-field appearance="outline" class="form-field">
+                  <mat-label>رقم الجوال</mat-label>
+                  <input matInput formControlName="mobileNumber" dir="ltr" placeholder="05xxxxxxxx">
+                  <mat-error *ngIf="plaintiffForm.get('mobileNumber')?.hasError('required')">رقم الجوال مطلوب</mat-error>
+                  <mat-error *ngIf="plaintiffForm.get('mobileNumber')?.hasError('mobileNumber')">رقم الجوال يجب أن يبدأ بـ 05 ويتكون من 10 أرقام</mat-error>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="form-field">
+                  <mat-label>البريد الإلكتروني</mat-label>
+                  <input matInput formControlName="email" type="email" dir="ltr">
+                  <mat-error *ngIf="plaintiffForm.get('email')?.hasError('email')">البريد الإلكتروني غير صحيح</mat-error>
+                  <mat-error *ngIf="plaintiffForm.get('email')?.hasError('maxlength')">البريد الإلكتروني يجب ألا يتجاوز 255 حرف</mat-error>
+                </mat-form-field>
+              </div>
+            </ng-container>
+
+            <!-- عنوان الإقامة - Individual types (1, 2) -->
+            <ng-container *ngIf="isIndividual()">
+              <div class="address-section" formGroupName="residenceAddress">
+                <h4>عنوان الإقامة<span *ngIf="isIndividual()" class="required-indicator"> *</span></h4>
+                <div class="form-row">
+                  <mat-form-field appearance="outline" class="form-field">
+                    <mat-label>المنطقة</mat-label>
+                    <mat-select formControlName="regionId" (selectionChange)="onResidenceRegionChange($event.value)">
+                      <mat-option *ngFor="let region of regions" [value]="region.id">
+                        {{ region.nameAr }}
+                      </mat-option>
+                    </mat-select>
+                    <mat-error *ngIf="plaintiffForm.get('residenceAddress.regionId')?.hasError('required')
+                                      && (plaintiffForm.get('residenceAddress.regionId')?.touched || submitted)">المنطقة مطلوبة</mat-error>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="form-field">
+                    <mat-label>المدينة</mat-label>
+                    <mat-select formControlName="cityId" (selectionChange)="onCityChange()">
+                      <mat-option *ngFor="let city of residenceCities" [value]="city.id">
+                        {{ city.nameAr }}
+                      </mat-option>
+                    </mat-select>
+                    <mat-error *ngIf="plaintiffForm.get('residenceAddress.cityId')?.hasError('required')
+                                      && (plaintiffForm.get('residenceAddress.cityId')?.touched || submitted)">المدينة مطلوبة</mat-error>
+                  </mat-form-field>
+                </div>
+
+                <div class="form-row">
+                  <mat-form-field appearance="outline" class="form-field">
+                    <mat-label>الحي</mat-label>
+                    <input matInput formControlName="districtId">
+                    <mat-error *ngIf="plaintiffForm.get('residenceAddress.districtId')?.hasError('required')
+                                      && (plaintiffForm.get('residenceAddress.districtId')?.touched || submitted)">الحي مطلوب</mat-error>
+                    <mat-error *ngIf="plaintiffForm.get('residenceAddress.districtId')?.hasError('maxlength')">الحي يجب ألا يتجاوز 100 حرف</mat-error>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="form-field">
+                    <mat-label>الشارع</mat-label>
+                    <input matInput formControlName="street">
+                    <mat-error *ngIf="plaintiffForm.get('residenceAddress.street')?.hasError('required')
+                                      && (plaintiffForm.get('residenceAddress.street')?.touched || submitted)">الشارع مطلوب</mat-error>
+                    <mat-error *ngIf="plaintiffForm.get('residenceAddress.street')?.hasError('maxlength')">الشارع يجب ألا يتجاوز 200 حرف</mat-error>
+                  </mat-form-field>
+                </div>
+
+                <div class="form-row">
+                  <mat-form-field appearance="outline" class="form-field">
+                    <mat-label>رقم المبنى</mat-label>
+                    <input matInput formControlName="buildingNumber" placeholder="4 أرقام">
+                    <mat-error *ngIf="plaintiffForm.get('residenceAddress.buildingNumber')?.hasError('required')
+                                      && (plaintiffForm.get('residenceAddress.buildingNumber')?.touched || submitted)">رقم المبنى مطلوب</mat-error>
+                    <mat-error *ngIf="plaintiffForm.get('residenceAddress.buildingNumber')?.hasError('pattern')">رقم المبنى يجب أن يكون 4 أرقام فقط</mat-error>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="form-field">
+                    <mat-label>رقم الوحدة</mat-label>
+                    <input matInput formControlName="unitNumber" placeholder="أرقام فقط">
+                    <mat-error *ngIf="plaintiffForm.get('residenceAddress.unitNumber')?.hasError('required')
+                                      && (plaintiffForm.get('residenceAddress.unitNumber')?.touched || submitted)">رقم الوحدة مطلوب</mat-error>
+                    <mat-error *ngIf="plaintiffForm.get('residenceAddress.unitNumber')?.hasError('pattern')">رقم الوحدة يجب أن يكون أرقام فقط</mat-error>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="form-field">
+                    <mat-label>الرمز البريدي</mat-label>
+                    <input matInput formControlName="postalCode" placeholder="5 أرقام">
+                    <mat-error *ngIf="plaintiffForm.get('residenceAddress.postalCode')?.hasError('required')
+                                      && (plaintiffForm.get('residenceAddress.postalCode')?.touched || submitted)">الرمز البريدي مطلوب</mat-error>
+                    <mat-error *ngIf="plaintiffForm.get('residenceAddress.postalCode')?.hasError('pattern')">الرمز البريدي يجب أن يكون 5 أرقام فقط</mat-error>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="form-field">
+                    <mat-label>الرمز الإضافي</mat-label>
+                    <input matInput formControlName="additionalCode" placeholder="4 أرقام">
+                    <mat-error *ngIf="plaintiffForm.get('residenceAddress.additionalCode')?.hasError('required')
+                                      && (plaintiffForm.get('residenceAddress.additionalCode')?.touched || submitted)">الرمز الإضافي مطلوب</mat-error>
+                    <mat-error *ngIf="plaintiffForm.get('residenceAddress.additionalCode')?.hasError('pattern')">الرمز الإضافي يجب أن يكون 4 أرقام فقط</mat-error>
+                  </mat-form-field>
+                </div>
+              </div>
+
+              <!-- عنوان العمل - BC02: only when showWorkAddress (employment = خاص) -->
+              <div class="address-section" formGroupName="workAddress" *ngIf="showWorkAddress">
+                <h4>عنوان العمل <span class="required-indicator">*</span></h4>
+                <div class="form-row">
+                  <mat-form-field appearance="outline" class="form-field">
+                    <mat-label>المنطقة</mat-label>
+                    <mat-select formControlName="regionId" (selectionChange)="onWorkRegionChange($event.value)">
+                      <mat-option *ngFor="let region of regions" [value]="region.id">
+                        {{ region.nameAr }}
+                      </mat-option>
+                    </mat-select>
+                    <mat-error *ngIf="plaintiffForm.get('workAddress.regionId')?.hasError('required')
+                                      && (plaintiffForm.get('workAddress.regionId')?.touched || submitted)">المنطقة مطلوبة</mat-error>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="form-field">
+                    <mat-label>المدينة</mat-label>
+                    <mat-select formControlName="cityId" (selectionChange)="onCityChange()">
+                      <mat-option *ngFor="let city of workCities" [value]="city.id">
+                        {{ city.nameAr }}
+                      </mat-option>
+                    </mat-select>
+                    <mat-error *ngIf="plaintiffForm.get('workAddress.cityId')?.hasError('required')
+                                      && (plaintiffForm.get('workAddress.cityId')?.touched || submitted)">المدينة مطلوبة</mat-error>
+                  </mat-form-field>
+                </div>
+
+                <div class="form-row">
+                  <mat-form-field appearance="outline" class="form-field">
+                    <mat-label>الحي</mat-label>
+                    <input matInput formControlName="districtId">
+                    <mat-error *ngIf="plaintiffForm.get('workAddress.districtId')?.hasError('required')
+                                      && (plaintiffForm.get('workAddress.districtId')?.touched || submitted)">الحي مطلوب</mat-error>
+                    <mat-error *ngIf="plaintiffForm.get('workAddress.districtId')?.hasError('maxlength')">الحي يجب ألا يتجاوز 100 حرف</mat-error>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="form-field">
+                    <mat-label>الشارع</mat-label>
+                    <input matInput formControlName="street">
+                    <mat-error *ngIf="plaintiffForm.get('workAddress.street')?.hasError('required')
+                                      && (plaintiffForm.get('workAddress.street')?.touched || submitted)">الشارع مطلوب</mat-error>
+                    <mat-error *ngIf="plaintiffForm.get('workAddress.street')?.hasError('maxlength')">الشارع يجب ألا يتجاوز 200 حرف</mat-error>
+                  </mat-form-field>
+                </div>
+
+                <div class="form-row">
+                  <mat-form-field appearance="outline" class="form-field">
+                    <mat-label>رقم المبنى</mat-label>
+                    <input matInput formControlName="buildingNumber" placeholder="4 أرقام">
+                    <mat-error *ngIf="plaintiffForm.get('workAddress.buildingNumber')?.hasError('required')
+                                      && (plaintiffForm.get('workAddress.buildingNumber')?.touched || submitted)">رقم المبنى مطلوب</mat-error>
+                    <mat-error *ngIf="plaintiffForm.get('workAddress.buildingNumber')?.hasError('pattern')">رقم المبنى يجب أن يكون 4 أرقام فقط</mat-error>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="form-field">
+                    <mat-label>رقم الوحدة</mat-label>
+                    <input matInput formControlName="unitNumber" placeholder="أرقام فقط">
+                    <mat-error *ngIf="plaintiffForm.get('workAddress.unitNumber')?.hasError('required')
+                                      && (plaintiffForm.get('workAddress.unitNumber')?.touched || submitted)">رقم الوحدة مطلوب</mat-error>
+                    <mat-error *ngIf="plaintiffForm.get('workAddress.unitNumber')?.hasError('pattern')">رقم الوحدة يجب أن يكون أرقام فقط</mat-error>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="form-field">
+                    <mat-label>الرمز البريدي</mat-label>
+                    <input matInput formControlName="postalCode" placeholder="5 أرقام">
+                    <mat-error *ngIf="plaintiffForm.get('workAddress.postalCode')?.hasError('required')
+                                      && (plaintiffForm.get('workAddress.postalCode')?.touched || submitted)">الرمز البريدي مطلوب</mat-error>
+                    <mat-error *ngIf="plaintiffForm.get('workAddress.postalCode')?.hasError('pattern')">الرمز البريدي يجب أن يكون 5 أرقام فقط</mat-error>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="form-field">
+                    <mat-label>الرمز الإضافي</mat-label>
+                    <input matInput formControlName="additionalCode" placeholder="4 أرقام">
+                    <mat-error *ngIf="plaintiffForm.get('workAddress.additionalCode')?.hasError('required')
+                                      && (plaintiffForm.get('workAddress.additionalCode')?.touched || submitted)">الرمز الإضافي مطلوب</mat-error>
+                    <mat-error *ngIf="plaintiffForm.get('workAddress.additionalCode')?.hasError('pattern')">الرمز الإضافي يجب أن يكون 4 أرقام فقط</mat-error>
+                  </mat-form-field>
+                </div>
+              </div>
+            </ng-container>
+          </form>
+        </div>
+
+        <div class="step-actions">
+          <button mat-button (click)="onCancel()">إلغاء</button>
+          <span class="spacer"></span>
+          <button mat-raised-button class="primary-btn" (click)="onNextStep()">التالي</button>
+        </div>
+      </mat-step>
+
+      <!-- Step 2: Representatives -->
+      <mat-step [label]="steps[1].label">
+        <div class="step-content">
+          <div class="step-header">
+            <div>
+              <h3>بيانات الممثلين</h3>
+              <p class="step-description">يمكنك إضافة ممثلين للمدعي مثل المحامين أو الوكلاء.</p>
+            </div>
+            <button mat-flat-button class="add-representative-btn" [matMenuTriggerFor]="repTypeMenu" *ngIf="!isViewMode">
+              <mat-icon>person_add</mat-icon>
+              <span>إضافة ممثّل للمدّعي</span>
+            </button>
+            <mat-menu #repTypeMenu="matMenu">
+              <button mat-menu-item *ngFor="let type of filteredRepresentativeTypes" (click)="onAddRepresentative(type.id)">
+                {{ type.nameAr }}
+              </button>
+            </mat-menu>
+          </div>
+
+          <!-- Representatives List -->
+          <div *ngIf="representatives.length === 0" class="empty-state">
+            <mat-icon>people_outline</mat-icon>
+            <p>لا يوجد ممثلين</p>
+            <button mat-flat-button class="add-representative-btn" [matMenuTriggerFor]="repTypeMenuEmpty" *ngIf="!isViewMode">
+              <mat-icon>person_add</mat-icon>
+              <span>إضافة ممثّل للمدّعي</span>
+            </button>
+            <mat-menu #repTypeMenuEmpty="matMenu">
+              <button mat-menu-item *ngFor="let type of filteredRepresentativeTypes" (click)="onAddRepresentative(type.id)">
+                {{ type.nameAr }}
+              </button>
+            </mat-menu>
+          </div>
+
+          <table mat-table [dataSource]="representatives" *ngIf="representatives.length > 0" class="representatives-table">
+            <!-- Identity Number Column -->
+            <ng-container matColumnDef="identityNumber">
+              <th mat-header-cell *matHeaderCellDef>رقم الهوية</th>
+              <td mat-cell *matCellDef="let rep">{{ rep.identityNumber }}</td>
+            </ng-container>
+
+            <!-- Name Column -->
+            <ng-container matColumnDef="fullName">
+              <th mat-header-cell *matHeaderCellDef>اسم الممثل</th>
+              <td mat-cell *matCellDef="let rep">{{ rep.fullName }}</td>
+            </ng-container>
+
+            <!-- Type Column -->
+            <ng-container matColumnDef="type">
+              <th mat-header-cell *matHeaderCellDef>نوع الممثل</th>
+              <td mat-cell *matCellDef="let rep">{{ rep.representativeTypeNameAr }}</td>
+            </ng-container>
+
+            <!-- Authorization/Power of Attorney Column -->
+            <ng-container matColumnDef="authorization">
+              <th mat-header-cell *matHeaderCellDef>رقم الوكالة</th>
+              <td mat-cell *matCellDef="let rep">{{ rep.authorizationNumber || '-' }}</td>
+            </ng-container>
+
+            <!-- Actions Column -->
+            <ng-container matColumnDef="actions">
+              <th mat-header-cell *matHeaderCellDef>إجراءات</th>
+              <td mat-cell *matCellDef="let rep">
+                <button mat-icon-button matTooltip="تعديل" (click)="onEditRepresentative(rep)" *ngIf="!isViewMode">
+                  <mat-icon>edit</mat-icon>
+                </button>
+                <button mat-icon-button matTooltip="حذف" (click)="onDeleteRepresentative(rep)" *ngIf="!isViewMode" class="delete-btn">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="['identityNumber', 'fullName', 'type', 'authorization', 'actions']"></tr>
+            <tr mat-row *matRowDef="let row; columns: ['identityNumber', 'fullName', 'type', 'authorization', 'actions'];"></tr>
+          </table>
+        </div>
+
+        <div class="step-actions">
+          <button mat-button (click)="onPreviousStep()">السابق</button>
+          <span class="spacer"></span>
+          <button mat-raised-button class="primary-btn" (click)="onNextStep()">التالي</button>
+        </div>
+      </mat-step>
+
+      <!-- Step 3: Attachments -->
+      <mat-step [label]="steps[2].label">
+        <div class="step-content">
+          <h3>المرفقات</h3>
+          <p class="step-description">قم برفع المرفقات المطلوبة (PDF فقط، الحد الأقصى 4 ميجابايت).</p>
+
+          <!-- Attachment Upload Component -->
+          <app-attachment-upload
+            [plaintiffId]="plaintiffId || 0"
+            [plaintiffTypeId]="selectedPlaintiffType"
+            [attachments]="attachments"
+            [readonly]="isViewMode"
+            (attachmentsChange)="onAttachmentsChanged($event)">
+          </app-attachment-upload>
+        </div>
+
+        <div class="step-actions">
+          <button mat-button (click)="onPreviousStep()">السابق</button>
+          <span class="spacer"></span>
+          <button mat-raised-button class="primary-btn" (click)="onNextStep()">التالي</button>
+        </div>
+      </mat-step>
+
+      <!-- Step 4: Additional Data (Checkboxes Only) -->
+      <mat-step [label]="steps[3].label">
+        <div class="step-content">
+          <h3>بيانات إضافية</h3>
+
+          <form [formGroup]="plaintiffForm">
+            <div class="additional-options">
+              <!-- Checkbox: تحديد كمقدم طلب -->
+              <div class="checkbox-row">
+                <mat-checkbox formControlName="isApplicant">تحديد كمقدم طلب</mat-checkbox>
+              </div>
+
+              <!-- Checkbox: إضافة عنوان مختار -->
+              <div class="checkbox-row">
+                <mat-checkbox formControlName="addSelectedAddress">إضافة عنوان مختار</mat-checkbox>
+              </div>
+            </div>
+
+            <!-- بيانات عنوان وطني - shows when checkbox is checked -->
+            <div class="address-section" formGroupName="selectedAddress"
+                 *ngIf="plaintiffForm.get('addSelectedAddress')?.value">
+              <h4>بيانات عنوان وطني</h4>
+              <div class="form-row">
+                <mat-form-field appearance="outline" class="form-field">
+                  <mat-label>المنطقة</mat-label>
+                  <mat-select formControlName="regionId" (selectionChange)="onSelectedRegionChange($event.value)">
+                    <mat-option *ngFor="let region of regions" [value]="region.id">
+                      {{ region.nameAr }}
+                    </mat-option>
+                  </mat-select>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="form-field">
+                  <mat-label>المدينة</mat-label>
+                  <mat-select formControlName="cityId">
+                    <mat-option *ngFor="let city of selectedAddressCities" [value]="city.id">
+                      {{ city.nameAr }}
+                    </mat-option>
+                  </mat-select>
+                </mat-form-field>
+              </div>
+
+              <div class="form-row">
+                <mat-form-field appearance="outline" class="form-field">
+                  <mat-label>الحي</mat-label>
+                  <input matInput formControlName="districtId">
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="form-field">
+                  <mat-label>الشارع</mat-label>
+                  <input matInput formControlName="street">
+                </mat-form-field>
+              </div>
+
+              <div class="form-row">
+                <mat-form-field appearance="outline" class="form-field">
+                  <mat-label>رقم المبنى</mat-label>
+                  <input matInput formControlName="buildingNumber" placeholder="4 أرقام">
+                  <mat-error *ngIf="plaintiffForm.get('selectedAddress.buildingNumber')?.hasError('buildingNumber')">رقم المبنى يجب أن يكون 4 أرقام فقط</mat-error>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="form-field">
+                  <mat-label>رقم الوحدة</mat-label>
+                  <input matInput formControlName="unitNumber" placeholder="أرقام فقط">
+                  <mat-error *ngIf="plaintiffForm.get('selectedAddress.unitNumber')?.hasError('pattern')">رقم الوحدة يجب أن يكون أرقام فقط</mat-error>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="form-field">
+                  <mat-label>الرمز البريدي</mat-label>
+                  <input matInput formControlName="postalCode" placeholder="5 أرقام">
+                  <mat-error *ngIf="plaintiffForm.get('selectedAddress.postalCode')?.hasError('postalCode')">الرمز البريدي يجب أن يكون 5 أرقام فقط</mat-error>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="form-field">
+                  <mat-label>الرقم الإضافي</mat-label>
+                  <input matInput formControlName="additionalCode" placeholder="4 أرقام">
+                  <mat-error *ngIf="plaintiffForm.get('selectedAddress.additionalCode')?.hasError('additionalNumber')">الرقم الإضافي يجب أن يكون 4 أرقام فقط</mat-error>
+                </mat-form-field>
+              </div>
+            </div>
+          </form>
+        </div>
+
+        <div class="step-actions">
+          <button mat-button (click)="onPreviousStep()">السابق</button>
+          <span class="spacer"></span>
+          <button mat-button (click)="onCancel()" *ngIf="isViewMode">
+            العودة للقائمة
+          </button>
+          <button mat-raised-button class="primary-btn" (click)="onSave()" [disabled]="isSaving" *ngIf="!isViewMode">
+            <mat-spinner *ngIf="isSaving" diameter="20"></mat-spinner>
+            <span *ngIf="!isSaving">{{ plaintiffId ? 'حفظ التعديلات' : 'حفظ المدعي' }}</span>
+          </button>
+        </div>
+      </mat-step>
+    </mat-horizontal-stepper>
+  </div>
+</div>

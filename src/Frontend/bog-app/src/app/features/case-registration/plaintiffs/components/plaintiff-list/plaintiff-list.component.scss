@@ -1,0 +1,279 @@
+/* Plaintiff List - Simple Clean Design */
+
+.plaintiff-list-container {
+  padding: 0;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.page-title {
+  font-size: 22px;
+  font-weight: 600;
+  color: #111827;
+  margin: 0;
+}
+
+.header-actions {
+  display: flex;
+  gap: 10px;
+}
+
+/* Add Plaintiff Button - Gold/Amber to match Defendant */
+.add-plaintiff-btn {
+  background-color: #C4A35A !important;
+  color: white !important;
+  font-weight: 500;
+  border-radius: 6px !important;
+  padding: 0 16px;
+  height: 40px;
+
+  mat-icon {
+    margin-left: 6px;
+    margin-right: 0;
+  }
+
+  &:hover {
+    background-color: #B8963E !important;
+  }
+}
+
+/* Add Plaintiff Button Outline (for empty state) */
+.add-plaintiff-btn-outline {
+  border-color: #C4A35A !important;
+  color: #C4A35A !important;
+  font-weight: 500;
+
+  &:hover {
+    background-color: rgba(196, 163, 90, 0.08) !important;
+  }
+}
+
+/* Loading */
+.loading-container {
+  display: flex;
+  justify-content: center;
+  padding: 60px;
+}
+
+/* Empty State */
+.empty-state {
+  text-align: center;
+  padding: 60px 24px;
+  background: white;
+  border-radius: 12px;
+  border: 1px dashed #d1d5db;
+
+  .empty-icon {
+    font-size: 56px;
+    width: 56px;
+    height: 56px;
+    color: #9ca3af;
+    margin-bottom: 16px;
+  }
+
+  p {
+    color: #6b7280;
+    margin-bottom: 20px;
+    font-size: 15px;
+  }
+}
+
+/* Card */
+mat-card {
+  border-radius: 12px !important;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08) !important;
+  overflow: hidden;
+}
+
+.full-width {
+  width: 100%;
+}
+
+/* Table */
+table.mat-table {
+  width: 100%;
+
+  th.mat-header-cell {
+    background: #059669;
+    color: white;
+    font-weight: 600;
+    font-size: 13px;
+    padding: 14px 16px;
+    text-align: right;
+  }
+
+  td.mat-cell {
+    font-size: 14px;
+    padding: 14px 16px;
+    text-align: right;
+    border-bottom: 1px solid #f3f4f6;
+    color: #374151;
+  }
+
+  tr.mat-row:hover {
+    background: #f9fafb;
+  }
+}
+
+/* Status Badge */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: 100px;
+  font-size: 12px;
+  font-weight: 500;
+
+  mat-icon {
+    font-size: 14px;
+    width: 14px;
+    height: 14px;
+  }
+}
+
+.status-complete {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.status-incomplete {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.applicant-icon {
+  color: #22c55e;
+}
+
+.delete-action {
+  color: #ef4444 !important;
+}
+
+/* Summary */
+.summary {
+  margin-top: 16px;
+  padding: 10px 16px;
+  color: #6b7280;
+  font-size: 13px;
+}
+
+.representatives-summary {
+  margin-top: 12px;
+  padding: 8px 16px;
+  color: #6b7280;
+  font-size: 13px;
+}
+
+/* Representatives Container */
+.representatives-container {
+  margin-top: 24px;
+
+  mat-card-header {
+    padding: 16px;
+    border-bottom: 1px solid #e5e7eb;
+
+    mat-card-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      color: #111827;
+      margin: 0;
+
+      mat-icon {
+        color: #059669;
+      }
+    }
+
+    .spacer {
+      flex: 1;
+    }
+  }
+}
+
+.loading-representatives {
+  display: flex;
+  justify-content: center;
+  padding: 24px;
+}
+
+.empty-representatives {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 24px;
+  color: #6b7280;
+
+  mat-icon {
+    color: #9ca3af;
+  }
+}
+
+.representatives-table {
+  width: 100%;
+
+  th.mat-header-cell {
+    background: #10b981;
+    color: white;
+    font-size: 13px;
+    padding: 12px 14px;
+  }
+
+  td.mat-cell {
+    font-size: 13px;
+    padding: 12px 14px;
+  }
+
+  .delete-btn {
+    color: #ef4444;
+  }
+}
+
+.no-selection {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 40px;
+  color: #6b7280;
+
+  mat-icon {
+    font-size: 48px;
+    width: 48px;
+    height: 48px;
+    color: #d1d5db;
+  }
+}
+
+/* Menu */
+::ng-deep .mat-menu-panel {
+  direction: rtl;
+  text-align: right;
+  border-radius: 8px !important;
+  min-width: 160px;
+}
+
+::ng-deep .mat-menu-item {
+  text-align: right;
+  font-size: 14px;
+
+  mat-icon {
+    margin-left: 12px;
+    margin-right: 0;
+  }
+}
+
+/* Paginator */
+::ng-deep .mat-paginator {
+  background: transparent;
+  margin-top: 12px;
+}

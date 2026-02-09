@@ -1,0 +1,906 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plaintiff Module - Issues Report</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #f0f2f5; color: #1a1a2e; line-height: 1.6; direction: ltr; text-align: left; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+
+        /* Header */
+        .report-header { background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%); color: white; padding: 40px; border-radius: 12px; margin-bottom: 30px; }
+        .report-header h1 { font-size: 28px; margin-bottom: 8px; }
+        .report-header .subtitle { font-size: 16px; opacity: 0.85; }
+        .report-header .meta { display: flex; gap: 30px; margin-top: 20px; font-size: 14px; opacity: 0.75; }
+
+        /* Summary Cards */
+        .summary-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 30px; }
+        .summary-card { background: white; border-radius: 10px; padding: 24px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.08); border-top: 4px solid; }
+        .summary-card.critical { border-color: #e74c3c; }
+        .summary-card.high { border-color: #e67e22; }
+        .summary-card.medium { border-color: #f39c12; }
+        .summary-card.low { border-color: #3498db; }
+        .summary-card .count { font-size: 42px; font-weight: 700; }
+        .summary-card.critical .count { color: #e74c3c; }
+        .summary-card.high .count { color: #e67e22; }
+        .summary-card.medium .count { color: #f39c12; }
+        .summary-card.low .count { color: #3498db; }
+        .summary-card .label { font-size: 14px; color: #666; margin-top: 4px; }
+
+        /* Test Results Card */
+        .test-results { background: white; border-radius: 10px; padding: 24px; margin-bottom: 30px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); border-left: 4px solid #27ae60; }
+        .test-results h2 { color: #27ae60; margin-bottom: 16px; font-size: 20px; }
+        .test-bar { display: flex; gap: 8px; flex-wrap: wrap; }
+        .test-spec { background: #eafaf1; border: 1px solid #27ae60; border-radius: 6px; padding: 8px 14px; font-size: 13px; }
+        .test-spec .name { font-weight: 600; color: #1a1a2e; }
+        .test-spec .result { color: #27ae60; font-weight: 700; }
+        .test-total { margin-top: 16px; font-size: 18px; font-weight: 700; color: #27ae60; }
+
+        /* Section */
+        .section { background: white; border-radius: 10px; padding: 30px; margin-bottom: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+        .section h2 { font-size: 22px; color: #1a1a2e; margin-bottom: 6px; padding-bottom: 12px; border-bottom: 2px solid #eee; }
+        .section h2 .badge { font-size: 13px; background: #eee; padding: 3px 10px; border-radius: 12px; margin-left: 10px; vertical-align: middle; }
+        .section-desc { color: #666; font-size: 14px; margin-bottom: 20px; }
+
+        /* Issue Card */
+        .issue { border: 1px solid #e0e0e0; border-radius: 8px; margin-bottom: 16px; overflow: hidden; }
+        .issue-header { display: flex; align-items: center; gap: 12px; padding: 14px 18px; background: #fafafa; border-bottom: 1px solid #e0e0e0; }
+        .issue-id { font-weight: 700; color: #555; font-size: 13px; min-width: 50px; }
+        .issue-title { font-weight: 600; font-size: 15px; flex: 1; }
+        .severity-badge { padding: 3px 12px; border-radius: 12px; font-size: 12px; font-weight: 700; color: white; text-transform: uppercase; }
+        .severity-badge.critical { background: #e74c3c; }
+        .severity-badge.high { background: #e67e22; }
+        .severity-badge.medium { background: #f39c12; color: #333; }
+        .severity-badge.low { background: #3498db; }
+        .category-badge { padding: 3px 10px; border-radius: 12px; font-size: 11px; background: #e8eaf6; color: #3f51b5; font-weight: 600; }
+        .issue-body { padding: 16px 18px; font-size: 14px; }
+        .issue-body p { margin-bottom: 8px; }
+        .issue-body .file-ref { font-family: 'Consolas', 'Courier New', monospace; background: #f5f5f5; padding: 2px 8px; border-radius: 4px; font-size: 13px; color: #d63384; }
+        .issue-body .impact { background: #fff3e0; padding: 10px 14px; border-radius: 6px; margin-top: 10px; border-left: 3px solid #e67e22; }
+        .issue-body .impact strong { color: #e67e22; }
+        .issue-body ul { margin: 8px 0 8px 20px; }
+        .issue-body li { margin-bottom: 4px; }
+
+        /* Deployment Assessment */
+        .deployment { background: linear-gradient(135deg, #fdedec, #fdf2e9); border: 2px solid #e74c3c; border-radius: 10px; padding: 30px; margin-bottom: 24px; }
+        .deployment h2 { color: #c0392b; margin-bottom: 16px; }
+        .deployment .verdict { font-size: 22px; font-weight: 700; color: #e74c3c; margin-bottom: 12px; }
+        .deployment ul { margin-left: 20px; }
+        .deployment li { margin-bottom: 6px; }
+
+        /* Priority Table */
+        table { width: 100%; border-collapse: collapse; margin-top: 16px; }
+        th { background: #1a1a2e; color: white; padding: 12px 16px; text-align: left; font-size: 13px; }
+        td { padding: 10px 16px; border-bottom: 1px solid #eee; font-size: 13px; }
+        tr:hover td { background: #f8f9fa; }
+
+        /* Footer */
+        .footer { text-align: center; padding: 20px; color: #999; font-size: 13px; }
+
+        @media (max-width: 768px) {
+            .summary-grid { grid-template-columns: repeat(2, 1fr); }
+            .test-bar { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <!-- Header -->
+    <div class="report-header">
+        <h1>Plaintiff Module - Issues Report</h1>
+        <div class="subtitle">Comprehensive analysis of frontend, backend, and SRS compliance gaps</div>
+        <div class="meta">
+            <span>Date: 2026-02-08</span>
+            <span>Module: Case Registration &gt; Plaintiffs (UC 6.5.1)</span>
+            <span>Branch: MohamedShafik</span>
+            <span>Total Issues Found: 45</span>
+        </div>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="summary-grid">
+        <div class="summary-card critical">
+            <div class="count">9</div>
+            <div class="label">Critical</div>
+        </div>
+        <div class="summary-card high">
+            <div class="count">12</div>
+            <div class="label">High</div>
+        </div>
+        <div class="summary-card medium">
+            <div class="count">18</div>
+            <div class="label">Medium</div>
+        </div>
+        <div class="summary-card low">
+            <div class="count">6</div>
+            <div class="label">Low</div>
+        </div>
+    </div>
+
+    <!-- Test Results -->
+    <div class="test-results">
+        <h2>Cypress E2E Test Results (UI Layer)</h2>
+        <div class="test-bar">
+            <div class="test-spec"><span class="name">plaintiff-list</span> <span class="result">10/10</span></div>
+            <div class="test-spec"><span class="name">plaintiff-stepper</span> <span class="result">12/12</span></div>
+            <div class="test-spec"><span class="name">type1-individual</span> <span class="result">18/18</span></div>
+            <div class="test-spec"><span class="name">type2-no-id</span> <span class="result">11/11</span></div>
+            <div class="test-spec"><span class="name">type3-business-owner</span> <span class="result">16/16</span></div>
+            <div class="test-spec"><span class="name">type4-registered-company</span> <span class="result">10/10</span></div>
+            <div class="test-spec"><span class="name">type5-unregistered-company</span> <span class="result">9/9</span></div>
+            <div class="test-spec"><span class="name">type6-gov-agency</span> <span class="result">8/8</span></div>
+            <div class="test-spec"><span class="name">type7-ngo</span> <span class="result">10/10</span></div>
+            <div class="test-spec"><span class="name">type8-waqf</span> <span class="result">13/13</span></div>
+            <div class="test-spec"><span class="name">representative-dialog</span> <span class="result">40/40</span></div>
+        </div>
+        <div class="test-total">157 / 157 tests passing (all mocked API - UI validation only)</div>
+    </div>
+
+    <!-- Deployment Assessment -->
+    <div class="deployment">
+        <h2>Deployment Assessment</h2>
+        <div class="verdict">NOT READY FOR PRODUCTION</div>
+        <p>The following blockers must be resolved before deployment:</p>
+        <ul>
+            <li><strong>9 Critical issues</strong> &mdash; FK constraint violations, missing method implementations, address validation over-restriction</li>
+            <li><strong>12 High issues</strong> &mdash; Race conditions, missing backend validations, incomplete file storage, SRS non-compliance</li>
+            <li><strong>No backend integration tests</strong> &mdash; Cypress tests mock all API calls; real API + DB flow is untested</li>
+            <li><strong>Representative file storage not implemented</strong> &mdash; Attachment records saved but files never stored</li>
+        </ul>
+    </div>
+
+    <!-- ================================================================== -->
+    <!-- SECTION A: FRONTEND ISSUES -->
+    <!-- ================================================================== -->
+    <div class="section">
+        <h2>A. Frontend Issues <span class="badge">22 issues</span></h2>
+        <p class="section-desc">Issues found in Angular components, services, and templates</p>
+
+        <!-- FE-01 -->
+        <div class="issue">
+            <div class="issue-header">
+                <span class="issue-id">FE-01</span>
+                <span class="issue-title">requestId defaults to 0 &mdash; FK constraint violation on save</span>
+                <span class="severity-badge critical">Critical</span>
+                <span class="category-badge">Bug</span>
+            </div>
+            <div class="issue-body">
+                <p><span class="file-ref">plaintiff-form.component.ts:31</span></p>
+                <p><code>requestId: number = 0</code> &mdash; When the <code>requestId</code> query parameter is missing or invalid, the form sends <code>CaseRegistrationRequestId = 0</code> to the backend, which does not exist in the database.</p>
+                <p>The POST call goes to <code>/api/case-requests/0/plaintiffs</code> causing a SQL FK constraint violation. The user sees "حدث خطأ أثناء إنشاء المدعي".</p>
+                <div class="impact"><strong>Impact:</strong> Plaintiff creation completely broken when requestId is not in the URL.</div>
+            </div>
+        </div>
+
+        <!-- FE-02 -->
+        <div class="issue">
+            <div class="issue-header">
+                <span class="issue-id">FE-02</span>
+                <span class="issue-title">Address validation over-restriction &mdash; all 8 fields required instead of 2 (BC04)</span>
+                <span class="severity-badge critical">Critical</span>
+                <span class="category-badge">SRS Non-Compliance</span>
+            </div>
+            <div class="issue-body">
+                <p><span class="file-ref">plaintiff-form.component.ts:625-919</span> (all type cases)</p>
+                <p>Per SRS BC04, only <code>regionId</code> and <code>cityId</code> are mandatory in the national address model. However, the implementation sets <code>Validators.required</code> on ALL 8 address fields (district, street, building, unit, postal, additional code) for every plaintiff type.</p>
+                <p>Affected types: 1, 2, 3, 4, 7, 8 &mdash; every type with an address section.</p>
+                <div class="impact"><strong>Impact:</strong> Users cannot save a plaintiff without filling ALL address fields, even though SRS only requires region + city. This blocks form submission.</div>
+            </div>
+        </div>
+
+        <!-- FE-03 -->
+        <div class="issue">
+            <div class="issue-header">
+                <span class="issue-id">FE-03</span>
+                <span class="issue-title">Type 1: Profession field not validated as required</span>
+                <span class="severity-badge critical">Critical</span>
+                <span class="category-badge">SRS Non-Compliance</span>
+            </div>
+            <div class="issue-body">
+                <p><span class="file-ref">plaintiff-form.component.ts:537</span></p>
+                <p>SRS Section 2.5 specifies Profession (المهنة) as mandatory for Type 1 individuals ("المهنة - نص - نعم"). However, no <code>Validators.required</code> is set for the profession field in <code>updateFormValidation()</code> for Type 1. It's only conditionally set through BC01 logic.</p>
+                <div class="impact"><strong>Impact:</strong> Type 1 plaintiff can be saved without profession, violating SRS requirement.</div>
+            </div>
+        </div>
+
+        <!-- FE-04 -->
+        <div class="issue">
+            <div class="issue-header">
+                <span class="issue-id">FE-04</span>
+                <span class="issue-title">Race condition in loadAllRepresentatives()</span>
+                <span class="severity-badge high">High</span>
+                <span class="category-badge">Bug</span>
+            </div>
+            <div class="issue-body">
+                <p><span class="file-ref">plaintiff-list.component.ts:367-409</span></p>
+                <p>Uses a <code>completedRequests</code> counter in a closure with concurrent API subscriptions. If API call order differs from <code>forEach</code> order, state corruption can occur. Multiple subscriptions fire independently with no synchronization.</p>
+                <div class="impact"><strong>Impact:</strong> Representatives may not load correctly or display for the wrong plaintiff.</div>
+            </div>
+        </div>
+
+        <!-- FE-05 -->
+        <div class="issue">
+            <div class="issue-header">
+                <span class="issue-id">FE-05</span>
+                <span class="issue-title">BR08: Absher verification not enforced at save time</span>
+                <span class="severity-badge high">High</span>
+                <span class="category-badge">SRS Non-Compliance</span>
+            </div>
+            <div class="issue-body">
+                <p><span class="file-ref">plaintiff-form.component.ts:1559</span></p>
+                <p>SRS BR08 requires Absher verification for Type 1 individuals before saving. The UI shows a warning indicator but the form's <code>onSave()</code> method does not check <code>isAbsherVerified</code>. Absher can be bypassed entirely.</p>
+                <div class="impact"><strong>Impact:</strong> Individual plaintiffs can be created without Absher verification, violating BR08.</div>
+            </div>
+        </div>
+
+        <!-- FE-06 -->
+        <div class="issue">
+            <div class="issue-header">
+                <span class="issue-id">FE-06</span>
+                <span class="issue-title">Absher readonly fields can be modified programmatically</span>
+                <span class="severity-badge high">High</span>
+                <span class="category-badge">Security</span>
+            </div>
+            <div class="issue-body">
+                <p><span class="file-ref">plaintiff-form.component.html:85-161</span></p>
+                <p>Absher-fetched fields use <code>[readonly]="isAbsherFieldsReadonly()"</code> HTML attribute, but the form controls remain enabled. Values can be changed via browser DevTools or <code>form.patchValue()</code>. Should use <code>formControl.disable()</code> instead.</p>
+                <div class="impact"><strong>Impact:</strong> Absher-verified data (name, birth date, identity) can be tampered with.</div>
+            </div>
+        </div>
+
+        <!-- FE-07 -->
+        <div class="issue">
+            <div class="issue-header">
+                <span class="issue-id">FE-07</span>
+                <span class="issue-title">Representative type restrictions not enforced on backend</span>
+                <span class="severity-badge high">High</span>
+                <span class="category-badge">SRS Non-Compliance</span>
+            </div>
+            <div class="issue-body">
+                <p><span class="file-ref">representative-dialog.component.ts (ALLOWED_REPRESENTATIVE_TYPES)</span></p>
+                <p>Each plaintiff type allows specific representative types (e.g., Type 5 only allows وكيل). The frontend filters the menu correctly, but there is no server-side validation. A crafted POST request can bypass the frontend restriction.</p>
+                <div class="impact"><strong>Impact:</strong> Invalid representative types can be saved for a plaintiff by bypassing the UI.</div>
+            </div>
+        </div>
+
+        <!-- FE-08 -->
+        <div class="issue">
+            <div class="issue-header">
+                <span class="issue-id">FE-08</span>
+                <span class="issue-title">Attachment type restrictions not enforced per plaintiff type (BC01)</span>
+                <span class="severity-badge high">High</span>
+                <span class="category-badge">SRS Non-Compliance</span>
+            </div>
+            <div class="issue-body">
+                <p><span class="file-ref">plaintiff-form.component.html:1482-1486</span></p>
+                <p>SRS BC01 states each plaintiff type has specific allowed attachment types. The current implementation accepts any attachment type for any plaintiff type. No mapping of plaintiff type &rarr; allowed attachment types exists.</p>
+                <div class="impact"><strong>Impact:</strong> Wrong attachment types can be uploaded for any plaintiff type.</div>
+            </div>
+        </div>
+
+        <!-- FE-09 -->
+        <div class="issue">
+            <div class="issue-header">
+                <span class="issue-id">FE-09</span>
+                <span class="issue-title">Demo data fallback without user warning</span>
+                <span class="severity-badge medium">Medium</span>
+                <span class="category-badge">UX</span>
+            </div>
+            <div class="issue-body">
+                <p><span class="file-ref">plaintiff-list.component.ts:156</span></p>
+                <p>When the API call fails, <code>loadDemoData()</code> is called silently. Users see fake/demo data without any indication it's not real. No error message or banner shown.</p>
+                <div class="impact"><strong>Impact:</strong> Users may make decisions based on demo data thinking it's real.</div>
+            </div>
+        </div>
+
+        <!-- FE-10 -->
+        <div class="issue">
+            <div class="issue-header">
+                <span class="issue-id">FE-10</span>
+                <span class="issue-title">Temporary attachment IDs use Date.now() &mdash; collision risk</span>
+                <span class="severity-badge medium">Medium</span>
+                <span class="category-badge">Bug</span>
+            </div>
+            <div class="issue-body">
+                <p><span class="file-ref">representative-dialog.component.ts:898</span></p>
+                <p>Temporary attachment IDs are generated with <code>Date.now()</code>. Two rapid uploads within the same millisecond get the same ID, causing deletion of the wrong attachment.</p>
+                <div class="impact"><strong>Impact:</strong> Rapid file uploads may collide, causing wrong file to be deleted.</div>
+            </div>
+        </div>
+
+        <!-- FE-11 -->
+        <div class="issue">
+            <div class="issue-header">
+                <span class="issue-id">FE-11</span>
+                <span class="issue-title">Hardcoded nationality and identity type IDs</span>
+                <span class="severity-badge medium">Medium</span>
+                <span class="category-badge">Maintenance</span>
+            </div>
+            <div class="issue-body">
+                <p><span class="file-ref">plaintiff-form.component.ts:96,322</span></p>
+                <p><code>SAUDI_NATIONALITY_ID = 1</code> and identity type IDs (1, 2, 3) are hardcoded. If these IDs change in the database, the nationality auto-set and identity type logic will break silently.</p>
+                <div class="impact"><strong>Impact:</strong> Application breaks if lookup table IDs change.</div>
+            </div>
+        </div>
+
+        <!-- FE-12 -->
+        <div class="issue">
+            <div class="issue-header">
+                <span class="issue-id">FE-12</span>
+                <span class="issue-title">Disabled form controls excluded from form.value</span>
+                <span class="severity-badge medium">Medium</span>
+                <span class="category-badge">Bug</span>
+            </div>
+            <div class="issue-body">
+                <p><span class="file-ref">plaintiff-form.component.ts:180</span></p>
+                <p>In view mode, form is disabled, but Angular excludes disabled controls from <code>form.value</code>. If any save logic uses <code>form.value</code> instead of <code>form.getRawValue()</code>, data will be lost.</p>
+                <div class="impact"><strong>Impact:</strong> Potential data loss if disabled controls are needed for save operations.</div>
+            </div>
+        </div>
+
+        <!-- FE-13 -->
+        <div class="issue">
+            <div class="issue-header">
+                <span class="issue-id">FE-13</span>
+                <span class="issue-title">Silent error handling in loadAllRepresentatives()</span>
+                <span class="severity-badge medium">Medium</span>
+                <span class="category-badge">UX</span>
+            </div>
+            <div class="issue-body">
+                <p><span class="file-ref">plaintiff-list.component.ts:398-406</span></p>
+                <p>Error handler increments the counter but does not display any error message to the user. Representatives silently fail to load with no indication.</p>
+                <div class="impact"><strong>Impact:</strong> Users unaware that representative data failed to load.</div>
+            </div>
+        </div>
+
+        <!-- FE-14 -->
+        <div class="issue">
+            <div class="issue-header">
+                <span class="issue-id">FE-14</span>
+                <span class="issue-title">NaN comparison in type switching logic</span>
+                <span class="severity-badge medium">Medium</span>
+                <span class="category-badge">Bug</span>
+            </div>
+            <div class="issue-body">
+                <p><span class="file-ref">plaintiff-form.component.ts:268-277</span></p>
+                <p><code>const typeIdNum = Number(plaintiffTypeId)</code> &mdash; if <code>plaintiffTypeId</code> is undefined or empty string, <code>Number()</code> returns <code>NaN</code>. The subsequent <code>if (typeIdNum)</code> check works (NaN is falsy) but the code should explicitly handle this case with a user-facing error.</p>
+                <div class="impact"><strong>Impact:</strong> Type switching silently fails with invalid values.</div>
+            </div>
+        </div>
+
+        <!-- FE-15 -->
+        <div class="issue">
+            <div class="issue-header">
+                <span class="issue-id">FE-15</span>
+                <span class="issue-title">Type 5: unregisteredCompanyAddress not required</span>
+                <span class="severity-badge medium">Medium</span>
+                <span class="category-badge">SRS Non-Compliance</span>
+            </div>
+            <div class="issue-body">
+                <p><span class="file-ref">plaintiff-form.component.ts:801-823</span> (case 5 validators)</p>
+                <p>SRS Section 2.9 specifies the unregistered company address field as required. No <code>Validators.required</code> is set for this field in the Type 5 validator setup.</p>
+                <div class="impact"><strong>Impact:</strong> Type 5 plaintiff saved without company address.</div>
+            </div>
+        </div>
+
+        <!-- FE-16 -->
+        <div class="issue">
+            <div class="issue-header">
+                <span class="issue-id">FE-16</span>
+                <span class="issue-title">Inconsistent maxlength for decisionSource fields</span>
+                <span class="severity-badge medium">Medium</span>
+                <span class="category-badge">Validation</span>
+            </div>
+            <div class="issue-body">
+                <p><span class="file-ref">representative-dialog.component.html:387 vs 576</span></p>
+                <p>Liquidator representative type uses <code>maxlength="200"</code> for <code>decisionSource</code>, but Mussaffi type uses <code>maxlength="20"</code> for the same conceptual field. These should be consistent.</p>
+                <div class="impact"><strong>Impact:</strong> Form validation inconsistency between representative types.</div>
+            </div>
+        </div>
+
+        <!-- FE-17 -->
+        <div class="issue">
+            <div class="issue-header">
+                <span class="issue-id">FE-17</span>
+                <span class="issue-title">Plaintiff service has no request validation</span>
+                <span class="severity-badge medium">Medium</span>
+                <span class="category-badge">Validation</span>
+            </div>
+            <div class="issue-body">
+                <p><span class="file-ref">plaintiff.service.ts:23-26</span></p>
+                <p><code>getPlaintiffs(requestId)</code> and other methods don't validate <code>requestId > 0</code> before making API calls. Bad requests sent to API with requestId=0.</p>
+                <div class="impact"><strong>Impact:</strong> Unnecessary 400/500 errors from backend.</div>
+            </div>
+        </div>
+
+        <!-- FE-18 -->
+        <div class="issue">
+            <div class="issue-header">
+                <span class="issue-id">FE-18</span>
+                <span class="issue-title">Date property type mismatch in plaintiff model</span>
+                <span class="severity-badge medium">Medium</span>
+                <span class="category-badge">Bug</span>
+            </div>
+            <div class="issue-body">
+                <p><span class="file-ref">plaintiff.model.ts (multiple lines)</span></p>
+                <p>Date properties typed as <code>Date</code> but backend returns ISO string. No deserialization layer exists. Date comparisons and formatting may fail.</p>
+                <div class="impact"><strong>Impact:</strong> Date display and comparison bugs in edit mode.</div>
+            </div>
+        </div>
+
+        <!-- FE-19 -->
+        <div class="issue">
+            <div class="issue-header">
+                <span class="issue-id">FE-19</span>
+                <span class="issue-title">Representative count limits not validated</span>
+                <span class="severity-badge medium">Medium</span>
+                <span class="category-badge">SRS Non-Compliance</span>
+            </div>
+            <div class="issue-body">
+                <p><span class="file-ref">plaintiff-form.component.ts (Step 2)</span></p>
+                <p>No minimum or maximum limit validation for representatives per plaintiff. SRS may require at least one representative of an allowed type for certain plaintiff types.</p>
+                <div class="impact"><strong>Impact:</strong> Form accepts 0 representatives when one may be required.</div>
+            </div>
+        </div>
+
+        <!-- FE-20 -->
+        <div class="issue">
+            <div class="issue-header">
+                <span class="issue-id">FE-20</span>
+                <span class="issue-title">RepresentativeVM File property breaks on API round-trip</span>
+                <span class="severity-badge medium">Medium</span>
+                <span class="category-badge">Bug</span>
+            </div>
+            <div class="issue-body">
+                <p><span class="file-ref">plaintiff.model.ts:220-232</span></p>
+                <p><code>file?: File</code> property for temporary upload state is mixed with persisted attachment properties. This property is lost after API call since <code>File</code> objects cannot be serialized.</p>
+                <div class="impact"><strong>Impact:</strong> File upload state lost after save; attachment appears missing in edit mode.</div>
+            </div>
+        </div>
+
+        <!-- FE-21 -->
+        <div class="issue">
+            <div class="issue-header">
+                <span class="issue-id">FE-21</span>
+                <span class="issue-title">Missing null check for filteredNationalities</span>
+                <span class="severity-badge low">Low</span>
+                <span class="category-badge">Bug</span>
+            </div>
+            <div class="issue-body">
+                <p><span class="file-ref">representative-dialog.component.ts:182-191</span></p>
+                <p><code>filteredNationalities</code> assigned before <code>nationalities</code> is loaded from service. Can result in empty nationality dropdown on dialog open.</p>
+                <div class="impact"><strong>Impact:</strong> Nationality dropdown may appear empty on slow connections.</div>
+            </div>
+        </div>
+
+        <!-- FE-22 -->
+        <div class="issue">
+            <div class="issue-header">
+                <span class="issue-id">FE-22</span>
+                <span class="issue-title">Magic numbers throughout switch statements</span>
+                <span class="severity-badge low">Low</span>
+                <span class="category-badge">Code Quality</span>
+            </div>
+            <div class="issue-body">
+                <p><span class="file-ref">plaintiff-form.component.ts:598-941</span></p>
+                <p>Plaintiff type IDs (1-8) and employment status IDs (1,2,3) are hardcoded as magic numbers in massive switch statements. Should use enums or constants for maintainability.</p>
+                <div class="impact"><strong>Impact:</strong> Code harder to maintain; silent bugs if IDs change.</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================================================================== -->
+    <!-- SECTION B: BACKEND ISSUES -->
+    <!-- ================================================================== -->
+    <div class="section">
+        <h2>B. Backend Issues <span class="badge">14 issues</span></h2>
+        <p class="section-desc">Issues found in API controllers, business logic, data access, DTOs, and entities</p>
+
+        <!-- BE-01 -->
+        <div class="issue">
+            <div class="issue-header">
+                <span class="issue-id">BE-01</span>
+                <span class="issue-title">PlaintiffAttachmentCreateDTO missing FileSizeBytes &amp; validation</span>
+                <span class="severity-badge critical">Critical</span>
+                <span class="category-badge">Data Integrity</span>
+            </div>
+            <div class="issue-body">
+                <p><span class="file-ref">BOG.DTO/Plaintiff/PlaintiffAttachmentDTO.cs:1-42</span></p>
+                <p>The DTO accepts <code>FileContent</code> (Base64) but has no <code>FileSizeBytes</code> field. The entity requires it. No FluentValidation validator exists for this DTO. The controller comment mentions "PDF only, max 4MB (BR04)" but no actual validation exists in code.</p>
+                <ul>
+                    <li>No file size limit validation (4MB per BR04)</li>
+                    <li>No Base64 validity check</li>
+                    <li>No PDF magic bytes verification</li>
+                </ul>
+                <div class="impact"><strong>Impact:</strong> Any file type/size accepted; no BR04 enforcement. DB may reject missing FileSizeBytes.</div>
+            </div>
+        </div>
+
+        <!-- BE-02 -->
+        <div class="issue">
+            <div class="issue-header">
+                <span class="issue-id">BE-02</span>
+                <span class="issue-title">Representative attachment file storage not implemented</span>
+                <span class="severity-badge critical">Critical</span>
+                <span class="category-badge">Incomplete Implementation</span>
+            </div>
+            <div class="issue-body">
+                <p><span class="file-ref">BOG.BL/Services/PlaintiffBL.cs:459-464</span></p>
+                <p>A TODO comment indicates file content handling is not implemented: <em>"TODO: Save file content to storage if FileContent is provided"</em>. Attachment metadata records are created in the database, but actual file bytes are never stored anywhere.</p>
+                <div class="impact"><strong>Impact:</strong> Representative attachments appear to upload successfully but files are permanently lost.</div>
+            </div>
+        </div>
+
+        <!-- BE-03 -->
+        <div class="issue">
+            <div class="issue-header">
+                <span class="issue-id">BE-03</span>
+                <span class="issue-title">Orphaned address records on plaintiff save failure</span>
+                <span class="severity-badge high">High</span>
+                <span class="category-badge">Data Integrity</span>
+            </div>
+            <div class="issue-body">
+                <p><span class="file-ref">BOG.BL/Services/PlaintiffBL.cs:123-184, 269-270</span></p>
+                <p>Address records are created with separate <code>SaveChangesAsync()</code> calls (one per address type). If one address succeeds but the plaintiff save at line 270 fails, orphaned Address records remain in the database with no parent reference. No transaction scope wraps the entire operation.</p>
+                <div class="impact"><strong>Impact:</strong> Database accumulates orphaned address records over time.</div>
+            </div>
+        </div>
+
+        <!-- BE-04 -->
+        <div class="issue">
+            <div class="issue-header">
+                <span class="issue-id">BE-04</span>
+                <span class="issue-title">Representative creation with potentially invalid PlaintiffId</span>
+                <span class="severity-badge high">High</span>
+                <span class="category-badge">Data Integrity</span>
+            </div>
+            <div class="issue-body">
+                <p><span class="file-ref">BOG.BL/Services/PlaintiffBL.cs:364-437</span></p>
+                <p>Representative entities use <code>PlaintiffId = plaintiff.Id</code> (line 366). If the plaintiff save fails at line 270, <code>plaintiff.Id</code> would be 0, causing FK constraint violations when representatives are saved at lines 470-473.</p>
+                <div class="impact"><strong>Impact:</strong> FK constraint error cascade when plaintiff creation fails.</div>
+            </div>
+        </div>
+
+        <!-- BE-05 -->
+        <div class="issue">
+            <div class="issue-header">
+                <span class="issue-id">BE-05</span>
+                <span class="issue-title">No FK validation for lookup table references</span>
+                <span class="severity-badge medium">Medium</span>
+                <span class="category-badge">Data Integrity</span>
+            </div>
+            <div class="issue-body">
+                <p><span class="file-ref">BOG.BL/Services/PlaintiffBL.cs:207-267</span></p>
+                <p>Plaintiff entity is created with optional FK references (<code>GovernmentAgencyId</code>, <code>CountryId</code>, <code>NationalityId</code>, <code>LicenseSourceId</code>) but none are validated to exist in their lookup tables before save. Database constraints catch this, but error messages are cryptic.</p>
+                <div class="impact"><strong>Impact:</strong> Cryptic SQL errors instead of user-friendly validation messages.</div>
+            </div>
+        </div>
+
+        <!-- BE-06 -->
+        <div class="issue">
+            <div class="issue-header">
+                <span class="issue-id">BE-06</span>
+                <span class="issue-title">PlaintiffUpdateDTO IdentityNumber StringLength mismatch</span>
+                <span class="severity-badge medium">Medium</span>
+                <span class="category-badge">Validation</span>
+            </div>
+            <div class="issue-body">
+                <p><span class="file-ref">BOG.DTO/Plaintiff/PlaintiffUpdateDTO.cs:31</span></p>
+                <p><code>IdentityNumber</code> uses <code>[StringLength(10)]</code> in UpdateDTO but <code>[StringLength(20)]</code> in CreateDTO. Passport numbers can be up to 20 characters. Users cannot update identity data for passport holders.</p>
+                <div class="impact"><strong>Impact:</strong> Update fails for passport identity numbers longer than 10 characters.</div>
+            </div>
+        </div>
+
+        <!-- BE-07 -->
+        <div class="issue">
+            <div class="issue-header">
+                <span class="issue-id">BE-07</span>
+                <span class="issue-title">No FluentValidation for PlaintiffUpdateDTO</span>
+                <span class="severity-badge medium">Medium</span>
+                <span class="category-badge">Validation</span>
+            </div>
+            <div class="issue-body">
+                <p><span class="file-ref">BOG.DTO/Plaintiff/PlaintiffUpdateDTO.cs</span></p>
+                <p>No FluentValidation validator exists for the update DTO. SRS validation rules are not enforced during updates (e.g., type-specific field requirements, identity field immutability from Absher).</p>
+                <div class="impact"><strong>Impact:</strong> Invalid updates accepted by API; SRS rules bypassable via update.</div>
+            </div>
+        </div>
+
+        <!-- BE-08 -->
+        <div class="issue">
+            <div class="issue-header">
+                <span class="issue-id">BE-08</span>
+                <span class="issue-title">SelectedAddressDTO case-sensitive RegEx</span>
+                <span class="severity-badge medium">Medium</span>
+                <span class="category-badge">Validation</span>
+            </div>
+            <div class="issue-body">
+                <p><span class="file-ref">BOG.DTO/Plaintiff/SelectedAddressDTO.cs:14</span></p>
+                <p>RegEx <code>^(Residence|Work)$</code> is case-sensitive. Frontend sending "residence" or "WORK" would fail validation. Should be case-insensitive.</p>
+                <div class="impact"><strong>Impact:</strong> Selected address feature fails if frontend sends different casing.</div>
+            </div>
+        </div>
+
+        <!-- BE-09 -->
+        <div class="issue">
+            <div class="issue-header">
+                <span class="issue-id">BE-09</span>
+                <span class="issue-title">AddressSourceType required even when CustomAddress provided</span>
+                <span class="severity-badge medium">Medium</span>
+                <span class="category-badge">Logic Error</span>
+            </div>
+            <div class="issue-body">
+                <p><span class="file-ref">BOG.BL/Services/PlaintiffBL.cs:901-933</span></p>
+                <p><code>AddressSourceType</code> is <code>[Required]</code> in the DTO, but at line 927-929, when <code>CustomAddress</code> is provided, <code>AddressSourceType</code> is ignored. Client must provide it even though it's not used.</p>
+                <div class="impact"><strong>Impact:</strong> Confusing API contract; unnecessary required field.</div>
+            </div>
+        </div>
+
+        <!-- BE-10 -->
+        <div class="issue">
+            <div class="issue-header">
+                <span class="issue-id">BE-10</span>
+                <span class="issue-title">DTO comment references wrong type IDs</span>
+                <span class="severity-badge medium">Medium</span>
+                <span class="category-badge">Documentation</span>
+            </div>
+            <div class="issue-body">
+                <p><span class="file-ref">BOG.DTO/Plaintiff/PlaintiffUpdateDTO.cs:300-315</span></p>
+                <p>Comments reference wrong plaintiff types for address sections:</p>
+                <ul>
+                    <li>Line 300: Says "Type 6" for BusinessAddress &mdash; should be "Type 3"</li>
+                    <li>Line 305: Says "Type 2" for CompanyAddress &mdash; should be "Type 4"</li>
+                    <li>Line 310: Says "Type 4" for NGOAddress &mdash; should be "Type 7"</li>
+                    <li>Line 315: Says "Type 5" for WaqfAddress &mdash; should be "Type 8"</li>
+                </ul>
+                <div class="impact"><strong>Impact:</strong> Misleading for developers maintaining the code.</div>
+            </div>
+        </div>
+
+        <!-- BE-11 -->
+        <div class="issue">
+            <div class="issue-header">
+                <span class="issue-id">BE-11</span>
+                <span class="issue-title">Excessive debug logging with LogWarning in production</span>
+                <span class="severity-badge low">Low</span>
+                <span class="category-badge">Performance</span>
+            </div>
+            <div class="issue-body">
+                <p><span class="file-ref">BOG.API/Controllers/PlaintiffsController.cs:67-91</span></p>
+                <p>DTO field values logged with <code>LogWarning</code> instead of <code>LogDebug</code>. These execute in production and log sensitive plaintiff data (identity numbers, names, etc.).</p>
+                <div class="impact"><strong>Impact:</strong> Sensitive PII logged in production; performance overhead.</div>
+            </div>
+        </div>
+
+        <!-- BE-12 -->
+        <div class="issue">
+            <div class="issue-header">
+                <span class="issue-id">BE-12</span>
+                <span class="issue-title">Gender validation accepts mixed formats</span>
+                <span class="severity-badge low">Low</span>
+                <span class="category-badge">Validation</span>
+            </div>
+            <div class="issue-body">
+                <p><span class="file-ref">BOG.BL/Services/PlaintiffBL.cs (Validator:88)</span></p>
+                <p>Gender validation accepts both Arabic ("ذكر"/"أنثى") and English ("male"/"female") but doesn't normalize the value. Database could have mixed formats.</p>
+                <div class="impact"><strong>Impact:</strong> Inconsistent data in database; filtering/reporting issues.</div>
+            </div>
+        </div>
+
+        <!-- BE-13 -->
+        <div class="issue">
+            <div class="issue-header">
+                <span class="issue-id">BE-13</span>
+                <span class="issue-title">Duplicate IsDeleted/IsActive filter in PlaintiffRepository</span>
+                <span class="severity-badge low">Low</span>
+                <span class="category-badge">Performance</span>
+            </div>
+            <div class="issue-body">
+                <p><span class="file-ref">BOG.DAL/Repositories/PlaintiffRepository.cs:25-32</span></p>
+                <p><code>GetByRequestIdAsync</code> double-filters both the junction table (<code>!crp.IsDeleted</code>) and the plaintiff (<code>!p.IsDeleted && p.IsActive</code>). Redundant but not a bug.</p>
+                <div class="impact"><strong>Impact:</strong> Minor unnecessary query complexity.</div>
+            </div>
+        </div>
+
+        <!-- BE-14 -->
+        <div class="issue">
+            <div class="issue-header">
+                <span class="issue-id">BE-14</span>
+                <span class="issue-title">GetByIdAsync may return untracked entity for update</span>
+                <span class="severity-badge low">Low</span>
+                <span class="category-badge">Bug</span>
+            </div>
+            <div class="issue-body">
+                <p><span class="file-ref">BOG.BL/Services/PlaintiffBL.cs:490</span></p>
+                <p><code>UpdateAsync</code> uses <code>GetByIdAsync(id)</code> which may return an untracked entity from the base Repository. Could cause "cannot track multiple instances" error on update.</p>
+                <div class="impact"><strong>Impact:</strong> Potential tracking conflict errors during plaintiff updates.</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================================================================== -->
+    <!-- SECTION C: SRS COMPLIANCE GAPS -->
+    <!-- ================================================================== -->
+    <div class="section">
+        <h2>C. SRS Compliance Gaps <span class="badge">9 gaps</span></h2>
+        <p class="section-desc">Requirements from SRS UC 6.5.1 not reflected in implementation</p>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>SRS Reference</th>
+                    <th>Requirement</th>
+                    <th>Current Status</th>
+                    <th>Severity</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>SRS-01</td>
+                    <td>BC04 (Section 2.3)</td>
+                    <td>Only regionId and cityId are mandatory in national address</td>
+                    <td>All 8 address fields marked required &mdash; over-restrictive</td>
+                    <td><span class="severity-badge critical">Critical</span></td>
+                </tr>
+                <tr>
+                    <td>SRS-02</td>
+                    <td>Section 2.5 (6.3.9)</td>
+                    <td>Profession (المهنة) mandatory for Type 1</td>
+                    <td>No required validator set for profession field</td>
+                    <td><span class="severity-badge critical">Critical</span></td>
+                </tr>
+                <tr>
+                    <td>SRS-03</td>
+                    <td>BR08 (Section 3.2)</td>
+                    <td>Absher verification mandatory before save for Type 1</td>
+                    <td>Warning shown but save not blocked</td>
+                    <td><span class="severity-badge high">High</span></td>
+                </tr>
+                <tr>
+                    <td>SRS-04</td>
+                    <td>Section 2.1</td>
+                    <td>Absher fields must be immutable after verification</td>
+                    <td>Uses HTML readonly (bypassable), not form disable</td>
+                    <td><span class="severity-badge high">High</span></td>
+                </tr>
+                <tr>
+                    <td>SRS-05</td>
+                    <td>Section 2.16</td>
+                    <td>Representative types restricted per plaintiff type</td>
+                    <td>Frontend filters work; no backend validation</td>
+                    <td><span class="severity-badge high">High</span></td>
+                </tr>
+                <tr>
+                    <td>SRS-06</td>
+                    <td>Section 3.4 BC01</td>
+                    <td>Attachment types restricted per plaintiff type</td>
+                    <td>Not implemented &mdash; any attachment type accepted</td>
+                    <td><span class="severity-badge high">High</span></td>
+                </tr>
+                <tr>
+                    <td>SRS-07</td>
+                    <td>BR04 (Section 3.4)</td>
+                    <td>Attachments: PDF only, max 4MB</td>
+                    <td>No backend validation &mdash; only DTO comment</td>
+                    <td><span class="severity-badge high">High</span></td>
+                </tr>
+                <tr>
+                    <td>SRS-08</td>
+                    <td>Section 2.9 (6.3.7)</td>
+                    <td>Type 5: Company address field required</td>
+                    <td>No required validator for unregisteredCompanyAddress</td>
+                    <td><span class="severity-badge medium">Medium</span></td>
+                </tr>
+                <tr>
+                    <td>SRS-09</td>
+                    <td>Section 3.5</td>
+                    <td>Representative count/minimum requirements per type</td>
+                    <td>No min/max validation for representative count</td>
+                    <td><span class="severity-badge medium">Medium</span></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- ================================================================== -->
+    <!-- PRIORITY MATRIX -->
+    <!-- ================================================================== -->
+    <div class="section">
+        <h2>Priority Action Matrix</h2>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Priority</th>
+                    <th>Issue IDs</th>
+                    <th>Action Required</th>
+                    <th>Effort</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><span class="severity-badge critical">P0</span></td>
+                    <td>FE-01</td>
+                    <td>Fix requestId=0 default &mdash; validate before API call, redirect if missing</td>
+                    <td>Small</td>
+                </tr>
+                <tr>
+                    <td><span class="severity-badge critical">P0</span></td>
+                    <td>FE-02, SRS-01</td>
+                    <td>Fix address validators: only require regionId + cityId per BC04</td>
+                    <td>Small</td>
+                </tr>
+                <tr>
+                    <td><span class="severity-badge critical">P0</span></td>
+                    <td>BE-02</td>
+                    <td>Implement representative attachment file storage (currently TODO)</td>
+                    <td>Medium</td>
+                </tr>
+                <tr>
+                    <td><span class="severity-badge critical">P0</span></td>
+                    <td>BE-01</td>
+                    <td>Add attachment validation: FileSizeBytes, 4MB limit, PDF check</td>
+                    <td>Medium</td>
+                </tr>
+                <tr>
+                    <td><span class="severity-badge high">P1</span></td>
+                    <td>FE-05, SRS-03</td>
+                    <td>Enforce BR08 Absher verification at save time for Type 1</td>
+                    <td>Small</td>
+                </tr>
+                <tr>
+                    <td><span class="severity-badge high">P1</span></td>
+                    <td>FE-07, SRS-05</td>
+                    <td>Add backend validation for representative types per plaintiff type</td>
+                    <td>Medium</td>
+                </tr>
+                <tr>
+                    <td><span class="severity-badge high">P1</span></td>
+                    <td>BE-03</td>
+                    <td>Wrap plaintiff + address creation in a single transaction scope</td>
+                    <td>Medium</td>
+                </tr>
+                <tr>
+                    <td><span class="severity-badge high">P1</span></td>
+                    <td>FE-08, SRS-06</td>
+                    <td>Implement attachment type restrictions by plaintiff type</td>
+                    <td>Medium</td>
+                </tr>
+                <tr>
+                    <td><span class="severity-badge medium">P2</span></td>
+                    <td>FE-03, SRS-02</td>
+                    <td>Add required validator for profession field on Type 1</td>
+                    <td>Small</td>
+                </tr>
+                <tr>
+                    <td><span class="severity-badge medium">P2</span></td>
+                    <td>BE-06</td>
+                    <td>Fix IdentityNumber StringLength in UpdateDTO (10 &rarr; 20)</td>
+                    <td>Small</td>
+                </tr>
+                <tr>
+                    <td><span class="severity-badge medium">P2</span></td>
+                    <td>BE-07</td>
+                    <td>Create FluentValidation validator for PlaintiffUpdateDTO</td>
+                    <td>Medium</td>
+                </tr>
+                <tr>
+                    <td><span class="severity-badge medium">P2</span></td>
+                    <td>FE-04</td>
+                    <td>Replace concurrent subscriptions with forkJoin in loadAllRepresentatives</td>
+                    <td>Small</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="footer">
+        Generated on 2026-02-08 &bull; Plaintiff Module Issues Report &bull; Branch: MohamedShafik
+    </div>
+</div>
+</body>
+</html>

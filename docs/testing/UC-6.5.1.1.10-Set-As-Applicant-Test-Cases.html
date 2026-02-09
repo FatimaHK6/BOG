@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>حالات اختبار - تحديد كمقدّم طلب (6.5.1.1.10)</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .header {
+            background: linear-gradient(135deg, #1B5E20, #2E7D32);
+            color: white;
+            padding: 30px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+        }
+        .header h1 {
+            margin: 0 0 10px 0;
+            font-size: 28px;
+        }
+        .header .subtitle {
+            opacity: 0.9;
+            font-size: 16px;
+        }
+        .header .meta {
+            margin-top: 15px;
+            font-size: 14px;
+            opacity: 0.8;
+        }
+        .section {
+            background: white;
+            border-radius: 8px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .section h2 {
+            color: #1B5E20;
+            border-bottom: 2px solid #E8F5E9;
+            padding-bottom: 10px;
+            margin-top: 0;
+        }
+        .section h3 {
+            color: #2E7D32;
+            margin-top: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: right;
+        }
+        th {
+            background-color: #E8F5E9;
+            color: #1B5E20;
+            font-weight: 600;
+        }
+        tr:nth-child(even) {
+            background-color: #fafafa;
+        }
+        tr:hover {
+            background-color: #f0f0f0;
+        }
+        .test-case {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        .test-case-header {
+            background: #E8F5E9;
+            padding: 15px 20px;
+            border-bottom: 1px solid #ddd;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .test-case-header h4 {
+            margin: 0;
+            color: #1B5E20;
+        }
+        .test-case-body {
+            padding: 20px;
+        }
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .badge-positive {
+            background: #C8E6C9;
+            color: #2E7D32;
+        }
+        .badge-negative {
+            background: #FFCDD2;
+            color: #C62828;
+        }
+        .badge-priority-high {
+            background: #FFCDD2;
+            color: #C62828;
+        }
+        .badge-priority-medium {
+            background: #FFF9C4;
+            color: #F57F17;
+        }
+        .badge-priority-low {
+            background: #E3F2FD;
+            color: #1565C0;
+        }
+        .steps {
+            counter-reset: step;
+            list-style: none;
+            padding: 0;
+        }
+        .steps li {
+            counter-increment: step;
+            padding: 10px 0 10px 40px;
+            position: relative;
+            border-bottom: 1px dashed #eee;
+        }
+        .steps li:last-child {
+            border-bottom: none;
+        }
+        .steps li::before {
+            content: counter(step);
+            position: absolute;
+            right: 0;
+            top: 10px;
+            width: 25px;
+            height: 25px;
+            background: #1B5E20;
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 25px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .expected-result {
+            background: #E8F5E9;
+            padding: 15px;
+            border-radius: 4px;
+            border-right: 4px solid #1B5E20;
+            margin-top: 15px;
+        }
+        .preconditions {
+            background: #FFF3E0;
+            padding: 15px;
+            border-radius: 4px;
+            border-right: 4px solid #FF9800;
+        }
+        .business-rules {
+            background: #E3F2FD;
+            padding: 15px;
+            border-radius: 4px;
+            border-right: 4px solid #1976D2;
+        }
+        .summary-box {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .summary-item {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .summary-item .number {
+            font-size: 36px;
+            font-weight: bold;
+            color: #1B5E20;
+        }
+        .summary-item .label {
+            color: #666;
+            font-size: 14px;
+        }
+        code {
+            background: #f5f5f5;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+        }
+        .tag {
+            display: inline-block;
+            background: #E8F5E9;
+            color: #1B5E20;
+            padding: 2px 8px;
+            border-radius: 3px;
+            font-size: 12px;
+            margin-left: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>حالات اختبار - تحديد كمقدّم طلب</h1>
+        <div class="subtitle">User Story: 6.5.1.1.10 - Set as Applicant</div>
+        <div class="meta">
+            <strong>المشروع:</strong> نظام إدارة الدعاوى (BOG) |
+            <strong>الإصدار:</strong> 1.0 |
+            <strong>التاريخ:</strong> 2026-01-19
+        </div>
+    </div>
+
+    <!-- Summary -->
+    <div class="summary-box">
+        <div class="summary-item">
+            <div class="number">8</div>
+            <div class="label">إجمالي حالات الاختبار</div>
+        </div>
+        <div class="summary-item">
+            <div class="number">5</div>
+            <div class="label">اختبارات إيجابية</div>
+        </div>
+        <div class="summary-item">
+            <div class="number">3</div>
+            <div class="label">اختبارات سلبية</div>
+        </div>
+        <div class="summary-item">
+            <div class="number">2</div>
+            <div class="label">قواعد العمل</div>
+        </div>
+    </div>
+
+    <!-- Overview Section -->
+    <div class="section">
+        <h2>1. نظرة عامة</h2>
+        <p><strong>الوصف:</strong> تحديد مدّعي أو ممثّل كمقدّم للطلب. يمكن تحديد مقدّم طلب واحد فقط لكل طلب قيد دعوى.</p>
+
+        <h3>1.1 الشروط الاستباقية</h3>
+        <div class="preconditions">
+            <ul>
+                <li>المدّعي/الممثّل من نوع <strong>فرد</strong> (نوع المدعي = 1 أو 2)</li>
+                <li>وجود مدّعي واحد على الأقل في الطلب</li>
+                <li>المستخدم لديه صلاحية تعديل الطلب</li>
+            </ul>
+        </div>
+
+        <h3>1.2 قواعد العمل</h3>
+        <div class="business-rules">
+            <table>
+                <tr>
+                    <th>الرمز</th>
+                    <th>القاعدة</th>
+                    <th>الوصف</th>
+                </tr>
+                <tr>
+                    <td><code>BC01</code></td>
+                    <td>إزالة الخاصية من المقدم السابق</td>
+                    <td>عند تحديد مقدّم طلب جديد، يتم إزالة صفة مقدّم الطلب من الشخص السابق تلقائياً</td>
+                </tr>
+                <tr>
+                    <td><code>BC02</code></td>
+                    <td>تحديد نوع مقدّم الطلب</td>
+                    <td>أنواع مقدّم الطلب: أصيل (المدعي نفسه) / وكيل (ممثل المدعي) / أصيل-وكيل</td>
+                </tr>
+            </table>
+        </div>
+
+        <h3>1.3 أنواع مقدّم الطلب</h3>
+        <table>
+            <tr>
+                <th>النوع</th>
+                <th>الوصف</th>
+                <th>الشروط</th>
+            </tr>
+            <tr>
+                <td>أصيل</td>
+                <td>المدّعي نفسه هو مقدّم الطلب</td>
+                <td>نوع المدعي = فرد</td>
+            </tr>
+            <tr>
+                <td>وكيل</td>
+                <td>ممثّل المدّعي هو مقدّم الطلب</td>
+                <td>نوع الممثل = وكيل/محامي</td>
+            </tr>
+            <tr>
+                <td>أصيل-وكيل</td>
+                <td>المدّعي الفرد يمثّل نفسه ومدّعين آخرين</td>
+                <td>المدعي فرد + يمثل مدعين آخرين</td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- Test Cases Section -->
+    <div class="section">
+        <h2>2. حالات الاختبار</h2>
+
+        <!-- TC-001 -->
+        <div class="test-case">
+            <div class="test-case-header">
+                <h4>TC-6.5.1.1.10-001: تحديد مدّعي فرد كمقدّم طلب (أصيل)</h4>
+                <div>
+                    <span class="badge badge-positive">إيجابي</span>
+                    <span class="badge badge-priority-high">أولوية عالية</span>
+                </div>
+            </div>
+            <div class="test-case-body">
+                <p><strong>الهدف:</strong> التحقق من إمكانية تحديد مدّعي من نوع فرد كمقدّم طلب (أصيل)</p>
+
+                <div class="preconditions">
+                    <strong>الشروط المسبقة:</strong>
+                    <ul>
+                        <li>يوجد طلب قيد دعوى مع مدّعي واحد على الأقل من نوع "فرد"</li>
+                        <li>لا يوجد مقدّم طلب محدد مسبقاً</li>
+                    </ul>
+                </div>
+
+                <h5>خطوات الاختبار:</h5>
+                <ol class="steps">
+                    <li>الانتقال إلى صفحة قيد الدعوى</li>
+                    <li>فتح قسم "المدعين"</li>
+                    <li>اختيار مدّعي من نوع "فرد" من القائمة</li>
+                    <li>الضغط على زر "تحديد كمقدّم طلب"</li>
+                    <li>اختيار نوع مقدّم الطلب: "أصيل"</li>
+                    <li>الضغط على "تأكيد"</li>
+                </ol>
+
+                <div class="expected-result">
+                    <strong>النتيجة المتوقعة:</strong>
+                    <ul>
+                        <li>يظهر شارة "مقدّم الطلب" بجانب اسم المدّعي</li>
+                        <li>يتم تحديث حقل <code>isApplicant = true</code> للمدّعي</li>
+                        <li>يظهر رسالة نجاح: "تم تحديد مقدّم الطلب بنجاح"</li>
+                    </ul>
+                </div>
+
+                <p><strong>قواعد العمل المغطاة:</strong> <span class="tag">BC02</span></p>
+            </div>
+        </div>
+
+        <!-- TC-002 -->
+        <div class="test-case">
+            <div class="test-case-header">
+                <h4>TC-6.5.1.1.10-002: تحديد ممثّل كمقدّم طلب (وكيل)</h4>
+                <div>
+                    <span class="badge badge-positive">إيجابي</span>
+                    <span class="badge badge-priority-high">أولوية عالية</span>
+                </div>
+            </div>
+            <div class="test-case-body">
+                <p><strong>الهدف:</strong> التحقق من إمكانية تحديد ممثّل (وكيل/محامي) كمقدّم طلب</p>
+
+                <div class="preconditions">
+                    <strong>الشروط المسبقة:</strong>
+                    <ul>
+                        <li>يوجد مدّعي مع ممثّل من نوع "وكيل"</li>
+                        <li>لا يوجد مقدّم طلب محدد مسبقاً</li>
+                    </ul>
+                </div>
+
+                <h5>خطوات الاختبار:</h5>
+                <ol class="steps">
+                    <li>الانتقال إلى صفحة قيد الدعوى</li>
+                    <li>فتح قسم "المدعين"</li>
+                    <li>التوسع في قائمة ممثلي المدّعي</li>
+                    <li>اختيار ممثّل من نوع "وكيل"</li>
+                    <li>الضغط على زر "تحديد كمقدّم طلب"</li>
+                    <li>الضغط على "تأكيد"</li>
+                </ol>
+
+                <div class="expected-result">
+                    <strong>النتيجة المتوقعة:</strong>
+                    <ul>
+                        <li>يظهر شارة "مقدّم الطلب" بجانب اسم الممثّل</li>
+                        <li>نوع مقدّم الطلب = "وكيل"</li>
+                        <li>يتم تحديث حقل <code>isApplicant = true</code> للممثّل</li>
+                    </ul>
+                </div>
+
+                <p><strong>قواعد العمل المغطاة:</strong> <span class="tag">BC02</span></p>
+            </div>
+        </div>
+
+        <!-- TC-003 -->
+        <div class="test-case">
+            <div class="test-case-header">
+                <h4>TC-6.5.1.1.10-003: تغيير مقدّم الطلب (BC01)</h4>
+                <div>
+                    <span class="badge badge-positive">إيجابي</span>
+                    <span class="badge badge-priority-high">أولوية عالية</span>
+                </div>
+            </div>
+            <div class="test-case-body">
+                <p><strong>الهدف:</strong> التحقق من إزالة صفة مقدّم الطلب من الشخص السابق عند تحديد مقدّم جديد</p>
+
+                <div class="preconditions">
+                    <strong>الشروط المسبقة:</strong>
+                    <ul>
+                        <li>يوجد مقدّم طلب محدد مسبقاً (المدعي أ)</li>
+                        <li>يوجد مدّعي آخر من نوع فرد (المدعي ب)</li>
+                    </ul>
+                </div>
+
+                <h5>خطوات الاختبار:</h5>
+                <ol class="steps">
+                    <li>التحقق من أن المدعي (أ) معلّم كمقدّم طلب</li>
+                    <li>اختيار المدعي (ب) من القائمة</li>
+                    <li>الضغط على زر "تحديد كمقدّم طلب"</li>
+                    <li>تأكيد العملية</li>
+                </ol>
+
+                <div class="expected-result">
+                    <strong>النتيجة المتوقعة:</strong>
+                    <ul>
+                        <li>إزالة شارة "مقدّم الطلب" من المدعي (أ)</li>
+                        <li>تحديث <code>isApplicant = false</code> للمدعي (أ)</li>
+                        <li>إضافة شارة "مقدّم الطلب" للمدعي (ب)</li>
+                        <li>تحديث <code>isApplicant = true</code> للمدعي (ب)</li>
+                        <li>مقدّم طلب واحد فقط في النظام</li>
+                    </ul>
+                </div>
+
+                <p><strong>قواعد العمل المغطاة:</strong> <span class="tag">BC01</span></p>
+            </div>
+        </div>
+
+        <!-- TC-004 -->
+        <div class="test-case">
+            <div class="test-case-header">
+                <h4>TC-6.5.1.1.10-004: تغيير مقدّم الطلب من مدّعي إلى ممثّل</h4>
+                <div>
+                    <span class="badge badge-positive">إيجابي</span>
+                    <span class="badge badge-priority-medium">أولوية متوسطة</span>
+                </div>
+            </div>
+            <div class="test-case-body">
+                <p><strong>الهدف:</strong> التحقق من إمكانية تغيير مقدّم الطلب من مدّعي إلى ممثّل</p>
+
+                <div class="preconditions">
+                    <strong>الشروط المسبقة:</strong>
+                    <ul>
+                        <li>المدعي (فرد) محدد كمقدّم طلب حالي</li>
+                        <li>يوجد ممثّل للمدعي من نوع "وكيل"</li>
+                    </ul>
+                </div>
+
+                <h5>خطوات الاختبار:</h5>
+                <ol class="steps">
+                    <li>فتح قائمة ممثلي المدّعي</li>
+                    <li>اختيار الممثّل (الوكيل)</li>
+                    <li>الضغط على "تحديد كمقدّم طلب"</li>
+                    <li>تأكيد العملية</li>
+                </ol>
+
+                <div class="expected-result">
+                    <strong>النتيجة المتوقعة:</strong>
+                    <ul>
+                        <li>إزالة صفة مقدّم الطلب من المدّعي</li>
+                        <li>تحديد الممثّل كمقدّم طلب</li>
+                        <li>تغيير نوع مقدّم الطلب من "أصيل" إلى "وكيل"</li>
+                    </ul>
+                </div>
+
+                <p><strong>قواعد العمل المغطاة:</strong> <span class="tag">BC01</span> <span class="tag">BC02</span></p>
+            </div>
+        </div>
+
+        <!-- TC-005 -->
+        <div class="test-case">
+            <div class="test-case-header">
+                <h4>TC-6.5.1.1.10-005: تحديد مدّعي فرد يمثّل مدّعين آخرين (أصيل-وكيل)</h4>
+                <div>
+                    <span class="badge badge-positive">إيجابي</span>
+                    <span class="badge badge-priority-medium">أولوية متوسطة</span>
+                </div>
+            </div>
+            <div class="test-case-body">
+                <p><strong>الهدف:</strong> التحقق من تحديد مدّعي فرد كمقدّم طلب مع نوع "أصيل-وكيل"</p>
+
+                <div class="preconditions">
+                    <strong>الشروط المسبقة:</strong>
+                    <ul>
+                        <li>يوجد مدّعي من نوع فرد</li>
+                        <li>المدعي الفرد مسجّل كممثّل لمدّعين آخرين في نفس الطلب</li>
+                    </ul>
+                </div>
+
+                <h5>خطوات الاختبار:</h5>
+                <ol class="steps">
+                    <li>اختيار المدّعي الفرد الذي يمثّل آخرين</li>
+                    <li>الضغط على "تحديد كمقدّم طلب"</li>
+                    <li>اختيار نوع مقدّم الطلب: "أصيل-وكيل"</li>
+                    <li>تأكيد العملية</li>
+                </ol>
+
+                <div class="expected-result">
+                    <strong>النتيجة المتوقعة:</strong>
+                    <ul>
+                        <li>تحديد المدّعي كمقدّم طلب</li>
+                        <li>نوع مقدّم الطلب = "أصيل-وكيل"</li>
+                        <li>يظهر في التقارير كمقدّم طلب عن نفسه وعن المدّعين الآخرين</li>
+                    </ul>
+                </div>
+
+                <p><strong>قواعد العمل المغطاة:</strong> <span class="tag">BC02</span></p>
+            </div>
+        </div>
+
+        <!-- Negative Test Cases -->
+        <h3 style="color: #C62828; margin-top: 40px;">حالات الاختبار السلبية</h3>
+
+        <!-- TC-006 -->
+        <div class="test-case">
+            <div class="test-case-header">
+                <h4>TC-6.5.1.1.10-006: محاولة تحديد مدّعي غير فرد كمقدّم طلب</h4>
+                <div>
+                    <span class="badge badge-negative">سلبي</span>
+                    <span class="badge badge-priority-high">أولوية عالية</span>
+                </div>
+            </div>
+            <div class="test-case-body">
+                <p><strong>الهدف:</strong> التحقق من عدم إمكانية تحديد مدّعي من نوع غير فرد كمقدّم طلب</p>
+
+                <div class="preconditions">
+                    <strong>الشروط المسبقة:</strong>
+                    <ul>
+                        <li>يوجد مدّعي من نوع "شركة مسجلة" أو "جهة حكومية"</li>
+                    </ul>
+                </div>
+
+                <h5>خطوات الاختبار:</h5>
+                <ol class="steps">
+                    <li>اختيار مدّعي من نوع "شركة مسجلة"</li>
+                    <li>البحث عن زر "تحديد كمقدّم طلب"</li>
+                </ol>
+
+                <div class="expected-result">
+                    <strong>النتيجة المتوقعة:</strong>
+                    <ul>
+                        <li>زر "تحديد كمقدّم طلب" <strong>غير ظاهر</strong> أو <strong>معطّل</strong></li>
+                        <li>فقط المدّعين من نوع فرد يمكن تحديدهم كمقدّم طلب</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- TC-007 -->
+        <div class="test-case">
+            <div class="test-case-header">
+                <h4>TC-6.5.1.1.10-007: محاولة تحديد مقدّم طلب مكرر</h4>
+                <div>
+                    <span class="badge badge-negative">سلبي</span>
+                    <span class="badge badge-priority-medium">أولوية متوسطة</span>
+                </div>
+            </div>
+            <div class="test-case-body">
+                <p><strong>الهدف:</strong> التحقق من أن النظام لا يسمح بوجود أكثر من مقدّم طلب واحد</p>
+
+                <div class="preconditions">
+                    <strong>الشروط المسبقة:</strong>
+                    <ul>
+                        <li>يوجد مقدّم طلب محدد مسبقاً</li>
+                    </ul>
+                </div>
+
+                <h5>خطوات الاختبار:</h5>
+                <ol class="steps">
+                    <li>محاولة إضافة مقدّم طلب ثانٍ عبر API مباشرة</li>
+                    <li>أو محاولة تعيين <code>isApplicant = true</code> لشخصين في نفس الوقت</li>
+                </ol>
+
+                <div class="expected-result">
+                    <strong>النتيجة المتوقعة:</strong>
+                    <ul>
+                        <li>النظام يرفض العملية</li>
+                        <li>يبقى مقدّم طلب واحد فقط</li>
+                        <li>تطبيق قاعدة BC01 تلقائياً</li>
+                    </ul>
+                </div>
+
+                <p><strong>قواعد العمل المغطاة:</strong> <span class="tag">BC01</span></p>
+            </div>
+        </div>
+
+        <!-- TC-008 -->
+        <div class="test-case">
+            <div class="test-case-header">
+                <h4>TC-6.5.1.1.10-008: إلغاء تحديد مقدّم الطلب</h4>
+                <div>
+                    <span class="badge badge-negative">سلبي</span>
+                    <span class="badge badge-priority-low">أولوية منخفضة</span>
+                </div>
+            </div>
+            <div class="test-case-body">
+                <p><strong>الهدف:</strong> التحقق من سلوك النظام عند إلغاء عملية تحديد مقدّم الطلب</p>
+
+                <div class="preconditions">
+                    <strong>الشروط المسبقة:</strong>
+                    <ul>
+                        <li>يوجد مدّعي من نوع فرد</li>
+                    </ul>
+                </div>
+
+                <h5>خطوات الاختبار:</h5>
+                <ol class="steps">
+                    <li>اختيار مدّعي من نوع فرد</li>
+                    <li>الضغط على "تحديد كمقدّم طلب"</li>
+                    <li>في نافذة التأكيد، الضغط على "إلغاء"</li>
+                </ol>
+
+                <div class="expected-result">
+                    <strong>النتيجة المتوقعة:</strong>
+                    <ul>
+                        <li>إغلاق النافذة بدون تغييرات</li>
+                        <li>بقاء الحالة السابقة كما هي</li>
+                        <li>عدم تحديث أي بيانات</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Traceability Matrix -->
+    <div class="section">
+        <h2>3. مصفوفة التتبع</h2>
+        <table>
+            <tr>
+                <th>حالة الاختبار</th>
+                <th>BC01</th>
+                <th>BC02</th>
+                <th>الأولوية</th>
+                <th>النوع</th>
+            </tr>
+            <tr>
+                <td>TC-6.5.1.1.10-001</td>
+                <td>-</td>
+                <td>✓</td>
+                <td>عالية</td>
+                <td>إيجابي</td>
+            </tr>
+            <tr>
+                <td>TC-6.5.1.1.10-002</td>
+                <td>-</td>
+                <td>✓</td>
+                <td>عالية</td>
+                <td>إيجابي</td>
+            </tr>
+            <tr>
+                <td>TC-6.5.1.1.10-003</td>
+                <td>✓</td>
+                <td>-</td>
+                <td>عالية</td>
+                <td>إيجابي</td>
+            </tr>
+            <tr>
+                <td>TC-6.5.1.1.10-004</td>
+                <td>✓</td>
+                <td>✓</td>
+                <td>متوسطة</td>
+                <td>إيجابي</td>
+            </tr>
+            <tr>
+                <td>TC-6.5.1.1.10-005</td>
+                <td>-</td>
+                <td>✓</td>
+                <td>متوسطة</td>
+                <td>إيجابي</td>
+            </tr>
+            <tr>
+                <td>TC-6.5.1.1.10-006</td>
+                <td>-</td>
+                <td>-</td>
+                <td>عالية</td>
+                <td>سلبي</td>
+            </tr>
+            <tr>
+                <td>TC-6.5.1.1.10-007</td>
+                <td>✓</td>
+                <td>-</td>
+                <td>متوسطة</td>
+                <td>سلبي</td>
+            </tr>
+            <tr>
+                <td>TC-6.5.1.1.10-008</td>
+                <td>-</td>
+                <td>-</td>
+                <td>منخفضة</td>
+                <td>سلبي</td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- Test Data -->
+    <div class="section">
+        <h2>4. بيانات الاختبار</h2>
+        <table>
+            <tr>
+                <th>البيان</th>
+                <th>القيمة</th>
+                <th>الوصف</th>
+            </tr>
+            <tr>
+                <td>مدّعي فرد</td>
+                <td>نوع المدعي = 1</td>
+                <td>فرد سعودي برقم هوية صالح</td>
+            </tr>
+            <tr>
+                <td>مدّعي فرد بدون هوية</td>
+                <td>نوع المدعي = 2</td>
+                <td>فرد غير سعودي</td>
+            </tr>
+            <tr>
+                <td>ممثّل وكيل</td>
+                <td>نوع الممثل = 1</td>
+                <td>محامي برقم رخصة صالح</td>
+            </tr>
+            <tr>
+                <td>شركة مسجلة</td>
+                <td>نوع المدعي = 4</td>
+                <td>شركة برقم سجل تجاري</td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- Footer -->
+    <div class="section" style="text-align: center; color: #666;">
+        <p>
+            <strong>نظام إدارة الدعاوى (BOG)</strong><br>
+            وثيقة حالات الاختبار - الإصدار 1.0<br>
+            تم الإنشاء: 2026-01-19
+        </p>
+    </div>
+</body>
+</html>

@@ -1,0 +1,236 @@
+<div class="plaintiff-list-container">
+  <!-- Header -->
+  <div class="page-header">
+    <h2 class="page-title">المدعين</h2>
+    <div class="header-actions">
+      <button mat-stroked-button color="accent" (click)="onSaveAsDraft()" [disabled]="isSaving">
+        <mat-icon>save</mat-icon>
+        حفظ كمسودة
+      </button>
+      <button mat-raised-button class="add-plaintiff-btn" [matMenuTriggerFor]="plaintiffTypeMenu">
+        <mat-icon>add</mat-icon>
+        إضافة مدعي جديد
+      </button>
+      <mat-menu #plaintiffTypeMenu="matMenu" class="plaintiff-type-menu">
+        <button mat-menu-item *ngFor="let type of plaintiffTypes" (click)="onSelectPlaintiffType(type)">
+          {{ type.nameAr }}
+        </button>
+      </mat-menu>
+    </div>
+  </div>
+
+  <!-- Loading Spinner -->
+  <div *ngIf="isLoading" class="loading-container">
+    <mat-spinner diameter="40"></mat-spinner>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="!isLoading && plaintiffs.length === 0" class="empty-state">
+    <mat-icon class="empty-icon">person_off</mat-icon>
+    <p>لا يوجد مدعين مسجلين</p>
+    <button mat-stroked-button class="add-plaintiff-btn-outline" [matMenuTriggerFor]="plaintiffTypeMenuEmpty">
+      إضافة مدعي
+    </button>
+    <mat-menu #plaintiffTypeMenuEmpty="matMenu" class="plaintiff-type-menu">
+      <button mat-menu-item *ngFor="let type of plaintiffTypes" (click)="onSelectPlaintiffType(type)">
+        {{ type.nameAr }}
+      </button>
+    </mat-menu>
+  </div>
+
+  <!-- Plaintiffs Table -->
+  <mat-card *ngIf="!isLoading && plaintiffs.length > 0">
+    <mat-card-content>
+      <table mat-table [dataSource]="dataSource" class="full-width">
+
+        <!-- Plaintiff Type Column -->
+        <ng-container matColumnDef="plaintiffType">
+          <th mat-header-cell *matHeaderCellDef>نوع المدعي</th>
+          <td mat-cell *matCellDef="let plaintiff">{{ plaintiff.plaintiffTypeNameAr }}</td>
+        </ng-container>
+
+        <!-- Identity Number Column -->
+        <ng-container matColumnDef="identityNumber">
+          <th mat-header-cell *matHeaderCellDef>رقم الهوية</th>
+          <td mat-cell *matCellDef="let plaintiff">{{ plaintiff.identityNumber || '-' }}</td>
+        </ng-container>
+
+        <!-- Full Name Column -->
+        <ng-container matColumnDef="fullName">
+          <th mat-header-cell *matHeaderCellDef>اسم المدعي</th>
+          <td mat-cell *matCellDef="let plaintiff">{{ plaintiff.displayName }}</td>
+        </ng-container>
+
+        <!-- Attachment Status Column -->
+        <ng-container matColumnDef="attachmentStatus">
+          <th mat-header-cell *matHeaderCellDef>حالة المرفقات</th>
+          <td mat-cell *matCellDef="let plaintiff">
+            <span class="status-badge" [ngClass]="getAttachmentStatusClass(plaintiff.attachmentStatus)">
+              <mat-icon *ngIf="plaintiff.attachmentStatus === 'complete'">check_circle</mat-icon>
+              <mat-icon *ngIf="plaintiff.attachmentStatus !== 'complete'">warning</mat-icon>
+              {{ getAttachmentStatusText(plaintiff.attachmentStatus) }}
+            </span>
+          </td>
+        </ng-container>
+
+        <!-- Is Applicant Column -->
+        <ng-container matColumnDef="isApplicant">
+          <th mat-header-cell *matHeaderCellDef>مقدم الطلب</th>
+          <td mat-cell *matCellDef="let plaintiff">
+            <mat-icon *ngIf="plaintiff.isApplicant" class="applicant-icon">check_circle</mat-icon>
+            <span *ngIf="!plaintiff.isApplicant">-</span>
+          </td>
+        </ng-container>
+
+        <!-- Actions Column -->
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef>الإجراءات</th>
+          <td mat-cell *matCellDef="let plaintiff">
+            <button mat-icon-button [matMenuTriggerFor]="actionMenu" matTooltip="الإجراءات">
+              <mat-icon>more_vert</mat-icon>
+            </button>
+            <mat-menu #actionMenu="matMenu">
+              <button mat-menu-item (click)="onViewPlaintiff(plaintiff.id)">
+                <mat-icon>visibility</mat-icon>
+                <span>عرض التفاصيل</span>
+              </button>
+              <button mat-menu-item (click)="onEditPlaintiff(plaintiff.id)">
+                <mat-icon>edit</mat-icon>
+                <span>تعديل</span>
+              </button>
+              <button mat-menu-item (click)="onSetApplicant(plaintiff)"
+                      *ngIf="!plaintiff.isApplicant && plaintiff.plaintiffTypeId === 1">
+                <mat-icon>person_pin</mat-icon>
+                <span>تعيين كمقدم طلب</span>
+              </button>
+              <mat-divider></mat-divider>
+              <button mat-menu-item (click)="onDeletePlaintiff(plaintiff)" class="delete-action">
+                <mat-icon>delete</mat-icon>
+                <span>حذف</span>
+              </button>
+            </mat-menu>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+      </table>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Paginator -->
+  <mat-paginator #plaintiffPaginator
+                 *ngIf="!isLoading && plaintiffs.length > 0"
+                 [pageSize]="10"
+                 [pageSizeOptions]="[5, 10, 25, 50]"
+                 showFirstLastButtons
+                 aria-label="اختر صفحة">
+  </mat-paginator>
+
+  <!-- Summary -->
+  <div *ngIf="!isLoading && plaintiffs.length > 0" class="summary">
+    <span>عرض {{ plaintiffs.length }} مدعي</span>
+  </div>
+
+  <!-- Representatives Section -->
+  <div class="representatives-container" *ngIf="!isLoading && plaintiffs.length > 0">
+    <mat-card>
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon>people</mat-icon>
+          الممثلين
+        </mat-card-title>
+      </mat-card-header>
+
+      <mat-card-content>
+        <!-- Loading Representatives -->
+        <div *ngIf="isLoadingRepresentatives" class="loading-representatives">
+          <mat-spinner diameter="30"></mat-spinner>
+        </div>
+
+        <!-- Empty State -->
+        <div *ngIf="!isLoadingRepresentatives && allRepresentatives.length === 0" class="empty-representatives">
+          <mat-icon>person_off</mat-icon>
+          <span>لا يوجد ممثلين</span>
+        </div>
+
+        <!-- Representatives Table -->
+        <table mat-table [dataSource]="representativesDataSource"
+               *ngIf="!isLoadingRepresentatives && allRepresentatives.length > 0"
+               class="representatives-table full-width">
+
+          <ng-container matColumnDef="plaintiffName">
+            <th mat-header-cell *matHeaderCellDef>اسم المدعي</th>
+            <td mat-cell *matCellDef="let rep">{{ rep.plaintiffName }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="type">
+            <th mat-header-cell *matHeaderCellDef>نوع الممثل</th>
+            <td mat-cell *matCellDef="let rep">{{ rep.representativeTypeNameAr || rep.representativeTypeName }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="identityNumber">
+            <th mat-header-cell *matHeaderCellDef>رقم الهوية</th>
+            <td mat-cell *matCellDef="let rep">{{ rep.identityNumber }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="fullName">
+            <th mat-header-cell *matHeaderCellDef>اسم الممثل</th>
+            <td mat-cell *matCellDef="let rep">{{ rep.fullName }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="mobileNumber">
+            <th mat-header-cell *matHeaderCellDef>رقم الجوال</th>
+            <td mat-cell *matCellDef="let rep">{{ rep.mobileNumber || '-' }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="isApplicant">
+            <th mat-header-cell *matHeaderCellDef>مقدم الطلب</th>
+            <td mat-cell *matCellDef="let rep">
+              <mat-icon *ngIf="rep.isApplicant" class="applicant-icon">check_circle</mat-icon>
+              <span *ngIf="!rep.isApplicant">-</span>
+            </td>
+          </ng-container>
+
+          <!-- Representative Actions Column -->
+          <ng-container matColumnDef="repActions">
+            <th mat-header-cell *matHeaderCellDef>الإجراءات</th>
+            <td mat-cell *matCellDef="let rep">
+              <button mat-icon-button [matMenuTriggerFor]="repActionMenu" matTooltip="الإجراءات">
+                <mat-icon>more_vert</mat-icon>
+              </button>
+              <mat-menu #repActionMenu="matMenu">
+                <button mat-menu-item (click)="onSetRepresentativeAsApplicant(rep)"
+                        *ngIf="!rep.isApplicant">
+                  <mat-icon>person_pin</mat-icon>
+                  <span>تعيين كمقدم طلب</span>
+                </button>
+                <button mat-menu-item disabled *ngIf="rep.isApplicant">
+                  <mat-icon>check_circle</mat-icon>
+                  <span>مقدم الطلب الحالي</span>
+                </button>
+              </mat-menu>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="['plaintiffName', 'type', 'identityNumber', 'fullName', 'mobileNumber', 'isApplicant', 'repActions']"></tr>
+          <tr mat-row *matRowDef="let row; columns: ['plaintiffName', 'type', 'identityNumber', 'fullName', 'mobileNumber', 'isApplicant', 'repActions'];"></tr>
+        </table>
+
+        <!-- Representatives Paginator -->
+        <mat-paginator #representativePaginator
+                       *ngIf="!isLoadingRepresentatives && allRepresentatives.length > 0"
+                       [pageSize]="5"
+                       [pageSizeOptions]="[5, 10, 25]"
+                       showFirstLastButtons
+                       aria-label="اختر صفحة الممثلين">
+        </mat-paginator>
+
+        <!-- Representatives Summary -->
+        <div *ngIf="!isLoadingRepresentatives && allRepresentatives.length > 0" class="representatives-summary">
+          <span>عرض {{ allRepresentatives.length }} ممثل</span>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>

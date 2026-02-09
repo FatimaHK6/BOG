@@ -1,0 +1,884 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>قواعد العمل - بيانات الممثلين | Representative Business Rules</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f7fa;
+            min-height: 100vh;
+            padding: 30px;
+            line-height: 1.8;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+            color: white;
+            padding: 30px 40px;
+            border-radius: 16px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 40px rgba(5, 150, 105, 0.3);
+        }
+
+        .header h1 {
+            font-size: 1.8em;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 1em;
+        }
+
+        .section {
+            background: white;
+            border-radius: 12px;
+            padding: 25px 30px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            border-right: 5px solid #059669;
+        }
+
+        .section-title {
+            color: #059669;
+            font-size: 1.3em;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #e5e7eb;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-title .code {
+            background: #059669;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 6px;
+            font-size: 0.75em;
+            font-weight: normal;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+            font-size: 0.95em;
+        }
+
+        th, td {
+            padding: 14px 16px;
+            text-align: right;
+            border: 1px solid #e5e7eb;
+        }
+
+        th {
+            background: #f8fafc;
+            font-weight: 600;
+            color: #374151;
+        }
+
+        tr:hover {
+            background: #f0fdf4;
+        }
+
+        .required {
+            color: #dc2626;
+            font-weight: bold;
+        }
+
+        .optional {
+            color: #6b7280;
+        }
+
+        .rule-box {
+            background: #fffbeb;
+            border: 1px solid #f59e0b;
+            border-radius: 10px;
+            padding: 18px 22px;
+            margin: 15px 0;
+        }
+
+        .rule-box h4 {
+            color: #b45309;
+            margin-bottom: 10px;
+            font-size: 1em;
+        }
+
+        .rule-box ul {
+            margin-right: 20px;
+            color: #92400e;
+        }
+
+        .rule-box li {
+            margin-bottom: 8px;
+        }
+
+        .error-box {
+            background: #fef2f2;
+            border: 1px solid #ef4444;
+            border-radius: 10px;
+            padding: 18px 22px;
+            margin: 15px 0;
+        }
+
+        .error-box h4 {
+            color: #dc2626;
+            margin-bottom: 10px;
+        }
+
+        .error-code {
+            display: inline-block;
+            background: #dc2626;
+            color: white;
+            padding: 2px 10px;
+            border-radius: 4px;
+            font-size: 0.85em;
+            margin-left: 8px;
+        }
+
+        .type-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            margin: 3px;
+        }
+
+        .type-badge.lawyer { background: #dbeafe; color: #1e40af; }
+        .type-badge.liquidator { background: #fce7f3; color: #9d174d; }
+        .type-badge.guardian { background: #d1fae5; color: #065f46; }
+        .type-badge.conservator { background: #fef3c7; color: #92400e; }
+        .type-badge.company-rep { background: #e0e7ff; color: #3730a3; }
+        .type-badge.gov-rep { background: #f3e8ff; color: #6b21a8; }
+        .type-badge.trustee { background: #ccfbf1; color: #0f766e; }
+        .type-badge.custodian { background: #fef9c3; color: #854d0e; }
+        .type-badge.waqf-inspector { background: #ffe4e6; color: #be123c; }
+
+        .editable {
+            background: #fefce8;
+            border: 2px dashed #eab308;
+            padding: 3px 8px;
+            border-radius: 4px;
+            min-width: 100px;
+            display: inline-block;
+        }
+
+        .editable:focus {
+            outline: none;
+            background: #fef9c3;
+            border-color: #ca8a04;
+        }
+
+        .hint {
+            color: #6b7280;
+            font-size: 0.85em;
+            font-style: italic;
+            margin-top: 5px;
+        }
+
+        .mapping-table {
+            margin-top: 20px;
+        }
+
+        .mapping-table th:first-child {
+            width: 200px;
+        }
+
+        .note {
+            background: #eff6ff;
+            border-right: 4px solid #3b82f6;
+            padding: 15px 20px;
+            margin: 15px 0;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .note strong {
+            color: #1d4ed8;
+        }
+
+        .print-btn {
+            position: fixed;
+            bottom: 30px;
+            left: 30px;
+            background: #059669;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-size: 1em;
+            box-shadow: 0 4px 15px rgba(5, 150, 105, 0.4);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .print-btn:hover {
+            background: #047857;
+        }
+
+        @media print {
+            .print-btn { display: none; }
+            body { background: white; }
+            .section { box-shadow: none; border: 1px solid #e5e7eb; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>قواعد العمل - بيانات الممثلين</h1>
+            <p>Representative Data Business Rules - SRS UC 6.5.1</p>
+        </div>
+
+        <!-- Representative Types -->
+        <div class="section">
+            <h2 class="section-title">
+                <span class="code">1.4</span>
+                أنواع الممثلين (9 أنواع)
+            </h2>
+            <table>
+                <tr>
+                    <th>الرمز</th>
+                    <th>النوع (عربي)</th>
+                    <th>Type (English)</th>
+                    <th>الوصف</th>
+                </tr>
+                <tr>
+                    <td>1</td>
+                    <td><span contenteditable="true" class="editable">محامي/وكيل</span></td>
+                    <td>Attorney/Lawyer</td>
+                    <td>ممثل قانوني بموجب وكالة</td>
+                </tr>
+                <tr>
+                    <td>2</td>
+                    <td><span contenteditable="true" class="editable">مصفي</span></td>
+                    <td>Liquidator</td>
+                    <td>مصفي الشركات</td>
+                </tr>
+                <tr>
+                    <td>3</td>
+                    <td><span contenteditable="true" class="editable">أمين تفليسة</span></td>
+                    <td>Bankruptcy Trustee</td>
+                    <td>أمين على التفليسة</td>
+                </tr>
+                <tr>
+                    <td>4</td>
+                    <td><span contenteditable="true" class="editable">حارس قضائي</span></td>
+                    <td>Judicial Custodian</td>
+                    <td>حارس معين من المحكمة</td>
+                </tr>
+                <tr>
+                    <td>5</td>
+                    <td><span contenteditable="true" class="editable">ممثل نظامي</span></td>
+                    <td>Company Representative</td>
+                    <td>ممثل الشركة أو المؤسسة</td>
+                </tr>
+                <tr>
+                    <td>6</td>
+                    <td><span contenteditable="true" class="editable">ولي</span></td>
+                    <td>Guardian</td>
+                    <td>ولي على القاصر أو المحجور عليه</td>
+                </tr>
+                <tr>
+                    <td>7</td>
+                    <td><span contenteditable="true" class="editable">ممثل جهة حكومية</span></td>
+                    <td>Government Rep</td>
+                    <td>ممثل الجهة الحكومية</td>
+                </tr>
+                <tr>
+                    <td>8</td>
+                    <td><span contenteditable="true" class="editable">وصي</span></td>
+                    <td>Conservator</td>
+                    <td>وصي على القاصر</td>
+                </tr>
+                <tr>
+                    <td>9</td>
+                    <td><span contenteditable="true" class="editable">ناظر</span></td>
+                    <td>Waqf Inspector</td>
+                    <td>ناظر الوقف</td>
+                </tr>
+            </table>
+        </div>
+
+        <!-- Mapping Table -->
+        <div class="section">
+            <h2 class="section-title">
+                <span class="code">2.16</span>
+                جدول أنواع المدعين والممثلين المتاحين
+            </h2>
+            <p style="margin-bottom: 15px; color: #6b7280;">الجدول أدناه يوضّح اختيارات نوع التمثيل وفقًا لنوع المدّعي المراد إضافة الممثل له:</p>
+            <table class="mapping-table">
+                <tr>
+                    <th style="background: #3b82f6; color: white;">نوع الممثل</th>
+                    <th style="background: #3b82f6; color: white;">المدعين</th>
+                </tr>
+                <tr>
+                    <td><span class="type-badge lawyer">وكيل</span></td>
+                    <td>شركة مسجلة بالمملكة – شركة غير مسجلة بالمملكة – جمعية/مؤسسة أهلية– صاحب مؤسسة – جهة حكومية - فرد – فرد بدون هوية - وقف</td>
+                </tr>
+                <tr>
+                    <td><span class="type-badge liquidator">مصفي</span></td>
+                    <td>شركة مسجلة بالمملكة – فرد بدون هوية</td>
+                </tr>
+                <tr>
+                    <td><span class="type-badge trustee">أمين تفليسة</span></td>
+                    <td>شركة مسجلة بالمملكة – صاحب مؤسسة – فرد – فرد بدون هوية</td>
+                </tr>
+                <tr>
+                    <td><span class="type-badge custodian">حارس قضائي</span></td>
+                    <td>شركة مسجلة بالمملكة– فرد بدون هوية</td>
+                </tr>
+                <tr>
+                    <td><span class="type-badge company-rep">ممثل نظامي لشركة</span></td>
+                    <td>شركة مسجلة بالمملكة– فرد بدون هوية</td>
+                </tr>
+                <tr>
+                    <td><span class="type-badge gov-rep">ممثل جهة حكومية</span></td>
+                    <td>جهة حكومية – فرد بدون هوية</td>
+                </tr>
+                <tr>
+                    <td><span class="type-badge guardian">ولي</span></td>
+                    <td>صاحب مؤسسة – فرد – فرد بدون هوية</td>
+                </tr>
+                <tr>
+                    <td><span class="type-badge conservator">وصي</span></td>
+                    <td>فرد – فرد بدون هوية</td>
+                </tr>
+                <tr>
+                    <td><span class="type-badge waqf-inspector">ناظر</span></td>
+                    <td>فرد بدون هوية - وقف</td>
+                </tr>
+            </table>
+        </div>
+
+        <!-- نموذج بيانات فرد الكامل -->
+        <div class="section">
+            <h2 class="section-title">
+                <span class="code">6.3.9</span>
+                نموذج بيانات فرد (من النماذج المشتركة)
+            </h2>
+
+            <div class="note" style="background: #f0fdf4; border-right-color: #059669; margin-bottom: 20px;">
+                <strong style="color: #059669;">ملاحظة:</strong>
+                هذا النموذج مأخوذ من <strong>النماذج المشتركة (6.3.9)</strong> مع استثناء أن حقل نوع الهوية <strong>لا يحتوي على القيمة "جواز السفر"</strong>
+            </div>
+
+            <table>
+                <tr>
+                    <th>الحقل</th>
+                    <th>Field</th>
+                    <th>النوع</th>
+                    <th>إجباري</th>
+                    <th>القيود</th>
+                </tr>
+                <tr style="background: #f0f9ff;">
+                    <td colspan="5" style="font-weight: 600; color: #1e40af;">البيانات الشخصية (6.3.1)</td>
+                </tr>
+                <tr>
+                    <td>نوع الهوية</td>
+                    <td>Identity Type</td>
+                    <td>اختيار</td>
+                    <td class="required">نعم</td>
+                    <td><span contenteditable="true" class="editable" style="background: #fef2f2; border-color: #ef4444;">هوية وطنية / هوية مقيم (بدون جواز سفر)</span></td>
+                </tr>
+                <tr>
+                    <td>رقم الهوية</td>
+                    <td>Identity Number</td>
+                    <td>رقمي</td>
+                    <td class="required">نعم</td>
+                    <td><span contenteditable="true" class="editable">10 أرقام</span></td>
+                </tr>
+                <tr>
+                    <td>تاريخ الميلاد</td>
+                    <td>Birth Date</td>
+                    <td>تاريخ</td>
+                    <td class="required">نعم</td>
+                    <td><span contenteditable="true" class="editable">لا يمكن أن يكون في المستقبل</span></td>
+                </tr>
+                <tr>
+                    <td>الجنس</td>
+                    <td>Gender</td>
+                    <td>اختيار</td>
+                    <td class="required">نعم</td>
+                    <td><span contenteditable="true" class="editable">ذكر / أنثى</span></td>
+                </tr>
+                <tr>
+                    <td>الاسم الأول</td>
+                    <td>First Name</td>
+                    <td>نص</td>
+                    <td class="required">نعم</td>
+                    <td><span contenteditable="true" class="editable">نص عربي - حد أقصى 100 حرف</span></td>
+                </tr>
+                <tr>
+                    <td>اسم الأب</td>
+                    <td>Father's Name</td>
+                    <td>نص</td>
+                    <td class="required">نعم</td>
+                    <td><span contenteditable="true" class="editable">حد أقصى 100 حرف</span></td>
+                </tr>
+                <tr>
+                    <td>اسم الجد</td>
+                    <td>Grandfather's Name</td>
+                    <td>نص</td>
+                    <td class="optional">لا</td>
+                    <td><span contenteditable="true" class="editable">حد أقصى 100 حرف</span></td>
+                </tr>
+                <tr>
+                    <td>اسم الفخذ</td>
+                    <td>Clan Name</td>
+                    <td>نص</td>
+                    <td class="optional">لا</td>
+                    <td><span contenteditable="true" class="editable">حد أقصى 100 حرف</span></td>
+                </tr>
+                <tr>
+                    <td>اسم العائلة</td>
+                    <td>Family Name</td>
+                    <td>نص</td>
+                    <td class="required">نعم</td>
+                    <td><span contenteditable="true" class="editable">حد أقصى 100 حرف</span></td>
+                </tr>
+                <tr>
+                    <td>تاريخ إصدار الهوية</td>
+                    <td>ID Issue Date</td>
+                    <td>تاريخ</td>
+                    <td class="required">نعم</td>
+                    <td><span contenteditable="true" class="editable">تاريخ صحيح</span></td>
+                </tr>
+                <tr>
+                    <td>تاريخ انتهاء الهوية</td>
+                    <td>ID Expiry Date</td>
+                    <td>تاريخ</td>
+                    <td class="required">نعم</td>
+                    <td><span contenteditable="true" class="editable">يجب أن يكون بعد تاريخ الإصدار</span></td>
+                </tr>
+                <tr>
+                    <td>الجنسية</td>
+                    <td>Nationality</td>
+                    <td>اختيار</td>
+                    <td class="required">نعم</td>
+                    <td><span contenteditable="true" class="editable">قاعدة شرطية (انظر أدناه)</span></td>
+                </tr>
+                <tr style="background: #f0f9ff;">
+                    <td colspan="5" style="font-weight: 600; color: #1e40af;">عنوان السكن</td>
+                </tr>
+                <tr>
+                    <td>عنوان السكن</td>
+                    <td>Residence Address</td>
+                    <td>نموذج</td>
+                    <td class="required">نعم</td>
+                    <td><span contenteditable="true" class="editable">نموذج بيانات العنوان الوطني (6.3.2) من النماذج المشتركة</span></td>
+                </tr>
+                <tr style="background: #f0f9ff;">
+                    <td colspan="5" style="font-weight: 600; color: #1e40af;">بيانات العمل</td>
+                </tr>
+                <tr>
+                    <td>حالة العمل</td>
+                    <td>Employment Status</td>
+                    <td>اختيار</td>
+                    <td class="required">نعم</td>
+                    <td><span contenteditable="true" class="editable">حكومي / خاص / بدون عمل</span></td>
+                </tr>
+                <tr>
+                    <td>جهة العمل</td>
+                    <td>Employer</td>
+                    <td>نص</td>
+                    <td class="optional">شرطي (BC01)</td>
+                    <td><span contenteditable="true" class="editable">حد أقصى 200 حرف</span></td>
+                </tr>
+                <tr>
+                    <td>المهنة</td>
+                    <td>Profession</td>
+                    <td>نص</td>
+                    <td class="required">نعم</td>
+                    <td><span contenteditable="true" class="editable">حد أقصى 200 حرف</span></td>
+                </tr>
+                <tr>
+                    <td>عنوان العمل</td>
+                    <td>Work Address</td>
+                    <td>نموذج</td>
+                    <td class="optional">شرطي (BC02)</td>
+                    <td><span contenteditable="true" class="editable">نموذج بيانات العنوان الوطني (6.3.2) من النماذج المشتركة</span></td>
+                </tr>
+                <tr style="background: #f0f9ff;">
+                    <td colspan="5" style="font-weight: 600; color: #1e40af;">بيانات التواصل</td>
+                </tr>
+                <tr>
+                    <td>رقم الجوال</td>
+                    <td>Mobile Number</td>
+                    <td>رقمي</td>
+                    <td class="required">نعم</td>
+                    <td><span contenteditable="true" class="editable">10 أرقام، يبدأ بـ 05</span></td>
+                </tr>
+                <tr>
+                    <td>البريد الإلكتروني</td>
+                    <td>Email</td>
+                    <td>بريد</td>
+                    <td class="optional">لا</td>
+                    <td><span contenteditable="true" class="editable">صيغة صحيحة للبريد الإلكتروني</span></td>
+                </tr>
+            </table>
+
+            <div class="rule-box">
+                <h4>قواعد حقل الجنسية:</h4>
+                <ul>
+                    <li><span contenteditable="true" class="editable">إذا كان نوع الهوية = هوية وطنية: الجنسية تكون "سعودي" (عرض فقط - غير قابل للتعديل)</span></li>
+                    <li><span contenteditable="true" class="editable">إذا كان نوع الهوية = هوية مقيم: الجنسية تكون اختيار من قائمة الجنسيات (باستثناء "سعودي")</span></li>
+                </ul>
+            </div>
+
+            <div class="rule-box">
+                <h4>قواعد العمل الشرطية:</h4>
+                <ul>
+                    <li><strong>BC01:</strong> <span contenteditable="true" class="editable">يتم إظهار حقل "جهة العمل" فقط إذا كانت حالة العمل = حكومي أو خاص. يتم إخفاؤه إذا كانت حالة العمل = بدون عمل.</span></li>
+                    <li><strong>BC02:</strong> <span contenteditable="true" class="editable">يتم إظهار "عنوان العمل" فقط إذا كانت حالة العمل = خاص. يتم إخفاؤه إذا كانت حالة العمل = حكومي أو بدون عمل.</span></li>
+                </ul>
+            </div>
+
+            <div class="rule-box">
+                <h4>قواعد التكامل مع أبشر:</h4>
+                <p>عند تفعيل التكامل مع أبشر وإدخال رقم الهوية (مواطن/مقيم)، تصبح الحقول التالية <strong>غير قابلة للتعديل</strong>:</p>
+                <ul>
+                    <li><span contenteditable="true" class="editable">نوع الهوية، رقم الهوية، تاريخ الميلاد</span></li>
+                    <li><span contenteditable="true" class="editable">الاسم الأول، اسم الأب، اسم الجد، اسم الفخذ، اسم العائلة</span></li>
+                    <li><span contenteditable="true" class="editable">تاريخ إصدار الهوية، تاريخ انتهاء الهوية</span></li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- National Address Model -->
+        <div class="section">
+            <h2 class="section-title">
+                <span class="code">6.3.2</span>
+                نموذج بيانات العنوان الوطني (من النماذج المشتركة)
+            </h2>
+
+            <div class="note" style="background: #f0f9ff; border-right-color: #3b82f6; margin-bottom: 20px;">
+                <strong style="color: #1d4ed8;">ملاحظة:</strong>
+                هذا النموذج مأخوذ من <strong>النماذج المشتركة (6.3.2)</strong> ويُستخدم في عنوان السكن وعنوان العمل
+            </div>
+
+            <table>
+                <tr>
+                    <th>الحقل</th>
+                    <th>Field</th>
+                    <th>النوع</th>
+                    <th>إجباري</th>
+                    <th>القيود</th>
+                </tr>
+                <tr>
+                    <td>المنطقة</td>
+                    <td>Region</td>
+                    <td>اختيار</td>
+                    <td class="required">نعم</td>
+                    <td><span contenteditable="true" class="editable">من 13 منطقة إدارية</span></td>
+                </tr>
+                <tr>
+                    <td>المدينة</td>
+                    <td>City</td>
+                    <td>اختيار</td>
+                    <td class="required">نعم</td>
+                    <td><span contenteditable="true" class="editable">من مدن المنطقة المختارة</span></td>
+                </tr>
+                <tr>
+                    <td>الحي</td>
+                    <td>District</td>
+                    <td>نص</td>
+                    <td class="optional">لا</td>
+                    <td><span contenteditable="true" class="editable">حد أقصى 100 حرف</span></td>
+                </tr>
+                <tr>
+                    <td>الشارع</td>
+                    <td>Street</td>
+                    <td>نص</td>
+                    <td class="optional">لا</td>
+                    <td><span contenteditable="true" class="editable">حد أقصى 100 حرف</span></td>
+                </tr>
+                <tr>
+                    <td>رقم المبنى</td>
+                    <td>Building Number</td>
+                    <td>رقمي</td>
+                    <td class="optional">لا</td>
+                    <td><span contenteditable="true" class="editable">4 أرقام</span></td>
+                </tr>
+                <tr>
+                    <td>رقم الوحدة</td>
+                    <td>Unit Number</td>
+                    <td>رقمي</td>
+                    <td class="optional">لا</td>
+                    <td><span contenteditable="true" class="editable">-</span></td>
+                </tr>
+                <tr>
+                    <td>الرمز البريدي</td>
+                    <td>Postal Code</td>
+                    <td>رقمي</td>
+                    <td class="optional">لا</td>
+                    <td><span contenteditable="true" class="editable">5 أرقام</span></td>
+                </tr>
+                <tr>
+                    <td>الرمز الإضافي</td>
+                    <td>Additional Code</td>
+                    <td>رقمي</td>
+                    <td class="optional">لا</td>
+                    <td><span contenteditable="true" class="editable">4 أرقام</span></td>
+                </tr>
+            </table>
+
+            <div class="rule-box">
+                <h4>قواعد العمل:</h4>
+                <ul>
+                    <li><strong>BC04:</strong> <span contenteditable="true" class="editable">فقط حقلي المنطقة والمدينة إجباريان في نموذج العنوان الوطني. بقية الحقول (الحي، الشارع، رقم المبنى، رقم الوحدة، الرمز البريدي، الرمز الإضافي) اختيارية.</span></li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Lawyer Model -->
+        <div class="section">
+            <h2 class="section-title">
+                <span class="code">6.3.18</span>
+                نموذج بيانات محامي/وكيل
+            </h2>
+            <div class="note">
+                <strong>ملاحظة:</strong> يتضمن هذا النموذج البيانات الشخصية (6.3.1) + بيانات التواصل + الحقول التالية:
+            </div>
+            <table>
+                <tr>
+                    <th>الحقل</th>
+                    <th>Field</th>
+                    <th>النوع</th>
+                    <th>إجباري</th>
+                    <th>القيود</th>
+                </tr>
+                <tr>
+                    <td>رقم الوكالة</td>
+                    <td>POA Number</td>
+                    <td>نصي</td>
+                    <td class="required">نعم</td>
+                    <td><span contenteditable="true" class="editable">حد أقصى 20 حرف</span></td>
+                </tr>
+                <tr>
+                    <td>تاريخ الوكالة</td>
+                    <td>POA Date</td>
+                    <td>تاريخ</td>
+                    <td class="required">نعم</td>
+                    <td><span contenteditable="true" class="editable">تاريخ صحيح</span></td>
+                </tr>
+                <tr>
+                    <td>الجهة المصدرة للوكالة</td>
+                    <td>Issuing Authority</td>
+                    <td>نص</td>
+                    <td class="required">نعم</td>
+                    <td><span contenteditable="true" class="editable">حد أقصى 200 حرف</span></td>
+                </tr>
+                <tr>
+                    <td>نوع الجهة المصدرة</td>
+                    <td>Authority Type</td>
+                    <td>اختيار</td>
+                    <td class="required">نعم</td>
+                    <td><span contenteditable="true" class="editable">كتابة عدل / محكمة / وزارة خارجية</span></td>
+                </tr>
+            </table>
+        </div>
+
+        <!-- Liquidator Model -->
+        <div class="section">
+            <h2 class="section-title">
+                <span class="code">6.3.12</span>
+                نموذج بيانات مصفي
+            </h2>
+            <div class="note">
+                <strong>ملاحظة:</strong> يتضمن هذا النموذج البيانات الشخصية (6.3.1) + بيانات التواصل + الحقول التالية:
+            </div>
+            <table>
+                <tr>
+                    <th>الحقل</th>
+                    <th>Field</th>
+                    <th>النوع</th>
+                    <th>إجباري</th>
+                    <th>القيود</th>
+                </tr>
+                <tr>
+                    <td>رقم القرار</td>
+                    <td>Decision Number</td>
+                    <td>نصي</td>
+                    <td class="required">نعم</td>
+                    <td><span contenteditable="true" class="editable">حد أقصى 20 حرف</span></td>
+                </tr>
+                <tr>
+                    <td>تاريخ القرار</td>
+                    <td>Decision Date</td>
+                    <td>تاريخ</td>
+                    <td class="required">نعم</td>
+                    <td><span contenteditable="true" class="editable">تاريخ صحيح</span></td>
+                </tr>
+                <tr>
+                    <td>مصدر القرار</td>
+                    <td>Decision Source</td>
+                    <td>نص</td>
+                    <td class="required">نعم</td>
+                    <td><span contenteditable="true" class="editable">حد أقصى 200 حرف</span></td>
+                </tr>
+            </table>
+        </div>
+
+        <!-- Guardian Model -->
+        <div class="section">
+            <h2 class="section-title">
+                <span class="code">6.3.16</span>
+                نموذج بيانات ولي
+            </h2>
+            <div class="note">
+                <strong>ملاحظة:</strong> يتضمن هذا النموذج البيانات الشخصية (6.3.1) + بيانات التواصل + الحقول التالية:
+            </div>
+            <table>
+                <tr>
+                    <th>الحقل</th>
+                    <th>Field</th>
+                    <th>النوع</th>
+                    <th>إجباري</th>
+                    <th>القيود</th>
+                </tr>
+                <tr>
+                    <td>رقم الصك</td>
+                    <td>Deed Number</td>
+                    <td>نصي</td>
+                    <td class="required">نعم</td>
+                    <td><span contenteditable="true" class="editable">حد أقصى 20 حرف</span></td>
+                </tr>
+                <tr>
+                    <td>تاريخ الصك</td>
+                    <td>Deed Date</td>
+                    <td>تاريخ</td>
+                    <td class="required">نعم</td>
+                    <td><span contenteditable="true" class="editable">تاريخ صحيح</span></td>
+                </tr>
+                <tr>
+                    <td>مصدر الصك</td>
+                    <td>Deed Source</td>
+                    <td>نص</td>
+                    <td class="required">نعم</td>
+                    <td><span contenteditable="true" class="editable">حد أقصى 200 حرف</span></td>
+                </tr>
+                <tr>
+                    <td>نوع الولاية</td>
+                    <td>Guardianship Type</td>
+                    <td>اختيار</td>
+                    <td class="required">نعم</td>
+                    <td><span contenteditable="true" class="editable">طبيعية / مكتسبة</span></td>
+                </tr>
+            </table>
+        </div>
+
+        <!-- Add Representative Use Case -->
+        <div class="section">
+            <h2 class="section-title">
+                <span class="code">6.5.1.1.7</span>
+                إضافة ممثل لمدّعي
+            </h2>
+
+            <h4 style="margin: 15px 0 10px; color: #374151;">الشروط الاستباقية:</h4>
+            <ul style="margin-right: 20px; margin-bottom: 20px;">
+                <li><span contenteditable="true" class="editable">حالة الطلب: لا يوجد حالة / مسوّدة / استكمال النواقص</span></li>
+            </ul>
+
+            <h4 style="margin: 15px 0 10px; color: #374151;">المسار الرئيسي:</h4>
+            <ol style="margin-right: 20px; margin-bottom: 20px;">
+                <li><span contenteditable="true" class="editable">تعبئة البيانات الشخصية للممثّل</span></li>
+                <li><span contenteditable="true" class="editable">اختيار نوع التمثيل</span></li>
+                <li><span contenteditable="true" class="editable">تعبئة نموذج بيانات التمثيل</span></li>
+                <li><span contenteditable="true" class="editable">حفظ</span></li>
+            </ol>
+
+            <div class="error-box">
+                <h4>الاستثناءات (Errors):</h4>
+                <table>
+                    <tr>
+                        <th style="width: 100px;">الرمز</th>
+                        <th>الوصف</th>
+                    </tr>
+                    <tr>
+                        <td><span class="error-code">ERR008</span></td>
+                        <td><span contenteditable="true" class="editable">ممثّل موجود مسبقاً للمدّعي على الطلب</span></td>
+                    </tr>
+                    <tr>
+                        <td><span class="error-code">ERR012</span></td>
+                        <td><span contenteditable="true" class="editable">رقم هوية الممثّل نفس رقم هوية المدّعي</span></td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <!-- Attachment Rules -->
+        <div class="section">
+            <h2 class="section-title">
+                <span class="code">ATT</span>
+                قواعد المرفقات (صورة التمثيل)
+            </h2>
+            <table>
+                <tr>
+                    <th>الحقل</th>
+                    <th>إجباري</th>
+                    <th>القيود</th>
+                </tr>
+                <tr>
+                    <td>المرفق</td>
+                    <td class="required">نعم</td>
+                    <td><span contenteditable="true" class="editable">PDF فقط - أقصى 4 ميجابايت</span></td>
+                </tr>
+            </table>
+
+            <div class="rule-box">
+                <h4>قواعد العمل:</h4>
+                <ul>
+                    <li><span contenteditable="true" class="editable">الملف المرفق غير قابل للتعديل بعد الحفظ</span></li>
+                    <li><span contenteditable="true" class="editable">يمكن حذف المرفق وإضافة مرفق جديد</span></li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Set as Applicant -->
+        <div class="section">
+            <h2 class="section-title">
+                <span class="code">6.5.1.1.10</span>
+                تحديد ممثّل كمقدّم طلب
+            </h2>
+
+            <h4 style="margin: 15px 0 10px; color: #374151;">الشروط الاستباقية:</h4>
+            <ul style="margin-right: 20px; margin-bottom: 20px;">
+                <li><span contenteditable="true" class="editable">الممثّل من نوع فرد (محامي/وكيل فقط)</span></li>
+            </ul>
+
+            <div class="rule-box">
+                <h4>قواعد العمل:</h4>
+                <ul>
+                    <li><strong>BC01:</strong> <span contenteditable="true" class="editable">إزالة الخاصية من المقدم السابق</span></li>
+                    <li><strong>BC02:</strong> <span contenteditable="true" class="editable">تحديد نوع مقدّم الطلب: أصيل / وكيل / أصيل-وكيل</span></li>
+                </ul>
+            </div>
+        </div>
+
+        <p class="hint" style="text-align: center; margin-top: 30px;">
+            انقر على الحقول المظللة باللون الأصفر للتعديل مباشرة
+        </p>
+    </div>
+
+    <button class="print-btn" onclick="window.print()">
+        <span>🖨️</span> طباعة
+    </button>
+</body>
+</html>

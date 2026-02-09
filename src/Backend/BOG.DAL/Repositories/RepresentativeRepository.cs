@@ -25,6 +25,8 @@ public class RepresentativeRepository : Repository<Representative>, IRepresentat
             .Include(r => r.RepresentativeType)
             .Include(r => r.IdentityType)
             .Include(r => r.DataSource)
+            .Include(r => r.Attachments)
+                .ThenInclude(a => a.AttachmentType)
             .Where(r => r.PlaintiffId == plaintiffId && !r.IsDeleted && r.IsActive)
             .OrderBy(r => r.CreatedDate)
             .ToListAsync(cancellationToken);
@@ -68,6 +70,8 @@ public class RepresentativeRepository : Repository<Representative>, IRepresentat
             .Include(r => r.RepresentativeType)
             .Include(r => r.IdentityType)
             .Include(r => r.DataSource)
+            .Include(r => r.Attachments)
+                .ThenInclude(a => a.AttachmentType)
             .Include(r => r.Plaintiff)
                 .ThenInclude(p => p.PlaintiffType)
             .FirstOrDefaultAsync(r => r.Id == id && !r.IsDeleted && r.IsActive, cancellationToken);

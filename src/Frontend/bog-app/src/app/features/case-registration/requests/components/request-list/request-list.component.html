@@ -1,0 +1,294 @@
+<div class="request-list-page">
+  <!-- Right Sidebar - Search/Filter Panel -->
+  <aside class="search-panel">
+    <h3 class="search-title">بحث في الطلبات</h3>
+
+    <div class="filter-group">
+      <label>المحكمة</label>
+      <mat-form-field appearance="outline">
+        <mat-select [(value)]="filters.courtId" placeholder="اختر">
+          <mat-option [value]="null">الكل</mat-option>
+          <mat-option [value]="1">المحكمة الإدارية بالرياض</mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+
+    <div class="filter-group">
+      <label>طريقة تقديم الطلب <span class="required">*</span></label>
+      <mat-form-field appearance="outline">
+        <mat-select [(value)]="filters.submissionMethod" placeholder="اختر">
+          <mat-option [value]="null">الكل</mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+
+    <div class="filter-group">
+      <label>حالة الطلب <span class="required">*</span></label>
+      <mat-form-field appearance="outline">
+        <mat-select [(value)]="filters.statusIds" multiple placeholder="اختر">
+          <mat-option [value]="1">مسودة</mat-option>
+          <mat-option [value]="2">جديد</mat-option>
+          <mat-option [value]="3">استكمال نواقص</mat-option>
+          <mat-option [value]="4">مقيدة</mat-option>
+          <mat-option [value]="5">مرفوضة</mat-option>
+        </mat-select>
+      </mat-form-field>
+      <div class="selected-chips" *ngIf="filters.statusIds && filters.statusIds.length > 0">
+        <mat-chip-set>
+          <mat-chip *ngFor="let statusId of filters.statusIds" (removed)="removeStatusFilter(statusId)">
+            {{ getStatusName(statusId) }}
+            <button matChipRemove>
+              <mat-icon>cancel</mat-icon>
+            </button>
+          </mat-chip>
+        </mat-chip-set>
+      </div>
+    </div>
+
+    <div class="filter-group">
+      <label>نوع الدعوى</label>
+      <mat-form-field appearance="outline">
+        <mat-select [(value)]="filters.caseTypeId" placeholder="اختر">
+          <mat-option [value]="null">الكل</mat-option>
+          <mat-option [value]="1">إداري</mat-option>
+          <mat-option [value]="2">تأديبي</mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+
+    <div class="filter-group">
+      <label>رقم الطلب</label>
+      <mat-form-field appearance="outline">
+        <input matInput [(ngModel)]="filters.requestNumber" placeholder="">
+      </mat-form-field>
+    </div>
+
+    <div class="filter-group">
+      <label>تاريخ الطلب</label>
+      <mat-form-field appearance="outline">
+        <input matInput [matDatepicker]="datePicker" [(ngModel)]="filters.requestDate">
+        <mat-datepicker-toggle matSuffix [for]="datePicker"></mat-datepicker-toggle>
+        <mat-datepicker #datePicker></mat-datepicker>
+      </mat-form-field>
+    </div>
+
+    <div class="filter-actions">
+      <button mat-flat-button class="btn-search" (click)="onSearch()">عرض النتائج</button>
+      <button mat-stroked-button class="btn-cancel" (click)="onClearFilters()">إلغاء</button>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <!-- Header -->
+    <header class="page-header">
+      <div class="header-right">
+        <mat-icon class="header-icon">description</mat-icon>
+        <h1>قائمة الطلبات</h1>
+      </div>
+      <div class="header-left">
+        <div class="view-toggle">
+          <button mat-icon-button [class.active]="viewMode === 'card'" (click)="viewMode = 'card'" matTooltip="عرض بطاقات">
+            <mat-icon>grid_view</mat-icon>
+          </button>
+          <button mat-icon-button [class.active]="viewMode === 'table'" (click)="viewMode = 'table'" matTooltip="عرض جدول">
+            <mat-icon>view_list</mat-icon>
+          </button>
+        </div>
+        <button mat-flat-button class="btn-add" (click)="onNewRequest()">
+          <mat-icon>add</mat-icon>
+          إضافة طلب قيد دعوى جديد
+        </button>
+      </div>
+    </header>
+
+    <!-- Statistics Bar -->
+    <div class="stats-bar">
+      <div class="stat-item">
+        <span class="stat-value">{{ totalRequests }}</span>
+        <span class="stat-label">عدد الطلبات الإجمالي</span>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat-item">
+        <span class="stat-value">{{ administrativeCount }}</span>
+        <span class="stat-label">عدد الطلبات الإدارية</span>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat-item">
+        <span class="stat-value">{{ disciplinaryCount }}</span>
+        <span class="stat-label">عدد الطلبات التأديبية</span>
+      </div>
+    </div>
+
+    <!-- Loading -->
+    <div *ngIf="isLoading" class="loading-container">
+      <mat-spinner diameter="40"></mat-spinner>
+    </div>
+
+    <!-- Empty State -->
+    <div *ngIf="!isLoading && requests.length === 0" class="empty-state">
+      <mat-icon>folder_open</mat-icon>
+      <p>لا توجد طلبات</p>
+      <button mat-stroked-button color="primary" (click)="onNewRequest()">
+        <mat-icon>add</mat-icon>
+        إنشاء طلب جديد
+      </button>
+    </div>
+
+    <!-- Card View -->
+    <div *ngIf="!isLoading && requests.length > 0 && viewMode === 'card'" class="cards-container">
+      <div *ngFor="let request of requests" class="request-card" [class.draft-card]="request.isDraft">
+        <!-- Card Corner Ribbon -->
+        <div class="card-ribbon" [class.ribbon-draft]="request.isDraft" [class.ribbon-complete]="!request.isDraft">
+          <mat-icon>{{ request.isDraft ? 'edit' : 'gavel' }}</mat-icon>
+        </div>
+
+        <!-- Three-dot menu -->
+        <button mat-icon-button class="card-menu-btn" [matMenuTriggerFor]="cardMenu">
+          <mat-icon>more_vert</mat-icon>
+        </button>
+        <mat-menu #cardMenu="matMenu">
+          <button mat-menu-item (click)="onEditRequest(request)" *ngIf="request.isDraft">
+            <mat-icon>edit</mat-icon>
+            <span>تعديل</span>
+          </button>
+          <button mat-menu-item (click)="onViewRequest(request)" *ngIf="!request.isDraft">
+            <mat-icon>visibility</mat-icon>
+            <span>عرض</span>
+          </button>
+          <button mat-menu-item (click)="onDeleteRequest(request)" *ngIf="request.isDraft" class="delete-menu-item">
+            <mat-icon>delete</mat-icon>
+            <span>حذف</span>
+          </button>
+        </mat-menu>
+
+        <!-- Card Header -->
+        <div class="card-header">
+          <mat-icon class="gavel-icon">gavel</mat-icon>
+          <div class="card-header-info">
+            <span class="request-label">طلب رقم</span>
+            <span class="request-number">{{ request.id }}</span>
+          </div>
+          <span class="request-date">{{ request.createdDate | date:'dd/MM/yyyy' }}</span>
+        </div>
+
+        <!-- Status Badge -->
+        <div class="card-status">
+          <span class="status-badge" [ngClass]="getStatusClass(request.requestStatusId)">
+            {{ request.statusNameAr }}
+          </span>
+        </div>
+
+        <!-- Case Type & Details -->
+        <div class="card-details">
+          <div class="detail-row">
+            <span class="case-type-badge" [class.type-admin]="request.caseTypeId === 1" [class.type-disciplinary]="request.caseTypeId === 2">
+              {{ request.caseTypeId === 1 ? 'إداري' : 'تأديبي' }}
+            </span>
+            <div class="detail-info">
+              <span class="detail-label">تاريخ القيد</span>
+              <span class="detail-value">{{ request.createdDate | date:'dd/MM/yyyy' }}</span>
+            </div>
+            <div class="detail-info">
+              <span class="detail-label">رقم الدعوى</span>
+              <span class="detail-value">{{ request.caseNumber || '-' }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Plaintiff & Defendant -->
+        <div class="card-parties">
+          <div class="party-row">
+            <span class="party-label">المدعي</span>
+            <span class="party-value">{{ request.plaintiffName || 'لم يتم تحديد مدعي' }}</span>
+          </div>
+          <div class="party-row">
+            <span class="party-label">المدعى عليه</span>
+            <span class="party-value">{{ request.defendantName || 'لم يتم تحديد مدعى عليه' }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Table View -->
+    <table mat-table [dataSource]="requests" *ngIf="!isLoading && requests.length > 0 && viewMode === 'table'" class="requests-table">
+      <!-- ID Column -->
+      <ng-container matColumnDef="id">
+        <th mat-header-cell *matHeaderCellDef>رقم الطلب</th>
+        <td mat-cell *matCellDef="let request">#{{ request.id }}</td>
+      </ng-container>
+
+      <!-- Status Column -->
+      <ng-container matColumnDef="statusNameAr">
+        <th mat-header-cell *matHeaderCellDef>الحالة</th>
+        <td mat-cell *matCellDef="let request">
+          <span class="status-badge" [ngClass]="getStatusClass(request.requestStatusId)">
+            {{ request.statusNameAr }}
+          </span>
+        </td>
+      </ng-container>
+
+      <!-- Subject Column -->
+      <ng-container matColumnDef="subjectPreview">
+        <th mat-header-cell *matHeaderCellDef>الموضوع</th>
+        <td mat-cell *matCellDef="let request">{{ request.subjectPreview || 'بدون موضوع' }}</td>
+      </ng-container>
+
+      <!-- Plaintiffs Count Column -->
+      <ng-container matColumnDef="plaintiffsCount">
+        <th mat-header-cell *matHeaderCellDef>المدعين</th>
+        <td mat-cell *matCellDef="let request">{{ request.plaintiffsCount }}</td>
+      </ng-container>
+
+      <!-- Defendants Count Column -->
+      <ng-container matColumnDef="defendantsCount">
+        <th mat-header-cell *matHeaderCellDef>المدعى عليهم</th>
+        <td mat-cell *matCellDef="let request">{{ request.defendantsCount }}</td>
+      </ng-container>
+
+      <!-- Created Date Column -->
+      <ng-container matColumnDef="createdDate">
+        <th mat-header-cell *matHeaderCellDef>تاريخ الإنشاء</th>
+        <td mat-cell *matCellDef="let request">{{ request.createdDate | date:'yyyy/MM/dd' }}</td>
+      </ng-container>
+
+      <!-- Actions Column -->
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef>إجراءات</th>
+        <td mat-cell *matCellDef="let request">
+          <button mat-icon-button matTooltip="تعديل" (click)="onEditRequest(request)" *ngIf="request.isDraft">
+            <mat-icon>edit</mat-icon>
+          </button>
+          <button mat-icon-button matTooltip="عرض" (click)="onViewRequest(request)" *ngIf="!request.isDraft">
+            <mat-icon>visibility</mat-icon>
+          </button>
+          <button mat-icon-button matTooltip="حذف" (click)="onDeleteRequest(request)" *ngIf="request.isDraft" class="delete-btn">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+    </table>
+
+    <!-- Pagination -->
+    <div class="pagination" *ngIf="!isLoading && requests.length > 0">
+      <button mat-icon-button (click)="onPreviousPage()" [disabled]="currentPage === 1">
+        <mat-icon>chevron_right</mat-icon>
+      </button>
+      <div class="page-numbers">
+        <button *ngFor="let page of getPageNumbers()"
+                mat-button
+                [class.active]="page === currentPage"
+                (click)="onPageChange(page)">
+          {{ page }}
+        </button>
+        <span *ngIf="totalPages > 5">...</span>
+      </div>
+      <button mat-icon-button (click)="onNextPage()" [disabled]="currentPage === totalPages">
+        <mat-icon>chevron_left</mat-icon>
+      </button>
+    </div>
+  </main>
+</div>

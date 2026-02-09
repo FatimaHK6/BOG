@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تقرير التحقق الشامل من قواعد العمل - UC 6.5.1</title>
+    <style>
+        :root {
+            --primary: #1a5f7a;
+            --success: #198754;
+            --warning: #ffc107;
+            --danger: #dc3545;
+            --info: #0dcaf0;
+            --light: #f8f9fa;
+            --dark: #212529;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+            line-height: 1.6;
+            background: #f5f5f5;
+            color: var(--dark);
+            padding: 20px;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #dc3545, #c82333);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        .header h1 { font-size: 1.8em; margin-bottom: 10px; }
+        .header .subtitle { opacity: 0.9; }
+        .content { padding: 30px; }
+
+        .alert {
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .alert-danger {
+            background: #fff5f5;
+            border-right: 4px solid var(--danger);
+        }
+        .alert-warning {
+            background: #fffbeb;
+            border-right: 4px solid var(--warning);
+        }
+
+        .summary-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        .card {
+            background: var(--light);
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+        }
+        .card.danger { border-right: 4px solid var(--danger); }
+        .card.warning { border-right: 4px solid var(--warning); }
+        .card.info { border-right: 4px solid var(--info); }
+        .card .value {
+            font-size: 2.5em;
+            font-weight: bold;
+        }
+        .card.danger .value { color: var(--danger); }
+        .card.warning .value { color: #b45309; }
+        .card.info .value { color: var(--info); }
+        .card .label { color: #666; margin-top: 5px; }
+
+        h2 {
+            color: var(--primary);
+            margin: 30px 0 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--primary);
+        }
+        h3 { color: var(--dark); margin: 20px 0 15px; }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+            font-size: 0.9em;
+        }
+        th, td {
+            padding: 10px 12px;
+            text-align: right;
+            border: 1px solid #ddd;
+        }
+        th {
+            background: var(--primary);
+            color: white;
+            font-weight: 600;
+        }
+        tr:nth-child(even) { background: #f9f9f9; }
+        tr:hover { background: #f0f7ff; }
+        tr.critical { background: #fff5f5; }
+        tr.critical:hover { background: #fee2e2; }
+
+        .status-icon { font-size: 1.1em; }
+        .status-success { color: var(--success); }
+        .status-warning { color: #b45309; }
+        .status-danger { color: var(--danger); }
+
+        .badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            font-weight: 500;
+        }
+        .badge-danger { background: #fee2e2; color: #991b1b; }
+        .badge-warning { background: #fef3c7; color: #92400e; }
+        .badge-success { background: #d1fae5; color: #065f46; }
+        .badge-info { background: #e0f2fe; color: #0369a1; }
+
+        .issue-section {
+            background: #fff5f5;
+            border: 1px solid #fecaca;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .issue-section h4 {
+            color: var(--danger);
+            margin-bottom: 15px;
+        }
+        .issue-section ul {
+            margin-right: 20px;
+        }
+        .issue-section li {
+            margin-bottom: 8px;
+        }
+
+        .code-block {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 12px;
+            border-radius: 6px;
+            font-family: 'Consolas', monospace;
+            font-size: 0.85em;
+            direction: ltr;
+            text-align: left;
+            overflow-x: auto;
+            margin: 10px 0;
+        }
+
+        .recommendation-box {
+            background: #f0fdf4;
+            border-right: 4px solid var(--success);
+            padding: 20px;
+            border-radius: 8px;
+            margin: 15px 0;
+        }
+        .recommendation-box h4 {
+            color: var(--success);
+            margin-bottom: 10px;
+        }
+        .recommendation-box ol {
+            margin-right: 20px;
+        }
+        .recommendation-box li {
+            margin-bottom: 8px;
+        }
+
+        .footer {
+            background: var(--light);
+            padding: 20px;
+            text-align: center;
+            color: #666;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>تقرير التحقق الشامل من قواعد العمل</h1>
+            <div class="subtitle">Use Case 6.5.1 - نموذج المدعي | تاريخ: 2026-01-21</div>
+        </div>
+
+        <div class="content">
+            <!-- Alert -->
+            <div class="alert alert-danger">
+                <strong>تنبيه هام:</strong> تم اكتشاف 27 مشكلة في التطبيق، منها 15 مشكلة عالية الأولوية تتعلق بأمان البيانات وسلامتها.
+            </div>
+
+            <!-- Summary Cards -->
+            <div class="summary-cards">
+                <div class="card danger">
+                    <div class="value">27</div>
+                    <div class="label">إجمالي المشاكل</div>
+                </div>
+                <div class="card danger">
+                    <div class="value">15</div>
+                    <div class="label">أولوية عالية</div>
+                </div>
+                <div class="card warning">
+                    <div class="value">8</div>
+                    <div class="label">أولوية متوسطة</div>
+                </div>
+                <div class="card info">
+                    <div class="value">4</div>
+                    <div class="label">أولوية منخفضة</div>
+                </div>
+            </div>
+
+            <!-- Critical Issues Section -->
+            <h2>المشاكل الحرجة (أولوية عالية)</h2>
+
+            <div class="issue-section">
+                <h4>1. لا يوجد تحقق من العنوان الوطني</h4>
+                <p><strong>المشكلة:</strong> AddressCreateDTO ليس له Validator على الإطلاق!</p>
+                <p><strong>الحقول المفقودة:</strong></p>
+                <ul>
+                    <li>RegionId, CityId, DistrictId - مطلوبة</li>
+                    <li>BuildingNumber - regex ^\d{4}$</li>
+                    <li>PostalCode - regex ^\d{5}$</li>
+                    <li>AdditionalCode - regex ^\d{4}$</li>
+                    <li>Street - MaxLength(200)</li>
+                    <li>UnitNumber - رقمي فقط</li>
+                </ul>
+            </div>
+
+            <div class="issue-section">
+                <h4>2. ERR011 - فحص تكرار المدعي غير مطبق</h4>
+                <p><strong>المطلوب:</strong> "المدّعي موجود مسبقاً بنفس رقم الهوية ونوع المدّعي"</p>
+                <p><strong>الحل:</strong> إضافة فحص فريد على (IdentityNumber + PlaintiffTypeId + IsDeleted=false)</p>
+            </div>
+
+            <div class="issue-section">
+                <h4>3. ERR008 - فحص تكرار الممثل غير مطبق</h4>
+                <p><strong>المطلوب:</strong> "الممثّل موجود مسبقاً للمدّعي"</p>
+                <p><strong>الحل:</strong> فحص في طبقة Business Logic</p>
+            </div>
+
+            <div class="issue-section">
+                <h4>4. ERR012 - هوية الممثل = هوية المدعي (Backend)</h4>
+                <p><strong>المطلوب:</strong> "رقم هوية الممثّل نفس رقم هوية المدّعي"</p>
+                <p><strong>الحالة:</strong> Frontend يمرر البيانات، لكن Backend لا يتحقق</p>
+            </div>
+
+            <div class="issue-section">
+                <h4>5. BR07 - أنواع الممثلين حسب نوع المدعي (القسم 2.16)</h4>
+                <p><strong>المطلوب:</strong> التحقق من أنواع الممثلين المسموحة لكل نوع مدعي</p>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>نوع المدعي</th>
+                            <th>أنواع الممثلين المسموحة</th>
+                            <th>الحالة</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="critical"><td>فرد</td><td>محامي، وكيل، ولي، وصي</td><td><span class="badge badge-danger">غير مطبق</span></td></tr>
+                        <tr class="critical"><td>فرد بدون هوية</td><td>محامي، وكيل، ولي، وصي</td><td><span class="badge badge-danger">غير مطبق</span></td></tr>
+                        <tr class="critical"><td>صاحب مؤسسة</td><td>محامي، وكيل</td><td><span class="badge badge-danger">غير مطبق</span></td></tr>
+                        <tr class="critical"><td>شركة مسجلة</td><td>محامي، مصفي، أمين تفليسة، حارس قضائي، ممثل نظامي</td><td><span class="badge badge-danger">غير مطبق</span></td></tr>
+                        <tr class="critical"><td>شركة غير مسجلة</td><td>محامي، مصفي، أمين تفليسة، حارس قضائي، ممثل نظامي</td><td><span class="badge badge-danger">غير مطبق</span></td></tr>
+                        <tr class="critical"><td>جهة حكومية</td><td>ممثل جهة حكومية</td><td><span class="badge badge-danger">غير مطبق</span></td></tr>
+                        <tr class="critical"><td>جمعية/مؤسسة أهلية</td><td>محامي، ممثل نظامي</td><td><span class="badge badge-danger">غير مطبق</span></td></tr>
+                        <tr class="critical"><td>وقف</td><td>محامي، ناظر</td><td><span class="badge badge-danger">غير مطبق</span></td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="issue-section">
+                <h4>6. BR08 - التكامل مع أبشر إجباري للفرد</h4>
+                <p><strong>المطلوب:</strong> التكامل مع أبشر إجباري للمواطن/المقيم</p>
+                <p><strong>الحالة:</strong> Frontend يطبق، Backend لا يفرض DataSourceId</p>
+            </div>
+
+            <div class="issue-section">
+                <h4>7. ERR014/ERR015 - تحقق رقم الهوية (مواطن/مقيم)</h4>
+                <p><strong>المصدر:</strong> SRS_Full_AR.md - سطر 183-185</p>
+                <p><strong>المطلوب:</strong></p>
+                <ul>
+                    <li><strong>ERR014:</strong> الرقم المدخل ليس هوية مواطن - يجب أن يبدأ بـ <code>1</code></li>
+                    <li><strong>ERR015:</strong> الرقم المدخل ليس هوية مقيم - يجب أن يبدأ بـ <code>2</code></li>
+                </ul>
+                <p><strong>التطبيق الحالي:</strong></p>
+                <div class="code-block">// الكود الحالي يتحقق فقط من 10 أرقام
+Regex.IsMatch(identityNumber, @"^\d{10}$");</div>
+                <p><strong>المطلوب:</strong></p>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>نوع الهوية</th>
+                            <th>Regex الحالي</th>
+                            <th>Regex المطلوب</th>
+                            <th>الحالة</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="critical">
+                            <td>هوية وطنية (مواطن)</td>
+                            <td><code>^\d{10}$</code></td>
+                            <td><code>^1\d{9}$</code></td>
+                            <td><span class="badge badge-danger">❌ غير مطبق</span></td>
+                        </tr>
+                        <tr class="critical">
+                            <td>هوية مقيم</td>
+                            <td><code>^\d{10}$</code></td>
+                            <td><code>^2\d{9}$</code></td>
+                            <td><span class="badge badge-danger">❌ غير مطبق</span></td>
+                        </tr>
+                        <tr>
+                            <td>جواز سفر</td>
+                            <td>MaxLength(20)</td>
+                            <td>MaxLength(20)</td>
+                            <td><span class="badge badge-success">✅ صحيح</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="issue-section">
+                <h4>8. رقم الجوال - التحقق مفقود في FluentValidator</h4>
+                <p><strong>المصدر:</strong> SRS 6.3.1 - سطر 244</p>
+                <p><strong>القيد:</strong> "10 أرقام فقط ويبدأ بـ 05"</p>
+                <p><strong>التطبيق الحالي في Validator:</strong></p>
+                <div class="code-block">RuleFor(x => x.MobileNumber)
+    .NotEmpty().WithMessage("رقم الجوال مطلوب");
+// ❌ لا يوجد تحقق من الصيغة!</div>
+                <p><strong>DTO يحتوي على Regex ولكن Validator لا يستخدمه:</strong></p>
+                <div class="code-block">[RegularExpression(@"^05\d{8}$", ErrorMessage = "رقم الجوال يجب أن يبدأ بـ 05")]
+public string? MobileNumber { get; set; }</div>
+                <p><strong>المطلوب إضافته للـ Validator:</strong></p>
+                <div class="code-block">RuleFor(x => x.MobileNumber)
+    .NotEmpty().WithMessage("رقم الجوال مطلوب")
+    .Matches(@"^05\d{8}$").WithMessage("رقم الجوال يجب أن يبدأ بـ 05 ويتكون من 10 أرقام");</div>
+            </div>
+
+            <div class="issue-section">
+                <h4>9. ERR016 - تاريخ الميلاد مع رقم الهوية (أبشر)</h4>
+                <p><strong>المصدر:</strong> SRS_Full_AR.md - سطر 185</p>
+                <p><strong>الرسالة:</strong> "لا يوجد بيانات مسجلة في أبشر لرقم الهوية وتاريخ الميلاد"</p>
+                <p><strong>الحالة:</strong> يستخدم Mock data حالياً بدلاً من التحقق الفعلي من أبشر</p>
+            </div>
+
+            <!-- Medium Priority -->
+            <h2>المشاكل المتوسطة الأولوية</h2>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>المشكلة</th>
+                        <th>الحقول المتأثرة</th>
+                        <th>الحالة</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>7</td>
+                        <td>التحقق من النص العربي فقط مفقود</td>
+                        <td>CompanyName, NGOName, WaqfName</td>
+                        <td><span class="badge badge-danger">غير مطبق</span></td>
+                    </tr>
+                    <tr>
+                        <td>8</td>
+                        <td>MaxLength مفقود في FluentValidator</td>
+                        <td>Employer, Profession, UnregisteredCompanyCity, Description, Headquarters, AdditionalStatement, DeedSource, WaqfAgencyName, WaqfDescription</td>
+                        <td><span class="badge badge-warning">جزئي (DTO فقط)</span></td>
+                    </tr>
+                    <tr>
+                        <td>9</td>
+                        <td>IdentityExpiryDate > IdentityIssueDate</td>
+                        <td>IdentityExpiryDate</td>
+                        <td><span class="badge badge-danger">غير مطبق</span></td>
+                    </tr>
+                    <tr>
+                        <td>10</td>
+                        <td>LicenseDate <= Today</td>
+                        <td>LicenseDate (النوع 7)</td>
+                        <td><span class="badge badge-danger">غير مطبق</span></td>
+                    </tr>
+                    <tr>
+                        <td>11</td>
+                        <td>Gender regex مفقود في Validator</td>
+                        <td>Gender (ذكر/أنثى)</td>
+                        <td><span class="badge badge-warning">DTO فقط</span></td>
+                    </tr>
+                    <tr>
+                        <td>12</td>
+                        <td>WaqfOversightType regex مفقود في Validator</td>
+                        <td>WaqfOversightType (خاصة/حكومية)</td>
+                        <td><span class="badge badge-warning">DTO فقط</span></td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!-- Error Codes -->
+            <h2>أكواد الأخطاء (ERR)</h2>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>الكود</th>
+                        <th>الرسالة</th>
+                        <th>مكان التحقق</th>
+                        <th>الحالة</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="critical">
+                        <td>ERR008</td>
+                        <td>الممثّل موجود مسبقاً للمدّعي</td>
+                        <td>Business Logic</td>
+                        <td><span class="status-icon status-danger">❌</span></td>
+                    </tr>
+                    <tr class="critical">
+                        <td>ERR011</td>
+                        <td>المدّعي موجود مسبقاً بنفس رقم الهوية ونوع المدّعي</td>
+                        <td>Database/BL</td>
+                        <td><span class="status-icon status-danger">❌</span></td>
+                    </tr>
+                    <tr class="critical">
+                        <td>ERR012</td>
+                        <td>رقم هوية الممثّل نفس رقم هوية المدّعي</td>
+                        <td>Backend Validator</td>
+                        <td><span class="status-icon status-warning">⚠️ Frontend فقط</span></td>
+                    </tr>
+                    <tr class="critical">
+                        <td>ERR014</td>
+                        <td>الرقم المدخل ليس هوية مواطن (يجب أن يبدأ بـ 1)</td>
+                        <td>FluentValidator</td>
+                        <td><span class="status-icon status-danger">❌</span></td>
+                    </tr>
+                    <tr class="critical">
+                        <td>ERR015</td>
+                        <td>الرقم المدخل ليس هوية مقيم (يجب أن يبدأ بـ 2)</td>
+                        <td>FluentValidator</td>
+                        <td><span class="status-icon status-danger">❌</span></td>
+                    </tr>
+                    <tr>
+                        <td>ERR016</td>
+                        <td>لم يتم استرجاع بيانات من أبشر</td>
+                        <td>Integration Layer</td>
+                        <td><span class="status-icon status-warning">⚠️ Mock data</span></td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!-- Business Rules -->
+            <h2>قواعد العمل (BC)</h2>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>الكود</th>
+                        <th>القاعدة</th>
+                        <th>الحالة</th>
+                        <th>ملاحظات</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="critical">
+                        <td>BC01 (3.1)</td>
+                        <td>الخيارات تظهر حسب حالة الطلب (مسودة/استكمال النواقص)</td>
+                        <td><span class="status-icon status-danger">❌</span></td>
+                        <td>منطق UI مفقود</td>
+                    </tr>
+                    <tr class="critical">
+                        <td>BC02 (3.1)</td>
+                        <td>خيار تعديل يظهر في حالات محددة</td>
+                        <td><span class="status-icon status-danger">❌</span></td>
+                        <td>صلاحيات التعديل مفقودة</td>
+                    </tr>
+                    <tr>
+                        <td>BC03 (3.1)</td>
+                        <td>العنوان المختار إذا اختلفت مدينة المدعي</td>
+                        <td><span class="status-icon status-warning">⚠️</span></td>
+                        <td>Frontend فقط</td>
+                    </tr>
+                    <tr>
+                        <td>BC07 (3.1)</td>
+                        <td>تحديد كمقدم طلب للفرد فقط</td>
+                        <td><span class="status-icon status-warning">⚠️</span></td>
+                        <td>Frontend فقط</td>
+                    </tr>
+                    <tr>
+                        <td>BC01 (3.2)</td>
+                        <td>عرض النموذج المقابل لنوع المدعي</td>
+                        <td><span class="status-icon status-success">✅</span></td>
+                        <td>مطبق</td>
+                    </tr>
+                    <tr>
+                        <td>BC02 (3.2)</td>
+                        <td>التكامل مع أبشر للمواطن/المقيم</td>
+                        <td><span class="status-icon status-warning">⚠️</span></td>
+                        <td>Backend لا يفرض</td>
+                    </tr>
+                    <tr>
+                        <td>BC02 (3.3)</td>
+                        <td>حقول الهوية غير قابلة للتعديل</td>
+                        <td><span class="status-icon status-success">✅</span></td>
+                        <td>مطبق</td>
+                    </tr>
+                    <tr>
+                        <td>BC03 (3.3)</td>
+                        <td>حقول أبشر غير قابلة للتعديل</td>
+                        <td><span class="status-icon status-success">✅</span></td>
+                        <td>مطبق</td>
+                    </tr>
+                    <tr class="critical">
+                        <td>BR07</td>
+                        <td>أنواع الممثلين تختلف حسب نوع المدعي (القسم 2.16)</td>
+                        <td><span class="status-icon status-danger">❌</span></td>
+                        <td>غير مطبق</td>
+                    </tr>
+                    <tr class="critical">
+                        <td>BR08</td>
+                        <td>التكامل مع أبشر إجباري للفرد</td>
+                        <td><span class="status-icon status-danger">❌</span></td>
+                        <td>Backend لا يتحقق</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!-- Field Validations by Type -->
+            <h2>التحقق من الحقول حسب النوع</h2>
+
+            <h3>نموذج العنوان الوطني (6.3.2)</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>الحقل</th>
+                        <th>القيد في SRS</th>
+                        <th>Backend Validator</th>
+                        <th>الحالة</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="critical"><td>المنطقة (Region)</td><td>مطلوب، من 13 منطقة</td><td>لا يوجد تحقق</td><td><span class="status-icon status-danger">❌</span></td></tr>
+                    <tr class="critical"><td>المدينة (City)</td><td>مطلوب، من مدن المنطقة</td><td>لا يوجد تحقق</td><td><span class="status-icon status-danger">❌</span></td></tr>
+                    <tr class="critical"><td>الحي (District)</td><td>مطلوب، من أحياء المدينة</td><td>لا يوجد تحقق</td><td><span class="status-icon status-danger">❌</span></td></tr>
+                    <tr class="critical"><td>الشارع (Street)</td><td>مطلوب، 200 حرف</td><td>لا يوجد تحقق</td><td><span class="status-icon status-danger">❌</span></td></tr>
+                    <tr class="critical"><td>رقم المبنى</td><td>مطلوب، 4 أرقام</td><td>لا يوجد regex ^\d{4}$</td><td><span class="status-icon status-danger">❌</span></td></tr>
+                    <tr class="critical"><td>رقم الوحدة</td><td>مطلوب، أرقام فقط</td><td>لا يوجد تحقق رقمي</td><td><span class="status-icon status-danger">❌</span></td></tr>
+                    <tr class="critical"><td>الرمز البريدي</td><td>مطلوب، 5 أرقام</td><td>لا يوجد regex ^\d{5}$</td><td><span class="status-icon status-danger">❌</span></td></tr>
+                    <tr class="critical"><td>الرمز الإضافي</td><td>مطلوب، 4 أرقام</td><td>لا يوجد regex ^\d{4}$</td><td><span class="status-icon status-danger">❌</span></td></tr>
+                </tbody>
+            </table>
+
+            <!-- Recommendations -->
+            <h2>التوصيات</h2>
+
+            <div class="recommendation-box">
+                <h4>Sprint 1 - إجراءات فورية (أولوية قصوى)</h4>
+                <ol>
+                    <li><strong>تصحيح ERR014/ERR015 - رقم الهوية:</strong>
+                        <ul>
+                            <li>هوية وطنية: <code>^1\d{9}$</code> (يبدأ بـ 1)</li>
+                            <li>هوية مقيم: <code>^2\d{9}$</code> (يبدأ بـ 2)</li>
+                        </ul>
+                    </li>
+                    <li><strong>إضافة تحقق رقم الجوال:</strong> <code>^05\d{8}$</code> في FluentValidator</li>
+                    <li><strong>إنشاء AddressCreateDTOValidator</strong> مع جميع التحققات</li>
+                    <li><strong>تطبيق ERR011</strong> - فحص تكرار المدعي (IdentityNumber + PlaintiffTypeId)</li>
+                    <li><strong>تطبيق ERR008</strong> - فحص تكرار الممثل</li>
+                    <li><strong>تطبيق ERR012</strong> - التحقق في Backend أن هوية الممثل ≠ هوية المدعي</li>
+                    <li><strong>تطبيق BR07</strong> - مصفوفة أنواع الممثلين حسب نوع المدعي (القسم 2.16)</li>
+                </ol>
+            </div>
+
+            <div class="recommendation-box">
+                <h4>Sprint 2 - تحسين جودة البيانات</h4>
+                <ol>
+                    <li>إضافة regex للنص العربي فقط: CompanyName, NGOName, WaqfName</li>
+                    <li>إضافة جميع MaxLength إلى FluentValidator</li>
+                    <li>إضافة تحقق التواريخ: ExpiryDate > IssueDate, LicenseDate <= Today</li>
+                    <li>إضافة regex لـ Gender و WaqfOversightType</li>
+                </ol>
+            </div>
+
+            <div class="recommendation-box">
+                <h4>Sprint 3 - تحسينات معمارية</h4>
+                <ol>
+                    <li>تطبيق صلاحيات العمليات حسب حالة الطلب (BC01, BC02)</li>
+                    <li>تتبع DataSourceId وفرض عدم تعديل حقول أبشر</li>
+                    <li>إضافة تحقق البريد الإلكتروني في FluentValidator</li>
+                </ol>
+            </div>
+
+        </div>
+
+        <div class="footer">
+            <p>تم إنشاء التقرير بواسطة Claude Code - Requirements Validator</p>
+            <p>إصدار: 3.0 | تاريخ: 2026-01-21 | إجمالي المشاكل: 27</p>
+        </div>
+    </div>
+</body>
+</html>

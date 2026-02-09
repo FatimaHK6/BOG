@@ -1,0 +1,59 @@
+{
+  "common": {
+    "identityNumber": "1234567890",
+    "firstName": "أحمد",
+    "fatherName": "محمد",
+    "grandfatherName": "عبدالله",
+    "familyName": "الشمري",
+    "clanName": "شمر",
+    "birthDate": "01/01/1990",
+    "gender": "ذكر",
+    "nationalityId": 1,
+    "identityIssueDate": "01/01/2020",
+    "identityExpiryDate": "01/01/2030",
+    "residenceRegionId": 1,
+    "residenceCityId": 1,
+    "residenceDistrict": "حي النزهة",
+    "residenceStreet": "شارع الملك فهد",
+    "residenceBuildingNumber": "1234",
+    "residenceUnitNumber": "1",
+    "residencePostalCode": "12345",
+    "residenceAdditionalCode": "6789",
+    "employmentStatus": "بدون عمل",
+    "mobileNumber": "0512345678",
+    "email": "ahmed@test.com"
+  },
+  "mussaffi": {
+    "typeId": 10,
+    "typeName": "مصفي",
+    "sectionTitle": "بيانات مصفي",
+    "decisionNumber": "12345",
+    "decisionDate": "01/15/2025",
+    "decisionSource": "المحكمة التجارية"
+  },
+  "trustee": {
+    "typeId": 8,
+    "typeName": "أمين التفليسة",
+    "sectionTitle": "بيانات المصفي",
+    "decisionNumber": "67890",
+    "decisionDate": "03/20/2025",
+    "decisionSource": "محكمة التنفيذ"
+  },
+  "judicialCustodian": {
+    "typeId": 11,
+    "typeName": "حارس قضائي",
+    "sectionTitle": "بيانات حارس قضائي",
+    "decisionNumber": "11111",
+    "decisionDate": "06/10/2025",
+    "decisionSource": "المحكمة العامة"
+  },
+  "legalRepresentative": {
+    "typeId": 9,
+    "typeName": "ممثل نظامي",
+    "sectionTitle": "بيانات ممثل نظامي",
+    "representationDocSource": "وزارة التجارة",
+    "representativeCapacity": "رئيس مجلس إدارة",
+    "representationDocType": "عقد تأسيس",
+    "representationDocNumber": "DOC-2025-001"
+  }
+}

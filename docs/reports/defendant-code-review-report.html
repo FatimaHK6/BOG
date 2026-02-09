@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Code Review Report: Defendant Implementation vs Documentation</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        h1 {
+            color: #1a5f2a;
+            border-bottom: 3px solid #1a5f2a;
+            padding-bottom: 10px;
+            text-align: center;
+        }
+        h2 {
+            color: #2c7a3f;
+            border-bottom: 2px solid #e0e0e0;
+            padding-bottom: 8px;
+            margin-top: 40px;
+        }
+        h3 {
+            color: #444;
+            margin-top: 25px;
+        }
+        .overview {
+            background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            border-right: 5px solid #1a5f2a;
+        }
+        .status-badge {
+            display: inline-block;
+            background-color: #ff9800;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+        .type-section {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .type-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .type-number {
+            background-color: #1a5f2a;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 18px;
+        }
+        .type-name {
+            font-size: 22px;
+            color: #1a5f2a;
+            margin: 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+            font-size: 14px;
+        }
+        th {
+            background-color: #1a5f2a;
+            color: white;
+            padding: 12px;
+            text-align: right;
+        }
+        td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        tr:hover {
+            background-color: #e8f5e9;
+        }
+        .status-ok {
+            color: #2e7d32;
+            font-weight: bold;
+        }
+        .status-ok::before {
+            content: "✓ ";
+        }
+        .status-error {
+            color: #c62828;
+            font-weight: bold;
+        }
+        .status-error::before {
+            content: "✗ ";
+        }
+        .status-warning {
+            color: #f57c00;
+            font-weight: bold;
+        }
+        .status-warning::before {
+            content: "⚠ ";
+        }
+        .frontend-status {
+            background-color: #e3f2fd;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+        .frontend-status h4 {
+            margin-top: 0;
+            color: #1565c0;
+        }
+        .frontend-status ul {
+            margin-bottom: 0;
+        }
+        .critical-box {
+            background-color: #ffebee;
+            border: 2px solid #c62828;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+        }
+        .critical-box h4 {
+            color: #c62828;
+            margin-top: 0;
+        }
+        .cross-cutting {
+            background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
+            padding: 25px;
+            border-radius: 10px;
+            margin: 30px 0;
+        }
+        .summary-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .stat-number {
+            font-size: 36px;
+            font-weight: bold;
+            color: #c62828;
+        }
+        .stat-label {
+            color: #666;
+            font-size: 14px;
+        }
+        .priority-section {
+            margin: 20px 0;
+        }
+        .priority-high {
+            border-right: 4px solid #c62828;
+            padding-right: 15px;
+            margin: 10px 0;
+        }
+        .priority-medium {
+            border-right: 4px solid #f57c00;
+            padding-right: 15px;
+            margin: 10px 0;
+        }
+        .priority-low {
+            border-right: 4px solid #fbc02d;
+            padding-right: 15px;
+            margin: 10px 0;
+        }
+        .files-list {
+            background: #eceff1;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 30px;
+        }
+        .files-list code {
+            display: block;
+            padding: 5px 10px;
+            margin: 5px 0;
+            background: white;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            direction: ltr;
+            text-align: left;
+        }
+        .report-footer {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 2px solid #e0e0e0;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <h1>Code Review Report: Defendant Implementation vs Documentation</h1>
+
+    <div class="overview">
+        <h2 style="margin-top: 0; border: none;">Overview</h2>
+        <p>Comprehensive comparison of ALL defendant type implementations against the documentation in <code>defendant-user-stories-plan.html</code>.</p>
+        <span class="status-badge">Report Only - No Code Changes Made</span>
+    </div>
+
+    <!-- Type 1: Individual -->
+    <div class="type-section">
+        <div class="type-header">
+            <div class="type-number">1</div>
+            <h2 class="type-name" style="border: none; margin: 0;">فرد (Individual)</h2>
+        </div>
+
+        <h3>Backend Validation Discrepancies</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Issue</th>
+                    <th>Documentation</th>
+                    <th>Implementation</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Region/City Required</td>
+                    <td>Required fields</td>
+                    <td class="status-error">Not validated as required in backend</td>
+                </tr>
+                <tr>
+                    <td>Nationality Logic</td>
+                    <td>If Saudi → Region/City required; If non-Saudi → Country required</td>
+                    <td class="status-error">Logic NOT enforced in backend validator</td>
+                </tr>
+                <tr>
+                    <td>Work Address Conditional</td>
+                    <td>Required if hasWorkAddress=true</td>
+                    <td class="status-error">Not validated conditionally in backend</td>
+                </tr>
+                <tr>
+                    <td>IdentityType Values</td>
+                    <td>1=هوية وطنية, 2=إقامة, 3=جواز سفر</td>
+                    <td class="status-warning">Backend accepts any but no explicit validation</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="frontend-status">
+            <h4>Frontend Status</h4>
+            <ul>
+                <li class="status-ok">3 tabs implemented</li>
+                <li class="status-ok">Absher Integration implemented</li>
+                <li class="status-ok">Field locking working</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Type 2: Registered Company -->
+    <div class="type-section">
+        <div class="type-header">
+            <div class="type-number">2</div>
+            <h2 class="type-name" style="border: none; margin: 0;">شركة مسجلة (Registered Company)</h2>
+        </div>
+
+        <h3>Backend Validation Discrepancies</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Issue</th>
+                    <th>Documentation</th>
+                    <th>Implementation</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>District Field</td>
+                    <td>Should be dropdown (lookup)</td>
+                    <td class="status-error">Validated as text with MaxLength only</td>
+                </tr>
+                <tr>
+                    <td>CompanyName Pattern</td>
+                    <td>Arabic letters + numbers only</td>
+                    <td class="status-error">No regex validation enforced</td>
+                </tr>
+                <tr>
+                    <td>UnifiedNumber</td>
+                    <td>10 digits</td>
+                    <td class="status-error">MaxLength(50) - too permissive</td>
+                </tr>
+                <tr>
+                    <td>CommercialRegNumber</td>
+                    <td>Numeric pattern</td>
+                    <td class="status-error">MaxLength(50) - no pattern validation</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="frontend-status">
+            <h4>Frontend Status</h4>
+            <ul>
+                <li class="status-ok">2 tabs implemented</li>
+                <li class="status-error">District as text input (should be dropdown)</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Type 3: Government Agency -->
+    <div class="type-section">
+        <div class="type-header">
+            <div class="type-number">3</div>
+            <h2 class="type-name" style="border: none; margin: 0;">جهة حكومية (Government Agency)</h2>
+        </div>
+
+        <h3>Backend Validation Discrepancies</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Issue</th>
+                    <th>Documentation</th>
+                    <th>Implementation</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>GovernmentAgencyId</td>
+                    <td>Required, must exist in lookup</td>
+                    <td class="status-warning">Validated as required but no existence check</td>
+                </tr>
+                <tr>
+                    <td>Headquarters Auto-fill</td>
+                    <td>Should auto-populate from lookup</td>
+                    <td class="status-warning">No backend validation of consistency</td>
+                </tr>
+                <tr>
+                    <td>Address Fields</td>
+                    <td>Region/City from lookup</td>
+                    <td class="status-error">Not validated against lookups</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="frontend-status">
+            <h4>Frontend Status</h4>
+            <ul>
+                <li class="status-ok">2 tabs implemented</li>
+                <li class="status-ok">Auto-fill headquarters working</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Type 4: Unregistered Company -->
+    <div class="type-section">
+        <div class="type-header">
+            <div class="type-number">4</div>
+            <h2 class="type-name" style="border: none; margin: 0;">شركة غير مسجلة (Unregistered Company)</h2>
+        </div>
+
+        <h3>Backend Validation Discrepancies</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Issue</th>
+                    <th>Documentation</th>
+                    <th>Implementation</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>CompanyName</td>
+                    <td>Arabic + numbers, max 100</td>
+                    <td class="status-error">MaxLength only, no pattern</td>
+                </tr>
+                <tr>
+                    <td>Address Validation</td>
+                    <td>Region/City required</td>
+                    <td class="status-error">Not enforced as required</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="frontend-status">
+            <h4>Frontend Status</h4>
+            <ul>
+                <li class="status-ok">2 tabs implemented</li>
+                <li class="status-ok">Field layout matches</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Type 5: Business Owner -->
+    <div class="type-section">
+        <div class="type-header">
+            <div class="type-number">5</div>
+            <h2 class="type-name" style="border: none; margin: 0;">صاحب مؤسسة (Business Owner)</h2>
+        </div>
+
+        <h3>Backend Validation Discrepancies</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Issue</th>
+                    <th>Documentation</th>
+                    <th>Implementation</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>IdentityType Values</td>
+                    <td>1, 2, 3 (هوية وطنية, إقامة, جواز سفر)</td>
+                    <td class="status-error">Backend restricts to 1, 2 only</td>
+                </tr>
+                <tr>
+                    <td>Personal Fields</td>
+                    <td>Optional per doc (fetched from Absher)</td>
+                    <td class="status-warning">Some marked as Required in validator</td>
+                </tr>
+                <tr>
+                    <td>EstablishmentName</td>
+                    <td>Arabic + numbers pattern</td>
+                    <td class="status-error">MaxLength only</td>
+                </tr>
+                <tr>
+                    <td>CommercialRegNumber</td>
+                    <td>Numeric, specific length</td>
+                    <td class="status-error">MaxLength(50) only</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="critical-box">
+            <h4>Critical Tab Discrepancy</h4>
+            <table>
+                <tr>
+                    <th>Documentation</th>
+                    <th>Implementation</th>
+                </tr>
+                <tr>
+                    <td>3 tabs: البيانات الشخصية, بيانات المؤسسة, العنوان</td>
+                    <td class="status-error">5 tabs implemented (includes separate work/home address tabs)</td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="frontend-status">
+            <h4>Frontend Status</h4>
+            <ul>
+                <li class="status-ok">Absher Integration implemented</li>
+                <li class="status-ok">Field locking working</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Type 6: NGO -->
+    <div class="type-section">
+        <div class="type-header">
+            <div class="type-number">6</div>
+            <h2 class="type-name" style="border: none; margin: 0;">جمعية خيرية (NGO)</h2>
+        </div>
+
+        <h3>Backend Validation Discrepancies</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Issue</th>
+                    <th>Documentation</th>
+                    <th>Implementation</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>LicenseNumber</td>
+                    <td>Pattern not specified in doc</td>
+                    <td class="status-ok">MaxLength(50) - acceptable</td>
+                </tr>
+                <tr>
+                    <td>LicenseSource</td>
+                    <td>Dropdown from lookup</td>
+                    <td class="status-warning">Validated as required but no lookup check</td>
+                </tr>
+                <tr>
+                    <td>Address Fields</td>
+                    <td>Region/City required</td>
+                    <td class="status-error">Not enforced</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="frontend-status">
+            <h4>Frontend Status</h4>
+            <ul>
+                <li class="status-ok">2 tabs implemented</li>
+                <li class="status-ok">LicenseSource dropdown working</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Type 7: Waqf -->
+    <div class="type-section">
+        <div class="type-header">
+            <div class="type-number">7</div>
+            <h2 class="type-name" style="border: none; margin: 0;">وقف (Waqf)</h2>
+        </div>
+
+        <h3>Backend Validation Discrepancies</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Issue</th>
+                    <th>Documentation</th>
+                    <th>Implementation</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>DeedSource</td>
+                    <td>Arabic characters only</td>
+                    <td class="status-error">MaxLength only, no character validation</td>
+                </tr>
+                <tr>
+                    <td>DeedNumber</td>
+                    <td>Numeric pattern</td>
+                    <td class="status-error">MaxLength only</td>
+                </tr>
+                <tr>
+                    <td>Address Validation</td>
+                    <td>Region/City from lookups</td>
+                    <td class="status-error">Not validated against lookups</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="frontend-status">
+            <h4>Frontend Status</h4>
+            <ul>
+                <li class="status-ok">2 tabs implemented</li>
+                <li class="status-ok">Field layout matches</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Cross-Cutting Issues -->
+    <div class="cross-cutting">
+        <h2 style="margin-top: 0; border: none; color: #e65100;">Cross-Cutting Issues (All Types)</h2>
+
+        <h3>1. Lookup Validation Gap</h3>
+        <p><strong>Issue:</strong> Backend does not validate that dropdown values (Region, City, District, Country) exist in lookup tables</p>
+        <p><strong>Risk:</strong> Invalid IDs could be submitted</p>
+
+        <h3>2. Pattern Validation Missing</h3>
+        <p><strong>Issue:</strong> Many fields documented with specific patterns (Arabic only, numbers only) use MaxLength only</p>
+        <p><strong>Affected Fields:</strong> CompanyName, EstablishmentName, CommercialRegNumber, UnifiedNumber, DeedNumber, DeedSource</p>
+
+        <h3>3. Conditional Validation Not Enforced</h3>
+        <p><strong>Issue:</strong> Work address fields documented as "required if hasWorkAddress=true" not validated conditionally</p>
+        <p><strong>Affected Types:</strong> Individual, Business Owner</p>
+
+        <h3>4. Nationality-Based Logic</h3>
+        <p><strong>Issue:</strong> Saudi vs Non-Saudi logic (Region/City vs Country) not enforced in backend</p>
+        <p><strong>Affected Types:</strong> Individual, Business Owner</p>
+    </div>
+
+    <!-- Summary Statistics -->
+    <h2>Summary Statistics</h2>
+    <div class="summary-stats">
+        <div class="stat-card">
+            <div class="stat-number">18</div>
+            <div class="stat-label">Backend validation gaps</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">2</div>
+            <div class="stat-label">Frontend structure discrepancies</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">8</div>
+            <div class="stat-label">Pattern validation missing</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">6</div>
+            <div class="stat-label">Lookup validation missing</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">4</div>
+            <div class="stat-label">Conditional logic not enforced</div>
+        </div>
+    </div>
+
+    <!-- Priority Section -->
+    <h2>Discrepancies by Priority</h2>
+
+    <div class="priority-section">
+        <h3 style="color: #c62828;">High Priority (Data Integrity)</h3>
+        <div class="priority-high">
+            <p>1. Add nationality-based conditional validation (Individual, Business Owner)</p>
+        </div>
+        <div class="priority-high">
+            <p>2. Validate lookup IDs exist in database (All types)</p>
+        </div>
+        <div class="priority-high">
+            <p>3. Fix Type 5 IdentityType to allow value 3 (جواز سفر)</p>
+        </div>
+
+        <h3 style="color: #f57c00;">Medium Priority (Data Quality)</h3>
+        <div class="priority-medium">
+            <p>4. Add pattern validation for Arabic-only fields</p>
+        </div>
+        <div class="priority-medium">
+            <p>5. Add numeric pattern for registration numbers</p>
+        </div>
+        <div class="priority-medium">
+            <p>6. Enforce work address conditional requirements</p>
+        </div>
+
+        <h3 style="color: #fbc02d;">Low Priority (Consistency)</h3>
+        <div class="priority-low">
+            <p>7. Review Type 5 tab structure vs documentation (5 vs 3 tabs)</p>
+        </div>
+        <div class="priority-low">
+            <p>8. Standardize MaxLength values to match business rules</p>
+        </div>
+    </div>
+
+    <!-- Files Reviewed -->
+    <div class="files-list">
+        <h2 style="margin-top: 0;">Files Reviewed</h2>
+
+        <h3>Backend</h3>
+        <code>src/Backend/BOG.DTO/Defendant/DefendantCreateDTOValidator.cs</code>
+        <code>src/Backend/BOG.DTO/Defendant/DefendantUpdateDTOValidator.cs</code>
+
+        <h3>Frontend</h3>
+        <code>defendant-individual-form/ (Type 1)</code>
+        <code>defendant-registered-company-form/ (Type 2)</code>
+        <code>defendant-gov-form/ (Type 3)</code>
+        <code>defendant-unregistered-company-form/ (Type 4)</code>
+        <code>defendant-business-owner-form/ (Type 5)</code>
+        <code>defendant-ngo-form/ (Type 6)</code>
+        <code>defendant-waqf-form/ (Type 7)</code>
+
+        <h3>Documentation</h3>
+        <code>docs/implementation/6.5.1-case-registration/defendant-user-stories-plan.html</code>
+    </div>
+
+    <div class="report-footer">
+        <p><strong>Report Complete - No Code Changes Made</strong></p>
+        <p>Generated: February 2026</p>
+    </div>
+</body>
+</html>

@@ -1,0 +1,130 @@
+<div class="defendant-form-container">
+  <!-- Header -->
+  <div class="form-header">
+    <h2 class="form-title">{{ isViewMode ? 'عرض مدعى عليه - شركة غير مسجلة في المملكة' : (isEditMode ? 'تعديل مدعى عليه - شركة غير مسجلة في المملكة' : 'إضافة مدعى عليه - شركة غير مسجلة في المملكة') }}</h2>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="isLoading" class="loading-container">
+    <mat-spinner diameter="40"></mat-spinner>
+  </div>
+
+  <!-- Form -->
+  <mat-card *ngIf="!isLoading">
+    <mat-card-content>
+      <form [formGroup]="form" (ngSubmit)="onSubmit()">
+
+        <div class="form-layout">
+          <!-- Internal Tabs (Left Side) -->
+          <div class="form-tabs">
+            <button type="button" class="tab-btn active">بيانات الشركة</button>
+          </div>
+
+          <!-- Form Content (Right Side) -->
+          <div class="form-content">
+            <!-- Company Data Section -->
+            <div class="form-section">
+
+              <div class="form-row">
+                <!-- Commercial Registration Number -->
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>رقم السجل التجاري</mat-label>
+                  <input matInput formControlName="commercialRegNumber"
+                         maxlength="20"
+                         placeholder="أدخل رقم السجل التجاري">
+                  <mat-hint align="end">{{ form.value.commercialRegNumber?.length || 0 }} / 20</mat-hint>
+                  <mat-error *ngIf="f['commercialRegNumber'].hasError('required')">
+                    رقم السجل التجاري مطلوب
+                  </mat-error>
+                  <mat-error *ngIf="f['commercialRegNumber'].hasError('maxlength')">
+                    رقم السجل التجاري يجب ألا يتجاوز 20 حرف
+                  </mat-error>
+                </mat-form-field>
+              </div>
+
+              <div class="form-row">
+                <!-- Company Name -->
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>اسم الشركة</mat-label>
+                  <input matInput formControlName="companyName"
+                         maxlength="200"
+                         placeholder="أدخل اسم الشركة">
+                  <mat-hint align="end">{{ form.value.companyName?.length || 0 }} / 200</mat-hint>
+                  <mat-error *ngIf="f['companyName'].hasError('required')">
+                    اسم الشركة مطلوب
+                  </mat-error>
+                  <mat-error *ngIf="f['companyName'].hasError('maxlength')">
+                    اسم الشركة يجب ألا يتجاوز 200 حرف
+                  </mat-error>
+                </mat-form-field>
+              </div>
+
+              <div class="form-row">
+                <!-- Country Dropdown -->
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>الدولة</mat-label>
+                  <mat-select formControlName="countryId">
+                    <mat-option *ngFor="let country of countries" [value]="country.id">
+                      {{ country.nameAr }}
+                    </mat-option>
+                  </mat-select>
+                  <mat-error *ngIf="f['countryId'].hasError('required')">
+                    الدولة مطلوبة
+                  </mat-error>
+                </mat-form-field>
+              </div>
+
+              <div class="form-row">
+                <!-- City -->
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>المدينة</mat-label>
+                  <input matInput formControlName="city"
+                         maxlength="100"
+                         placeholder="أدخل اسم المدينة">
+                  <mat-hint align="end">{{ form.value.city?.length || 0 }} / 100</mat-hint>
+                  <mat-error *ngIf="f['city'].hasError('required')">
+                    المدينة مطلوبة
+                  </mat-error>
+                  <mat-error *ngIf="f['city'].hasError('maxlength')">
+                    المدينة يجب ألا تتجاوز 100 حرف
+                  </mat-error>
+                </mat-form-field>
+              </div>
+
+              <div class="form-row">
+                <!-- Description -->
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>وصف تقريبي</mat-label>
+                  <textarea matInput formControlName="description"
+                            rows="4"
+                            maxlength="1000"
+                            placeholder="أدخل وصف تقريبي للشركة"></textarea>
+                  <mat-hint align="end">{{ form.value.description?.length || 0 }} / 1000</mat-hint>
+                  <mat-error *ngIf="f['description'].hasError('required')">
+                    الوصف التقريبي مطلوب
+                  </mat-error>
+                  <mat-error *ngIf="f['description'].hasError('maxlength')">
+                    الوصف التقريبي يجب ألا يتجاوز 1000 حرف
+                  </mat-error>
+                </mat-form-field>
+              </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="form-actions">
+              <button mat-button type="button" (click)="onCancel()">
+                {{ isViewMode ? 'رجوع' : 'إلغاء' }}
+              </button>
+              <button *ngIf="!isViewMode" mat-raised-button type="submit" class="save-btn"
+                      [disabled]="isSaving">
+                <mat-spinner *ngIf="isSaving" diameter="20" class="inline-spinner"></mat-spinner>
+                <span *ngIf="!isSaving">حفظ المدعى عليه</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+      </form>
+    </mat-card-content>
+  </mat-card>
+</div>

@@ -1,0 +1,971 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مقارنة نماذج المدعين - SRS vs Implementation</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Arial, sans-serif;
+        }
+        body {
+            background: #f5f5f5;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        h1 {
+            text-align: center;
+            color: #1a237e;
+            margin-bottom: 30px;
+        }
+        .summary-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 40px;
+            background: white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .summary-table th, .summary-table td {
+            padding: 12px;
+            border: 1px solid #ddd;
+            text-align: center;
+        }
+        .summary-table th {
+            background: #1a237e;
+            color: white;
+        }
+        .summary-table tr:nth-child(even) {
+            background: #f9f9f9;
+        }
+        .type-section {
+            background: white;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        .type-header {
+            background: linear-gradient(135deg, #1a237e, #3949ab);
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .type-header h2 {
+            margin: 0;
+            font-size: 1.3em;
+        }
+        .type-badge {
+            background: rgba(255,255,255,0.2);
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+        }
+        .comparison-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0;
+        }
+        .column {
+            padding: 20px;
+        }
+        .column-srs {
+            background: #e8f5e9;
+            border-left: 4px solid #4caf50;
+        }
+        .column-impl {
+            background: #ffebee;
+            border-left: 4px solid #f44336;
+        }
+        .column h3 {
+            margin-top: 0;
+            padding-bottom: 10px;
+            border-bottom: 2px solid currentColor;
+        }
+        .column-srs h3 {
+            color: #2e7d32;
+        }
+        .column-impl h3 {
+            color: #c62828;
+        }
+        .form-group {
+            margin-bottom: 15px;
+            padding: 10px;
+            background: rgba(255,255,255,0.7);
+            border-radius: 4px;
+        }
+        .form-group label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #333;
+        }
+        .form-group .field-info {
+            font-size: 0.85em;
+            color: #666;
+        }
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        .required::after {
+            content: " *";
+            color: #f44336;
+        }
+        .missing {
+            background: #ffcdd2 !important;
+            border: 2px dashed #f44336 !important;
+        }
+        .missing label::before {
+            content: "❌ مفقود: ";
+            color: #c62828;
+        }
+        .correct {
+            background: #c8e6c9 !important;
+            border: 2px solid #4caf50 !important;
+        }
+        .correct label::before {
+            content: "✅ ";
+        }
+        .wrong-validation {
+            background: #fff3e0 !important;
+            border: 2px dashed #ff9800 !important;
+        }
+        .wrong-validation label::before {
+            content: "⚠️ تحقق خاطئ: ";
+            color: #e65100;
+        }
+        .section-title {
+            background: #e3f2fd;
+            padding: 8px 12px;
+            margin: 15px -10px 10px -10px;
+            font-weight: bold;
+            color: #1565c0;
+            border-right: 4px solid #1565c0;
+        }
+        .fix-note {
+            background: #fff9c4;
+            padding: 10px;
+            border-radius: 4px;
+            margin-top: 10px;
+            font-size: 0.9em;
+            border-right: 4px solid #fbc02d;
+        }
+        .legend {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 15px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+        }
+        .legend-correct { background: #c8e6c9; border: 2px solid #4caf50; }
+        .legend-missing { background: #ffcdd2; border: 2px dashed #f44336; }
+        .legend-wrong { background: #fff3e0; border: 2px dashed #ff9800; }
+
+        @media print {
+            .type-section { page-break-inside: avoid; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>مقارنة نماذج أنواع المدعين</h1>
+        <h2 style="text-align:center; color:#666;">SRS V2.5 vs Current Implementation</h2>
+
+        <!-- Legend -->
+        <div class="legend">
+            <div class="legend-item">
+                <div class="legend-color legend-correct"></div>
+                <span>موجود وصحيح</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color legend-missing"></div>
+                <span>مفقود (يجب إضافته)</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color legend-wrong"></div>
+                <span>موجود لكن بتحقق خاطئ</span>
+            </div>
+        </div>
+
+        <!-- Summary Table -->
+        <table class="summary-table">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>نوع المدعي</th>
+                    <th>Type</th>
+                    <th>الحقول المطلوبة (SRS)</th>
+                    <th>الحقول الموجودة</th>
+                    <th>المفقودة</th>
+                    <th>بتحقق خاطئ</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>1</td>
+                    <td>فرد</td>
+                    <td>Individual</td>
+                    <td>18</td>
+                    <td>12</td>
+                    <td style="color:#c62828; font-weight:bold;">6</td>
+                    <td>0</td>
+                </tr>
+                <tr>
+                    <td>2</td>
+                    <td>فرد بدون هوية</td>
+                    <td>Individual w/o ID</td>
+                    <td>12</td>
+                    <td>10</td>
+                    <td style="color:#c62828; font-weight:bold;">2</td>
+                    <td style="color:#e65100; font-weight:bold;">1</td>
+                </tr>
+                <tr>
+                    <td>3</td>
+                    <td>صاحب مؤسسة</td>
+                    <td>Business Owner</td>
+                    <td>20</td>
+                    <td>14</td>
+                    <td style="color:#c62828; font-weight:bold;">6</td>
+                    <td>0</td>
+                </tr>
+                <tr>
+                    <td>4</td>
+                    <td>شركة مسجلة</td>
+                    <td>Registered Company</td>
+                    <td>12</td>
+                    <td>2</td>
+                    <td style="color:#c62828; font-weight:bold;">10</td>
+                    <td>0</td>
+                </tr>
+                <tr>
+                    <td>5</td>
+                    <td>شركة غير مسجلة</td>
+                    <td>Unregistered Company</td>
+                    <td>6</td>
+                    <td>2</td>
+                    <td style="color:#c62828; font-weight:bold;">4</td>
+                    <td style="color:#e65100; font-weight:bold;">1</td>
+                </tr>
+                <tr>
+                    <td>6</td>
+                    <td>جهة حكومية</td>
+                    <td>Government Agency</td>
+                    <td>3</td>
+                    <td>2</td>
+                    <td style="color:#c62828; font-weight:bold;">1</td>
+                    <td>0</td>
+                </tr>
+                <tr>
+                    <td>7</td>
+                    <td>جمعية/مؤسسة أهلية</td>
+                    <td>NGO</td>
+                    <td>13</td>
+                    <td>3</td>
+                    <td style="color:#c62828; font-weight:bold;">10</td>
+                    <td style="color:#e65100; font-weight:bold;">2</td>
+                </tr>
+                <tr>
+                    <td>8</td>
+                    <td>وقف</td>
+                    <td>Waqf</td>
+                    <td>16</td>
+                    <td>4</td>
+                    <td style="color:#c62828; font-weight:bold;">12</td>
+                    <td style="color:#e65100; font-weight:bold;">1</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- Type 1: Individual -->
+        <div class="type-section">
+            <div class="type-header">
+                <h2>1. فرد (Individual)</h2>
+                <span class="type-badge">SRS 6.3.9 + 6.3.1</span>
+            </div>
+            <div class="comparison-container">
+                <div class="column column-srs">
+                    <h3>المطلوب حسب SRS</h3>
+
+                    <div class="section-title">البيانات الشخصية (6.3.1)</div>
+
+                    <div class="form-group correct">
+                        <label class="required">نوع الهوية</label>
+                        <select>
+                            <option>هوية وطنية</option>
+                            <option>هوية مقيم</option>
+                            <option>جواز سفر</option>
+                        </select>
+                        <div class="field-info">IdentityTypeId - اختيار وحيد</div>
+                    </div>
+
+                    <div class="form-group correct">
+                        <label class="required">رقم الهوية</label>
+                        <input type="text" placeholder="10 أرقام (وطنية/مقيم) أو 20 حرف (جواز)">
+                        <div class="field-info">IdentityNumber - 10 أو 20 حرف</div>
+                    </div>
+
+                    <div class="form-group correct">
+                        <label class="required">تاريخ الميلاد</label>
+                        <input type="date">
+                        <div class="field-info">BirthDate - لا يقبل تاريخ مستقبلي</div>
+                    </div>
+
+                    <div class="form-group correct">
+                        <label class="required">الجنس</label>
+                        <select>
+                            <option>ذكر</option>
+                            <option>أنثى</option>
+                        </select>
+                        <div class="field-info">Gender</div>
+                    </div>
+
+                    <div class="form-group correct">
+                        <label class="required">الاسم الأول</label>
+                        <input type="text">
+                        <div class="field-info">FirstName</div>
+                    </div>
+
+                    <div class="form-group correct">
+                        <label class="required">اسم الأب</label>
+                        <input type="text">
+                        <div class="field-info">FatherName</div>
+                    </div>
+
+                    <div class="form-group correct">
+                        <label>اسم الجد</label>
+                        <input type="text">
+                        <div class="field-info">GrandfatherName - اختياري</div>
+                    </div>
+
+                    <div class="form-group missing">
+                        <label>اسم الفخذ</label>
+                        <input type="text" disabled placeholder="مفقود في DTO">
+                        <div class="field-info">ClanName - اختياري - <strong>يجب إضافته</strong></div>
+                    </div>
+
+                    <div class="form-group correct">
+                        <label class="required">اسم العائلة</label>
+                        <input type="text">
+                        <div class="field-info">FamilyName</div>
+                    </div>
+
+                    <div class="form-group missing">
+                        <label class="required">تاريخ إصدار الهوية</label>
+                        <input type="date" disabled placeholder="مفقود في DTO">
+                        <div class="field-info">IdentityIssueDate - <strong>يجب إضافته</strong></div>
+                    </div>
+
+                    <div class="form-group missing">
+                        <label class="required">تاريخ انتهاء الهوية</label>
+                        <input type="date" disabled placeholder="مفقود في DTO">
+                        <div class="field-info">IdentityExpiryDate - <strong>يجب إضافته</strong></div>
+                    </div>
+
+                    <div class="form-group correct">
+                        <label class="required">الجنسية</label>
+                        <select>
+                            <option>سعودي</option>
+                            <option>غير سعودي</option>
+                        </select>
+                        <div class="field-info">NationalityId</div>
+                    </div>
+
+                    <div class="section-title">بيانات التواصل</div>
+
+                    <div class="form-group correct">
+                        <label class="required">رقم الجوال</label>
+                        <input type="tel" placeholder="05XXXXXXXX">
+                        <div class="field-info">MobileNumber - 10 أرقام يبدأ بـ 05</div>
+                    </div>
+
+                    <div class="form-group correct">
+                        <label>البريد الإلكتروني</label>
+                        <input type="email" placeholder="example@example.com">
+                        <div class="field-info">Email - اختياري</div>
+                    </div>
+
+                    <div class="section-title">بيانات العمل (6.3.9)</div>
+
+                    <div class="form-group missing">
+                        <label class="required">جهة العمل</label>
+                        <input type="text" disabled placeholder="مفقود في DTO">
+                        <div class="field-info">Employer - 200 حرف - <strong>يجب إضافته</strong></div>
+                    </div>
+
+                    <div class="form-group missing">
+                        <label class="required">المهنة</label>
+                        <input type="text" disabled placeholder="مفقود في DTO">
+                        <div class="field-info">Profession - 200 حرف - <strong>يجب إضافته</strong></div>
+                    </div>
+
+                    <div class="section-title">عنوان السكن (6.3.2) - إجباري</div>
+
+                    <div class="form-group missing">
+                        <label class="required">المنطقة</label>
+                        <select disabled><option>مفقود</option></select>
+                        <div class="field-info">ResidenceAddress.RegionId - <strong>يجب إضافته</strong></div>
+                    </div>
+
+                    <div class="form-group missing">
+                        <label class="required">المدينة</label>
+                        <select disabled><option>مفقود</option></select>
+                        <div class="field-info">ResidenceAddress.CityId</div>
+                    </div>
+
+                    <div class="form-group missing">
+                        <label class="required">الحي</label>
+                        <select disabled><option>مفقود</option></select>
+                        <div class="field-info">ResidenceAddress.DistrictId</div>
+                    </div>
+
+                    <div class="form-group missing">
+                        <label class="required">الشارع</label>
+                        <input type="text" disabled placeholder="مفقود">
+                        <div class="field-info">ResidenceAddress.Street - 200 حرف</div>
+                    </div>
+
+                    <div class="form-group missing">
+                        <label class="required">رقم المبنى</label>
+                        <input type="text" disabled placeholder="مفقود">
+                        <div class="field-info">ResidenceAddress.BuildingNumber - 4 أرقام</div>
+                    </div>
+
+                    <div class="form-group missing">
+                        <label class="required">رقم الوحدة</label>
+                        <input type="text" disabled placeholder="مفقود">
+                        <div class="field-info">ResidenceAddress.UnitNumber</div>
+                    </div>
+
+                    <div class="form-group missing">
+                        <label class="required">الرمز البريدي</label>
+                        <input type="text" disabled placeholder="مفقود">
+                        <div class="field-info">ResidenceAddress.PostalCode - 5 أرقام</div>
+                    </div>
+
+                    <div class="form-group missing">
+                        <label class="required">الرمز الإضافي</label>
+                        <input type="text" disabled placeholder="مفقود">
+                        <div class="field-info">ResidenceAddress.AdditionalCode - 4 أرقام</div>
+                    </div>
+                </div>
+
+                <div class="column column-impl">
+                    <h3>الموجود في Implementation</h3>
+
+                    <div class="fix-note">
+                        <strong>الإصلاحات المطلوبة في PlaintiffCreateDTO:</strong>
+                        <ul>
+                            <li>إضافة ClanName (اسم الفخذ)</li>
+                            <li>إضافة IdentityIssueDate (تاريخ إصدار الهوية)</li>
+                            <li>إضافة IdentityExpiryDate (تاريخ انتهاء الهوية)</li>
+                            <li>إضافة Employer (جهة العمل)</li>
+                            <li>إضافة Profession (المهنة)</li>
+                            <li>إضافة ResidenceAddress DTO كاملاً</li>
+                            <li>إضافة WorkAddress DTO (اختياري)</li>
+                        </ul>
+                    </div>
+
+                    <pre style="background:#333; color:#fff; padding:15px; border-radius:4px; overflow-x:auto; font-size:12px;">
+// PlaintiffCreateDTO.cs - الحقول المفقودة
+
+// إضافة هذه الحقول:
+public string? ClanName { get; set; }
+
+public DateTime? IdentityIssueDate { get; set; }
+
+public DateTime? IdentityExpiryDate { get; set; }
+
+[StringLength(200)]
+public string? Employer { get; set; }
+
+[StringLength(200)]
+public string? Profession { get; set; }
+
+// إضافة DTO للعنوان:
+public AddressCreateDTO? ResidenceAddress { get; set; }
+
+public AddressCreateDTO? WorkAddress { get; set; }
+                    </pre>
+                </div>
+            </div>
+        </div>
+
+        <!-- Type 5: Unregistered Company -->
+        <div class="type-section">
+            <div class="type-header">
+                <h2>5. شركة غير مسجلة (Unregistered Company)</h2>
+                <span class="type-badge">SRS 6.3.7</span>
+            </div>
+            <div class="comparison-container">
+                <div class="column column-srs">
+                    <h3>المطلوب حسب SRS</h3>
+
+                    <div class="form-group wrong-validation">
+                        <label class="required">رقم السجل التجاري</label>
+                        <input type="text" placeholder="حتى 20 حرف">
+                        <div class="field-info">CommercialRegNumber - <strong>SRS: 20 حرف | Implementation: 10 فقط!</strong></div>
+                    </div>
+
+                    <div class="form-group correct">
+                        <label class="required">اسم الشركة</label>
+                        <input type="text" placeholder="نص عربي - 200 حرف">
+                        <div class="field-info">CompanyName - 200 حرف عربي</div>
+                    </div>
+
+                    <div class="form-group missing">
+                        <label class="required">عنوان الشركة</label>
+                        <input type="text" disabled placeholder="مفقود">
+                        <div class="field-info">UnregisteredCompanyAddress - نص - <strong>يجب إضافته</strong></div>
+                    </div>
+
+                    <div class="form-group missing">
+                        <label class="required">الدولة</label>
+                        <select disabled><option>مفقود</option></select>
+                        <div class="field-info">CountryId - من قاعدة البيانات - <strong>يجب إضافته</strong></div>
+                    </div>
+
+                    <div class="form-group missing">
+                        <label class="required">المدينة</label>
+                        <input type="text" disabled placeholder="مفقود">
+                        <div class="field-info">UnregisteredCompanyCity - 100 حرف - <strong>يجب إضافته</strong></div>
+                    </div>
+
+                    <div class="form-group missing">
+                        <label class="required">وصف تقريبي</label>
+                        <textarea disabled placeholder="مفقود"></textarea>
+                        <div class="field-info">Description - 1000 حرف - <strong>يجب إضافته</strong></div>
+                    </div>
+                </div>
+
+                <div class="column column-impl">
+                    <h3>الموجود في Implementation</h3>
+
+                    <div class="fix-note">
+                        <strong>الإصلاحات المطلوبة:</strong>
+                        <ul>
+                            <li>تعديل CommercialRegNumber validation من 10 إلى 20</li>
+                            <li>إضافة UnregisteredCompanyAddress</li>
+                            <li>إضافة CountryId</li>
+                            <li>إضافة UnregisteredCompanyCity</li>
+                            <li>إضافة Description</li>
+                        </ul>
+                    </div>
+
+                    <pre style="background:#333; color:#fff; padding:15px; border-radius:4px; overflow-x:auto; font-size:12px;">
+// تعديل في PlaintiffCreateDTO.cs
+
+// تعديل هذا:
+[StringLength(10)] // ❌ خطأ
+public string? CommercialRegNumber { get; set; }
+
+// إلى:
+[StringLength(20)] // ✅ صحيح للشركات غير المسجلة
+public string? CommercialRegNumber { get; set; }
+
+// إضافة:
+[StringLength(500)]
+public string? UnregisteredCompanyAddress { get; set; }
+
+public int? CountryId { get; set; }
+
+[StringLength(100)]
+public string? UnregisteredCompanyCity { get; set; }
+
+[StringLength(1000)]
+public string? Description { get; set; }
+                    </pre>
+                </div>
+            </div>
+        </div>
+
+        <!-- Type 7: NGO -->
+        <div class="type-section">
+            <div class="type-header">
+                <h2>7. جمعية/مؤسسة أهلية (NGO)</h2>
+                <span class="type-badge">SRS 6.3.4</span>
+            </div>
+            <div class="comparison-container">
+                <div class="column column-srs">
+                    <h3>المطلوب حسب SRS</h3>
+
+                    <div class="form-group wrong-validation">
+                        <label class="required">رقم الترخيص</label>
+                        <input type="text" placeholder="10 أرقام فقط">
+                        <div class="field-info">LicenseNumber - <strong>SRS: 10 أرقام | Implementation: 50 حرف!</strong></div>
+                    </div>
+
+                    <div class="form-group wrong-validation">
+                        <label class="required">مصدر الترخيص</label>
+                        <select>
+                            <option>وزارة الموارد البشرية</option>
+                            <option>وزارة الشؤون الإسلامية</option>
+                        </select>
+                        <div class="field-info">LicenseSourceId - <strong>SRS: من قاعدة البيانات | Implementation: نص حر!</strong></div>
+                    </div>
+
+                    <div class="form-group missing">
+                        <label class="required">اسم الجمعية/المؤسسة</label>
+                        <input type="text" disabled placeholder="مفقود">
+                        <div class="field-info">NGOName - 200 حرف عربي - <strong>يجب إضافته</strong></div>
+                    </div>
+
+                    <div class="form-group correct">
+                        <label class="required">تاريخ الترخيص</label>
+                        <input type="date">
+                        <div class="field-info">LicenseDate</div>
+                    </div>
+
+                    <div class="section-title">عنوان الجمعية (6.3.2) - إجباري</div>
+
+                    <div class="form-group missing">
+                        <label class="required">المنطقة</label>
+                        <select disabled><option>مفقود</option></select>
+                        <div class="field-info">NGOAddress.RegionId - <strong>يجب إضافته</strong></div>
+                    </div>
+
+                    <div class="form-group missing">
+                        <label class="required">المدينة</label>
+                        <select disabled><option>مفقود</option></select>
+                        <div class="field-info">NGOAddress.CityId</div>
+                    </div>
+
+                    <div class="form-group missing">
+                        <label class="required">الحي</label>
+                        <select disabled><option>مفقود</option></select>
+                        <div class="field-info">NGOAddress.DistrictId</div>
+                    </div>
+
+                    <div class="form-group missing">
+                        <label class="required">الشارع</label>
+                        <input type="text" disabled placeholder="مفقود">
+                        <div class="field-info">NGOAddress.Street</div>
+                    </div>
+
+                    <div class="form-group missing">
+                        <label class="required">رقم المبنى</label>
+                        <input type="text" disabled placeholder="مفقود">
+                        <div class="field-info">NGOAddress.BuildingNumber</div>
+                    </div>
+
+                    <div class="form-group missing">
+                        <label class="required">رقم الوحدة</label>
+                        <input type="text" disabled placeholder="مفقود">
+                        <div class="field-info">NGOAddress.UnitNumber</div>
+                    </div>
+
+                    <div class="form-group missing">
+                        <label class="required">الرمز البريدي</label>
+                        <input type="text" disabled placeholder="مفقود">
+                        <div class="field-info">NGOAddress.PostalCode</div>
+                    </div>
+
+                    <div class="form-group missing">
+                        <label class="required">الرمز الإضافي</label>
+                        <input type="text" disabled placeholder="مفقود">
+                        <div class="field-info">NGOAddress.AdditionalCode</div>
+                    </div>
+                </div>
+
+                <div class="column column-impl">
+                    <h3>الموجود في Implementation</h3>
+
+                    <div class="fix-note">
+                        <strong>الإصلاحات المطلوبة:</strong>
+                        <ul>
+                            <li>تعديل LicenseNumber validation إلى 10 أرقام</li>
+                            <li>تغيير LicenseSource من نص إلى LicenseSourceId (FK)</li>
+                            <li>إضافة NGOName</li>
+                            <li>إضافة NGOAddress DTO</li>
+                        </ul>
+                    </div>
+
+                    <pre style="background:#333; color:#fff; padding:15px; border-radius:4px; overflow-x:auto; font-size:12px;">
+// تعديلات PlaintiffCreateDTO.cs
+
+// تعديل:
+[StringLength(10)]
+[RegularExpression(@"^\d{10}$",
+    ErrorMessage = "رقم الترخيص يجب أن يكون 10 أرقام")]
+public string? LicenseNumber { get; set; }
+
+// تغيير من نص إلى FK:
+// [StringLength(200)]
+// public string? LicenseSource { get; set; } ❌
+public int? LicenseSourceId { get; set; } // ✅
+
+// إضافة:
+[StringLength(200)]
+public string? NGOName { get; set; }
+
+public AddressCreateDTO? NGOAddress { get; set; }
+                    </pre>
+                </div>
+            </div>
+        </div>
+
+        <!-- Type 8: Waqf -->
+        <div class="type-section">
+            <div class="type-header">
+                <h2>8. وقف (Waqf)</h2>
+                <span class="type-badge">SRS 6.3.11</span>
+            </div>
+            <div class="comparison-container">
+                <div class="column column-srs">
+                    <h3>المطلوب حسب SRS</h3>
+
+                    <div class="form-group wrong-validation">
+                        <label class="required">رقم صك المحكمة</label>
+                        <input type="text" placeholder="10 أرقام">
+                        <div class="field-info">CourtDeedNumber - <strong>SRS: 10 أرقام | Implementation: 50 حرف!</strong></div>
+                    </div>
+
+                    <div class="form-group missing">
+                        <label class="required">اسم الوقف</label>
+                        <input type="text" disabled placeholder="مفقود">
+                        <div class="field-info">WaqfName - 200 حرف عربي - <strong>يجب إضافته</strong></div>
+                    </div>
+
+                    <div class="form-group correct">
+                        <label class="required">تاريخ صك المحكمة</label>
+                        <input type="date">
+                        <div class="field-info">DeedDate - <= تاريخ اليوم</div>
+                    </div>
+
+                    <div class="form-group correct">
+                        <label class="required">مصدر الصك</label>
+                        <input type="text" placeholder="100 حرف">
+                        <div class="field-info">DeedSource - 100 حرف</div>
+                    </div>
+
+                    <div class="form-group correct">
+                        <label class="required">نظارة الوقف</label>
+                        <select>
+                            <option>خاصة</option>
+                            <option>حكومية</option>
+                        </select>
+                        <div class="field-info">WaqfOversightType</div>
+                    </div>
+
+                    <div class="form-group missing">
+                        <label class="required">اسم الجهة</label>
+                        <input type="text" disabled placeholder="مفقود - إجباري إذا كانت النظارة حكومية">
+                        <div class="field-info">WaqfAgencyName - 200 حرف - شرطي - <strong>يجب إضافته</strong></div>
+                    </div>
+
+                    <div class="form-group missing">
+                        <label class="required">وصف تقريبي</label>
+                        <textarea disabled placeholder="مفقود"></textarea>
+                        <div class="field-info">WaqfDescription - 200 حرف - <strong>يجب إضافته</strong></div>
+                    </div>
+
+                    <div class="section-title">عنوان الوقف (6.3.2) - إجباري</div>
+
+                    <div class="form-group missing">
+                        <label class="required">المنطقة</label>
+                        <select disabled><option>مفقود</option></select>
+                        <div class="field-info">WaqfAddress.RegionId - <strong>يجب إضافته</strong></div>
+                    </div>
+
+                    <div class="form-group missing">
+                        <label class="required">المدينة</label>
+                        <select disabled><option>مفقود</option></select>
+                    </div>
+
+                    <div class="form-group missing">
+                        <label class="required">الحي</label>
+                        <select disabled><option>مفقود</option></select>
+                    </div>
+
+                    <div class="form-group missing">
+                        <label class="required">الشارع</label>
+                        <input type="text" disabled>
+                    </div>
+
+                    <div class="form-group missing">
+                        <label class="required">رقم المبنى</label>
+                        <input type="text" disabled>
+                    </div>
+
+                    <div class="form-group missing">
+                        <label class="required">رقم الوحدة</label>
+                        <input type="text" disabled>
+                    </div>
+
+                    <div class="form-group missing">
+                        <label class="required">الرمز البريدي</label>
+                        <input type="text" disabled>
+                    </div>
+
+                    <div class="form-group missing">
+                        <label class="required">الرمز الإضافي</label>
+                        <input type="text" disabled>
+                    </div>
+                </div>
+
+                <div class="column column-impl">
+                    <h3>الموجود في Implementation</h3>
+
+                    <div class="fix-note">
+                        <strong>الإصلاحات المطلوبة:</strong>
+                        <ul>
+                            <li>تعديل CourtDeedNumber validation إلى 10 أرقام</li>
+                            <li>إضافة WaqfName</li>
+                            <li>إضافة WaqfAgencyName</li>
+                            <li>إضافة WaqfDescription</li>
+                            <li>إضافة WaqfAddress DTO</li>
+                        </ul>
+                    </div>
+
+                    <pre style="background:#333; color:#fff; padding:15px; border-radius:4px; overflow-x:auto; font-size:12px;">
+// تعديلات PlaintiffCreateDTO.cs
+
+// تعديل:
+[StringLength(10)]
+[RegularExpression(@"^\d{10}$",
+    ErrorMessage = "رقم الصك يجب أن يكون 10 أرقام")]
+public string? CourtDeedNumber { get; set; }
+
+// إضافة:
+[StringLength(200)]
+public string? WaqfName { get; set; }
+
+[StringLength(200)]
+public string? WaqfAgencyName { get; set; }
+
+[StringLength(200)]
+public string? WaqfDescription { get; set; }
+
+public AddressCreateDTO? WaqfAddress { get; set; }
+                    </pre>
+                </div>
+            </div>
+        </div>
+
+        <!-- Summary of Required Changes -->
+        <div class="type-section">
+            <div class="type-header" style="background: linear-gradient(135deg, #c62828, #e53935);">
+                <h2>ملخص جميع التعديلات المطلوبة</h2>
+                <span class="type-badge">Action Items</span>
+            </div>
+            <div style="padding: 20px;">
+                <h3>1. إنشاء AddressCreateDTO</h3>
+                <pre style="background:#333; color:#fff; padding:15px; border-radius:4px; overflow-x:auto;">
+public class AddressCreateDTO
+{
+    [Required]
+    public int RegionId { get; set; }
+
+    [Required]
+    public int CityId { get; set; }
+
+    [Required]
+    public int DistrictId { get; set; }
+
+    [Required]
+    [StringLength(200)]
+    public string Street { get; set; } = string.Empty;
+
+    [Required]
+    [StringLength(4)]
+    [RegularExpression(@"^\d{4}$")]
+    public string BuildingNumber { get; set; } = string.Empty;
+
+    [Required]
+    public string UnitNumber { get; set; } = string.Empty;
+
+    [Required]
+    [StringLength(5)]
+    [RegularExpression(@"^\d{5}$")]
+    public string PostalCode { get; set; } = string.Empty;
+
+    [Required]
+    [StringLength(4)]
+    [RegularExpression(@"^\d{4}$")]
+    public string AdditionalCode { get; set; } = string.Empty;
+}
+                </pre>
+
+                <h3>2. تعديل PlaintiffCreateDTO - إضافة الحقول المفقودة</h3>
+                <pre style="background:#333; color:#fff; padding:15px; border-radius:4px; overflow-x:auto;">
+// الحقول المفقودة للفرد:
+public string? ClanName { get; set; }
+public DateTime? IdentityIssueDate { get; set; }
+public DateTime? IdentityExpiryDate { get; set; }
+public string? Employer { get; set; }
+public string? Profession { get; set; }
+
+// العناوين:
+public AddressCreateDTO? ResidenceAddress { get; set; }
+public AddressCreateDTO? WorkAddress { get; set; }
+public AddressCreateDTO? BusinessAddress { get; set; }
+public AddressCreateDTO? CompanyAddress { get; set; }
+public AddressCreateDTO? NGOAddress { get; set; }
+public AddressCreateDTO? WaqfAddress { get; set; }
+
+// بيانات السجل التجاري:
+public DateTime? CRStartDate { get; set; }
+public DateTime? CREndDate { get; set; }
+
+// الشركة غير المسجلة:
+public string? UnregisteredCompanyAddress { get; set; }
+public int? CountryId { get; set; }
+public string? UnregisteredCompanyCity { get; set; }
+public string? Description { get; set; }
+
+// جهة حكومية:
+public string? Headquarters { get; set; }
+
+// جمعية:
+public int? LicenseSourceId { get; set; } // بدلاً من LicenseSource
+public string? NGOName { get; set; }
+
+// وقف:
+public string? WaqfName { get; set; }
+public string? WaqfAgencyName { get; set; }
+public string? WaqfDescription { get; set; }
+                </pre>
+
+                <h3>3. تعديل Validations الخاطئة</h3>
+                <pre style="background:#333; color:#fff; padding:15px; border-radius:4px; overflow-x:auto;">
+// CommercialRegNumber للشركات غير المسجلة:
+// من: [StringLength(10)]
+// إلى: [StringLength(20)]
+
+// LicenseNumber للجمعيات:
+// من: [StringLength(50)]
+// إلى: [StringLength(10)] + [RegularExpression(@"^\d{10}$")]
+
+// CourtDeedNumber للوقف:
+// من: [StringLength(50)]
+// إلى: [StringLength(10)] + [RegularExpression(@"^\d{10}$")]
+                </pre>
+            </div>
+        </div>
+
+    </div>
+</body>
+</html>

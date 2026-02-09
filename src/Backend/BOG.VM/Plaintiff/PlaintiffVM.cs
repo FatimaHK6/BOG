@@ -31,6 +31,21 @@ public class PlaintiffVM
     #region Personal Data
 
     /// <summary>
+    /// Identity type ID.
+    /// </summary>
+    public int? IdentityTypeId { get; set; }
+
+    /// <summary>
+    /// Identity type name.
+    /// </summary>
+    public string? IdentityTypeName { get; set; }
+
+    /// <summary>
+    /// Identity number.
+    /// </summary>
+    public string? IdentityNumber { get; set; }
+
+    /// <summary>
     /// First name (الاسم الأول).
     /// </summary>
     public string? FirstName { get; set; }
@@ -46,6 +61,11 @@ public class PlaintiffVM
     public string? GrandfatherName { get; set; }
 
     /// <summary>
+    /// Clan name (اسم الفخذ).
+    /// </summary>
+    public string? ClanName { get; set; }
+
+    /// <summary>
     /// Family name (اسم العائلة).
     /// </summary>
     public string? FamilyName { get; set; }
@@ -57,21 +77,16 @@ public class PlaintiffVM
     {
         get
         {
-            var nameParts = new[] { FirstName, FatherName, GrandfatherName, FamilyName }
+            var nameParts = new[] { FirstName, FatherName, GrandfatherName, ClanName, FamilyName }
                 .Where(n => !string.IsNullOrWhiteSpace(n));
             return string.Join(" ", nameParts);
         }
     }
 
     /// <summary>
-    /// Identity type name.
+    /// Nationality ID.
     /// </summary>
-    public string? IdentityTypeName { get; set; }
-
-    /// <summary>
-    /// Identity number.
-    /// </summary>
-    public string? IdentityNumber { get; set; }
+    public int? NationalityId { get; set; }
 
     /// <summary>
     /// Date of birth.
@@ -87,6 +102,40 @@ public class PlaintiffVM
     /// Nationality name.
     /// </summary>
     public string? NationalityName { get; set; }
+
+    /// <summary>
+    /// Identity issue date.
+    /// </summary>
+    public DateTime? IdentityIssueDate { get; set; }
+
+    /// <summary>
+    /// Identity expiry date.
+    /// </summary>
+    public DateTime? IdentityExpiryDate { get; set; }
+
+    /// <summary>
+    /// Document number for individual without ID (رقم الوثيقة).
+    /// </summary>
+    public string? DocumentNumber { get; set; }
+
+    #endregion
+
+    #region Employment Data
+
+    /// <summary>
+    /// Employment status ID (1=Government, 2=Private, 3=Unemployed).
+    /// </summary>
+    public int? EmploymentStatusId { get; set; }
+
+    /// <summary>
+    /// Employer name (جهة العمل).
+    /// </summary>
+    public string? Employer { get; set; }
+
+    /// <summary>
+    /// Profession/occupation (المهنة).
+    /// </summary>
+    public string? Profession { get; set; }
 
     #endregion
 
@@ -135,9 +184,53 @@ public class PlaintiffVM
     /// </summary>
     public string? CompanyName { get; set; }
 
+    /// <summary>
+    /// Commercial registration start date.
+    /// </summary>
+    public DateOnly? CRStartDate { get; set; }
+
+    /// <summary>
+    /// Commercial registration end date.
+    /// </summary>
+    public DateOnly? CREndDate { get; set; }
+
     #endregion
 
-    #region Government Agency
+    #region Unregistered Company (Type 5)
+
+    /// <summary>
+    /// Company address for unregistered company.
+    /// </summary>
+    public string? UnregisteredCompanyAddress { get; set; }
+
+    /// <summary>
+    /// Country ID for unregistered company.
+    /// </summary>
+    public int? CountryId { get; set; }
+
+    /// <summary>
+    /// Country name for unregistered company.
+    /// </summary>
+    public string? CountryName { get; set; }
+
+    /// <summary>
+    /// City for unregistered company.
+    /// </summary>
+    public string? UnregisteredCompanyCity { get; set; }
+
+    /// <summary>
+    /// Description for unregistered company.
+    /// </summary>
+    public string? Description { get; set; }
+
+    #endregion
+
+    #region Government Agency (Type 6)
+
+    /// <summary>
+    /// Government agency ID.
+    /// </summary>
+    public int? GovernmentAgencyId { get; set; }
 
     /// <summary>
     /// Government agency name.
@@ -145,9 +238,82 @@ public class PlaintiffVM
     public string? GovernmentAgencyName { get; set; }
 
     /// <summary>
+    /// Headquarters (المقر).
+    /// </summary>
+    public string? Headquarters { get; set; }
+
+    /// <summary>
     /// Additional statement.
     /// </summary>
     public string? AdditionalStatement { get; set; }
+
+    #endregion
+
+    #region NGO Data (Type 7)
+
+    /// <summary>
+    /// License number.
+    /// </summary>
+    public string? LicenseNumber { get; set; }
+
+    /// <summary>
+    /// License source ID.
+    /// </summary>
+    public int? LicenseSourceId { get; set; }
+
+    /// <summary>
+    /// License source name.
+    /// </summary>
+    public string? LicenseSourceName { get; set; }
+
+    /// <summary>
+    /// NGO name (اسم الجمعية).
+    /// </summary>
+    public string? NGOName { get; set; }
+
+    /// <summary>
+    /// License date.
+    /// </summary>
+    public DateTime? LicenseDate { get; set; }
+
+    #endregion
+
+    #region Waqf Data (Type 8)
+
+    /// <summary>
+    /// Court deed number.
+    /// </summary>
+    public string? CourtDeedNumber { get; set; }
+
+    /// <summary>
+    /// Waqf name (اسم الوقف).
+    /// </summary>
+    public string? WaqfName { get; set; }
+
+    /// <summary>
+    /// Deed date.
+    /// </summary>
+    public DateTime? DeedDate { get; set; }
+
+    /// <summary>
+    /// Deed source.
+    /// </summary>
+    public string? DeedSource { get; set; }
+
+    /// <summary>
+    /// Waqf oversight type (خاصة/حكومية).
+    /// </summary>
+    public string? WaqfOversightType { get; set; }
+
+    /// <summary>
+    /// Waqf agency name (for government oversight).
+    /// </summary>
+    public string? WaqfAgencyName { get; set; }
+
+    /// <summary>
+    /// Waqf description.
+    /// </summary>
+    public string? WaqfDescription { get; set; }
 
     #endregion
 
@@ -176,6 +342,26 @@ public class PlaintiffVM
     /// Work address.
     /// </summary>
     public AddressVM? WorkAddress { get; set; }
+
+    /// <summary>
+    /// Business address (for Type 3 - Business Owner).
+    /// </summary>
+    public AddressVM? BusinessAddress { get; set; }
+
+    /// <summary>
+    /// Company address (for Type 4 - Registered Company).
+    /// </summary>
+    public AddressVM? CompanyAddress { get; set; }
+
+    /// <summary>
+    /// NGO address (for Type 7 - NGO).
+    /// </summary>
+    public AddressVM? NGOAddress { get; set; }
+
+    /// <summary>
+    /// Waqf address (for Type 8 - Waqf).
+    /// </summary>
+    public AddressVM? WaqfAddress { get; set; }
 
     /// <summary>
     /// Selected address for correspondence.

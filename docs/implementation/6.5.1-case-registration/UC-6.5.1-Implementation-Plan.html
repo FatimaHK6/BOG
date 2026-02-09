@@ -1,0 +1,1090 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UC 6.5.1 - Case Registration Implementation Plan</title>
+    <style>
+        :root {
+            --primary-color: #1e6f5c;
+            --secondary-color: #29bb89;
+            --success-color: #059669;
+            --warning-color: #d97706;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-color: #1e293b;
+            --border-color: #e2e8f0;
+            --code-bg: #1e293b;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', 'Tahoma', 'Arial', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.8;
+            direction: rtl;
+        }
+
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+
+        header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 40px 20px;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        header h1 { font-size: 2rem; margin-bottom: 10px; }
+        header p { font-size: 1.1rem; opacity: 0.9; }
+
+        .meta-info {
+            background: var(--card-bg);
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-right: 4px solid var(--primary-color);
+        }
+
+        .toc {
+            background: var(--card-bg);
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .toc h2 { color: var(--primary-color); margin-bottom: 15px; font-size: 1.3rem; }
+        .toc ol { padding-right: 25px; }
+        .toc li { margin: 8px 0; }
+        .toc a { color: var(--primary-color); text-decoration: none; }
+        .toc a:hover { text-decoration: underline; }
+
+        .section {
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        h2 {
+            color: var(--primary-color);
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid var(--secondary-color);
+        }
+
+        h3 {
+            color: var(--text-color);
+            font-size: 1.2rem;
+            margin: 25px 0 15px 0;
+        }
+
+        h4 {
+            color: #475569;
+            font-size: 1.1rem;
+            margin: 20px 0 10px 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+            font-size: 0.95rem;
+        }
+
+        th, td {
+            border: 1px solid var(--border-color);
+            padding: 12px 15px;
+            text-align: right;
+        }
+
+        th {
+            background: var(--primary-color);
+            color: white;
+            font-weight: 600;
+        }
+
+        tr:nth-child(even) { background-color: #f8fafc; }
+        tr:hover { background-color: #f1f5f9; }
+
+        pre {
+            background: var(--code-bg);
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            direction: ltr;
+            text-align: left;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            margin: 15px 0;
+        }
+
+        code {
+            font-family: 'Consolas', 'Monaco', monospace;
+            background: #e2e8f0;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.9em;
+            color: #dc2626;
+        }
+
+        pre code { background: none; padding: 0; color: inherit; }
+
+        .file-tree {
+            background: #f1f5f9;
+            padding: 20px;
+            border-radius: 8px;
+            font-family: monospace;
+            direction: ltr;
+            text-align: left;
+            white-space: pre;
+            overflow-x: auto;
+            margin: 15px 0;
+        }
+
+        .note {
+            background: #fef3c7;
+            border-right: 4px solid var(--warning-color);
+            padding: 15px 20px;
+            border-radius: 0 8px 8px 0;
+            margin: 15px 0;
+        }
+
+        .info {
+            background: #dbeafe;
+            border-right: 4px solid #2563eb;
+            padding: 15px 20px;
+            border-radius: 0 8px 8px 0;
+            margin: 15px 0;
+        }
+
+        .success {
+            background: #d1fae5;
+            border-right: 4px solid var(--success-color);
+            padding: 15px 20px;
+            border-radius: 0 8px 8px 0;
+            margin: 15px 0;
+        }
+
+        ul, ol { padding-right: 25px; margin: 10px 0; }
+        li { margin: 5px 0; }
+
+        .phase-badge {
+            display: inline-block;
+            background: var(--primary-color);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 15px;
+            font-size: 0.85rem;
+            margin-left: 10px;
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: #64748b;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 768px) {
+            .container { padding: 10px; }
+            .section { padding: 15px; }
+            table { font-size: 0.85rem; }
+            th, td { padding: 8px; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Case Registration Management Implementation Plan</h1>
+        <h1>UC 6.5.1 - Implementation Plan</h1>
+        <p>Board of Grievances - Legal Case Management System</p>
+    </header>
+
+    <div class="container">
+        <div class="meta-info">
+            <strong>Version:</strong> 1.0 |
+            <strong>Date:</strong> 2026-01-14 |
+            <strong>Project:</strong> BOG Legal Case Management System
+        </div>
+
+        <div class="toc">
+            <h2>Table of Contents</h2>
+            <ol>
+                <li><a href="#overview">Overview</a></li>
+                <li><a href="#phase0">Phase 0: Roles & Authorization</a></li>
+                <li><a href="#phase1">Phase 1: Database Layer</a></li>
+                <li><a href="#phase2">Phase 2: Developer Task Assignment</a></li>
+                <li><a href="#phase3">Phase 3: Integration & Testing</a></li>
+                <li><a href="#phase4">Phase 4: Integration Services</a></li>
+                <li><a href="#phase5">Phase 5: Frontend (Angular UI)</a></li>
+                <li><a href="#files">File Summary</a></li>
+                <li><a href="#verification">Verification</a></li>
+            </ol>
+        </div>
+
+        <div class="section" id="overview">
+            <h2>1. Overview</h2>
+            <p>This plan implements Use Case 6.5.1 (Case Registration Management) following established SOLID architecture patterns.</p>
+
+            <h3>Implementation Structure</h3>
+            <table>
+                <thead>
+                    <tr><th>Phase</th><th>Description</th><th>Dependencies</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td>Phase 0</td><td>Roles & Authorization (Foundation)</td><td>None - Must complete first</td></tr>
+                    <tr><td>Phase 1</td><td>Database Layer (Entities, DbContext, Migrations)</td><td>Phase 0</td></tr>
+                    <tr><td>Phase 2A</td><td>Plaintiffs & Representatives Module</td><td>Phase 1</td></tr>
+                    <tr><td>Phase 2B</td><td>Defendants & Request Management Module</td><td>Phase 1</td></tr>
+                    <tr><td>Phase 3</td><td>Integration & Testing</td><td>Phase 2A + 2B</td></tr>
+                    <tr><td>Phase 4</td><td>Integration Services & Mocks</td><td>Phase 3</td></tr>
+                    <tr><td>Phase 5</td><td>Frontend (Angular UI)</td><td>Phase 4 (API Ready)</td></tr>
+                </tbody>
+            </table>
+
+            <h3>Use Case Summary</h3>
+            <table>
+                <thead><tr><th>Item</th><th>Count</th></tr></thead>
+                <tbody>
+                    <tr><td>Sub Use Cases</td><td>24</td></tr>
+                    <tr><td>Plaintiff Types</td><td>8</td></tr>
+                    <tr><td>Defendant Types</td><td>6</td></tr>
+                    <tr><td>Representative Types</td><td>9</td></tr>
+                    <tr><td>Request Statuses</td><td>10</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="section" id="phase0">
+            <h2>2. Phase 0: Roles & Authorization <span class="phase-badge">Foundation</span></h2>
+            <div class="note"><strong>Priority:</strong> Must complete before Phase 1</div>
+
+            <h3>2.1 User Roles</h3>
+            <table>
+                <thead><tr><th>Role</th><th>Name (Arabic)</th><th>Permissions</th></tr></thead>
+                <tbody>
+                    <tr><td>Clerk</td><td>Clerk</td><td>Create requests, Add plaintiffs/defendants, Submit</td></tr>
+                    <tr><td>Reviewer</td><td>Reviewer</td><td>View requests, Take actions (register, reject, request completion)</td></tr>
+                    <tr><td>Judge</td><td>Judge</td><td>View on desk, Approve/reject from judge desk</td></tr>
+                    <tr><td>RegistrationEmployee</td><td>Registration Employee</td><td>Create requests, Edit, Submit, Register cases</td></tr>
+                    <tr><td>StatusEmployee</td><td>Status Employee</td><td>View requests, Update status</td></tr>
+                    <tr><td>Admin</td><td>Admin</td><td>Full access</td></tr>
+                </tbody>
+            </table>
+
+            <h3>2.2 Required Entities</h3>
+            <div class="file-tree">BOG.DbModel/Entities/Identity/
++-- Role.cs                    # System roles
++-- UserRole.cs                # User-Role mapping (many-to-many)
++-- Court.cs                   # Courts
++-- Department.cs              # Departments within court
++-- UserDepartment.cs          # User assignment to department</div>
+
+            <h3>2.3 Role Entity</h3>
+            <pre><code>public class Role : BaseEntity
+{
+    public string Name { get; set; }           // Clerk, Reviewer, Judge, Admin
+    public string NameAr { get; set; }         // Arabic names
+    public string Description { get; set; }
+
+    public virtual ICollection&lt;UserRole&gt; UserRoles { get; set; }
+}</code></pre>
+
+            <h3>2.4 Permission Constants</h3>
+            <pre><code>public static class Permissions
+{
+    public const string CreateRequest = "CaseRegistration.Create";
+    public const string ViewRequest = "CaseRegistration.View";
+    public const string EditRequest = "CaseRegistration.Edit";
+    public const string SubmitRequest = "CaseRegistration.Submit";
+    public const string RegisterCase = "CaseRegistration.Register";
+    public const string RejectRequest = "CaseRegistration.Reject";
+    public const string SendToJudge = "CaseRegistration.SendToJudge";
+    public const string RequestCompletion = "CaseRegistration.RequestCompletion";
+    public const string UpdateStatus = "CaseRegistration.UpdateStatus";
+}</code></pre>
+
+            <h3>2.5 Seed Data</h3>
+            <pre><code>// Roles
+new Role { Id = 1, Name = "Clerk", NameAr = "Clerk" },
+new Role { Id = 2, Name = "Reviewer", NameAr = "Reviewer" },
+new Role { Id = 3, Name = "Judge", NameAr = "Judge" },
+new Role { Id = 4, Name = "RegistrationEmployee", NameAr = "Registration Employee" },
+new Role { Id = 5, Name = "StatusEmployee", NameAr = "Status Employee" },
+new Role { Id = 6, Name = "Admin", NameAr = "Admin" }</code></pre>
+        </div>
+
+        <div class="section" id="phase1">
+            <h2>3. Phase 1: Database Layer <span class="phase-badge">Database</span></h2>
+            <div class="note"><strong>Priority:</strong> Must complete before assigning tasks to developers</div>
+
+            <h3>3.1 Entity Structure</h3>
+            <div class="file-tree">BOG.DbModel/Entities/
++-- Lookups/                          # Lookup tables
+|   +-- PlaintiffType.cs              # Plaintiff types (8)
+|   +-- DefendantType.cs              # Defendant types (6)
+|   +-- RepresentativeType.cs         # Representative types (9)
+|   +-- RequestStatus.cs              # Request statuses (10)
+|   +-- IdentityType.cs               # Identity types (3)
+|   +-- AttachmentType.cs             # Attachment types
+|   +-- DataSource.cs                 # Data source (FromAbsher/FromUser)
+|   +-- Region.cs                     # Regions (13)
+|   +-- City.cs                       # Cities
+|   +-- GovernmentAgency.cs           # Government agencies
+|
++-- Common/                           # Common entities
+|   +-- Address.cs                    # National Address
+|
++-- CaseRegistration/                 # Case registration entities
+    +-- CaseRegistrationRequest.cs    # Main request entity
+    +-- Claim.cs                      # Claims (one-to-many)
+    +-- RelatedCase.cs                # Related cases (one-to-many)
+    +-- RequestClassification.cs      # Classifications (one-to-many)
+    +-- Plaintiff.cs                  # Plaintiff entity
+    +-- CaseRequestPlaintiff.cs       # Junction table (many-to-many)
+    +-- PlaintiffAttachment.cs        # Plaintiff attachments
+    +-- Defendant.cs                  # Defendant entity
+    +-- CaseRequestDefendant.cs       # Junction table (many-to-many)
+    +-- Representative.cs             # Representative
+    +-- RequestAttachment.cs          # Request attachments</div>
+
+            <h3>3.2 Lookup Tables Seed Data</h3>
+
+            <h4>Plaintiff Types</h4>
+            <table>
+                <thead><tr><th>ID</th><th>Name (Arabic)</th><th>Name (English)</th></tr></thead>
+                <tbody>
+                    <tr><td>1</td><td>Individual</td><td>Individual</td></tr>
+                    <tr><td>2</td><td>Individual without ID</td><td>Individual without ID</td></tr>
+                    <tr><td>3</td><td>Business Owner</td><td>Business Owner</td></tr>
+                    <tr><td>4</td><td>Registered Company</td><td>Registered Company</td></tr>
+                    <tr><td>5</td><td>Unregistered Company</td><td>Unregistered Company</td></tr>
+                    <tr><td>6</td><td>Government Agency</td><td>Government Agency</td></tr>
+                    <tr><td>7</td><td>Society/NGO</td><td>Society/NGO</td></tr>
+                    <tr><td>8</td><td>Waqf/Endowment</td><td>Waqf/Endowment</td></tr>
+                </tbody>
+            </table>
+
+            <h4>Request Statuses</h4>
+            <table>
+                <thead><tr><th>ID</th><th>Name (Arabic)</th><th>Name (English)</th></tr></thead>
+                <tbody>
+                    <tr><td>0</td><td>None</td><td>None</td></tr>
+                    <tr><td>1</td><td>Draft</td><td>Draft</td></tr>
+                    <tr><td>2</td><td>Needs Authentication</td><td>Needs Authentication</td></tr>
+                    <tr><td>3</td><td>New Request</td><td>New Request</td></tr>
+                    <tr><td>4</td><td>Awaiting Check</td><td>Awaiting Check</td></tr>
+                    <tr><td>5</td><td>On Judge Desk</td><td>On Judge Desk</td></tr>
+                    <tr><td>6</td><td>Registered Case</td><td>Registered Case</td></tr>
+                    <tr><td>7</td><td>Case Saved</td><td>Case Saved</td></tr>
+                    <tr><td>8</td><td>Pending Completion</td><td>Pending Completion</td></tr>
+                    <tr><td>9</td><td>Verifying Completion</td><td>Verifying Completion</td></tr>
+                    <tr><td>10</td><td>Rejected</td><td>Rejected</td></tr>
+                </tbody>
+            </table>
+
+            <h4>Data Source</h4>
+            <table>
+                <thead><tr><th>ID</th><th>Name (Arabic)</th><th>Name (English)</th></tr></thead>
+                <tbody>
+                    <tr><td>1</td><td>From Absher</td><td>FromAbsher</td></tr>
+                    <tr><td>2</td><td>From User</td><td>FromUser</td></tr>
+                </tbody>
+            </table>
+
+            <h3>3.3 Core Entity: CaseRegistrationRequest</h3>
+            <pre><code>public class CaseRegistrationRequest : BaseEntity
+{
+    public int RequestStatusId { get; set; }
+    public string Subject { get; set; }                // 4000 chars
+    public string Evidence { get; set; }               // 4000 chars
+    public string Notes { get; set; }
+    public int CourtId { get; set; }
+    public DateTime? SubmissionDate { get; set; }
+    public DateTime? CompletionDeadline { get; set; }  // 30 days
+    public string RejectionReason { get; set; }
+
+    public int CreatedByUserId { get; set; }
+    public int? LastModifiedByUserId { get; set; }
+
+    // Navigation
+    public virtual RequestStatus Status { get; set; }
+    public virtual Court Court { get; set; }
+    public virtual User CreatedByUser { get; set; }
+
+    // Many-to-Many
+    public virtual ICollection&lt;CaseRequestPlaintiff&gt; CaseRequestPlaintiffs { get; set; }
+    public virtual ICollection&lt;CaseRequestDefendant&gt; CaseRequestDefendants { get; set; }
+
+    // One-to-Many
+    public virtual ICollection&lt;Claim&gt; Claims { get; set; }
+    public virtual ICollection&lt;RelatedCase&gt; RelatedCases { get; set; }
+    public virtual ICollection&lt;RequestClassification&gt; Classifications { get; set; }
+    public virtual ICollection&lt;RequestAttachment&gt; Attachments { get; set; }
+}</code></pre>
+
+            <h3>3.4 Plaintiff Entity</h3>
+            <pre><code>public class Plaintiff : BaseEntity
+{
+    public int PlaintiffTypeId { get; set; }
+
+    // Personal Data
+    public int? IdentityTypeId { get; set; }
+    public string IdentityNumber { get; set; }
+    public string FirstName { get; set; }
+    public string FatherName { get; set; }
+    public string GrandfatherName { get; set; }
+    public string FamilyName { get; set; }
+    public DateTime? BirthDate { get; set; }
+    public string Gender { get; set; }
+    public int? DataSourceId { get; set; }             // Data source (Absher/User)
+
+    // Contact
+    public string MobileNumber { get; set; }
+    public string Email { get; set; }
+
+    // Addresses
+    public int? ResidenceAddressId { get; set; }
+    public int? WorkAddressId { get; set; }
+    public int? SelectedAddressId { get; set; }
+
+    // Navigation
+    public virtual PlaintiffType PlaintiffType { get; set; }
+    public virtual DataSource DataSource { get; set; }
+    public virtual ICollection&lt;CaseRequestPlaintiff&gt; CaseRequestPlaintiffs { get; set; }
+    public virtual ICollection&lt;Representative&gt; Representatives { get; set; }
+    public virtual ICollection&lt;PlaintiffAttachment&gt; Attachments { get; set; }
+}</code></pre>
+
+            <h3>3.5 Defendant Entity</h3>
+            <pre><code>public class Defendant : BaseEntity
+{
+    public int DefendantTypeId { get; set; }
+    public string FullName { get; set; }               // Required - 200 chars
+
+    public int? IdentityTypeId { get; set; }
+    public string IdentityNumber { get; set; }
+    public int? DataSourceId { get; set; }             // Data source (Absher/User)
+
+    public string AddressText { get; set; }
+    public int? AddressId { get; set; }
+
+    // Navigation
+    public virtual DefendantType DefendantType { get; set; }
+    public virtual DataSource DataSource { get; set; }
+    public virtual ICollection&lt;CaseRequestDefendant&gt; CaseRequestDefendants { get; set; }
+}</code></pre>
+
+            <h3>3.6 Migration Commands</h3>
+            <pre><code># Add migration
+dotnet ef migrations add AddCaseRegistrationEntities \
+    --project src/Backend/BOG.DbModel \
+    --startup-project src/Backend/BOG.API
+
+# Update database
+dotnet ef database update \
+    --project src/Backend/BOG.DbModel \
+    --startup-project src/Backend/BOG.API</code></pre>
+        </div>
+
+        <div class="section" id="phase2">
+            <h2>4. Phase 2: Developer Task Assignment</h2>
+
+            <h3>4.1 Developer A: Plaintiffs & Representatives Module</h3>
+            <div class="info">
+                <strong>Scope:</strong> Use Cases 6.5.1.1.1 - 6.5.1.1.10 (10 use cases)<br>
+                <strong>Focus:</strong> Plaintiff management, Representatives, Attachments, Selected Address
+            </div>
+
+            <table>
+                <thead><tr><th>Code</th><th>Name</th><th>Description</th></tr></thead>
+                <tbody>
+                    <tr><td>6.5.1.1.1</td><td>Plaintiffs</td><td>Plaintiff list</td></tr>
+                    <tr><td>6.5.1.1.2</td><td>Add Plaintiff</td><td>Add new plaintiff</td></tr>
+                    <tr><td>6.5.1.1.3</td><td>View Plaintiff Details</td><td>View plaintiff details</td></tr>
+                    <tr><td>6.5.1.1.4</td><td>Edit Plaintiff</td><td>Edit plaintiff data</td></tr>
+                    <tr><td>6.5.1.1.5</td><td>Plaintiff Attachments</td><td>Manage attachments</td></tr>
+                    <tr><td>6.5.1.1.6</td><td>Selected Address</td><td>Set address</td></tr>
+                    <tr><td>6.5.1.1.7</td><td>Add Representative</td><td>Add representative</td></tr>
+                    <tr><td>6.5.1.1.8</td><td>Representative Details</td><td>View representative</td></tr>
+                    <tr><td>6.5.1.1.9</td><td>Edit Representative</td><td>Edit representative</td></tr>
+                    <tr><td>6.5.1.1.10</td><td>Applicant</td><td>Set as applicant</td></tr>
+                </tbody>
+            </table>
+
+            <h4>API Endpoints</h4>
+            <pre><code>GET    /api/case-requests/{requestId}/plaintiffs
+POST   /api/case-requests/{requestId}/plaintiffs
+GET    /api/plaintiffs/{id}
+PUT    /api/plaintiffs/{id}
+DELETE /api/plaintiffs/{id}
+POST   /api/plaintiffs/{id}/set-applicant
+GET    /api/plaintiffs/{id}/attachments
+POST   /api/plaintiffs/{id}/attachments
+DELETE /api/plaintiffs/{id}/attachments/{attachmentId}
+GET    /api/plaintiffs/{id}/selected-address
+PUT    /api/plaintiffs/{id}/selected-address
+GET    /api/plaintiffs/{plaintiffId}/representatives
+POST   /api/plaintiffs/{plaintiffId}/representatives
+GET    /api/representatives/{id}
+PUT    /api/representatives/{id}
+DELETE /api/representatives/{id}</code></pre>
+
+            <h3>4.2 Developer B: Defendants & Request Management Module</h3>
+            <div class="info">
+                <strong>Scope:</strong> Use Cases 6.5.1.1.11 - 6.5.1.1.24 (14 use cases)<br>
+                <strong>Focus:</strong> Defendant management, Request lifecycle, Actions, Search
+            </div>
+
+            <table>
+                <thead><tr><th>Code</th><th>Name</th><th>Description</th></tr></thead>
+                <tbody>
+                    <tr><td>6.5.1.1.11</td><td>Defendants</td><td>Defendant list</td></tr>
+                    <tr><td>6.5.1.1.12</td><td>Add Defendant</td><td>Add new defendant</td></tr>
+                    <tr><td>6.5.1.1.13</td><td>Defendant Details</td><td>View details</td></tr>
+                    <tr><td>6.5.1.1.14</td><td>Edit Defendant</td><td>Edit data</td></tr>
+                    <tr><td>6.5.1.1.15-19</td><td>Additional Info & Deficiencies</td><td>Manage info and deficiencies</td></tr>
+                    <tr><td>6.5.1.1.20</td><td>Search</td><td>Search requests</td></tr>
+                    <tr><td>6.5.1.1.21-22</td><td>Request Management</td><td>Edit and view request details</td></tr>
+                    <tr><td>6.5.1.1.23</td><td>Take Action</td><td>Take action on request</td></tr>
+                    <tr><td>6.5.1.1.24</td><td>Register Case</td><td>Register case in system</td></tr>
+                </tbody>
+            </table>
+
+            <h4>Status Transitions</h4>
+            <table>
+                <thead><tr><th>From</th><th>Action</th><th>To</th></tr></thead>
+                <tbody>
+                    <tr><td>None</td><td>Save</td><td>Draft</td></tr>
+                    <tr><td>Draft</td><td>Submit</td><td>New Request</td></tr>
+                    <tr><td>New Request</td><td>Register</td><td>Registered Case</td></tr>
+                    <tr><td>New Request</td><td>Send to Judge</td><td>On Judge Desk</td></tr>
+                    <tr><td>New Request</td><td>Request Completion</td><td>Pending Completion</td></tr>
+                    <tr><td>New Request</td><td>Reject</td><td>Rejected</td></tr>
+                    <tr><td>Pending Completion</td><td>Timeout (30 days)</td><td>Rejected</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="section" id="phase3">
+            <h2>5. Phase 3: Integration & Testing</h2>
+
+            <h3>5.1 Integration Tasks</h3>
+            <ul>
+                <li><strong>Status Transition Validation Service</strong> - Implement IStatusTransitionValidator</li>
+                <li><strong>Absher Integration</strong> - Create IAbsherService in BOG.Integration</li>
+                <li><strong>Notification Service</strong> - Create INotificationService for SMS/Email</li>
+                <li><strong>Auto-Rejection Background Task</strong> - 30-day timeout check</li>
+            </ul>
+
+            <h3>5.2 Validation Messages</h3>
+            <table>
+                <thead><tr><th>Code</th><th>Message</th></tr></thead>
+                <tbody>
+                    <tr><td>ERR001</td><td>At least one plaintiff is required</td></tr>
+                    <tr><td>ERR002</td><td>At least one defendant is required</td></tr>
+                    <tr><td>ERR003</td><td>Mandatory attachments incomplete</td></tr>
+                    <tr><td>ERR008</td><td>Representative already exists</td></tr>
+                    <tr><td>ERR011</td><td>Plaintiff already exists</td></tr>
+                    <tr><td>ERR012</td><td>Representative ID same as plaintiff</td></tr>
+                    <tr><td>ERR013</td><td>Defendant already exists</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="section" id="phase4">
+            <h2>6. Phase 4: Integration Services</h2>
+
+            <h3>6.1 Absher Integration</h3>
+            <pre><code>public interface IAbsherService
+{
+    Task&lt;AbsherVerificationResult&gt; VerifyIdentityAsync(string identityNumber, int identityType);
+    Task&lt;AbsherPersonData?&gt; GetPersonDataAsync(string identityNumber, int identityType);
+    Task&lt;AbsherAddressData?&gt; GetNationalAddressAsync(string identityNumber);
+}</code></pre>
+
+            <h3>6.2 SMS Service</h3>
+            <pre><code>public interface ISmsService
+{
+    Task&lt;SmsResult&gt; SendSmsAsync(string mobileNumber, string message);
+    Task&lt;SmsResult&gt; SendSmsAsync(string mobileNumber, string templateCode, Dictionary&lt;string, string&gt; parameters);
+}</code></pre>
+
+            <h3>6.3 Email Service</h3>
+            <pre><code>public interface IEmailService
+{
+    Task&lt;EmailResult&gt; SendEmailAsync(string toEmail, string subject, string body, bool isHtml = true);
+    Task&lt;EmailResult&gt; SendEmailAsync(string toEmail, string templateCode, Dictionary&lt;string, string&gt; parameters);
+}</code></pre>
+
+            <h3>6.4 Case Management Service</h3>
+            <pre><code>public interface ICaseManagementService
+{
+    Task&lt;CaseRegistrationResult&gt; RegisterCaseAsync(CaseRegistrationData caseData);
+    Task&lt;CaseStatusResult&gt; GetCaseStatusAsync(string caseNumber);
+}</code></pre>
+
+            <h3>6.5 Configuration (appsettings.json)</h3>
+            <pre><code>{
+  "Integration": {
+    "Absher": { "UseMock": true, "BaseUrl": "https://absher.api.example.sa" },
+    "Sms": { "UseMock": true, "Provider": "Unifonic", "SenderId": "BOG" },
+    "Email": { "UseMock": true, "SmtpHost": "smtp.example.sa", "SmtpPort": 587 },
+    "CaseManagement": { "UseMock": true, "BaseUrl": "https://cms.bog.gov.sa/api", "Version": "v4" }
+  }
+}</code></pre>
+        </div>
+
+        <div class="section" id="phase5">
+            <h2>7. Phase 5: Frontend (Angular UI) <span class="phase-badge">Frontend</span></h2>
+            <div class="info">
+                <strong>Technologies:</strong> Angular 13 + Angular Material + RTL Support<br>
+                <strong>Dependencies:</strong> Phase 4 (API Ready)
+            </div>
+
+            <h3>7.1 Overview</h3>
+            <table>
+                <thead><tr><th>Item</th><th>Description</th></tr></thead>
+                <tbody>
+                    <tr><td>Framework</td><td>Angular 13.3</td></tr>
+                    <tr><td>UI Library</td><td>Angular Material</td></tr>
+                    <tr><td>Direction</td><td>RTL (Right to Left)</td></tr>
+                    <tr><td>Language</td><td>Arabic (Primary) + English</td></tr>
+                    <tr><td>Design</td><td>Responsive (Desktop, Tablet, Mobile)</td></tr>
+                </tbody>
+            </table>
+
+            <h3>7.2 Folder Structure</h3>
+            <div class="file-tree">src/Frontend/bog-app/src/app/
++-- core/                                    # Core services
+|   +-- services/
+|   |   +-- api.service.ts                   # Base HTTP service
+|   |   +-- auth.service.ts                  # Authentication service
+|   +-- interceptors/
+|   |   +-- auth.interceptor.ts              # Add Token to requests
+|   |   +-- error.interceptor.ts             # Error handling
+|   +-- guards/
+|       +-- auth.guard.ts                    # Route protection
+|
++-- shared/                                  # Shared components
+|   +-- components/
+|   |   +-- confirmation-dialog/             # Confirmation dialog
+|   |   +-- loading-spinner/                 # Loading indicator
+|   |   +-- address-form/                    # Address form
+|   |   +-- identity-lookup/                 # Absher identity lookup
+|   |   +-- file-upload/                     # File upload
+|   +-- directives/
+|   |   +-- rtl.directive.ts                 # RTL directive
+|   +-- pipes/
+|       +-- hijri-date.pipe.ts               # Hijri date conversion
+|       +-- arabic-number.pipe.ts            # Arabic numbers
+|
++-- features/                                # Feature modules
+|   +-- case-registration/                   # Case registration module
+|       +-- case-registration.module.ts
+|       +-- case-registration-routing.module.ts
+|       +-- models/                          # Models
+|       |   +-- plaintiff.model.ts
+|       |   +-- defendant.model.ts
+|       |   +-- representative.model.ts
+|       |   +-- attachment.model.ts
+|       |   +-- case-request.model.ts
+|       +-- services/                        # Services
+|       |   +-- plaintiff.service.ts
+|       |   +-- defendant.service.ts
+|       |   +-- representative.service.ts
+|       |   +-- attachment.service.ts
+|       |   +-- case-request.service.ts
+|       +-- pages/                           # Main pages
+|       |   +-- case-request-list/           # Request list
+|       |   +-- case-request-detail/         # Request details
+|       +-- components/                      # Components
+|           +-- side-navigation/             # Side navigation
+|           +-- plaintiffs/                  # Plaintiffs
+|           |   +-- plaintiff-list/
+|           |   +-- plaintiff-form/
+|           |   +-- plaintiff-wizard/        # 4-step wizard
+|           +-- defendants/                  # Defendants
+|           |   +-- defendant-list/
+|           |   +-- defendant-form/
+|           +-- representatives/             # Representatives
+|           |   +-- representative-list/
+|           |   +-- representative-form/
+|           +-- attachments/                 # Attachments
+|           |   +-- attachment-list/
+|           |   +-- attachment-upload/
+|           +-- case-data/                   # Case data
+|           |   +-- claims-list/             # Claims
+|           |   +-- related-cases/           # Related cases
+|           |   +-- classifications/         # Classifications
+|           +-- actions/                     # Actions
+|               +-- submit-request/          # Submit request
+|               +-- deficiencies/            # Deficiencies
+|
++-- layouts/                                 # Layouts
+    +-- main-layout/                         # Main layout
+        +-- header/
+        +-- sidebar/
+        +-- footer/</div>
+
+            <h3>7.3 Main Components</h3>
+
+            <h4>Case Request Detail Page</h4>
+            <pre><code>@Component({
+  selector: 'app-case-request-detail',
+  templateUrl: './case-request-detail.component.html'
+})
+export class CaseRequestDetailComponent implements OnInit {
+  requestId: number;
+  currentSection: string = 'plaintiffs';
+
+  sections = [
+    { id: 'plaintiffs', label: 'المدعين', icon: 'person' },
+    { id: 'defendants', label: 'المدعى عليه', icon: 'people' },
+    { id: 'case-data', label: 'بيانات الدعوى', icon: 'description' },
+    { id: 'additional-info', label: 'معلومات إضافية', icon: 'info' },
+    { id: 'deficiencies', label: 'النواقص', icon: 'warning' },
+    { id: 'finish', label: 'إنهاء الطلب', icon: 'check_circle' }
+  ];
+}</code></pre>
+
+            <h4>Plaintiff Wizard (4 Steps)</h4>
+            <pre><code>@Component({
+  selector: 'app-plaintiff-wizard',
+  templateUrl: './plaintiff-wizard.component.html'
+})
+export class PlaintiffWizardComponent implements OnInit {
+  currentStep: number = 1;
+  plaintiffForm: FormGroup;
+
+  steps = [
+    { number: 1, label: 'بيانات الشخصي' },
+    { number: 2, label: 'بيانات الممثلين' },
+    { number: 3, label: 'المرفقات' },
+    { number: 4, label: 'بيانات إضافية' }
+  ];
+
+  onPlaintiffTypeChange(typeId: number): void {
+    // Change form fields based on plaintiff type
+  }
+
+  lookupAbsher(identityNumber: string): void {
+    // Fetch data from Absher
+  }
+}</code></pre>
+
+            <h3>7.4 Models</h3>
+            <pre><code>// plaintiff.model.ts
+export interface Plaintiff {
+  id: number;
+  plaintiffTypeId: number;
+  plaintiffTypeName?: string;
+
+  // Personal Data
+  identityTypeId?: number;
+  identityNumber?: string;
+  firstName?: string;
+  fatherName?: string;
+  grandfatherName?: string;
+  familyName?: string;
+  fullName?: string;
+  birthDate?: Date;
+  gender?: string;
+
+  // Contact
+  mobileNumber?: string;
+  email?: string;
+
+  // Addresses
+  residenceAddress?: Address;
+  workAddress?: Address;
+  selectedAddressId?: number;
+
+  // Relations
+  representatives?: Representative[];
+  attachments?: PlaintiffAttachment[];
+
+  // Status
+  attachmentStatus?: 'complete' | 'incomplete';
+  isApplicant?: boolean;
+}
+
+// case-request.model.ts
+export interface CaseRequest {
+  id: number;
+  requestStatusId: number;
+  requestStatusName?: string;
+  subject: string;
+  evidence?: string;
+  courtId: number;
+
+  plaintiffs?: Plaintiff[];
+  defendants?: Defendant[];
+  claims?: Claim[];
+  relatedCases?: RelatedCase[];
+  attachments?: RequestAttachment[];
+
+  applicantId?: number;
+  applicantName?: string;
+}</code></pre>
+
+            <h3>7.5 Services</h3>
+            <pre><code>// plaintiff.service.ts
+@Injectable({ providedIn: 'root' })
+export class PlaintiffService {
+  private baseUrl = '/api';
+
+  constructor(private http: HttpClient) {}
+
+  getPlaintiffs(requestId: number): Observable&lt;Plaintiff[]&gt; {
+    return this.http.get&lt;Plaintiff[]&gt;(`${this.baseUrl}/case-requests/${requestId}/plaintiffs`);
+  }
+
+  getPlaintiff(id: number): Observable&lt;Plaintiff&gt; {
+    return this.http.get&lt;Plaintiff&gt;(`${this.baseUrl}/plaintiffs/${id}`);
+  }
+
+  createPlaintiff(requestId: number, plaintiff: PlaintiffCreateDto): Observable&lt;Plaintiff&gt; {
+    return this.http.post&lt;Plaintiff&gt;(`${this.baseUrl}/case-requests/${requestId}/plaintiffs`, plaintiff);
+  }
+
+  updatePlaintiff(id: number, plaintiff: PlaintiffUpdateDto): Observable&lt;Plaintiff&gt; {
+    return this.http.put&lt;Plaintiff&gt;(`${this.baseUrl}/plaintiffs/${id}`, plaintiff);
+  }
+
+  deletePlaintiff(id: number): Observable&lt;void&gt; {
+    return this.http.delete&lt;void&gt;(`${this.baseUrl}/plaintiffs/${id}`);
+  }
+
+  setAsApplicant(id: number): Observable&lt;void&gt; {
+    return this.http.post&lt;void&gt;(`${this.baseUrl}/plaintiffs/${id}/set-applicant`, {});
+  }
+}
+
+// absher.service.ts
+@Injectable({ providedIn: 'root' })
+export class AbsherService {
+  private baseUrl = '/api/integration/absher';
+
+  verifyIdentity(identityNumber: string, identityType: number): Observable&lt;AbsherVerificationResult&gt; {
+    return this.http.post&lt;AbsherVerificationResult&gt;(`${this.baseUrl}/verify`, {
+      identityNumber, identityType
+    });
+  }
+
+  getPersonData(identityNumber: string, identityType: number): Observable&lt;AbsherPersonData&gt; {
+    return this.http.get&lt;AbsherPersonData&gt;(`${this.baseUrl}/person/${identityNumber}?type=${identityType}`);
+  }
+}</code></pre>
+
+            <h3>7.6 Routing</h3>
+            <pre><code>// case-registration-routing.module.ts
+const routes: Routes = [
+  { path: '', component: CaseRequestListComponent },
+  { path: 'new', component: CaseRequestDetailComponent },
+  {
+    path: ':id',
+    component: CaseRequestDetailComponent,
+    children: [
+      { path: '', redirectTo: 'plaintiffs', pathMatch: 'full' },
+      { path: 'plaintiffs', component: PlaintiffListComponent },
+      { path: 'plaintiffs/new', component: PlaintiffWizardComponent },
+      { path: 'plaintiffs/:plaintiffId', component: PlaintiffWizardComponent },
+      { path: 'defendants', component: DefendantListComponent },
+      { path: 'defendants/new', component: DefendantFormComponent },
+      { path: 'case-data', component: CaseDataComponent },
+      { path: 'deficiencies', component: DeficienciesComponent },
+      { path: 'finish', component: FinishRequestComponent }
+    ]
+  }
+];</code></pre>
+
+            <h3>7.7 Validation Messages</h3>
+            <pre><code>export const VALIDATION_MESSAGES = {
+  // Server errors
+  ERR001: 'يجب إضافة مدّعي واحد على الأقل',
+  ERR002: 'يجب إضافة مدّعى عليه واحد على الأقل',
+  ERR003: 'المرفقات الإجبارية غير مكتملة',
+  ERR008: 'الممثّل موجود مسبقاً للمدعي',
+  ERR011: 'المدّعي موجود مسبقاً بنفس رقم الهوية',
+  ERR012: 'رقم هوية الممثّل نفس رقم هوية المدّعي',
+  BC07: 'فقط المدعي من نوع "فرد" يمكنه أن يكون مقدم الطلب',
+
+  // Success messages
+  SUCCESS_PLAINTIFF_ADDED: 'تم إضافة المدعي بنجاح',
+  SUCCESS_PLAINTIFF_UPDATED: 'تم تحديث بيانات المدعي بنجاح',
+  SUCCESS_REPRESENTATIVE_ADDED: 'تم إضافة الممثل بنجاح',
+  SUCCESS_ATTACHMENT_UPLOADED: 'تم رفع المرفق بنجاح',
+  SUCCESS_REQUEST_SUBMITTED: 'تم تقديم الطلب بنجاح'
+};</code></pre>
+
+            <h3>7.8 Color Scheme</h3>
+            <table>
+                <thead><tr><th>Element</th><th>Color</th><th>Hex</th></tr></thead>
+                <tbody>
+                    <tr><td>Primary</td><td>Green</td><td>#1B5E20</td></tr>
+                    <tr><td>Secondary</td><td>Dark Green</td><td>#0D3D14</td></tr>
+                    <tr><td>Background</td><td>Light Gray</td><td>#F5F5F5</td></tr>
+                    <tr><td>Success</td><td>Green</td><td>#4CAF50</td></tr>
+                    <tr><td>Warning</td><td>Orange</td><td>#FF9800</td></tr>
+                    <tr><td>Error</td><td>Red</td><td>#F44336</td></tr>
+                </tbody>
+            </table>
+
+            <h3>7.9 Implementation Steps</h3>
+            <pre><code># Setup project
+cd src/Frontend/bog-app
+ng add @angular/material
+npm install @ngx-translate/core @ngx-translate/http-loader
+
+# Create structure
+ng generate module features/case-registration --routing
+ng generate module core
+ng generate module shared
+
+# Create shared components
+ng generate component shared/components/confirmation-dialog
+ng generate component shared/components/address-form
+ng generate component shared/components/identity-lookup
+ng generate component shared/components/file-upload
+
+# Create case registration components
+ng generate component features/case-registration/pages/case-request-list
+ng generate component features/case-registration/pages/case-request-detail
+ng generate component features/case-registration/components/plaintiff-list
+ng generate component features/case-registration/components/plaintiff-wizard
+ng generate component features/case-registration/components/defendant-list
+ng generate component features/case-registration/components/defendant-form
+
+# Create services
+ng generate service features/case-registration/services/plaintiff
+ng generate service features/case-registration/services/defendant
+ng generate service features/case-registration/services/case-request
+ng generate service core/services/absher</code></pre>
+
+            <h3>7.10 UX Reference</h3>
+            <div class="info">
+                <strong>UX Specification:</strong><br>
+                • Markdown: <code>docs/implementation/6.5.1-case-registration/Ux/UC-6.5.1-UX-Specification.md</code><br>
+                • HTML (Print): <code>docs/implementation/6.5.1-case-registration/Ux/UC-6.5.1-UX-Specification.html</code>
+            </div>
+        </div>
+
+        <div class="section" id="files">
+            <h2>8. File Summary</h2>
+
+            <h3>Phase 0 (Roles & Authorization)</h3>
+            <ul>
+                <li>5 Identity entities</li>
+                <li>2 Repositories</li>
+                <li>2 Business logic services</li>
+                <li>2 Authorization files</li>
+                <li>1 API Controller</li>
+            </ul>
+
+            <h3>Phase 1 (Database)</h3>
+            <ul>
+                <li>10 Lookup table entities</li>
+                <li>1 Common entity (Address)</li>
+                <li>11 Case registration entities</li>
+                <li>1 DbContext update + 1 Migration</li>
+            </ul>
+
+            <h3>Developer A (Plaintiffs)</h3>
+            <ul>
+                <li>5 Repository interfaces + implementations</li>
+                <li>8 DTOs, 6 ViewModels</li>
+                <li>4 Business logic services</li>
+                <li>2 API Controllers</li>
+            </ul>
+
+            <h3>Developer B (Defendants & Requests)</h3>
+            <ul>
+                <li>8 Repository interfaces + implementations</li>
+                <li>12 DTOs, 9 ViewModels</li>
+                <li>7 Business logic services</li>
+                <li>5 API Controllers</li>
+            </ul>
+
+            <h3>Phase 4 (Integration)</h3>
+            <ul>
+                <li>4 Service interfaces</li>
+                <li>8 Implementations (4 mock + 4 real)</li>
+                <li>15+ DTOs</li>
+            </ul>
+
+            <h3>Phase 5 (Frontend - Angular)</h3>
+            <ul>
+                <li>1 Angular Module (Case Registration)</li>
+                <li>4 Core services</li>
+                <li>5 Shared components</li>
+                <li>2 Main pages</li>
+                <li>3 Plaintiff components</li>
+                <li>2 Defendant components</li>
+                <li>2 Representative components</li>
+                <li>2 Attachment components</li>
+                <li>3 Case data components</li>
+                <li>2 Action components</li>
+                <li>5 Models</li>
+                <li>6 Services</li>
+                <li><strong>Total: ~36 TypeScript/HTML/SCSS files</strong></li>
+            </ul>
+        </div>
+
+        <div class="section" id="verification">
+            <h2>9. Verification</h2>
+
+            <h3>Build Commands</h3>
+            <pre><code># Build
+dotnet build src/Backend/BOG.sln
+
+# Update Database
+dotnet ef database update --project src/Backend/BOG.DbModel --startup-project src/Backend/BOG.API
+
+# Run API
+dotnet run --project src/Backend/BOG.API</code></pre>
+
+            <div class="success">
+                <strong>Test Backend with Swagger:</strong> https://localhost:5001/swagger
+            </div>
+
+            <h3>Frontend Commands</h3>
+            <pre><code># Install dependencies
+cd src/Frontend/bog-app && npm install
+
+# Run development server
+cd src/Frontend/bog-app && ng serve
+
+# Build for production
+cd src/Frontend/bog-app && ng build --configuration production
+
+# Run tests
+cd src/Frontend/bog-app && ng test</code></pre>
+
+            <div class="success">
+                <strong>Test Frontend:</strong> http://localhost:4200
+            </div>
+
+            <h3>Test Scenarios</h3>
+            <ol>
+                <li><strong>Request Creation Flow:</strong> Create draft > Add plaintiff > Add defendant > Set applicant > Submit > Register</li>
+                <li><strong>Deficiency Flow:</strong> Submit > Request completion > Complete deficiencies > Verify > Register</li>
+                <li><strong>Validation Tests:</strong> Submit without plaintiff (ERR001), Submit without defendant (ERR002)</li>
+            </ol>
+        </div>
+
+        <footer>
+            <p>UC 6.5.1 Implementation Plan - BOG Legal Case Management System</p>
+            <p>Generated: 2026-01-14</p>
+        </footer>
+    </div>
+</body>
+</html>

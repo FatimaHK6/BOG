@@ -34,6 +34,160 @@ public class RepresentativeUpdateDTO
     [StringLength(100)]
     public string? FamilyName { get; set; }
 
+    /// <summary>
+    /// Date of birth.
+    /// </summary>
+    public DateTime? BirthDate { get; set; }
+
+    /// <summary>
+    /// Clan name (اسم الفخذ).
+    /// </summary>
+    [StringLength(100)]
+    public string? ClanName { get; set; }
+
+    /// <summary>
+    /// Gender (الجنس): male/female.
+    /// </summary>
+    [StringLength(10)]
+    public string? Gender { get; set; }
+
+    /// <summary>
+    /// Nationality ID (الجنسية).
+    /// </summary>
+    public int? NationalityId { get; set; }
+
+    /// <summary>
+    /// Identity issue date (تاريخ إصدار الهوية).
+    /// </summary>
+    public DateTime? IdentityIssueDate { get; set; }
+
+    /// <summary>
+    /// Identity expiry date (تاريخ انتهاء الهوية).
+    /// </summary>
+    public DateTime? IdentityExpiryDate { get; set; }
+
+    #endregion
+
+    #region Residence Address (عنوان السكن - 6.3.2)
+
+    /// <summary>
+    /// Region ID for residence address (المنطقة).
+    /// </summary>
+    public int? ResidenceRegionId { get; set; }
+
+    /// <summary>
+    /// City ID for residence address (المدينة).
+    /// </summary>
+    public int? ResidenceCityId { get; set; }
+
+    /// <summary>
+    /// District for residence address (الحي).
+    /// </summary>
+    [StringLength(100)]
+    public string? ResidenceDistrict { get; set; }
+
+    /// <summary>
+    /// Street for residence address (الشارع).
+    /// </summary>
+    [StringLength(100)]
+    public string? ResidenceStreet { get; set; }
+
+    /// <summary>
+    /// Building number for residence address (رقم المبنى).
+    /// </summary>
+    [StringLength(10)]
+    public string? ResidenceBuildingNumber { get; set; }
+
+    /// <summary>
+    /// Unit number for residence address (رقم الوحدة).
+    /// </summary>
+    [StringLength(10)]
+    public string? ResidenceUnitNumber { get; set; }
+
+    /// <summary>
+    /// Postal code for residence address (الرمز البريدي).
+    /// </summary>
+    [StringLength(5)]
+    public string? ResidencePostalCode { get; set; }
+
+    /// <summary>
+    /// Additional code for residence address (الرمز الإضافي).
+    /// </summary>
+    [StringLength(4)]
+    public string? ResidenceAdditionalCode { get; set; }
+
+    #endregion
+
+    #region Employment Data (بيانات العمل)
+
+    /// <summary>
+    /// Employment status (حالة العمل): government/private/unemployed.
+    /// </summary>
+    [StringLength(20)]
+    public string? EmploymentStatus { get; set; }
+
+    /// <summary>
+    /// Employer name (جهة العمل).
+    /// </summary>
+    [StringLength(200)]
+    public string? Employer { get; set; }
+
+    /// <summary>
+    /// Profession (المهنة).
+    /// </summary>
+    [StringLength(200)]
+    public string? Profession { get; set; }
+
+    #endregion
+
+    #region Work Address (عنوان العمل - 6.3.2)
+
+    /// <summary>
+    /// Region ID for work address (المنطقة).
+    /// </summary>
+    public int? WorkRegionId { get; set; }
+
+    /// <summary>
+    /// City ID for work address (المدينة).
+    /// </summary>
+    public int? WorkCityId { get; set; }
+
+    /// <summary>
+    /// District for work address (الحي).
+    /// </summary>
+    [StringLength(100)]
+    public string? WorkDistrict { get; set; }
+
+    /// <summary>
+    /// Street for work address (الشارع).
+    /// </summary>
+    [StringLength(100)]
+    public string? WorkStreet { get; set; }
+
+    /// <summary>
+    /// Building number for work address (رقم المبنى).
+    /// </summary>
+    [StringLength(10)]
+    public string? WorkBuildingNumber { get; set; }
+
+    /// <summary>
+    /// Unit number for work address (رقم الوحدة).
+    /// </summary>
+    [StringLength(10)]
+    public string? WorkUnitNumber { get; set; }
+
+    /// <summary>
+    /// Postal code for work address (الرمز البريدي).
+    /// </summary>
+    [StringLength(5)]
+    public string? WorkPostalCode { get; set; }
+
+    /// <summary>
+    /// Additional code for work address (الرمز الإضافي).
+    /// </summary>
+    [StringLength(4)]
+    public string? WorkAdditionalCode { get; set; }
+
     #endregion
 
     #region Contact Info
@@ -51,6 +205,26 @@ public class RepresentativeUpdateDTO
     [EmailAddress(ErrorMessage = "البريد الإلكتروني غير صحيح")]
     [StringLength(255)]
     public string? Email { get; set; }
+
+    #endregion
+
+    #region Lawyer License Data (بيانات رخصة المحاماة)
+
+    /// <summary>
+    /// Lawyer license number (رقم رخصة المحاماة).
+    /// </summary>
+    [StringLength(50)]
+    public string? LawyerLicenseNumber { get; set; }
+
+    /// <summary>
+    /// Lawyer license date (تاريخ الرخصة).
+    /// </summary>
+    public DateTime? LawyerLicenseDate { get; set; }
+
+    /// <summary>
+    /// Lawyer license expiry date (تاريخ انتهاء الرخصة).
+    /// </summary>
+    public DateTime? LawyerLicenseExpiryDate { get; set; }
 
     #endregion
 
@@ -78,6 +252,112 @@ public class RepresentativeUpdateDTO
     /// </summary>
     [StringLength(50)]
     public string? AuthorizationSourceType { get; set; }
+
+    #endregion
+
+    #region Liquidator Data (مصفي - 6.3.12)
+
+    /// <summary>
+    /// Decision number (رقم القرار) for Liquidator.
+    /// </summary>
+    [StringLength(20)]
+    public string? DecisionNumber { get; set; }
+
+    /// <summary>
+    /// Decision date (تاريخ القرار) for Liquidator.
+    /// </summary>
+    public DateTime? DecisionDate { get; set; }
+
+    /// <summary>
+    /// Decision source (مصدر القرار) for Liquidator.
+    /// </summary>
+    [StringLength(200)]
+    public string? DecisionSource { get; set; }
+
+    #endregion
+
+    #region Guardian Data (ولي - 6.3.16)
+
+    /// <summary>
+    /// Deed number (رقم الصك) for Guardian.
+    /// </summary>
+    [StringLength(20)]
+    public string? DeedNumber { get; set; }
+
+    /// <summary>
+    /// Deed date (تاريخ الصك) for Guardian.
+    /// </summary>
+    public DateTime? DeedDate { get; set; }
+
+    /// <summary>
+    /// Deed source (مصدر الصك) for Guardian.
+    /// </summary>
+    [StringLength(200)]
+    public string? DeedSource { get; set; }
+
+    /// <summary>
+    /// Guardianship type for Guardian (ولي): طبيعية/مكتسبة.
+    /// </summary>
+    [StringLength(20)]
+    public string? GuardianshipType { get; set; }
+
+    #endregion
+
+    #region CompanyRepresentative Data (ممثل الشركة - Type 6)
+
+    /// <summary>
+    /// Representation document source (مصدر مستند التمثيل).
+    /// </summary>
+    [StringLength(200)]
+    public string? RepresentationDocSource { get; set; }
+
+    /// <summary>
+    /// Representative capacity (صفة الممثل).
+    /// </summary>
+    [StringLength(100)]
+    public string? RepresentativeCapacity { get; set; }
+
+    /// <summary>
+    /// Representation document type (نوع مستند التمثيل).
+    /// </summary>
+    [StringLength(100)]
+    public string? RepresentationDocType { get; set; }
+
+    /// <summary>
+    /// Representation document number (رقم مستند التمثيل).
+    /// </summary>
+    [StringLength(20)]
+    public string? RepresentationDocNumber { get; set; }
+
+    #endregion
+
+    #region AgencyRepresentative Data (ممثل الجهة - Type 7)
+
+    /// <summary>
+    /// Representation letter number (رقم خطاب التمثيل).
+    /// </summary>
+    [StringLength(20)]
+    public string? RepresentationLetterNumber { get; set; }
+
+    /// <summary>
+    /// Representation letter date (تاريخ خطاب التمثيل).
+    /// </summary>
+    public DateTime? RepresentationLetterDate { get; set; }
+
+    /// <summary>
+    /// Representation letter source (مصدر خطاب التمثيل).
+    /// </summary>
+    [StringLength(200)]
+    public string? RepresentationLetterSource { get; set; }
+
+    #endregion
+
+    #region Attachments
+
+    /// <summary>
+    /// Attachments (صورة التمثيل).
+    /// </summary>
+    public List<RepresentativeAttachmentDTO>? Attachments { get; set; }
 
     #endregion
 }
