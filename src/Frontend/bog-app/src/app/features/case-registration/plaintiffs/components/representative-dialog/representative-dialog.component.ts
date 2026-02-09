@@ -12,6 +12,7 @@ export interface RepresentativeDialogData {
   representative?: RepresentativeVM;
   plaintiffId: number;
   plaintiffTypeId: number;
+  representativeTypeId?: number;  // Pre-selected type from menu
   plaintiffIdentityNumber?: string;  // For ERR012 validation
   existingRepresentatives?: RepresentativeVM[];  // For ERR008 validation
 }
@@ -34,6 +35,7 @@ export class RepresentativeDialogComponent implements OnInit {
   isLookingUp = false;
   isEditMode = false;
   isFromAbsher = false;  // Track if data came from Absher
+  selectedRepTypeName = '';  // Display name of pre-selected type
 
   // Employment status options
   employmentStatusOptions = [
@@ -67,6 +69,11 @@ export class RepresentativeDialogComponent implements OnInit {
     this.initForm();
     this.loadLookups();
 
+    // Set pre-selected representative type from menu
+    if (this.data.representativeTypeId && !this.isEditMode) {
+      this.representativeForm.patchValue({ representativeTypeId: this.data.representativeTypeId });
+    }
+
     if (this.isEditMode && this.data.representative) {
       this.populateForm(this.data.representative);
     }
@@ -88,15 +95,15 @@ export class RepresentativeDialogComponent implements OnInit {
       identityIssueDate: [null, Validators.required], // SRS: Required
       identityExpiryDate: [null, Validators.required], // SRS: Required
 
-      // Residence Address (عنوان السكن - 6.3.2) - BC04: Region & City required
+      // Residence Address (عنوان السكن - 6.3.2) - ALL fields required
       residenceRegionId: [null, Validators.required],
       residenceCityId: [null, Validators.required],
-      residenceDistrict: [''],
-      residenceStreet: [''],
-      residenceBuildingNumber: ['', Validators.pattern(/^\d{0,4}$/)],
-      residenceUnitNumber: [''],
-      residencePostalCode: ['', Validators.pattern(/^\d{0,5}$/)],
-      residenceAdditionalCode: ['', Validators.pattern(/^\d{0,4}$/)],
+      residenceDistrict: ['', [Validators.required, Validators.maxLength(100)]],
+      residenceStreet: ['', [Validators.required, Validators.maxLength(200)]],
+      residenceBuildingNumber: ['', [Validators.required, Validators.pattern(/^\d{4}$/)]],
+      residenceUnitNumber: ['', [Validators.required, Validators.pattern(/^\d+$/)]],
+      residencePostalCode: ['', [Validators.required, Validators.pattern(/^\d{5}$/)]],
+      residenceAdditionalCode: ['', [Validators.required, Validators.pattern(/^\d{4}$/)]],
 
       // Employment Data (بيانات العمل)
       employmentStatus: ['', Validators.required],
@@ -133,7 +140,16 @@ export class RepresentativeDialogComponent implements OnInit {
       deedNumber: [''],
       deedDate: [null],
       deedSource: [''],
-      guardianshipType: ['']
+      guardianshipType: [''],
+      // CompanyRepresentative fields (ممثل الشركة - Type 6)
+      representationDocSource: [''],
+      representativeCapacity: [''],
+      representationDocType: [''],
+      representationDocNumber: [''],
+      // AgencyRepresentative fields (ممثل الجهة - Type 7)
+      representationLetterNumber: [''],
+      representationLetterDate: [null],
+      representationLetterSource: ['']
     });
 
     // Subscribe to employment status changes for BC01 and BC02
@@ -181,16 +197,37 @@ export class RepresentativeDialogComponent implements OnInit {
     // Clear all type-specific validators first
     this.clearTypeSpecificValidators();
 
-    // Apply validators based on representative type
+    // Apply validators based on representative type (IDs from database)
+    // 1: Agent (وكيل), 2: Guardian (ولي), 3: Custodian (وصي), 4: Executor (ناظر)
+    // 5: HeirRepresentative (ممثل الورثة), 6: CompanyRepresentative (ممثل الشركة)
+    // 7: AgencyRepresentative (ممثل الجهة), 8: Trustee (أمين التفليسة), 9: LegalRepresentative (ممثل نظامي)
     if (typeId === 1) {
-      // Lawyer/Agent (محامي/وكيل): Authorization fields required
+      // Agent (وكيل): Authorization fields required
       this.setLawyerFieldsRequired(true);
     } else if (typeId === 2) {
-      // Liquidator (مصفي): Decision fields required
+      // Guardian (ولي): Deed + guardianship type fields required
+      this.setGuardianFieldsRequired(true);
+    } else if (typeId === 3) {
+      // Custodian (وصي): Deed fields required (no guardianship type)
+      this.setCustodianFieldsRequired(true);
+    } else if (typeId === 4) {
+      // Executor (ناظر): Decision fields required
       this.setLiquidatorFieldsRequired(true);
     } else if (typeId === 6) {
-      // Guardian (ولي): Deed fields required
-      this.setGuardianFieldsRequired(true);
+      // CompanyRepresentative (ممثل الشركة): Document fields required
+      this.setCompanyRepresentativeFieldsRequired(true);
+    } else if (typeId === 7) {
+      // AgencyRepresentative (ممثل الجهة): Letter fields required
+      this.setAgencyRepresentativeFieldsRequired(true);
+    } else if (typeId === 9) {
+      // LegalRepresentative (ممثل نظامي): Document fields required (same as type 6)
+      this.setCompanyRepresentativeFieldsRequired(true);
+    } else if (typeId === 10) {
+      // Liquidator (مصفي): Decision fields required
+      this.setMussaffiFieldsRequired(true);
+    } else if (typeId === 11) {
+      // JudicialCustodian (حارس قضائي): Decision fields required
+      this.setJudicialCustodianFieldsRequired(true);
     }
   }
 
@@ -205,8 +242,23 @@ export class RepresentativeDialogComponent implements OnInit {
       this.representativeForm.get(field)?.clearValidators();
       this.representativeForm.get(field)?.updateValueAndValidity();
     });
-    // Clear guardian fields
-    ['deedNumber', 'deedDate', 'deedSource', 'guardianshipType'].forEach(field => {
+    // Clear company representative fields
+    ['representationDocSource', 'representativeCapacity', 'representationDocType', 'representationDocNumber'].forEach(field => {
+      this.representativeForm.get(field)?.clearValidators();
+      this.representativeForm.get(field)?.updateValueAndValidity();
+    });
+    // Clear custodian fields (deed only, no guardianshipType)
+    ['deedNumber', 'deedDate', 'deedSource'].forEach(field => {
+      this.representativeForm.get(field)?.clearValidators();
+      this.representativeForm.get(field)?.updateValueAndValidity();
+    });
+    // Clear guardian fields (includes guardianshipType)
+    ['guardianshipType'].forEach(field => {
+      this.representativeForm.get(field)?.clearValidators();
+      this.representativeForm.get(field)?.updateValueAndValidity();
+    });
+    // Clear agency representative fields
+    ['representationLetterNumber', 'representationLetterDate', 'representationLetterSource'].forEach(field => {
       this.representativeForm.get(field)?.clearValidators();
       this.representativeForm.get(field)?.updateValueAndValidity();
     });
@@ -230,7 +282,51 @@ export class RepresentativeDialogComponent implements OnInit {
     fields.forEach(field => {
       const control = this.representativeForm.get(field);
       if (required) {
-        control?.setValidators(Validators.required);
+        if (field === 'decisionNumber') {
+          control?.setValidators([Validators.required, Validators.maxLength(20)]);
+        } else if (field === 'decisionSource') {
+          control?.setValidators([Validators.required, Validators.maxLength(200)]);
+        } else {
+          control?.setValidators(Validators.required);
+        }
+      } else {
+        control?.clearValidators();
+      }
+      control?.updateValueAndValidity();
+    });
+  }
+
+  private setCompanyRepresentativeFieldsRequired(required: boolean): void {
+    const fields = ['representationDocSource', 'representativeCapacity', 'representationDocType', 'representationDocNumber'];
+    fields.forEach(field => {
+      const control = this.representativeForm.get(field);
+      if (required) {
+        if (field === 'representationDocSource') {
+          control?.setValidators([Validators.required, Validators.maxLength(200)]);
+        } else if (field === 'representationDocNumber') {
+          control?.setValidators([Validators.required, Validators.maxLength(20)]);
+        } else {
+          control?.setValidators(Validators.required);
+        }
+      } else {
+        control?.clearValidators();
+      }
+      control?.updateValueAndValidity();
+    });
+  }
+
+  private setCustodianFieldsRequired(required: boolean): void {
+    const fields = ['deedNumber', 'deedDate', 'deedSource'];
+    fields.forEach(field => {
+      const control = this.representativeForm.get(field);
+      if (required) {
+        if (field === 'deedNumber') {
+          control?.setValidators([Validators.required, Validators.maxLength(20)]);
+        } else if (field === 'deedSource') {
+          control?.setValidators([Validators.required, Validators.maxLength(200)]);
+        } else {
+          control?.setValidators(Validators.required);
+        }
       } else {
         control?.clearValidators();
       }
@@ -251,27 +347,98 @@ export class RepresentativeDialogComponent implements OnInit {
     });
   }
 
+  private setMussaffiFieldsRequired(required: boolean): void {
+    const fields = ['decisionNumber', 'decisionDate', 'decisionSource'];
+    fields.forEach(field => {
+      const control = this.representativeForm.get(field);
+      if (required) {
+        if (field === 'decisionNumber' || field === 'decisionSource') {
+          control?.setValidators([Validators.required, Validators.maxLength(20)]);
+        } else {
+          control?.setValidators(Validators.required);
+        }
+      } else {
+        control?.clearValidators();
+      }
+      control?.updateValueAndValidity();
+    });
+  }
+
+  private setJudicialCustodianFieldsRequired(required: boolean): void {
+    const fields = ['decisionNumber', 'decisionDate', 'decisionSource'];
+    fields.forEach(field => {
+      const control = this.representativeForm.get(field);
+      if (required) {
+        if (field === 'decisionNumber' || field === 'decisionSource') {
+          control?.setValidators([Validators.required, Validators.maxLength(20)]);
+        } else {
+          control?.setValidators(Validators.required);
+        }
+      } else {
+        control?.clearValidators();
+      }
+      control?.updateValueAndValidity();
+    });
+  }
+
+  private setAgencyRepresentativeFieldsRequired(required: boolean): void {
+    const fields = ['representationLetterNumber', 'representationLetterDate', 'representationLetterSource'];
+    fields.forEach(field => {
+      const control = this.representativeForm.get(field);
+      if (required) {
+        if (field === 'representationLetterNumber') {
+          control?.setValidators([Validators.required, Validators.maxLength(20)]);
+        } else if (field === 'representationLetterSource') {
+          control?.setValidators([Validators.required, Validators.maxLength(200)]);
+        } else {
+          control?.setValidators(Validators.required);
+        }
+      } else {
+        control?.clearValidators();
+      }
+      control?.updateValueAndValidity();
+    });
+  }
+
   private onEmploymentStatusChange(status: string): void {
     const employerControl = this.representativeForm.get('employer');
     const workRegionControl = this.representativeForm.get('workRegionId');
     const workCityControl = this.representativeForm.get('workCityId');
 
-    // BC01: Employer required if government or private
+    const professionControl = this.representativeForm.get('profession');
+
+    // Employer and profession required if government or private, hidden if unemployed
     if (status === 'government' || status === 'private') {
       employerControl?.setValidators(Validators.required);
+      professionControl?.setValidators(Validators.required);
     } else {
       employerControl?.clearValidators();
       employerControl?.setValue('');
+      professionControl?.clearValidators();
+      professionControl?.setValue('');
     }
     employerControl?.updateValueAndValidity();
+    professionControl?.updateValueAndValidity();
 
-    // BC02: Work address (region & city) required only if private
+    // Work address - ALL fields required only when private
     if (status === 'private') {
       workRegionControl?.setValidators(Validators.required);
       workCityControl?.setValidators(Validators.required);
+      this.representativeForm.get('workDistrict')?.setValidators([Validators.required, Validators.maxLength(100)]);
+      this.representativeForm.get('workStreet')?.setValidators([Validators.required, Validators.maxLength(200)]);
+      this.representativeForm.get('workBuildingNumber')?.setValidators([Validators.required, Validators.pattern(/^\d{4}$/)]);
+      this.representativeForm.get('workUnitNumber')?.setValidators([Validators.required, Validators.pattern(/^\d+$/)]);
+      this.representativeForm.get('workPostalCode')?.setValidators([Validators.required, Validators.pattern(/^\d{5}$/)]);
+      this.representativeForm.get('workAdditionalCode')?.setValidators([Validators.required, Validators.pattern(/^\d{4}$/)]);
     } else {
       workRegionControl?.clearValidators();
       workCityControl?.clearValidators();
+      this.representativeForm.get('workDistrict')?.clearValidators();
+      this.representativeForm.get('workStreet')?.clearValidators();
+      this.representativeForm.get('workBuildingNumber')?.clearValidators();
+      this.representativeForm.get('workUnitNumber')?.clearValidators();
+      this.representativeForm.get('workPostalCode')?.clearValidators();
+      this.representativeForm.get('workAdditionalCode')?.clearValidators();
       // Clear work address fields
       this.representativeForm.patchValue({
         workRegionId: null,
@@ -284,8 +451,10 @@ export class RepresentativeDialogComponent implements OnInit {
         workAdditionalCode: ''
       });
     }
-    workRegionControl?.updateValueAndValidity();
-    workCityControl?.updateValueAndValidity();
+    // Update validity for all work address fields
+    ['workRegionId', 'workCityId', 'workDistrict', 'workStreet', 'workBuildingNumber', 'workUnitNumber', 'workPostalCode', 'workAdditionalCode'].forEach(field => {
+      this.representativeForm.get(field)?.updateValueAndValidity();
+    });
   }
 
   private loadLookups(): void {
@@ -293,6 +462,13 @@ export class RepresentativeDialogComponent implements OnInit {
       // Filter representative types based on plaintiff type
       const allowedIds = ALLOWED_REPRESENTATIVE_TYPES[this.data.plaintiffTypeId] || [];
       this.representativeTypes = types.filter(t => allowedIds.includes(t.id));
+
+      // Set type name for readonly display
+      const typeId = this.data.representativeTypeId || this.data.representative?.representativeTypeId;
+      if (typeId) {
+        const selectedType = this.representativeTypes.find(t => t.id === typeId);
+        this.selectedRepTypeName = selectedType?.nameAr || '';
+      }
     });
 
     this.lookupService.getIdentityTypes().subscribe(types => {
@@ -314,8 +490,10 @@ export class RepresentativeDialogComponent implements OnInit {
     });
   }
 
-  onResidenceRegionChange(regionId: number): void {
-    this.representativeForm.patchValue({ residenceCityId: null });
+  onResidenceRegionChange(regionId: number, preserveCity = false): void {
+    if (!preserveCity) {
+      this.representativeForm.patchValue({ residenceCityId: null });
+    }
     if (regionId) {
       this.lookupService.getCitiesByRegion(regionId).subscribe(cities => {
         this.residenceCities = cities;
@@ -325,8 +503,10 @@ export class RepresentativeDialogComponent implements OnInit {
     }
   }
 
-  onWorkRegionChange(regionId: number): void {
-    this.representativeForm.patchValue({ workCityId: null });
+  onWorkRegionChange(regionId: number, preserveCity = false): void {
+    if (!preserveCity) {
+      this.representativeForm.patchValue({ workCityId: null });
+    }
     if (regionId) {
       this.lookupService.getCitiesByRegion(regionId).subscribe(cities => {
         this.workCities = cities;
@@ -342,7 +522,7 @@ export class RepresentativeDialogComponent implements OnInit {
     return status === 'government' || status === 'private';
   }
 
-  // BC02: Show work address section if employment status is private
+  // Show work address section only if employment status is private
   showWorkAddress(): boolean {
     const status = this.representativeForm.get('employmentStatus')?.value;
     return status === 'private';
@@ -364,27 +544,27 @@ export class RepresentativeDialogComponent implements OnInit {
       identityIssueDate: rep.identityIssueDate,
       identityExpiryDate: rep.identityExpiryDate,
       // Residence Address
-      residenceRegionId: (rep as any).residenceRegionId,
-      residenceCityId: (rep as any).residenceCityId,
-      residenceDistrict: (rep as any).residenceDistrict,
-      residenceStreet: (rep as any).residenceStreet,
-      residenceBuildingNumber: (rep as any).residenceBuildingNumber,
-      residenceUnitNumber: (rep as any).residenceUnitNumber,
-      residencePostalCode: (rep as any).residencePostalCode,
-      residenceAdditionalCode: (rep as any).residenceAdditionalCode,
+      residenceRegionId: rep.residenceRegionId,
+      residenceCityId: rep.residenceCityId,
+      residenceDistrict: rep.residenceDistrict,
+      residenceStreet: rep.residenceStreet,
+      residenceBuildingNumber: rep.residenceBuildingNumber,
+      residenceUnitNumber: rep.residenceUnitNumber,
+      residencePostalCode: rep.residencePostalCode,
+      residenceAdditionalCode: rep.residenceAdditionalCode,
       // Employment Data
-      employmentStatus: (rep as any).employmentStatus,
-      employer: (rep as any).employer,
-      profession: (rep as any).profession,
+      employmentStatus: rep.employmentStatus,
+      employer: rep.employer,
+      profession: rep.profession,
       // Work Address
-      workRegionId: (rep as any).workRegionId,
-      workCityId: (rep as any).workCityId,
-      workDistrict: (rep as any).workDistrict,
-      workStreet: (rep as any).workStreet,
-      workBuildingNumber: (rep as any).workBuildingNumber,
-      workUnitNumber: (rep as any).workUnitNumber,
-      workPostalCode: (rep as any).workPostalCode,
-      workAdditionalCode: (rep as any).workAdditionalCode,
+      workRegionId: rep.workRegionId,
+      workCityId: rep.workCityId,
+      workDistrict: rep.workDistrict,
+      workStreet: rep.workStreet,
+      workBuildingNumber: rep.workBuildingNumber,
+      workUnitNumber: rep.workUnitNumber,
+      workPostalCode: rep.workPostalCode,
+      workAdditionalCode: rep.workAdditionalCode,
       // Contact Info
       mobileNumber: rep.mobileNumber,
       email: rep.email,
@@ -401,15 +581,22 @@ export class RepresentativeDialogComponent implements OnInit {
       deedNumber: rep.deedNumber,
       deedDate: rep.deedDate,
       deedSource: rep.deedSource,
-      guardianshipType: rep.guardianshipType
+      guardianshipType: rep.guardianshipType,
+      representationDocSource: rep.representationDocSource,
+      representativeCapacity: rep.representativeCapacity,
+      representationDocType: rep.representationDocType,
+      representationDocNumber: rep.representationDocNumber,
+      representationLetterNumber: rep.representationLetterNumber,
+      representationLetterDate: rep.representationLetterDate,
+      representationLetterSource: rep.representationLetterSource
     });
 
-    // Load cities for address dropdowns if region is set
-    if ((rep as any).residenceRegionId) {
-      this.onResidenceRegionChange((rep as any).residenceRegionId);
+    // Load cities for address dropdowns if region is set (preserve city selection)
+    if (rep.residenceRegionId) {
+      this.onResidenceRegionChange(rep.residenceRegionId, true);
     }
-    if ((rep as any).workRegionId) {
-      this.onWorkRegionChange((rep as any).workRegionId);
+    if (rep.workRegionId) {
+      this.onWorkRegionChange(rep.workRegionId, true);
     }
 
     // Load existing attachments
@@ -597,22 +784,63 @@ export class RepresentativeDialogComponent implements OnInit {
   // Check if guardianship type should be shown
   showGuardianshipType(): boolean {
     const typeId = this.representativeForm.get('representativeTypeId')?.value;
-    // Guardian (6) requires guardianship type (ولي - نوع الولاية: طبيعية/مكتسبة)
+    // Guardian (2) requires guardianship type (ولي - نوع الولاية)
+    return typeId === 2;
+  }
+
+  // Check if company representative fields should be shown (ممثل الشركة - type 6)
+  showCompanyRepresentativeFields(): boolean {
+    const typeId = this.representativeForm.get('representativeTypeId')?.value;
     return typeId === 6;
   }
 
-  // Check if liquidator fields should be shown (مصفي - 6.3.12)
+  // Check if custodian fields should be shown (وصي - type 3)
+  showCustodianFields(): boolean {
+    const typeId = this.representativeForm.get('representativeTypeId')?.value;
+    return typeId === 3;
+  }
+
+  // Check if liquidator fields should be shown (أمين التفليسة - type 8)
   showLiquidatorFields(): boolean {
     const typeId = this.representativeForm.get('representativeTypeId')?.value;
-    // Liquidator (2) requires decision number, date, source
-    return typeId === 2;
+    return typeId === 8;
+  }
+
+  // Check if executor fields should be shown (ناظر - type 4)
+  showExecutorFields(): boolean {
+    const typeId = this.representativeForm.get('representativeTypeId')?.value;
+    return typeId === 4;
+  }
+
+  // Check if legal representative fields should be shown (ممثل نظامي - type 9)
+  showLegalRepresentativeFields(): boolean {
+    const typeId = this.representativeForm.get('representativeTypeId')?.value;
+    return typeId === 9;
+  }
+
+  // Check if liquidator fields should be shown (مصفي - type 10)
+  showMussaffiFields(): boolean {
+    const typeId = this.representativeForm.get('representativeTypeId')?.value;
+    return typeId === 10;
+  }
+
+  // Check if judicial custodian fields should be shown (حارس قضائي - type 11)
+  showJudicialCustodianFields(): boolean {
+    const typeId = this.representativeForm.get('representativeTypeId')?.value;
+    return typeId === 11;
+  }
+
+  // Check if agency representative fields should be shown (ممثل الجهة - type 7)
+  showAgencyRepresentativeFields(): boolean {
+    const typeId = this.representativeForm.get('representativeTypeId')?.value;
+    return typeId === 7;
   }
 
   // Check if guardian deed fields should be shown (ولي - 6.3.16)
   showGuardianFields(): boolean {
     const typeId = this.representativeForm.get('representativeTypeId')?.value;
-    // Guardian (6) requires deed number, date, source
-    return typeId === 6;
+    // Guardian (2) requires deed number, date, source, guardianship type
+    return typeId === 2;
   }
 
   // ========== Attachment Methods ==========

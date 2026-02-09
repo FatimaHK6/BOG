@@ -89,6 +89,7 @@ public class ApplicationDbContext : DbContext
     public DbSet<Defendant> Defendants { get; set; }
     public DbSet<CaseRequestDefendant> CaseRequestDefendants { get; set; }
     public DbSet<Representative> Representatives { get; set; }
+    public DbSet<RepresentativeAttachment> RepresentativeAttachments { get; set; }
     public DbSet<RequestAttachment> RequestAttachments { get; set; }
 
     #endregion
@@ -1006,6 +1007,28 @@ public class ApplicationDbContext : DbContext
                 .OnDelete(DeleteBehavior.Restrict);
         });
 
+        // RepresentativeAttachment
+        modelBuilder.Entity<RepresentativeAttachment>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.FileName).IsRequired().HasMaxLength(255);
+            entity.Property(e => e.StoredFileName).IsRequired().HasMaxLength(500);
+            entity.Property(e => e.ContentType).IsRequired().HasMaxLength(100);
+            entity.Property(e => e.Description).HasMaxLength(500);
+            entity.Property(e => e.IsActive).HasDefaultValue(true);
+            entity.Property(e => e.IsDeleted).HasDefaultValue(false);
+
+            entity.HasOne(e => e.Representative)
+                .WithMany(r => r.Attachments)
+                .HasForeignKey(e => e.RepresentativeId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(e => e.AttachmentType)
+                .WithMany()
+                .HasForeignKey(e => e.AttachmentTypeId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
         // RequestAttachment
         modelBuilder.Entity<RequestAttachment>(entity =>
         {
@@ -1059,7 +1082,7 @@ public class ApplicationDbContext : DbContext
             new DefendantType { Id = 7, Name = "Waqf", NameAr = "وقف", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now }
         );
 
-        // RepresentativeTypes (9 types)
+        // RepresentativeTypes (11 types)
         modelBuilder.Entity<RepresentativeType>().HasData(
             new RepresentativeType { Id = 1, Name = "Agent", NameAr = "وكيل", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
             new RepresentativeType { Id = 2, Name = "Guardian", NameAr = "ولي", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
@@ -1069,7 +1092,9 @@ public class ApplicationDbContext : DbContext
             new RepresentativeType { Id = 6, Name = "CompanyRepresentative", NameAr = "ممثل الشركة", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
             new RepresentativeType { Id = 7, Name = "AgencyRepresentative", NameAr = "ممثل الجهة", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
             new RepresentativeType { Id = 8, Name = "Trustee", NameAr = "أمين التفليسة", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
-            new RepresentativeType { Id = 9, Name = "LegalRepresentative", NameAr = "ممثل نظامي", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now }
+            new RepresentativeType { Id = 9, Name = "LegalRepresentative", NameAr = "ممثل نظامي", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
+            new RepresentativeType { Id = 10, Name = "Liquidator", NameAr = "مصفي", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
+            new RepresentativeType { Id = 11, Name = "JudicialCustodian", NameAr = "حارس قضائي", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now }
         );
 
         // RequestStatus (10 statuses)
@@ -1106,7 +1131,8 @@ public class ApplicationDbContext : DbContext
             new AttachmentType { Id = 3, Name = "CommercialRegistration", NameAr = "السجل التجاري", IsMandatory = false, IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
             new AttachmentType { Id = 4, Name = "License", NameAr = "الترخيص", IsMandatory = false, IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
             new AttachmentType { Id = 5, Name = "Deed", NameAr = "الصك", IsMandatory = false, IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
-            new AttachmentType { Id = 6, Name = "SupportingDocument", NameAr = "مستند داعم", IsMandatory = false, IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now }
+            new AttachmentType { Id = 6, Name = "SupportingDocument", NameAr = "مستند داعم", IsMandatory = false, IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
+            new AttachmentType { Id = 10, Name = "RepresentativeDocument", NameAr = "صورة التمثيل", IsMandatory = true, IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now }
         );
 
         // Regions (13 Saudi regions)

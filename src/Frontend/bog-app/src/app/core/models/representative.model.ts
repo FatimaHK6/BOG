@@ -67,25 +67,44 @@ export interface RepresentativeCreateDTO {
   deedDate?: Date;
   deedSource?: string;
   guardianshipType?: string;
+  // CompanyRepresentative fields (ممثل الشركة - Type 6)
+  representationDocSource?: string;
+  representativeCapacity?: string;
+  representationDocType?: string;
+  representationDocNumber?: string;
+  // AgencyRepresentative fields (ممثل الجهة - Type 7)
+  representationLetterNumber?: string;
+  representationLetterDate?: Date;
+  representationLetterSource?: string;
+
+  // Attachments (صورة التمثيل)
+  attachments?: {
+    attachmentTypeId: number;
+    fileName: string;
+    contentType: string;
+    fileSizeBytes: number;
+    description?: string;
+  }[];
 }
 
 export interface RepresentativeUpdateDTO extends RepresentativeCreateDTO {
   id: number;
 }
 
-// Allowed Representative Types by Plaintiff Type per SRS table 2.16
-// Must match backend: BOG.BL/Services/RepresentativeBL.cs
-// Representative Types:
-// 1: Lawyer (محامي/وكيل), 2: Liquidator (مصفي), 3: BankruptcyTrustee (أمين تفليسة), 4: JudicialCustodian (حارس قضائي)
-// 5: CompanyRep (ممثل نظامي), 6: Guardian (ولي), 7: GovRep (ممثل جهة حكومية)
-// 8: Conservator (وصي), 9: WaqfInspector (ناظر)
+// Allowed Representative Types by Plaintiff Type
+// Source: plaintiff-user-stories-plan.html table 5.2 "الممثلين المسموحين حسب نوع المدعي"
+// DB Representative Types:
+// 1: وكيل (Agent), 2: ولي (Guardian), 3: وصي (Custodian), 4: ناظر (Executor)
+// 5: ممثل الورثة (HeirRepresentative), 6: ممثل الشركة (CompanyRepresentative)
+// 7: ممثل الجهة (AgencyRepresentative), 8: أمين التفليسة (Trustee)
+// 9: ممثل نظامي (LegalRepresentative), 10: مصفي (Liquidator), 11: حارس قضائي (JudicialCustodian)
 export const ALLOWED_REPRESENTATIVE_TYPES: { [key: number]: number[] } = {
-  1: [1, 3, 6, 8],            // فرد Individual: وكيل(1)، أمين تفليسة(3)، ولي(6)، وصي(8)
-  2: [1, 2, 3, 4, 5, 6, 7, 8, 9], // فرد بدون هوية: جميع الأنواع
-  3: [1, 3, 6],               // صاحب مؤسسة Business Owner: وكيل(1)، أمين تفليسة(3)، ولي(6)
-  4: [1, 2, 3, 4, 5],         // شركة مسجلة Registered Company: وكيل، مصفي، أمين تفليسة، حارس قضائي، ممثل نظامي
-  5: [1],                     // شركة غير مسجلة Unregistered Company: وكيل(1) فقط
-  6: [1, 7],                  // جهة حكومية Government Agency: وكيل(1)، ممثل جهة حكومية(7)
-  7: [1],                     // جمعية/مؤسسة أهلية NGO: وكيل(1) فقط
-  8: [1, 9]                   // وقف Waqf: وكيل(1)، ناظر(9)
+  1: [1, 2, 3, 8],            // فرد: وكيل(1)، ولي(2)، وصي(3)، أمين تفليسة(8)
+  2: [1, 2, 3, 4, 7, 8, 9, 10, 11], // فرد بدون هوية: جميع الأنواع
+  3: [1, 2, 8],               // صاحب مؤسسة: وكيل(1)، ولي(2)، أمين تفليسة(8)
+  4: [1, 8, 9, 10, 11],       // شركة مسجلة: وكيل(1)، أمين تفليسة(8)، ممثل نظامي(9)، مصفي(10)، حارس قضائي(11)
+  5: [1],                     // شركة غير مسجلة: وكيل(1) فقط
+  6: [1, 7],                  // جهة حكومية: وكيل(1)، ممثل الجهة(7)
+  7: [1],                     // جمعية/مؤسسة أهلية: وكيل(1) فقط
+  8: [1, 4]                   // وقف: وكيل(1)، ناظر(4)
 };

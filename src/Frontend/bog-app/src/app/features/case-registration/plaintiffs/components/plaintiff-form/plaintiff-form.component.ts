@@ -18,6 +18,7 @@ import { AbsherService } from '../../../../../core/services/absher.service';
 import { RepresentativeService } from '../../../../../core/services/representative.service';
 import { NotificationService } from '../../../../../core/services/notification.service';
 import { RepresentativeDialogComponent, RepresentativeDialogData } from '../representative-dialog/representative-dialog.component';
+import { RepresentativeType, ALLOWED_REPRESENTATIVE_TYPES } from '../../../../../core/models/representative.model';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../../../../shared/components/confirm-dialog/confirm-dialog.component';
 
 @Component({
@@ -66,6 +67,8 @@ export class PlaintiffFormComponent implements OnInit {
   showWorkAddress = false;
   // BC03/Waqf: Show agency name when oversight type is Government
   showWaqfAgencyName = false;
+  // Type 6: Headquarters is readonly (auto-filled from selected agency)
+  isHeadquartersReadonly = false;
   // SRS 6.3.10: Residence Address required for Type 2
   residenceAddressRequired = false;
   // Nationality Rule: Filter nationalities based on identity type
@@ -82,6 +85,12 @@ export class PlaintiffFormComponent implements OnInit {
   // View mode
   isViewMode = false;
 
+  // Type preset from route (when navigating from type menu)
+  typePreset = false;
+
+  // Submitted flag for validation display (like defendant form)
+  submitted = false;
+
   // Absher verification status (BR08 - mandatory for individuals)
   isAbsherVerified = false;
   absherDataSource?: number; // 1 = Absher
@@ -89,6 +98,9 @@ export class PlaintiffFormComponent implements OnInit {
   // Representatives and Attachments (managed in steps 2 and 3)
   representatives: RepresentativeVM[] = [];
   attachments: PlaintiffAttachmentVM[] = [];
+  // Filtered representative types for menu (based on plaintiff type)
+  allRepresentativeTypes: RepresentativeType[] = [];
+  filteredRepresentativeTypes: RepresentativeType[] = [];
 
   // Current plaintiff (for edit mode)
   plaintiff?: PlaintiffVM;
@@ -114,14 +126,6 @@ export class PlaintiffFormComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
-    // Get requestId from query params
-    this.route.queryParams.subscribe(params => {
-      const newRequestId = params['requestId'] ? +params['requestId'] : 0;
-      if (newRequestId > 0) {
-        this.requestId = newRequestId;
-      }
-    });
-
     // Get plaintiffId from route params if editing
     const idParam = this.route.snapshot.paramMap.get('id');
     if (idParam) {
@@ -133,6 +137,39 @@ export class PlaintiffFormComponent implements OnInit {
 
     this.initForm();
     this.loadLookups();
+
+    // Get requestId and type from query params
+    this.route.queryParams.subscribe(params => {
+      const newRequestId = params['requestId'] ? +params['requestId'] : 0;
+      if (newRequestId > 0) {
+        this.requestId = newRequestId;
+      }
+
+      // Check for type parameter (pre-selected from menu)
+      const typeParam = params['type'] ? +params['type'] : 0;
+
+      // For new plaintiff (not edit/view mode), type is required
+      if (!this.plaintiffId && !this.isViewMode) {
+        if (typeParam > 0 && typeParam <= 8) {
+          // Valid type (1-8)
+          this.typePreset = true;
+          // Set isPatching to prevent resetTypeSpecificFields from clearing
+          this.isPatching = true;
+          // Set the type after form is initialized
+          setTimeout(() => {
+            this.plaintiffForm.get('plaintiffTypeId')?.setValue(typeParam);
+            this.isPatching = false;
+          });
+        } else {
+          // No valid type provided - redirect back to list
+          this.notification.validation('الرجاء اختيار نوع المدعي من القائمة');
+          this.router.navigate(['/case-registration/plaintiffs'], {
+            queryParams: { requestId: this.requestId }
+          });
+          return;
+        }
+      }
+    });
 
     if (this.plaintiffId) {
       this.loadPlaintiff();
@@ -238,6 +275,8 @@ export class PlaintiffFormComponent implements OnInit {
         this.resetTypeSpecificFields(typeId);
       }
       this.updateFormValidation(typeId);
+      // Update filtered representative types for menu
+      this.updateFilteredRepresentativeTypes(typeId);
     });
 
     // Watch for identity type changes to re-validate identity number
@@ -285,37 +324,47 @@ export class PlaintiffFormComponent implements OnInit {
     }
 
     const nationalityControl = this.plaintiffForm.get('nationalityId');
+    const currentNationality = nationalityControl?.value;
 
     if (typeId === 1) { // National ID - Saudi only
+      // First enable to allow setValue, then set value, then disable
+      nationalityControl?.enable();
       nationalityControl?.setValue(this.SAUDI_NATIONALITY_ID);
       nationalityControl?.disable();
+      nationalityControl?.updateValueAndValidity();
       this.filteredNationalities = this.nationalities.filter(n => n.id === this.SAUDI_NATIONALITY_ID);
     } else if (typeId === 2 || typeId === 3) { // Resident ID or Passport - exclude Saudi
       nationalityControl?.enable();
-      nationalityControl?.setValue(null);
+      // Only clear nationality if it was Saudi (invalid for non-Saudi ID types)
+      // Don't clear if it already has a valid non-Saudi value
+      if (currentNationality === this.SAUDI_NATIONALITY_ID) {
+        nationalityControl?.setValue(null);
+      }
+      nationalityControl?.updateValueAndValidity();
       this.filteredNationalities = this.nationalities.filter(n => n.id !== this.SAUDI_NATIONALITY_ID);
     } else {
       nationalityControl?.enable();
+      nationalityControl?.updateValueAndValidity();
       this.filteredNationalities = this.nationalities;
     }
   }
 
   /**
    * BC01/BC02: Handle employment status changes.
-   * BC01: Show employer when Government or Private
-   * BC02: Show work address only when Private
+   * BC01: Show employer and profession when Government or Private (both required)
+   * BC02: Show work address only when Private (all fields required)
    */
   private onEmploymentStatusChange(statusId: number): void {
     const employerControl = this.plaintiffForm.get('employer');
     const professionControl = this.plaintiffForm.get('profession');
     const workAddressGroup = this.plaintiffForm.get('workAddress');
 
-    // BC01: Employer and Profession visibility
+    // BC01: Employer and Profession visibility and validation
     if (statusId === 1 || statusId === 2) { // Government or Private
       this.showEmployer = true;
       employerControl?.setValidators([Validators.required, Validators.maxLength(200)]);
-      professionControl?.setValidators([Validators.maxLength(200)]);
-    } else { // Unemployed (3)
+      professionControl?.setValidators([Validators.required, Validators.maxLength(200)]);
+    } else { // Unemployed (3) or not selected
       this.showEmployer = false;
       employerControl?.clearValidators();
       employerControl?.setValue(null);
@@ -325,12 +374,36 @@ export class PlaintiffFormComponent implements OnInit {
     employerControl?.updateValueAndValidity();
     professionControl?.updateValueAndValidity();
 
-    // BC02: Work Address visibility
+    // BC02: Work Address visibility and validation
     if (statusId === 2) { // Private only
       this.showWorkAddress = true;
+      // Set work address validators - ALL FIELDS REQUIRED per document
+      if (workAddressGroup) {
+        workAddressGroup.get('regionId')?.setValidators([Validators.required]);
+        workAddressGroup.get('cityId')?.setValidators([Validators.required]);
+        workAddressGroup.get('districtId')?.setValidators([Validators.required, Validators.maxLength(100)]);
+        workAddressGroup.get('street')?.setValidators([Validators.required, Validators.maxLength(200)]);
+        workAddressGroup.get('buildingNumber')?.setValidators([Validators.required, Validators.pattern('^[0-9]{4}$')]);
+        workAddressGroup.get('unitNumber')?.setValidators([Validators.required, Validators.pattern('^[0-9]+$')]);
+        workAddressGroup.get('postalCode')?.setValidators([Validators.required, Validators.pattern('^[0-9]{5}$')]);
+        workAddressGroup.get('additionalCode')?.setValidators([Validators.required, Validators.pattern('^[0-9]{4}$')]);
+        // Update validity for all work address fields
+        ['regionId', 'cityId', 'districtId', 'street', 'buildingNumber', 'unitNumber', 'postalCode', 'additionalCode'].forEach(field => {
+          workAddressGroup.get(field)?.updateValueAndValidity();
+        });
+      }
     } else { // Government or Unemployed
       this.showWorkAddress = false;
-      workAddressGroup?.reset();
+      // Clear work address validators and values
+      if (workAddressGroup) {
+        ['regionId', 'cityId', 'districtId', 'street', 'buildingNumber', 'unitNumber', 'postalCode', 'additionalCode'].forEach(field => {
+          const control = workAddressGroup.get(field);
+          control?.clearValidators();
+          control?.setErrors(null);
+          control?.updateValueAndValidity();
+        });
+        workAddressGroup.reset();
+      }
     }
   }
 
@@ -350,6 +423,30 @@ export class PlaintiffFormComponent implements OnInit {
       agencyControl?.setValue(null);
     }
     agencyControl?.updateValueAndValidity();
+  }
+
+  /**
+   * Type 6: Handle government agency selection change.
+   * Auto-fills headquarters field based on selected agency.
+   * Per SRS: "للقراءة فقط - يتم تعبئته تلقائياً بناءً على الجهة المختارة"
+   */
+  onGovernmentAgencyChange(agencyId: number): void {
+    const headquartersControl = this.plaintiffForm.get('headquarters');
+
+    if (agencyId) {
+      // Find the selected agency
+      const selectedAgency = this.governmentAgencies.find(a => a.id === agencyId);
+      if (selectedAgency) {
+        // Auto-fill headquarters with agency's headquarters or name
+        const headquartersValue = (selectedAgency as any).headquarters || selectedAgency.nameAr;
+        headquartersControl?.setValue(headquartersValue);
+        this.isHeadquartersReadonly = true;
+      }
+    } else {
+      // Clear headquarters if no agency selected
+      headquartersControl?.setValue('');
+      this.isHeadquartersReadonly = false;
+    }
   }
 
   /**
@@ -504,105 +601,339 @@ export class PlaintiffFormComponent implements OnInit {
         controls.identityNumber?.setValidators([Validators.required, Validators.maxLength(20), identityNumberValidator]);
         controls.firstName?.setValidators([Validators.required, Validators.maxLength(100)]);
         controls.fatherName?.setValidators([Validators.required, Validators.maxLength(100)]);
+        controls.grandfatherName?.setValidators([Validators.maxLength(100)]);
+        controls.clanName?.setValidators([Validators.maxLength(100)]);
         controls.familyName?.setValidators([Validators.required, Validators.maxLength(100)]);
         controls.birthDate?.setValidators([Validators.required, CustomValidators.notFutureDate('تاريخ الميلاد')]);
         controls.gender?.setValidators([Validators.required, CustomValidators.gender()]);
         controls.nationalityId?.setValidators([Validators.required]);
         controls.mobileNumber?.setValidators([Validators.required, CustomValidators.mobileNumber()]);
+        controls.email?.setValidators([Validators.email]);
         controls.identityIssueDate?.setValidators([Validators.required, CustomValidators.notFutureDate('تاريخ إصدار الهوية')]);
         controls.identityExpiryDate?.setValidators([Validators.required, identityExpiryValidator]);
-        // Profession is only required when employment status is Government(1) or Private(2)
-        controls.profession?.clearValidators();
+
+        // Trigger identity type change to set nationality correctly (for National ID = Saudi)
+        // This is needed because valueChanges doesn't fire for initial/default values
+        const currentIdentityType = this.plaintiffForm.get('identityTypeId')?.value;
+        if (currentIdentityType) {
+          this.onIdentityTypeChange(currentIdentityType);
+        }
+
+        // Residence Address - ALL FIELDS REQUIRED per document
+        const residenceAddressGroup = this.plaintiffForm.get('residenceAddress');
+        if (residenceAddressGroup) {
+          residenceAddressGroup.get('regionId')?.setValidators([Validators.required]);
+          residenceAddressGroup.get('cityId')?.setValidators([Validators.required]);
+          residenceAddressGroup.get('districtId')?.setValidators([Validators.required, Validators.maxLength(100)]);
+          residenceAddressGroup.get('street')?.setValidators([Validators.required, Validators.maxLength(200)]);
+          residenceAddressGroup.get('buildingNumber')?.setValidators([Validators.required, Validators.pattern('^[0-9]{4}$')]);
+          residenceAddressGroup.get('unitNumber')?.setValidators([Validators.required, Validators.pattern('^[0-9]+$')]);
+          residenceAddressGroup.get('postalCode')?.setValidators([Validators.required, Validators.pattern('^[0-9]{5}$')]);
+          residenceAddressGroup.get('additionalCode')?.setValidators([Validators.required, Validators.pattern('^[0-9]{4}$')]);
+          // Update validity for all address fields
+          ['regionId', 'cityId', 'districtId', 'street', 'buildingNumber', 'unitNumber', 'postalCode', 'additionalCode'].forEach(field => {
+            residenceAddressGroup.get(field)?.updateValueAndValidity();
+          });
+        }
+
         // Employment status is required for Individual
         this.plaintiffForm.get('employmentStatusId')?.setValidators([Validators.required]);
         this.plaintiffForm.get('employmentStatusId')?.updateValueAndValidity();
-        // Trigger employment status change to set profession validators correctly
+        // Trigger employment status change to set profession/employer and work address validators correctly
         const currentStatus = this.plaintiffForm.get('employmentStatusId')?.value;
         if (currentStatus) {
           this.onEmploymentStatusChange(currentStatus);
         }
         break;
 
-      case 2: // فرد بدون هوية (Individual w/o ID) - SRS Section 1.3
-        console.log('[CASE 2] Individual without ID - setting validators');
-        // Name fields required but no identity validation
-        controls.firstName?.setValidators([Validators.required, Validators.maxLength(100)]);
-        controls.fatherName?.setValidators([Validators.required, Validators.maxLength(100)]);
+      case 2: // فرد بدون هوية (Individual w/o ID) - SRS Section 4.2
+        console.log('[CASE 2] Individual without ID - setting validators per SRS 4.2');
+
+        // Document Number - optional, max 20 chars
+        controls.documentNumber?.setValidators([Validators.maxLength(20)]);
+
+        // Name fields - firstName & familyName required, others optional
+        // SRS: firstName requires Arabic only
+        controls.firstName?.setValidators([Validators.required, Validators.maxLength(100), CustomValidators.arabicOnly('الاسم الأول')]);
+        controls.fatherName?.setValidators([Validators.maxLength(100)]);  // Optional per SRS
+        controls.grandfatherName?.setValidators([Validators.maxLength(100)]);
+        controls.clanName?.setValidators([Validators.maxLength(100)]);
         controls.familyName?.setValidators([Validators.required, Validators.maxLength(100)]);
+
+        // Personal data - birthDate & gender required, nationality optional
+        controls.birthDate?.setValidators([Validators.required, CustomValidators.notFutureDate('تاريخ الميلاد')]);
+        controls.gender?.setValidators([Validators.required, CustomValidators.gender()]);
+        // Nationality is OPTIONAL for Type 2 per SRS (no Validators.required)
+        // Enable nationality for Type 2 (not tied to identity type rules)
+        this.plaintiffForm.get('nationalityId')?.enable();
+        this.filteredNationalities = this.nationalities; // All nationalities available
+
+        // Contact information - mobile required, email optional
         controls.mobileNumber?.setValidators([Validators.required, CustomValidators.mobileNumber()]);
+        controls.email?.setValidators([Validators.email, Validators.maxLength(255)]);
+
+        // Residence Address - ALL FIELDS REQUIRED per SRS 4.2
+        // "يتم استخدام نموذج بيانات العنوان الوطني من النماذج المشتركة. جميع الحقول إجبارية لهذا النوع."
+        const type2ResidenceAddressGroup = this.plaintiffForm.get('residenceAddress');
+        if (type2ResidenceAddressGroup) {
+          type2ResidenceAddressGroup.get('regionId')?.setValidators([Validators.required]);
+          type2ResidenceAddressGroup.get('cityId')?.setValidators([Validators.required]);
+          type2ResidenceAddressGroup.get('districtId')?.setValidators([Validators.required, Validators.maxLength(100)]);
+          type2ResidenceAddressGroup.get('street')?.setValidators([Validators.required, Validators.maxLength(200)]);
+          type2ResidenceAddressGroup.get('buildingNumber')?.setValidators([Validators.required, Validators.pattern('^[0-9]{4}$')]);
+          type2ResidenceAddressGroup.get('unitNumber')?.setValidators([Validators.required, Validators.pattern('^[0-9]+$')]);
+          type2ResidenceAddressGroup.get('postalCode')?.setValidators([Validators.required, Validators.pattern('^[0-9]{5}$')]);
+          type2ResidenceAddressGroup.get('additionalCode')?.setValidators([Validators.required, Validators.pattern('^[0-9]{4}$')]);
+          // Update validity for all residence address fields
+          ['regionId', 'cityId', 'districtId', 'street', 'buildingNumber', 'unitNumber', 'postalCode', 'additionalCode'].forEach(field => {
+            type2ResidenceAddressGroup.get(field)?.updateValueAndValidity();
+          });
+        }
+
+        // Note: Type 2 does NOT have employment data or work address per SRS
+        // "لا يوجد: بيانات العمل أو عنوان العمل (مخصص للنوع 1 فقط)"
+        this.showEmployer = false;
+        this.showWorkAddress = false;
+
         console.log(`[CASE 2] companyName after case: invalid=${controls.companyName?.invalid}, errors=${JSON.stringify(controls.companyName?.errors)}`);
         break;
 
-      case 3: // صاحب مؤسسة (Business Owner) - SRS Section 1.3
-        console.log('[CASE 3] Business Owner - setting validators INCLUDING companyName');
-        // Personal data + Commercial registration
+      case 3: // صاحب مؤسسة (Business Owner) - SRS Section 4.3
+        console.log('[CASE 3] Business Owner - setting validators per SRS 4.3');
+
+        // 1. Personal Data - All required per SRS 4.3.1
         controls.identityTypeId?.setValidators([Validators.required]);
         controls.identityNumber?.setValidators([Validators.required, Validators.maxLength(20), identityNumberValidator]);
         controls.firstName?.setValidators([Validators.required, Validators.maxLength(100)]);
         controls.fatherName?.setValidators([Validators.required, Validators.maxLength(100)]);
+        controls.grandfatherName?.setValidators([Validators.maxLength(100)]); // Optional
+        controls.clanName?.setValidators([Validators.maxLength(100)]); // Optional
         controls.familyName?.setValidators([Validators.required, Validators.maxLength(100)]);
+        controls.birthDate?.setValidators([Validators.required, CustomValidators.notFutureDate('تاريخ الميلاد')]);
+        controls.gender?.setValidators([Validators.required, CustomValidators.gender()]);
         controls.nationalityId?.setValidators([Validators.required]);
-        controls.mobileNumber?.setValidators([Validators.required, CustomValidators.mobileNumber()]);
         controls.identityIssueDate?.setValidators([Validators.required, CustomValidators.notFutureDate('تاريخ إصدار الهوية')]);
         controls.identityExpiryDate?.setValidators([Validators.required, identityExpiryValidator]);
-        // Business Owner specific fields
+        controls.mobileNumber?.setValidators([Validators.required, CustomValidators.mobileNumber()]);
+        controls.email?.setValidators([Validators.email, Validators.maxLength(255)]); // Optional
+
+        // 2. Residence Address - ALL FIELDS REQUIRED per SRS 4.3.2
+        const type3ResidenceAddressGroup = this.plaintiffForm.get('residenceAddress');
+        if (type3ResidenceAddressGroup) {
+          type3ResidenceAddressGroup.get('regionId')?.setValidators([Validators.required]);
+          type3ResidenceAddressGroup.get('cityId')?.setValidators([Validators.required]);
+          type3ResidenceAddressGroup.get('districtId')?.setValidators([Validators.required, Validators.maxLength(100)]);
+          type3ResidenceAddressGroup.get('street')?.setValidators([Validators.required, Validators.maxLength(200)]);
+          type3ResidenceAddressGroup.get('buildingNumber')?.setValidators([Validators.required, Validators.pattern(/^\d{4}$/)]);
+          type3ResidenceAddressGroup.get('unitNumber')?.setValidators([Validators.required, Validators.pattern(/^\d+$/)]);
+          type3ResidenceAddressGroup.get('postalCode')?.setValidators([Validators.required, Validators.pattern(/^\d{5}$/)]);
+          type3ResidenceAddressGroup.get('additionalCode')?.setValidators([Validators.required, Validators.pattern(/^\d{4}$/)]);
+        }
+
+        // 3. Employment Status - OPTIONAL per SRS 4.3.3
+        // Note: BC01/BC02 show/hide logic is handled in onEmploymentStatusChange()
+
+        // 6. Commercial Registration Data - REQUIRED per SRS 4.3.6
         controls.commercialRegNumber?.setValidators([Validators.required, CustomValidators.commercialRegNumber()]);
         controls.companyName?.setValidators([Validators.required, Validators.maxLength(200), CustomValidators.arabicOnly('اسم المؤسسة')]);
         controls.crStartDate?.setValidators([Validators.required, CustomValidators.notFutureDate('تاريخ بداية السجل التجاري')]);
         controls.crEndDate?.setValidators([Validators.required, crEndDateValidator]);
+
+        // 7. Business Address - ALL FIELDS REQUIRED per SRS 4.3.7
+        const type3BusinessAddressGroup = this.plaintiffForm.get('businessAddress');
+        if (type3BusinessAddressGroup) {
+          type3BusinessAddressGroup.get('regionId')?.setValidators([Validators.required]);
+          type3BusinessAddressGroup.get('cityId')?.setValidators([Validators.required]);
+          type3BusinessAddressGroup.get('districtId')?.setValidators([Validators.required, Validators.maxLength(100)]);
+          type3BusinessAddressGroup.get('street')?.setValidators([Validators.required, Validators.maxLength(200)]);
+          type3BusinessAddressGroup.get('buildingNumber')?.setValidators([Validators.required, Validators.pattern(/^\d{4}$/)]);
+          type3BusinessAddressGroup.get('unitNumber')?.setValidators([Validators.required, Validators.pattern(/^\d+$/)]);
+          type3BusinessAddressGroup.get('postalCode')?.setValidators([Validators.required, Validators.pattern(/^\d{5}$/)]);
+          type3BusinessAddressGroup.get('additionalCode')?.setValidators([Validators.required, Validators.pattern(/^\d{4}$/)]);
+        }
+
+        // Note: Work Address (BC02) validators are set conditionally in onEmploymentStatusChange()
+        // when employment status = private
+
+        this.showEmployer = true; // Default, will be updated by employment status change
+        this.showWorkAddress = false; // Default, only shows when employment = private
+
         break;
 
-      case 4: // شركة مسجلة (Registered Company) - SRS Section 1.3
+      case 4: // شركة مسجلة (Registered Company) - SRS Section 4.4
+        console.log('[CASE 4] Registered Company - setting validators per SRS 4.4');
+
+        // Commercial Registration Number - required, 10 digits only
         controls.commercialRegNumber?.setValidators([Validators.required, CustomValidators.commercialRegNumber()]);
+
+        // Company Name - required, max 200 chars, Arabic + numbers
         controls.companyName?.setValidators([Validators.required, Validators.maxLength(200), CustomValidators.arabicOnly('اسم الشركة')]);
+
+        // CR Start Date - required, not future date
         controls.crStartDate?.setValidators([Validators.required, CustomValidators.notFutureDate('تاريخ بداية السجل التجاري')]);
+
+        // CR End Date - required, must be after start date
         controls.crEndDate?.setValidators([Validators.required, crEndDateValidator]);
+
+        // Company Address - ALL FIELDS REQUIRED per SRS 4.4
+        // "العنوان الوطني (جميع الحقول إجبارية)"
+        const type4CompanyAddressGroup = this.plaintiffForm.get('companyAddress');
+        if (type4CompanyAddressGroup) {
+          type4CompanyAddressGroup.get('regionId')?.setValidators([Validators.required]);
+          type4CompanyAddressGroup.get('cityId')?.setValidators([Validators.required]);
+          type4CompanyAddressGroup.get('districtId')?.setValidators([Validators.required, Validators.maxLength(100)]);
+          type4CompanyAddressGroup.get('street')?.setValidators([Validators.required, Validators.maxLength(200)]);
+          type4CompanyAddressGroup.get('buildingNumber')?.setValidators([Validators.required, Validators.pattern('^[0-9]{4}$')]);
+          type4CompanyAddressGroup.get('unitNumber')?.setValidators([Validators.required, Validators.pattern('^[0-9]+$')]);
+          type4CompanyAddressGroup.get('postalCode')?.setValidators([Validators.required, Validators.pattern('^[0-9]{5}$')]);
+          type4CompanyAddressGroup.get('additionalCode')?.setValidators([Validators.required, Validators.pattern('^[0-9]{4}$')]);
+          // Update validity for all company address fields
+          ['regionId', 'cityId', 'districtId', 'street', 'buildingNumber', 'unitNumber', 'postalCode', 'additionalCode'].forEach(field => {
+            type4CompanyAddressGroup.get(field)?.updateValueAndValidity();
+          });
+        }
+
+        // Note: Type 4 does NOT have contact information per SRS
+        // "لا يوجد: بيانات التواصل (رقم الجوال، البريد الإلكتروني)"
+
         break;
 
-      case 5: // شركة غير مسجلة (Unregistered Company) - SRS Section 1.3
-        console.log('[CASE 5] Unregistered Company - setting validators on unregisteredCompanyName');
-        // FIXED: Use unregisteredCompanyName, not companyName (field name mismatch bug)
-        controls.unregisteredCompanyName?.setValidators([Validators.required, Validators.maxLength(200), CustomValidators.arabicOnly('اسم الشركة')]);
+      case 5: // شركة غير مسجلة (Unregistered Company) - SRS Section 4.5
+        console.log('[CASE 5] Unregistered Company - setting validators per SRS 4.5');
+
+        // Commercial Registration Number - required, max 20 chars
         controls.commercialRegNumber?.setValidators([Validators.required, Validators.maxLength(20)]);
-        // No contact information section for Unregistered Company
+
+        // Company Name - required, max 200 chars
+        controls.unregisteredCompanyName?.setValidators([Validators.required, Validators.maxLength(200)]);
+
+        // Country - required (dropdown)
+        this.plaintiffForm.get('unregisteredCountryId')?.setValidators([Validators.required]);
+
+        // City - required, max 100 chars
+        this.plaintiffForm.get('unregisteredCity')?.setValidators([Validators.required, Validators.maxLength(100)]);
+
+        // Description - required, max 1000 chars
+        this.plaintiffForm.get('unregisteredDescription')?.setValidators([Validators.required, Validators.maxLength(1000)]);
+
+        // Note: Type 5 does NOT have contact information per SRS
+        // "لا يوجد قسم بيانات التواصل"
+        // Note: Type 5 does NOT have address section (just country dropdown and city text)
+
         break;
 
-      case 6: // جهة حكومية (Government Agency) - SRS Section 1.3
+      case 6: // جهة حكومية (Government Agency) - SRS Section 4.6
+        console.log('[CASE 6] Government Agency - setting validators per SRS 4.6');
+
+        // Government Agency - required (dropdown from government agencies table)
         controls.governmentAgencyId?.setValidators([Validators.required]);
+
+        // Headquarters - required, max 200 chars
+        // Note: Per SRS, this is "للقراءة فقط - يتم تعبئته تلقائياً بناءً على الجهة المختارة"
+        // (read-only - auto-filled based on selected agency)
         controls.headquarters?.setValidators([Validators.required, Validators.maxLength(200)]);
+
+        // Additional Statement - optional, max 4000 chars
         controls.additionalStatement?.setValidators([Validators.maxLength(4000)]);
+
+        // Note: Type 6 does NOT have contact information per SRS
+        // "لا يوجد قسم بيانات التواصل"
+        // Note: Type 6 does NOT have address section per SRS
+        // "لا يوجد قسم عنوان"
+
         break;
 
-      case 7: // جمعية/مؤسسة أهلية (Society/NGO) - SRS Section 1.3
+      case 7: // جمعية/مؤسسة أهلية (Society/NGO) - SRS Section 4.7
+        console.log('[CASE 7] NGO/Society - setting validators per SRS 4.7');
+
+        // License Number - required, 10 digits
         controls.licenseNumber?.setValidators([Validators.required, CustomValidators.licenseNumber()]);
+
+        // License Source - required (dropdown)
         controls.licenseSourceId?.setValidators([Validators.required]);
-        controls.ngoName?.setValidators([Validators.required, Validators.maxLength(200), CustomValidators.arabicOnly('اسم الجمعية')]);
+
+        // NGO Name - required, max 200, Arabic + numbers
+        controls.ngoName?.setValidators([Validators.required, Validators.maxLength(200), CustomValidators.arabicOnly('اسم الجمعية/المؤسسة')]);
+
+        // License Date - required
         controls.licenseDate?.setValidators([Validators.required, CustomValidators.notFutureDate('تاريخ الترخيص')]);
-        // NGO Address is required
+
+        // NGO Address - ALL FIELDS REQUIRED per SRS 4.7
         const ngoAddressGroup = this.plaintiffForm.get('ngoAddress');
         if (ngoAddressGroup) {
           ngoAddressGroup.get('regionId')?.setValidators([Validators.required]);
           ngoAddressGroup.get('cityId')?.setValidators([Validators.required]);
+          ngoAddressGroup.get('districtId')?.setValidators([Validators.required, Validators.maxLength(100)]);
+          ngoAddressGroup.get('street')?.setValidators([Validators.required, Validators.maxLength(200)]);
+          ngoAddressGroup.get('buildingNumber')?.setValidators([Validators.required, Validators.pattern(/^\d{4}$/)]);
+          ngoAddressGroup.get('unitNumber')?.setValidators([Validators.required, Validators.pattern(/^\d+$/)]);
+          ngoAddressGroup.get('postalCode')?.setValidators([Validators.required, Validators.pattern(/^\d{5}$/)]);
+          ngoAddressGroup.get('additionalCode')?.setValidators([Validators.required, Validators.pattern(/^\d{4}$/)]);
+          // Update validity for all address fields
           ngoAddressGroup.get('regionId')?.updateValueAndValidity();
           ngoAddressGroup.get('cityId')?.updateValueAndValidity();
+          ngoAddressGroup.get('districtId')?.updateValueAndValidity();
+          ngoAddressGroup.get('street')?.updateValueAndValidity();
+          ngoAddressGroup.get('buildingNumber')?.updateValueAndValidity();
+          ngoAddressGroup.get('unitNumber')?.updateValueAndValidity();
+          ngoAddressGroup.get('postalCode')?.updateValueAndValidity();
+          ngoAddressGroup.get('additionalCode')?.updateValueAndValidity();
         }
+
+        // Note: Type 7 does NOT have contact information per SRS
+        // "لا يوجد قسم بيانات التواصل"
+
         break;
 
-      case 8: // وقف (Waqf) - SRS Section 1.3
+      case 8: // وقف (Waqf) - SRS Section 4.8
+        console.log('[CASE 8] Waqf - setting validators per SRS 4.8');
+
+        // Court Deed Number - required, 10 digits
         controls.courtDeedNumber?.setValidators([Validators.required, CustomValidators.courtDeedNumber()]);
+
+        // Waqf Name - required, max 200, Arabic + numbers
         controls.waqfName?.setValidators([Validators.required, Validators.maxLength(200), CustomValidators.arabicOnly('اسم الوقف')]);
+
+        // Deed Date - required, not future
         controls.deedDate?.setValidators([Validators.required, CustomValidators.notFutureDate('تاريخ صك المحكمة')]);
+
+        // Deed Source - required, max 100
         controls.deedSource?.setValidators([Validators.required, Validators.maxLength(100)]);
+
+        // Waqf Oversight Type - required (خاصة / حكومية)
         controls.waqfOversightType?.setValidators([Validators.required, CustomValidators.waqfOversightType()]);
+
+        // Waqf Description - required, max 200
         controls.waqfDescription?.setValidators([Validators.required, Validators.maxLength(200)]);
-        // Waqf Address is required - set validators on address form group
+
+        // Note: waqfAgencyName validators are set conditionally in onWaqfOversightChange()
+        // when oversight type = حكومية (BC03)
+
+        // Waqf Address - ALL FIELDS REQUIRED
         const waqfAddressGroup = this.plaintiffForm.get('waqfAddress');
         if (waqfAddressGroup) {
           waqfAddressGroup.get('regionId')?.setValidators([Validators.required]);
           waqfAddressGroup.get('cityId')?.setValidators([Validators.required]);
+          waqfAddressGroup.get('districtId')?.setValidators([Validators.required, Validators.maxLength(100)]);
+          waqfAddressGroup.get('street')?.setValidators([Validators.required, Validators.maxLength(200)]);
+          waqfAddressGroup.get('buildingNumber')?.setValidators([Validators.required, Validators.pattern(/^\d{4}$/)]);
+          waqfAddressGroup.get('unitNumber')?.setValidators([Validators.required, Validators.pattern(/^\d+$/)]);
+          waqfAddressGroup.get('postalCode')?.setValidators([Validators.required, Validators.pattern(/^\d{5}$/)]);
+          waqfAddressGroup.get('additionalCode')?.setValidators([Validators.required, Validators.pattern(/^\d{4}$/)]);
+          // Update validity for all address fields
           waqfAddressGroup.get('regionId')?.updateValueAndValidity();
           waqfAddressGroup.get('cityId')?.updateValueAndValidity();
+          waqfAddressGroup.get('districtId')?.updateValueAndValidity();
+          waqfAddressGroup.get('street')?.updateValueAndValidity();
+          waqfAddressGroup.get('buildingNumber')?.updateValueAndValidity();
+          waqfAddressGroup.get('unitNumber')?.updateValueAndValidity();
+          waqfAddressGroup.get('postalCode')?.updateValueAndValidity();
+          waqfAddressGroup.get('additionalCode')?.updateValueAndValidity();
         }
+
+        // Note: Type 8 does NOT have contact information per SRS
+        // "لا يوجد قسم بيانات التواصل"
+
         break;
 
       default:
@@ -809,6 +1140,13 @@ export class PlaintiffFormComponent implements OnInit {
     });
     this.lookupService.getRegions().subscribe(data => this.regions = data);
     this.lookupService.getGovernmentAgencies().subscribe(data => this.governmentAgencies = data);
+    this.lookupService.getRepresentativeTypes().subscribe(data => {
+      this.allRepresentativeTypes = data;
+      const currentTypeId = this.plaintiffForm.get('plaintiffTypeId')?.value;
+      if (currentTypeId) {
+        this.updateFilteredRepresentativeTypes(currentTypeId);
+      }
+    });
 
     // Load countries for Unregistered Company
     this.countries = this.getDemoCountries();
@@ -1246,6 +1584,10 @@ export class PlaintiffFormComponent implements OnInit {
     console.log('=== ON SAVE CALLED ===');
     console.log('plaintiffTypeId:', this.selectedPlaintiffType);
 
+    // Set submitted flag for error display (like defendant form)
+    this.submitted = true;
+    this.plaintiffForm.markAllAsTouched();
+
     // FORCE re-validation with current type before save (validators only, not values)
     const currentType = this.selectedPlaintiffType;
     if (currentType) {
@@ -1265,7 +1607,17 @@ export class PlaintiffFormComponent implements OnInit {
     });
 
     if (this.plaintiffForm.invalid) {
-      this.plaintiffForm.markAllAsTouched();
+      // Auto-switch to step with errors (like defendant form)
+      if (this.hasStep1Errors()) {
+        this.currentStep = 0;
+      } else if (this.hasStep2Errors()) {
+        this.currentStep = 1;
+      } else if (this.hasStep3Errors()) {
+        this.currentStep = 2;
+      } else if (this.hasStep4Errors()) {
+        this.currentStep = 3;
+      }
+
       // Log invalid fields for debugging
       const invalidFields = this.getInvalidFields();
       console.log('Invalid fields:', invalidFields);
@@ -1317,14 +1669,72 @@ export class PlaintiffFormComponent implements OnInit {
         fatherName: rep.fatherName,
         grandfatherName: rep.grandfatherName,
         familyName: rep.familyName,
+        clanName: rep.clanName,
         birthDate: rep.birthDate,
+        gender: rep.gender,
+        nationalityId: rep.nationalityId,
+        identityIssueDate: rep.identityIssueDate,
+        identityExpiryDate: rep.identityExpiryDate,
+        // Residence Address (عنوان السكن)
+        residenceRegionId: rep.residenceRegionId,
+        residenceCityId: rep.residenceCityId,
+        residenceDistrict: rep.residenceDistrict,
+        residenceStreet: rep.residenceStreet,
+        residenceBuildingNumber: rep.residenceBuildingNumber,
+        residenceUnitNumber: rep.residenceUnitNumber,
+        residencePostalCode: rep.residencePostalCode,
+        residenceAdditionalCode: rep.residenceAdditionalCode,
+        // Employment Data (بيانات العمل)
+        employmentStatus: rep.employmentStatus,
+        employer: rep.employer,
+        profession: rep.profession,
+        // Work Address (عنوان العمل)
+        workRegionId: rep.workRegionId,
+        workCityId: rep.workCityId,
+        workDistrict: rep.workDistrict,
+        workStreet: rep.workStreet,
+        workBuildingNumber: rep.workBuildingNumber,
+        workUnitNumber: rep.workUnitNumber,
+        workPostalCode: rep.workPostalCode,
+        workAdditionalCode: rep.workAdditionalCode,
+        // Contact Info
         mobileNumber: rep.mobileNumber?.trim() || null,
         email: rep.email?.trim() || null,
+        // Lawyer License (بيانات رخصة المحاماة)
+        lawyerLicenseNumber: rep.lawyerLicenseNumber,
+        lawyerLicenseDate: rep.lawyerLicenseDate,
+        lawyerLicenseExpiryDate: rep.lawyerLicenseExpiryDate,
+        // Authorization (بيانات الوكالة)
         authorizationNumber: rep.authorizationNumber,
         authorizationDate: rep.authorizationDate,
         authorizationSource: rep.authorizationSource,
         authorizationSourceType: rep.authorizationSourceType,
-        guardianshipType: rep.guardianshipType
+        // Liquidator (مصفي)
+        decisionNumber: rep.decisionNumber,
+        decisionDate: rep.decisionDate,
+        decisionSource: rep.decisionSource,
+        // Guardian (ولي)
+        deedNumber: rep.deedNumber,
+        deedDate: rep.deedDate,
+        deedSource: rep.deedSource,
+        guardianshipType: rep.guardianshipType,
+        // CompanyRepresentative (ممثل الشركة)
+        representationDocSource: rep.representationDocSource,
+        representativeCapacity: rep.representativeCapacity,
+        representationDocType: rep.representationDocType,
+        representationDocNumber: rep.representationDocNumber,
+        // AgencyRepresentative (ممثل الجهة)
+        representationLetterNumber: rep.representationLetterNumber,
+        representationLetterDate: rep.representationLetterDate,
+        representationLetterSource: rep.representationLetterSource,
+        // Attachments (صورة التمثيل)
+        attachments: rep.attachments?.map(att => ({
+          attachmentTypeId: att.attachmentTypeId,
+          fileName: att.fileName,
+          contentType: att.contentType,
+          fileSizeBytes: att.fileSizeBytes,
+          description: att.description
+        })) || []
       }));
       console.log('Mapped representatives:', mappedReps);
 
@@ -1556,8 +1966,10 @@ export class PlaintiffFormComponent implements OnInit {
       unregisteredCompanyName: 'اسم الشركة',
       unregisteredCompanyAddress: 'عنوان الشركة',
       countryId: 'الدولة',
+      unregisteredCountryId: 'الدولة',
       unregisteredCity: 'المدينة',
       description: 'الوصف',
+      unregisteredDescription: 'وصف تقريبي للشركة',
       governmentAgencyId: 'الجهة الحكومية',
       headquarters: 'المقر',
       additionalStatement: 'البيان الإضافي',
@@ -1574,6 +1986,18 @@ export class PlaintiffFormComponent implements OnInit {
       waqfAgencyName: 'اسم الجهة'
     };
 
+    // Address field labels
+    const addressFieldLabels: { [key: string]: string } = {
+      regionId: 'المنطقة',
+      cityId: 'المدينة',
+      districtId: 'الحي',
+      street: 'الشارع',
+      buildingNumber: 'رقم المبنى',
+      unitNumber: 'رقم الوحدة',
+      postalCode: 'الرمز البريدي',
+      additionalCode: 'الرمز الإضافي'
+    };
+
     // Only check top-level controls (not nested address groups)
     Object.keys(this.plaintiffForm.controls).forEach(key => {
       const control = this.plaintiffForm.get(key);
@@ -1583,6 +2007,33 @@ export class PlaintiffFormComponent implements OnInit {
         invalidFields.push(`- ${label}`);
       }
     });
+
+    // Check residence address fields for Type 1 (Individual) and Type 2 (Individual without ID)
+    // Both types require all residence address fields per SRS
+    if (this.selectedPlaintiffType === 1 || this.selectedPlaintiffType === 2) {
+      const residenceAddress = this.plaintiffForm.get('residenceAddress');
+      if (residenceAddress) {
+        Object.keys(addressFieldLabels).forEach(field => {
+          const control = residenceAddress.get(field);
+          if (control?.invalid) {
+            invalidFields.push(`- ${addressFieldLabels[field]} (عنوان الإقامة)`);
+          }
+        });
+      }
+
+      // Check work address fields if BC02 is active - Type 1 only (Type 2 doesn't have work address)
+      if (this.selectedPlaintiffType === 1 && this.showWorkAddress) {
+        const workAddress = this.plaintiffForm.get('workAddress');
+        if (workAddress) {
+          Object.keys(addressFieldLabels).forEach(field => {
+            const control = workAddress.get(field);
+            if (control?.invalid) {
+              invalidFields.push(`- ${addressFieldLabels[field]} (عنوان العمل)`);
+            }
+          });
+        }
+      }
+    }
 
     return invalidFields;
   }
@@ -1614,7 +2065,24 @@ export class PlaintiffFormComponent implements OnInit {
       authorizationDate: rep.authorizationDate,
       authorizationSource: rep.authorizationSource,
       authorizationSourceType: rep.authorizationSourceType,
-      guardianshipType: rep.guardianshipType
+      // Liquidator (مصفي)
+      decisionNumber: rep.decisionNumber,
+      decisionDate: rep.decisionDate,
+      decisionSource: rep.decisionSource,
+      // Guardian (ولي)
+      deedNumber: rep.deedNumber,
+      deedDate: rep.deedDate,
+      deedSource: rep.deedSource,
+      guardianshipType: rep.guardianshipType,
+      // CompanyRepresentative (ممثل الشركة)
+      representationDocSource: rep.representationDocSource,
+      representativeCapacity: rep.representativeCapacity,
+      representationDocType: rep.representationDocType,
+      representationDocNumber: rep.representationDocNumber,
+      // AgencyRepresentative (ممثل الجهة)
+      representationLetterNumber: rep.representationLetterNumber,
+      representationLetterDate: rep.representationLetterDate,
+      representationLetterSource: rep.representationLetterSource
     }));
 
     // Convert empty strings to null for optional fields
@@ -1698,6 +2166,14 @@ export class PlaintiffFormComponent implements OnInit {
     return this.plaintiffForm.get('plaintiffTypeId')?.value;
   }
 
+  // Get the Arabic name of the selected plaintiff type
+  get selectedPlaintiffTypeName(): string {
+    const typeId = this.selectedPlaintiffType;
+    if (!typeId) return '';
+    const type = this.plaintiffTypes.find(t => t.id === typeId);
+    return type?.nameAr || '';
+  }
+
   // ===== Plaintiff Type Helper Methods (SRS Section 1.3 - 8 types) =====
 
   // Type 1 or 2 - فرد or فرد بدون هوية (Individual types)
@@ -1764,7 +2240,7 @@ export class PlaintiffFormComponent implements OnInit {
   }
 
   // Representatives management
-  onAddRepresentative(): void {
+  onAddRepresentative(representativeTypeId: number): void {
     if (!this.plaintiffId && !this.selectedPlaintiffType) {
       this.notification.validation('الرجاء اختيار نوع المدعي أولاً');
       return;
@@ -1776,6 +2252,7 @@ export class PlaintiffFormComponent implements OnInit {
     const dialogData: RepresentativeDialogData = {
       plaintiffId: this.plaintiffId || 0,
       plaintiffTypeId: this.selectedPlaintiffType,
+      representativeTypeId: representativeTypeId,  // Pre-selected from menu
       plaintiffIdentityNumber: plaintiffIdentityNumber,  // For ERR012
       existingRepresentatives: this.representatives  // For ERR008
     };
@@ -1843,20 +2320,41 @@ export class PlaintiffFormComponent implements OnInit {
       if (result) {
         const index = this.representatives.findIndex(r => r.id === representative.id);
         if (index >= 0) {
-          const updatedRep = {
-            ...this.representatives[index],
-            ...result,
-            representativeTypeNameAr: this.getRepresentativeTypeName(result.representativeTypeId),
-            fullName: [result.firstName, result.fatherName, result.grandfatherName, result.familyName]
-              .filter((n: string) => n).join(' ')
-          };
-          // Reassign array to trigger change detection
-          this.representatives = [
-            ...this.representatives.slice(0, index),
-            updatedRep,
-            ...this.representatives.slice(index + 1)
-          ];
-          this.notification.success('تم تحديث بيانات الممثل بنجاح');
+          // If representative exists in database (has real ID), call API to update
+          if (this.plaintiffId && representative.id > 0 && representative.id < Date.now() - 1000000) {
+            // Real ID from database - call API
+            this.representativeService.updateRepresentative(representative.id, result).subscribe({
+              next: (savedRep) => {
+                // Update local array with response from API
+                this.representatives = [
+                  ...this.representatives.slice(0, index),
+                  savedRep,
+                  ...this.representatives.slice(index + 1)
+                ];
+                this.notification.success('تم تحديث بيانات الممثل بنجاح');
+              },
+              error: (error) => {
+                console.error('Error updating representative:', error);
+                this.notification.handleError(error, 'حدث خطأ أثناء تحديث بيانات الممثل');
+              }
+            });
+          } else {
+            // Temporary ID (new plaintiff not yet saved) - update locally only
+            const updatedRep = {
+              ...this.representatives[index],
+              ...result,
+              representativeTypeNameAr: this.getRepresentativeTypeName(result.representativeTypeId),
+              fullName: [result.firstName, result.fatherName, result.grandfatherName, result.familyName]
+                .filter((n: string) => n).join(' ')
+            };
+            // Reassign array to trigger change detection
+            this.representatives = [
+              ...this.representatives.slice(0, index),
+              updatedRep,
+              ...this.representatives.slice(index + 1)
+            ];
+            this.notification.success('تم تحديث بيانات الممثل بنجاح');
+          }
         }
       }
     });
@@ -1879,9 +2377,25 @@ export class PlaintiffFormComponent implements OnInit {
 
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
-        // Reassign array to trigger change detection
-        this.representatives = this.representatives.filter(r => r.id !== representative.id);
-        this.notification.success('تم حذف الممثل بنجاح');
+        // If representative exists in database (has real ID), call API to delete
+        if (this.plaintiffId && representative.id > 0 && representative.id < Date.now() - 1000000) {
+          // Real ID from database - call API
+          this.representativeService.deleteRepresentative(representative.id).subscribe({
+            next: () => {
+              // Remove from local array
+              this.representatives = this.representatives.filter(r => r.id !== representative.id);
+              this.notification.success('تم حذف الممثل بنجاح');
+            },
+            error: (error) => {
+              console.error('Error deleting representative:', error);
+              this.notification.handleError(error, 'حدث خطأ أثناء حذف الممثل');
+            }
+          });
+        } else {
+          // Temporary ID (new plaintiff not yet saved) - remove locally only
+          this.representatives = this.representatives.filter(r => r.id !== representative.id);
+          this.notification.success('تم حذف الممثل بنجاح');
+        }
       }
     });
   }
@@ -1899,6 +2413,212 @@ export class PlaintiffFormComponent implements OnInit {
       9: 'ممثل نظامي'
     };
     return typeNames[typeId] || 'ممثل';
+  }
+
+  private updateFilteredRepresentativeTypes(plaintiffTypeId: number): void {
+    const allowedIds = ALLOWED_REPRESENTATIVE_TYPES[plaintiffTypeId] || [];
+    this.filteredRepresentativeTypes = this.allRepresentativeTypes.filter(t => allowedIds.includes(t.id));
+  }
+
+  // ===== Step Error Checking Methods (like defendant form) =====
+
+  /**
+   * Check if Step 1 (بيانات الشخصي) has validation errors.
+   * Includes personal data, residence address (Type 1), and work address (BC02).
+   */
+  hasStep1Errors(): boolean {
+    // Personal data fields for Individual (Type 1)
+    const personalFields = ['identityTypeId', 'identityNumber', 'firstName', 'fatherName',
+      'familyName', 'birthDate', 'gender', 'nationalityId', 'mobileNumber',
+      'identityIssueDate', 'identityExpiryDate', 'employmentStatusId'];
+
+    // Check personal fields
+    for (const field of personalFields) {
+      const control = this.plaintiffForm.get(field);
+      if (control?.invalid && (control?.touched || this.submitted)) return true;
+    }
+
+    // Check employer/profession if BC01 active
+    if (this.showEmployer) {
+      const employerControl = this.plaintiffForm.get('employer');
+      const professionControl = this.plaintiffForm.get('profession');
+      if (employerControl?.invalid && (employerControl?.touched || this.submitted)) return true;
+      if (professionControl?.invalid && (professionControl?.touched || this.submitted)) return true;
+    }
+
+    // Check residence address if Type 1 (Individual) or Type 2 (Individual without ID)
+    // Both types require all residence address fields per SRS
+    if (this.selectedPlaintiffType === 1 || this.selectedPlaintiffType === 2) {
+      const addressFields = ['regionId', 'cityId', 'districtId', 'street',
+        'buildingNumber', 'unitNumber', 'postalCode', 'additionalCode'];
+      for (const field of addressFields) {
+        const control = this.plaintiffForm.get(`residenceAddress.${field}`);
+        if (control?.invalid && (control?.touched || this.submitted)) return true;
+      }
+
+      // Check work address if BC02 (Private employment status) - Type 1 only
+      if (this.selectedPlaintiffType === 1 && this.showWorkAddress) {
+        for (const field of addressFields) {
+          const control = this.plaintiffForm.get(`workAddress.${field}`);
+          if (control?.invalid && (control?.touched || this.submitted)) return true;
+        }
+      }
+    }
+
+    // Check Business Owner fields (Type 3) - SRS Section 4.3
+    if (this.selectedPlaintiffType === 3) {
+      // Personal data fields
+      const boPersonalFields = ['identityTypeId', 'identityNumber', 'firstName', 'fatherName',
+        'familyName', 'birthDate', 'gender', 'nationalityId', 'identityIssueDate',
+        'identityExpiryDate', 'mobileNumber'];
+      for (const field of boPersonalFields) {
+        const control = this.plaintiffForm.get(field);
+        if (control?.invalid && (control?.touched || this.submitted)) return true;
+      }
+
+      // Commercial registration fields
+      const boCRFields = ['commercialRegNumber', 'companyName', 'crStartDate', 'crEndDate'];
+      for (const field of boCRFields) {
+        const control = this.plaintiffForm.get(field);
+        if (control?.invalid && (control?.touched || this.submitted)) return true;
+      }
+
+      // Residence address - ALL FIELDS REQUIRED per SRS 4.3.2
+      const addressFields = ['regionId', 'cityId', 'districtId', 'street',
+        'buildingNumber', 'unitNumber', 'postalCode', 'additionalCode'];
+      for (const field of addressFields) {
+        const control = this.plaintiffForm.get(`residenceAddress.${field}`);
+        if (control?.invalid && (control?.touched || this.submitted)) return true;
+      }
+
+      // Business address - ALL FIELDS REQUIRED per SRS 4.3.7
+      for (const field of addressFields) {
+        const control = this.plaintiffForm.get(`businessAddress.${field}`);
+        if (control?.invalid && (control?.touched || this.submitted)) return true;
+      }
+
+      // Work address - only check if showWorkAddress (BC02 active)
+      if (this.showWorkAddress) {
+        for (const field of addressFields) {
+          const control = this.plaintiffForm.get(`workAddress.${field}`);
+          if (control?.invalid && (control?.touched || this.submitted)) return true;
+        }
+      }
+    }
+
+    // Check Registered Company fields (Type 4) - SRS Section 4.4
+    if (this.selectedPlaintiffType === 4) {
+      const companyFields = ['commercialRegNumber', 'companyName', 'crStartDate', 'crEndDate'];
+      for (const field of companyFields) {
+        const control = this.plaintiffForm.get(field);
+        if (control?.invalid && (control?.touched || this.submitted)) return true;
+      }
+
+      // Check company address - ALL FIELDS REQUIRED per SRS 4.4
+      const addressFields = ['regionId', 'cityId', 'districtId', 'street',
+        'buildingNumber', 'unitNumber', 'postalCode', 'additionalCode'];
+      for (const field of addressFields) {
+        const control = this.plaintiffForm.get(`companyAddress.${field}`);
+        if (control?.invalid && (control?.touched || this.submitted)) return true;
+      }
+    }
+
+    // Check Government Agency fields (Type 6) - SRS Section 4.6
+    if (this.selectedPlaintiffType === 6) {
+      const govFields = ['governmentAgencyId', 'headquarters'];
+      for (const field of govFields) {
+        const control = this.plaintiffForm.get(field);
+        if (control?.invalid && (control?.touched || this.submitted)) return true;
+      }
+    }
+
+    // Check Unregistered Company fields (Type 5) - SRS Section 4.5
+    if (this.selectedPlaintiffType === 5) {
+      const unregisteredFields = ['commercialRegNumber', 'unregisteredCompanyName',
+        'unregisteredCountryId', 'unregisteredCity', 'unregisteredDescription'];
+      for (const field of unregisteredFields) {
+        const control = this.plaintiffForm.get(field);
+        if (control?.invalid && (control?.touched || this.submitted)) return true;
+      }
+    }
+
+    // Check NGO/Society fields (Type 7) - SRS Section 4.7
+    if (this.selectedPlaintiffType === 7) {
+      const ngoFields = ['licenseNumber', 'licenseSourceId', 'ngoName', 'licenseDate'];
+      for (const field of ngoFields) {
+        const control = this.plaintiffForm.get(field);
+        if (control?.invalid && (control?.touched || this.submitted)) return true;
+      }
+
+      // Check NGO address - ALL FIELDS REQUIRED per SRS 4.7
+      const ngoAddressFields = ['regionId', 'cityId', 'districtId', 'street',
+        'buildingNumber', 'unitNumber', 'postalCode', 'additionalCode'];
+      for (const field of ngoAddressFields) {
+        const control = this.plaintiffForm.get(`ngoAddress.${field}`);
+        if (control?.invalid && (control?.touched || this.submitted)) return true;
+      }
+    }
+
+    // Check Waqf fields (Type 8) - SRS Section 4.8
+    if (this.selectedPlaintiffType === 8) {
+      const waqfFields = ['courtDeedNumber', 'waqfName', 'deedDate', 'deedSource',
+        'waqfOversightType', 'waqfDescription'];
+      for (const field of waqfFields) {
+        const control = this.plaintiffForm.get(field);
+        if (control?.invalid && (control?.touched || this.submitted)) return true;
+      }
+
+      // Check waqfAgencyName if oversight type is حكومية (BC03)
+      if (this.showWaqfAgencyName) {
+        const agencyControl = this.plaintiffForm.get('waqfAgencyName');
+        if (agencyControl?.invalid && (agencyControl?.touched || this.submitted)) return true;
+      }
+
+      // Check waqf address - ALL FIELDS REQUIRED
+      const waqfAddressFields = ['regionId', 'cityId', 'districtId', 'street',
+        'buildingNumber', 'unitNumber', 'postalCode', 'additionalCode'];
+      for (const field of waqfAddressFields) {
+        const control = this.plaintiffForm.get(`waqfAddress.${field}`);
+        if (control?.invalid && (control?.touched || this.submitted)) return true;
+      }
+    }
+
+    return false;
+  }
+
+  /**
+   * Check if Step 2 (بيانات الممثلين) has errors.
+   * Currently no required fields in step 2.
+   */
+  hasStep2Errors(): boolean {
+    // Representatives are optional, no validation errors in this step
+    return false;
+  }
+
+  /**
+   * Check if Step 3 (المرفقات) has errors.
+   * Currently no required fields in step 3.
+   */
+  hasStep3Errors(): boolean {
+    // Attachments are optional, no validation errors in this step
+    return false;
+  }
+
+  /**
+   * Check if Step 4 (بيانات إضافية) has errors.
+   * Includes selected address fields.
+   */
+  hasStep4Errors(): boolean {
+    // Check selected address if checkbox is checked
+    const addSelectedAddress = this.plaintiffForm.get('addSelectedAddress')?.value;
+    if (addSelectedAddress) {
+      const addressFields = ['regionId', 'cityId'];
+      for (const field of addressFields) {
+        const control = this.plaintiffForm.get(`selectedAddress.${field}`);
+        if (control?.invalid && (control?.touched || this.submitted)) return true;
+      }
+    }
+    return false;
   }
 
   // Attachments management

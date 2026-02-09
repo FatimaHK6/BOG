@@ -1016,6 +1016,15 @@ namespace BOG.DbModel.Migrations
                         .HasColumnType("bit")
                         .HasDefaultValue(false);
 
+                    b.Property<DateTime?>("LawyerLicenseDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("LawyerLicenseExpiryDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("LawyerLicenseNumber")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("MobileNumber")
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
@@ -1030,6 +1039,27 @@ namespace BOG.DbModel.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("Profession")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("RepresentationDocNumber")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("RepresentationDocSource")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("RepresentationDocType")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("RepresentationLetterDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("RepresentationLetterNumber")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("RepresentationLetterSource")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("RepresentativeCapacity")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("RepresentativeTypeId")
@@ -1094,6 +1124,70 @@ namespace BOG.DbModel.Migrations
                     b.HasIndex("RepresentativeTypeId");
 
                     b.ToTable("Representatives");
+                });
+
+            modelBuilder.Entity("BOG.DbModel.Entities.CaseRegistration.RepresentativeAttachment", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("AttachmentTypeId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ContentType")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("FileName")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<long>("FileSizeBytes")
+                        .HasColumnType("bigint");
+
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
+
+                    b.Property<bool>("IsDeleted")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
+                    b.Property<DateTime>("ModifiedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("RepresentativeId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("StoredFileName")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<DateTime>("UploadDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AttachmentTypeId");
+
+                    b.HasIndex("RepresentativeId");
+
+                    b.ToTable("RepresentativeAttachments");
                 });
 
             modelBuilder.Entity("BOG.DbModel.Entities.CaseRegistration.RequestAttachment", b =>
@@ -1682,6 +1776,19 @@ namespace BOG.DbModel.Migrations
                             ModifiedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             Name = "SupportingDocument",
                             NameAr = "مستند داعم"
+                        },
+                        new
+                        {
+                            Id = 10,
+                            AllowedExtensions = ".pdf",
+                            CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            IsActive = true,
+                            IsDeleted = false,
+                            IsMandatory = true,
+                            MaxFileSizeBytes = 4194304,
+                            ModifiedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Name = "RepresentativeDocument",
+                            NameAr = "صورة التمثيل"
                         });
                 });
 
@@ -3373,6 +3480,26 @@ namespace BOG.DbModel.Migrations
                             ModifiedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             Name = "LegalRepresentative",
                             NameAr = "ممثل نظامي"
+                        },
+                        new
+                        {
+                            Id = 10,
+                            CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            IsActive = true,
+                            IsDeleted = false,
+                            ModifiedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Name = "Liquidator",
+                            NameAr = "مصفي"
+                        },
+                        new
+                        {
+                            Id = 11,
+                            CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            IsActive = true,
+                            IsDeleted = false,
+                            ModifiedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Name = "JudicialCustodian",
+                            NameAr = "حارس قضائي"
                         });
                 });
 
@@ -3947,6 +4074,25 @@ namespace BOG.DbModel.Migrations
                     b.Navigation("RepresentativeType");
                 });
 
+            modelBuilder.Entity("BOG.DbModel.Entities.CaseRegistration.RepresentativeAttachment", b =>
+                {
+                    b.HasOne("BOG.DbModel.Entities.Lookups.AttachmentType", "AttachmentType")
+                        .WithMany()
+                        .HasForeignKey("AttachmentTypeId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("BOG.DbModel.Entities.CaseRegistration.Representative", "Representative")
+                        .WithMany("Attachments")
+                        .HasForeignKey("RepresentativeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("AttachmentType");
+
+                    b.Navigation("Representative");
+                });
+
             modelBuilder.Entity("BOG.DbModel.Entities.CaseRegistration.RequestAttachment", b =>
                 {
                     b.HasOne("BOG.DbModel.Entities.Lookups.AttachmentType", "AttachmentType")
@@ -4092,6 +4238,11 @@ namespace BOG.DbModel.Migrations
                     b.Navigation("CaseRequestPlaintiffs");
 
                     b.Navigation("Representatives");
+                });
+
+            modelBuilder.Entity("BOG.DbModel.Entities.CaseRegistration.Representative", b =>
+                {
+                    b.Navigation("Attachments");
                 });
 
             modelBuilder.Entity("BOG.DbModel.Entities.Identity.Court", b =>

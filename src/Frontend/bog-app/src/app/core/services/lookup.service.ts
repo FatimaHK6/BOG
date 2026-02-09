@@ -177,8 +177,7 @@ export class LookupService {
     return [
       { id: 1, name: 'National ID', nameAr: 'هوية وطنية' },
       { id: 2, name: 'Residency', nameAr: 'إقامة' },
-      { id: 3, name: 'Passport', nameAr: 'جواز سفر' },
-      { id: 4, name: 'GCC ID', nameAr: 'هوية خليجية' }
+      { id: 3, name: 'Passport', nameAr: 'جواز سفر' }
     ];
   }
 

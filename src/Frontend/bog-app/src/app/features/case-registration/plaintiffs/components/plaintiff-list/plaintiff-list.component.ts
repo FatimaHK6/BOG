@@ -11,6 +11,11 @@ import { NotificationService } from '../../../../../core/services/notification.s
 import { SetApplicantDialogComponent } from '../set-applicant-dialog/set-applicant-dialog.component';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../../../../shared/components/confirm-dialog/confirm-dialog.component';
 
+interface PlaintiffType {
+  id: number;
+  nameAr: string;
+}
+
 @Component({
   selector: 'app-plaintiff-list',
   templateUrl: './plaintiff-list.component.html',
@@ -24,6 +29,18 @@ export class PlaintiffListComponent implements OnInit, AfterViewInit {
   plaintiffs: PlaintiffListVM[] = [];
   dataSource = new MatTableDataSource<PlaintiffListVM>([]);
   isLoading = false;
+
+  // Plaintiff types matching database PlaintiffTypes table (SRS Section 1.3 - 8 types)
+  plaintiffTypes: PlaintiffType[] = [
+    { id: 1, nameAr: 'فرد' },
+    { id: 2, nameAr: 'فرد بدون هوية' },
+    { id: 3, nameAr: 'صاحب مؤسسة' },
+    { id: 4, nameAr: 'شركة مسجلة' },
+    { id: 5, nameAr: 'شركة غير مسجلة' },
+    { id: 6, nameAr: 'جهة حكومية' },
+    { id: 7, nameAr: 'جمعية/مؤسسة أهلية' },
+    { id: 8, nameAr: 'وقف' }
+  ];
 
   // All representatives for all plaintiffs
   allRepresentatives: (RepresentativeVM & { plaintiffName?: string })[] = [];
@@ -254,6 +271,19 @@ export class PlaintiffListComponent implements OnInit, AfterViewInit {
     this.setRepresentativesPaginator();
   }
 
+  /**
+   * Called when user selects a plaintiff type from the dropdown menu.
+   * Navigates to the add form with the selected type pre-set.
+   */
+  onSelectPlaintiffType(type: PlaintiffType): void {
+    this.router.navigate(['/case-registration/plaintiffs/add'], {
+      queryParams: { requestId: this.requestId, type: type.id }
+    });
+  }
+
+  /**
+   * @deprecated Use onSelectPlaintiffType instead. Kept for backwards compatibility.
+   */
   onAddPlaintiff(): void {
     this.router.navigate(['/case-registration/plaintiffs/add'], {
       queryParams: { requestId: this.requestId }

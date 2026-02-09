@@ -377,17 +377,95 @@ public class PlaintiffBL : IPlaintiffBL
                     NationalityId = repDto.NationalityId,
                     IdentityIssueDate = repDto.IdentityIssueDate,
                     IdentityExpiryDate = repDto.IdentityExpiryDate,
+                    // Residence Address (عنوان السكن)
+                    ResidenceRegionId = repDto.ResidenceRegionId,
+                    ResidenceCityId = repDto.ResidenceCityId,
+                    ResidenceDistrict = repDto.ResidenceDistrict,
+                    ResidenceStreet = repDto.ResidenceStreet,
+                    ResidenceBuildingNumber = repDto.ResidenceBuildingNumber,
+                    ResidenceUnitNumber = repDto.ResidenceUnitNumber,
+                    ResidencePostalCode = repDto.ResidencePostalCode,
+                    ResidenceAdditionalCode = repDto.ResidenceAdditionalCode,
+                    // Employment Data (بيانات العمل)
+                    EmploymentStatus = repDto.EmploymentStatus,
+                    Employer = repDto.Employer,
+                    Profession = repDto.Profession,
+                    // Work Address (عنوان العمل)
+                    WorkRegionId = repDto.WorkRegionId,
+                    WorkCityId = repDto.WorkCityId,
+                    WorkDistrict = repDto.WorkDistrict,
+                    WorkStreet = repDto.WorkStreet,
+                    WorkBuildingNumber = repDto.WorkBuildingNumber,
+                    WorkUnitNumber = repDto.WorkUnitNumber,
+                    WorkPostalCode = repDto.WorkPostalCode,
+                    WorkAdditionalCode = repDto.WorkAdditionalCode,
+                    // Contact Info
                     MobileNumber = repDto.MobileNumber,
                     Email = repDto.Email,
+                    // Lawyer License (بيانات رخصة المحاماة)
+                    LawyerLicenseNumber = repDto.LawyerLicenseNumber,
+                    LawyerLicenseDate = repDto.LawyerLicenseDate,
+                    LawyerLicenseExpiryDate = repDto.LawyerLicenseExpiryDate,
+                    // Authorization (بيانات الوكالة)
                     AuthorizationNumber = repDto.AuthorizationNumber,
                     AuthorizationDate = repDto.AuthorizationDate,
                     AuthorizationSource = repDto.AuthorizationSource,
                     AuthorizationSourceType = repDto.AuthorizationSourceType,
+                    // Liquidator (مصفي)
+                    DecisionNumber = repDto.DecisionNumber,
+                    DecisionDate = repDto.DecisionDate,
+                    DecisionSource = repDto.DecisionSource,
+                    // Guardian (ولي)
+                    DeedNumber = repDto.DeedNumber,
+                    DeedDate = repDto.DeedDate,
+                    DeedSource = repDto.DeedSource,
                     GuardianshipType = repDto.GuardianshipType,
+                    // CompanyRepresentative fields (ممثل الشركة - Type 6)
+                    RepresentationDocSource = repDto.RepresentationDocSource,
+                    RepresentativeCapacity = repDto.RepresentativeCapacity,
+                    RepresentationDocType = repDto.RepresentationDocType,
+                    RepresentationDocNumber = repDto.RepresentationDocNumber,
+                    // AgencyRepresentative fields
+                    RepresentationLetterNumber = repDto.RepresentationLetterNumber,
+                    RepresentationLetterDate = repDto.RepresentationLetterDate,
+                    RepresentationLetterSource = repDto.RepresentationLetterSource,
                     DataSourceId = 2, // FromUser
                     IsActive = true,
-                    CreatedDate = DateTime.UtcNow
+                    CreatedDate = DateTime.UtcNow,
+                    // Initialize attachments collection
+                    Attachments = new List<RepresentativeAttachment>()
                 };
+
+                // Add attachments for representative (صورة التمثيل)
+                if (repDto.Attachments != null && repDto.Attachments.Count > 0)
+                {
+                    _logger.LogInformation("Creating {Count} attachments for representative", repDto.Attachments.Count);
+                    foreach (var attachmentDto in repDto.Attachments)
+                    {
+                        var storedFileName = $"rep_{Guid.NewGuid()}{Path.GetExtension(attachmentDto.FileName)}";
+                        var attachment = new RepresentativeAttachment
+                        {
+                            AttachmentTypeId = attachmentDto.AttachmentTypeId,
+                            FileName = attachmentDto.FileName,
+                            StoredFileName = storedFileName,
+                            ContentType = attachmentDto.ContentType,
+                            FileSizeBytes = attachmentDto.FileSizeBytes,
+                            Description = attachmentDto.Description,
+                            UploadDate = DateTime.UtcNow,
+                            IsActive = true,
+                            CreatedDate = DateTime.UtcNow
+                        };
+
+                        // TODO: Save file content to storage if FileContent is provided
+                        // if (!string.IsNullOrEmpty(attachmentDto.FileContent))
+                        // {
+                        //     var bytes = Convert.FromBase64String(attachmentDto.FileContent);
+                        //     await _fileStorage.SaveAsync(storedFileName, bytes);
+                        // }
+
+                        representative.Attachments.Add(attachment);
+                    }
+                }
 
                 await _representativeRepository.AddAsync(representative, cancellationToken);
             }
@@ -1055,14 +1133,66 @@ public class PlaintiffBL : IPlaintiffBL
             IdentityExpiryDate = rep.IdentityExpiryDate,
             DataSourceId = rep.DataSourceId,
             DataSourceName = rep.DataSource?.NameAr,
+            // Residence Address (عنوان السكن)
+            ResidenceRegionId = rep.ResidenceRegionId,
+            ResidenceCityId = rep.ResidenceCityId,
+            ResidenceDistrict = rep.ResidenceDistrict,
+            ResidenceStreet = rep.ResidenceStreet,
+            ResidenceBuildingNumber = rep.ResidenceBuildingNumber,
+            ResidenceUnitNumber = rep.ResidenceUnitNumber,
+            ResidencePostalCode = rep.ResidencePostalCode,
+            ResidenceAdditionalCode = rep.ResidenceAdditionalCode,
+            // Employment Data (بيانات العمل)
+            EmploymentStatus = rep.EmploymentStatus,
+            Employer = rep.Employer,
+            Profession = rep.Profession,
+            // Work Address (عنوان العمل)
+            WorkRegionId = rep.WorkRegionId,
+            WorkCityId = rep.WorkCityId,
+            WorkDistrict = rep.WorkDistrict,
+            WorkStreet = rep.WorkStreet,
+            WorkBuildingNumber = rep.WorkBuildingNumber,
+            WorkUnitNumber = rep.WorkUnitNumber,
+            WorkPostalCode = rep.WorkPostalCode,
+            WorkAdditionalCode = rep.WorkAdditionalCode,
+            // Contact Info
             MobileNumber = rep.MobileNumber,
             Email = rep.Email,
+            // Lawyer License (بيانات رخصة المحاماة)
+            LawyerLicenseNumber = rep.LawyerLicenseNumber,
+            LawyerLicenseDate = rep.LawyerLicenseDate,
+            LawyerLicenseExpiryDate = rep.LawyerLicenseExpiryDate,
+            // Authorization (بيانات الوكالة)
             AuthorizationNumber = rep.AuthorizationNumber,
             AuthorizationDate = rep.AuthorizationDate,
             AuthorizationSource = rep.AuthorizationSource,
             AuthorizationSourceType = rep.AuthorizationSourceType,
+            // Liquidator (مصفي)
+            DecisionNumber = rep.DecisionNumber,
+            DecisionDate = rep.DecisionDate,
+            DecisionSource = rep.DecisionSource,
+            // Guardian (ولي)
+            DeedNumber = rep.DeedNumber,
+            DeedDate = rep.DeedDate,
+            DeedSource = rep.DeedSource,
             GuardianshipType = rep.GuardianshipType,
-            CreatedDate = rep.CreatedDate
+            CreatedDate = rep.CreatedDate,
+            // Attachments (صورة التمثيل)
+            Attachments = rep.Attachments?.Where(a => !a.IsDeleted && a.IsActive)
+                .Select(a => new RepresentativeAttachmentVM
+                {
+                    Id = a.Id,
+                    RepresentativeId = a.RepresentativeId,
+                    AttachmentTypeId = a.AttachmentTypeId,
+                    AttachmentTypeName = a.AttachmentType?.Name ?? "",
+                    AttachmentTypeNameAr = a.AttachmentType?.NameAr ?? "",
+                    FileName = a.FileName,
+                    FileSizeBytes = a.FileSizeBytes,
+                    ContentType = a.ContentType,
+                    DownloadUrl = $"/api/representatives/{a.RepresentativeId}/attachments/{a.Id}/download",
+                    UploadDate = a.UploadDate,
+                    Description = a.Description
+                }).ToList() ?? new List<RepresentativeAttachmentVM>()
         };
     }
 

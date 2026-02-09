@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>دليل تصحيح أخطاء شركة غير مسجلة (Type 5)</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #eee;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        h1 {
+            text-align: center;
+            color: #00d4ff;
+            margin-bottom: 10px;
+            font-size: 2em;
+        }
+        .subtitle {
+            text-align: center;
+            color: #888;
+            margin-bottom: 40px;
+            font-size: 1.1em;
+        }
+        .step {
+            background: rgba(255,255,255,0.05);
+            border-radius: 16px;
+            padding: 25px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(255,255,255,0.1);
+            position: relative;
+        }
+        .step-number {
+            position: absolute;
+            top: -15px;
+            right: 20px;
+            background: linear-gradient(135deg, #00d4ff, #0099cc);
+            color: #fff;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2em;
+            box-shadow: 0 4px 15px rgba(0,212,255,0.4);
+        }
+        .step h2 {
+            color: #00d4ff;
+            margin-top: 10px;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+        .step h3 {
+            color: #ffd700;
+            margin: 20px 0 10px 0;
+            font-size: 1.1em;
+        }
+        .instruction {
+            background: rgba(0,0,0,0.3);
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px 0;
+            border-right: 4px solid #00d4ff;
+        }
+        .keyboard {
+            display: inline-block;
+            background: #333;
+            border: 1px solid #555;
+            border-radius: 5px;
+            padding: 5px 12px;
+            font-family: monospace;
+            font-size: 0.9em;
+            color: #fff;
+            margin: 0 5px;
+            box-shadow: 0 2px 0 #222;
+        }
+        .code-block {
+            background: #0d1117;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 0.9em;
+            overflow-x: auto;
+            direction: ltr;
+            text-align: left;
+            border: 1px solid #30363d;
+        }
+        .code-block .comment {
+            color: #8b949e;
+        }
+        .code-block .key {
+            color: #79c0ff;
+        }
+        .code-block .value {
+            color: #a5d6ff;
+        }
+        .code-block .number {
+            color: #f9826c;
+        }
+        .code-block .null {
+            color: #ff7b72;
+        }
+        .highlight-box {
+            background: rgba(255,215,0,0.1);
+            border: 2px solid #ffd700;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        .error-box {
+            background: rgba(255,0,0,0.1);
+            border: 2px solid #ff4444;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        .success-box {
+            background: rgba(0,255,0,0.1);
+            border: 2px solid #44ff44;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        .field-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+            direction: ltr;
+        }
+        .field-table th, .field-table td {
+            border: 1px solid #444;
+            padding: 12px;
+            text-align: left;
+        }
+        .field-table th {
+            background: rgba(0,212,255,0.2);
+            color: #00d4ff;
+        }
+        .field-table tr:nth-child(even) {
+            background: rgba(255,255,255,0.03);
+        }
+        .screenshot-placeholder {
+            background: linear-gradient(135deg, #2d2d2d 0%, #1a1a1a 100%);
+            border: 2px dashed #555;
+            border-radius: 12px;
+            padding: 40px;
+            text-align: center;
+            margin: 20px 0;
+        }
+        .screenshot-placeholder img {
+            max-width: 100%;
+            border-radius: 8px;
+        }
+        .browser-mockup {
+            background: #1e1e1e;
+            border-radius: 12px;
+            overflow: hidden;
+            margin: 20px 0;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+        }
+        .browser-toolbar {
+            background: #333;
+            padding: 10px 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .browser-dots {
+            display: flex;
+            gap: 8px;
+        }
+        .browser-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+        .browser-dot.red { background: #ff5f57; }
+        .browser-dot.yellow { background: #febc2e; }
+        .browser-dot.green { background: #28c840; }
+        .browser-tabs {
+            display: flex;
+            gap: 5px;
+            margin-right: 20px;
+        }
+        .browser-tab {
+            background: #444;
+            padding: 8px 20px;
+            border-radius: 8px 8px 0 0;
+            font-size: 0.85em;
+            color: #aaa;
+        }
+        .browser-tab.active {
+            background: #1e1e1e;
+            color: #fff;
+        }
+        .devtools-panel {
+            display: flex;
+            background: #1e1e1e;
+            min-height: 400px;
+        }
+        .devtools-sidebar {
+            width: 200px;
+            background: #252526;
+            border-left: 1px solid #3c3c3c;
+            padding: 10px 0;
+        }
+        .devtools-sidebar-item {
+            padding: 8px 15px;
+            color: #aaa;
+            cursor: pointer;
+            font-size: 0.9em;
+        }
+        .devtools-sidebar-item:hover {
+            background: #333;
+        }
+        .devtools-sidebar-item.active {
+            background: #094771;
+            color: #fff;
+        }
+        .devtools-content {
+            flex: 1;
+            padding: 15px;
+            overflow: auto;
+        }
+        .network-row {
+            display: flex;
+            padding: 8px 10px;
+            border-bottom: 1px solid #333;
+            font-size: 0.85em;
+            direction: ltr;
+        }
+        .network-row:hover {
+            background: #333;
+        }
+        .network-row.header {
+            background: #252526;
+            font-weight: bold;
+            color: #888;
+        }
+        .network-col {
+            padding: 0 10px;
+        }
+        .network-col.name { width: 250px; color: #79c0ff; }
+        .network-col.status { width: 80px; }
+        .network-col.type { width: 100px; color: #888; }
+        .network-col.size { width: 80px; color: #888; }
+        .status-200 { color: #44ff44; }
+        .status-400 { color: #ff4444; }
+        .arrow {
+            display: inline-block;
+            margin: 0 10px;
+            color: #00d4ff;
+        }
+        ul {
+            padding-right: 25px;
+        }
+        li {
+            margin: 8px 0;
+            line-height: 1.8;
+        }
+        .badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            font-weight: bold;
+        }
+        .badge-get { background: #61affe; color: #fff; }
+        .badge-post { background: #49cc90; color: #fff; }
+        .badge-put { background: #fca130; color: #fff; }
+        .divider {
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #00d4ff, transparent);
+            margin: 40px 0;
+        }
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        .summary-card {
+            background: rgba(0,0,0,0.3);
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid #333;
+        }
+        .summary-card h4 {
+            color: #00d4ff;
+            margin-top: 0;
+        }
+        .checklist {
+            list-style: none;
+            padding: 0;
+        }
+        .checklist li {
+            padding: 10px 0;
+            border-bottom: 1px solid #333;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .checklist li:last-child {
+            border-bottom: none;
+        }
+        .check-icon {
+            width: 24px;
+            height: 24px;
+            border: 2px solid #555;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>دليل تصحيح أخطاء نموذج شركة غير مسجلة (Type 5)</h1>
+        <p class="subtitle">Debugging Guide for Unregistered Company Form</p>
+
+        <!-- Step 1: Open DevTools -->
+        <div class="step">
+            <div class="step-number">1</div>
+            <h2>فتح أدوات المطور (DevTools)</h2>
+
+            <div class="instruction">
+                <p>اضغط على <span class="keyboard">F12</span> أو <span class="keyboard">Ctrl + Shift + I</span> لفتح أدوات المطور</p>
+            </div>
+
+            <div class="browser-mockup">
+                <div class="browser-toolbar">
+                    <div class="browser-dots">
+                        <div class="browser-dot red"></div>
+                        <div class="browser-dot yellow"></div>
+                        <div class="browser-dot green"></div>
+                    </div>
+                    <div class="browser-tabs">
+                        <div class="browser-tab">Elements</div>
+                        <div class="browser-tab">Console</div>
+                        <div class="browser-tab active">Network</div>
+                        <div class="browser-tab">Sources</div>
+                    </div>
+                </div>
+                <div class="devtools-panel">
+                    <div class="devtools-content">
+                        <div class="network-row header">
+                            <div class="network-col name">Name</div>
+                            <div class="network-col status">Status</div>
+                            <div class="network-col type">Type</div>
+                            <div class="network-col size">Size</div>
+                        </div>
+                        <div class="network-row">
+                            <div class="network-col name">plaintiffs</div>
+                            <div class="network-col status status-200">200</div>
+                            <div class="network-col type">xhr</div>
+                            <div class="network-col size">2.3 KB</div>
+                        </div>
+                        <div class="network-row">
+                            <div class="network-col name">plaintiff-types</div>
+                            <div class="network-col status status-200">200</div>
+                            <div class="network-col type">xhr</div>
+                            <div class="network-col size">1.1 KB</div>
+                        </div>
+                    </div>
+                    <div class="devtools-sidebar">
+                        <div class="devtools-sidebar-item">Headers</div>
+                        <div class="devtools-sidebar-item active">Preview</div>
+                        <div class="devtools-sidebar-item">Response</div>
+                        <div class="devtools-sidebar-item">Timing</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 2: Check CREATE Request -->
+        <div class="step">
+            <div class="step-number">2</div>
+            <h2>فحص طلب الإنشاء (CREATE) - عند إضافة مدعي جديد</h2>
+
+            <div class="instruction">
+                <p>1. أنشئ مدعي جديد من نوع <strong>"شركة غير مسجلة"</strong></p>
+                <p>2. املأ جميع الحقول (رقم السجل، اسم الشركة، الدولة، المدينة، الوصف)</p>
+                <p>3. اضغط حفظ وراقب تبويب Network</p>
+            </div>
+
+            <h3>ابحث عن الطلب:</h3>
+            <div class="code-block">
+                <span class="badge badge-post">POST</span> /api/case-requests/{requestId}/plaintiffs
+            </div>
+
+            <h3>افحص Request Body (Payload):</h3>
+            <div class="code-block">
+{
+  <span class="key">"plaintiffTypeId"</span>: <span class="number">5</span>,
+  <span class="key">"commercialRegNumber"</span>: <span class="value">"1234567890"</span>,
+  <span class="key">"companyName"</span>: <span class="value">"اسم الشركة"</span>,
+
+  <span class="comment">// === الحقول المطلوب التحقق منها ===</span>
+  <span class="key">"countryId"</span>: <span class="number">1</span>,                    <span class="comment">// <-- هل موجود وليس null؟</span>
+  <span class="key">"unregisteredCompanyCity"</span>: <span class="value">"الرياض"</span>,   <span class="comment">// <-- هل موجود؟</span>
+  <span class="key">"description"</span>: <span class="value">"وصف الشركة"</span>           <span class="comment">// <-- هل موجود؟</span>
+}
+            </div>
+
+            <div class="error-box">
+                <strong>إذا كانت القيم null أو غير موجودة:</strong>
+                <p>المشكلة في Frontend - الحقول لا ترسل للـ Backend</p>
+            </div>
+
+            <div class="success-box">
+                <strong>إذا كانت القيم موجودة وصحيحة:</strong>
+                <p>انتقل للخطوة 3 لفحص الاستجابة</p>
+            </div>
+        </div>
+
+        <!-- Step 3: Check CREATE Response -->
+        <div class="step">
+            <div class="step-number">3</div>
+            <h2>فحص استجابة الإنشاء (CREATE Response)</h2>
+
+            <div class="instruction">
+                <p>في نفس الطلب، اضغط على تبويب <strong>Response</strong> أو <strong>Preview</strong></p>
+            </div>
+
+            <h3>افحص Response Body:</h3>
+            <div class="code-block">
+{
+  <span class="key">"id"</span>: <span class="number">123</span>,
+  <span class="key">"plaintiffTypeId"</span>: <span class="number">5</span>,
+  <span class="key">"commercialRegNumber"</span>: <span class="value">"1234567890"</span>,
+  <span class="key">"companyName"</span>: <span class="value">"اسم الشركة"</span>,
+
+  <span class="comment">// === هل رجعت هذه القيم من الـ Backend؟ ===</span>
+  <span class="key">"countryId"</span>: <span class="number">1</span>,                    <span class="comment">// <-- ما هي القيمة؟</span>
+  <span class="key">"unregisteredCompanyCity"</span>: <span class="value">"الرياض"</span>,   <span class="comment">// <-- هل موجودة؟</span>
+  <span class="key">"description"</span>: <span class="value">"وصف الشركة"</span>           <span class="comment">// <-- هل موجودة؟</span>
+}
+            </div>
+
+            <div class="error-box">
+                <strong>إذا كانت القيم null في الاستجابة:</strong>
+                <p>المشكلة في Backend - البيانات لا تُحفظ في قاعدة البيانات</p>
+            </div>
+        </div>
+
+        <!-- Step 4: Check GET Request -->
+        <div class="step">
+            <div class="step-number">4</div>
+            <h2>فحص طلب التحميل (GET) - عند تعديل مدعي موجود</h2>
+
+            <div class="instruction">
+                <p>1. افتح قائمة المدعين</p>
+                <p>2. اضغط على زر التعديل لمدعي من نوع "شركة غير مسجلة"</p>
+                <p>3. راقب تبويب Network</p>
+            </div>
+
+            <h3>ابحث عن الطلب:</h3>
+            <div class="code-block">
+                <span class="badge badge-get">GET</span> /api/plaintiffs/{plaintiffId}
+            </div>
+
+            <h3>افحص Response Body:</h3>
+            <div class="code-block">
+{
+  <span class="key">"id"</span>: <span class="number">123</span>,
+  <span class="key">"plaintiffTypeId"</span>: <span class="number">5</span>,
+
+  <span class="comment">// === تحقق من هذه القيم ===</span>
+  <span class="key">"countryId"</span>: <span class="number">???</span>,                   <span class="comment">// <-- ما هي القيمة الفعلية؟</span>
+  <span class="key">"unregisteredCompanyCity"</span>: <span class="value">"???"</span>,     <span class="comment">// <-- ما هي القيمة؟</span>
+  <span class="key">"description"</span>: <span class="value">"???"</span>                  <span class="comment">// <-- ما هي القيمة؟</span>
+}
+            </div>
+
+            <div class="highlight-box">
+                <strong>انتبه لقيمة countryId:</strong>
+                <p>إذا كانت القيمة مثلاً <code>countryId: 100</code> ولكن قائمة الدول في الـ Frontend تحتوي على IDs من 1-7 فقط، فالقائمة المنسدلة ستظهر فارغة!</p>
+            </div>
+        </div>
+
+        <!-- Step 5: Check Console -->
+        <div class="step">
+            <div class="step-number">5</div>
+            <h2>فحص Console للتحقق من الـ Patching</h2>
+
+            <div class="instruction">
+                <p>افتح تبويب <strong>Console</strong> في DevTools وابحث عن هذه الرسائل:</p>
+            </div>
+
+            <div class="code-block">
+<span class="comment">=== PATCHING FORM WITH PLAINTIFF ===</span>
+Plaintiff data: {id: 123, plaintiffTypeId: 5, countryId: 1, ...}
+plaintiffTypeId from data: 5
+
+<span class="comment">=== TYPE CHANGED ===</span>
+New typeId: 5 typeof: number
+isPatching: true   <span class="comment">// <-- يجب أن يكون true</span>
+            </div>
+
+            <div class="error-box">
+                <strong>إذا كان isPatching: false:</strong>
+                <p>الـ Flag لا يعمل بشكل صحيح ويتم مسح الحقول</p>
+            </div>
+
+            <div class="success-box">
+                <strong>إذا كان isPatching: true:</strong>
+                <p>الـ Reset يتم تخطيه بشكل صحيح</p>
+            </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- Summary -->
+        <h2 style="text-align: center; color: #ffd700;">ملخص الحقول المطلوب فحصها</h2>
+
+        <table class="field-table">
+            <thead>
+                <tr>
+                    <th>Field (Arabic)</th>
+                    <th>Form Control</th>
+                    <th>JSON Property (Request)</th>
+                    <th>JSON Property (Response)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>رقم السجل التجاري</td>
+                    <td><code>commercialRegNumber</code></td>
+                    <td><code>commercialRegNumber</code></td>
+                    <td><code>commercialRegNumber</code></td>
+                </tr>
+                <tr>
+                    <td>اسم الشركة</td>
+                    <td><code>unregisteredCompanyName</code></td>
+                    <td><code>companyName</code></td>
+                    <td><code>companyName</code></td>
+                </tr>
+                <tr style="background: rgba(255,215,0,0.1);">
+                    <td><strong>الدولة</strong></td>
+                    <td><code>unregisteredCountryId</code></td>
+                    <td><code>countryId</code></td>
+                    <td><code>countryId</code></td>
+                </tr>
+                <tr style="background: rgba(255,215,0,0.1);">
+                    <td><strong>المدينة</strong></td>
+                    <td><code>unregisteredCity</code></td>
+                    <td><code>unregisteredCompanyCity</code></td>
+                    <td><code>unregisteredCompanyCity</code></td>
+                </tr>
+                <tr style="background: rgba(255,215,0,0.1);">
+                    <td><strong>وصف تقريبي</strong></td>
+                    <td><code>unregisteredDescription</code></td>
+                    <td><code>description</code></td>
+                    <td><code>description</code></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="divider"></div>
+
+        <!-- Checklist -->
+        <h2 style="text-align: center; color: #00d4ff;">قائمة التحقق</h2>
+
+        <div class="summary-grid">
+            <div class="summary-card">
+                <h4>عند الإنشاء (CREATE)</h4>
+                <ul class="checklist">
+                    <li><span class="check-icon">☐</span> Request يحتوي على countryId</li>
+                    <li><span class="check-icon">☐</span> Request يحتوي على unregisteredCompanyCity</li>
+                    <li><span class="check-icon">☐</span> Request يحتوي على description</li>
+                    <li><span class="check-icon">☐</span> Response يرجع نفس القيم</li>
+                </ul>
+            </div>
+            <div class="summary-card">
+                <h4>عند التحميل (GET)</h4>
+                <ul class="checklist">
+                    <li><span class="check-icon">☐</span> Response يحتوي على countryId (قيمة رقمية)</li>
+                    <li><span class="check-icon">☐</span> Response يحتوي على unregisteredCompanyCity</li>
+                    <li><span class="check-icon">☐</span> Response يحتوي على description</li>
+                    <li><span class="check-icon">☐</span> countryId يطابق ID في قائمة الدول (1-7)</li>
+                </ul>
+            </div>
+            <div class="summary-card">
+                <h4>في Console</h4>
+                <ul class="checklist">
+                    <li><span class="check-icon">☐</span> isPatching = true عند التعديل</li>
+                    <li><span class="check-icon">☐</span> Plaintiff data يحتوي على القيم</li>
+                    <li><span class="check-icon">☐</span> لا توجد أخطاء JavaScript</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="highlight-box" style="text-align: center;">
+            <h3>بعد الفحص، أخبرني:</h3>
+            <p>1. هل البيانات موجودة في POST Request؟</p>
+            <p>2. هل البيانات ترجع في GET Response؟</p>
+            <p>3. ما هي قيمة countryId في الاستجابة؟</p>
+            <p>4. هل isPatching = true في Console؟</p>
+        </div>
+
+    </div>
+</body>
+</html>

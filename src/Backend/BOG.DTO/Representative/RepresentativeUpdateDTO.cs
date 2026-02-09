@@ -208,6 +208,26 @@ public class RepresentativeUpdateDTO
 
     #endregion
 
+    #region Lawyer License Data (بيانات رخصة المحاماة)
+
+    /// <summary>
+    /// Lawyer license number (رقم رخصة المحاماة).
+    /// </summary>
+    [StringLength(50)]
+    public string? LawyerLicenseNumber { get; set; }
+
+    /// <summary>
+    /// Lawyer license date (تاريخ الرخصة).
+    /// </summary>
+    public DateTime? LawyerLicenseDate { get; set; }
+
+    /// <summary>
+    /// Lawyer license expiry date (تاريخ انتهاء الرخصة).
+    /// </summary>
+    public DateTime? LawyerLicenseExpiryDate { get; set; }
+
+    #endregion
+
     #region Authorization Document
 
     /// <summary>
@@ -280,6 +300,64 @@ public class RepresentativeUpdateDTO
     /// </summary>
     [StringLength(20)]
     public string? GuardianshipType { get; set; }
+
+    #endregion
+
+    #region CompanyRepresentative Data (ممثل الشركة - Type 6)
+
+    /// <summary>
+    /// Representation document source (مصدر مستند التمثيل).
+    /// </summary>
+    [StringLength(200)]
+    public string? RepresentationDocSource { get; set; }
+
+    /// <summary>
+    /// Representative capacity (صفة الممثل).
+    /// </summary>
+    [StringLength(100)]
+    public string? RepresentativeCapacity { get; set; }
+
+    /// <summary>
+    /// Representation document type (نوع مستند التمثيل).
+    /// </summary>
+    [StringLength(100)]
+    public string? RepresentationDocType { get; set; }
+
+    /// <summary>
+    /// Representation document number (رقم مستند التمثيل).
+    /// </summary>
+    [StringLength(20)]
+    public string? RepresentationDocNumber { get; set; }
+
+    #endregion
+
+    #region AgencyRepresentative Data (ممثل الجهة - Type 7)
+
+    /// <summary>
+    /// Representation letter number (رقم خطاب التمثيل).
+    /// </summary>
+    [StringLength(20)]
+    public string? RepresentationLetterNumber { get; set; }
+
+    /// <summary>
+    /// Representation letter date (تاريخ خطاب التمثيل).
+    /// </summary>
+    public DateTime? RepresentationLetterDate { get; set; }
+
+    /// <summary>
+    /// Representation letter source (مصدر خطاب التمثيل).
+    /// </summary>
+    [StringLength(200)]
+    public string? RepresentationLetterSource { get; set; }
+
+    #endregion
+
+    #region Attachments
+
+    /// <summary>
+    /// Attachments (صورة التمثيل).
+    /// </summary>
+    public List<RepresentativeAttachmentDTO>? Attachments { get; set; }
 
     #endregion
 }

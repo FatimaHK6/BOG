@@ -60,6 +60,10 @@ public class RepresentativesController : ControllerBase
     {
         try
         {
+            // Debug logging - check what's being received
+            _logger.LogInformation("Creating representative - Received DTO: ResidenceRegionId={ResRegion}, ResidenceCityId={ResCity}, EmploymentStatus={EmpStatus}, LawyerLicenseNumber={LicNum}, AuthorizationNumber={AuthNum}",
+                dto.ResidenceRegionId, dto.ResidenceCityId, dto.EmploymentStatus, dto.LawyerLicenseNumber, dto.AuthorizationNumber);
+
             var representative = await _representativeBL.CreateAsync(plaintiffId, dto, cancellationToken);
             _logger.LogInformation("Representative created with ID: {RepId} for plaintiff {PlaintiffId}",
                 representative.Id, plaintiffId);

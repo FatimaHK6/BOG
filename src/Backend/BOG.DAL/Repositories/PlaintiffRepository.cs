@@ -142,6 +142,9 @@ public class PlaintiffRepository : Repository<Plaintiff>, IPlaintiffRepository
                 .ThenInclude(r => r.RepresentativeType)
             .Include(p => p.Representatives.Where(r => !r.IsDeleted && r.IsActive))
                 .ThenInclude(r => r.DataSource)
+            .Include(p => p.Representatives.Where(r => !r.IsDeleted && r.IsActive))
+                .ThenInclude(r => r.Attachments.Where(a => !a.IsDeleted && a.IsActive))
+                    .ThenInclude(a => a.AttachmentType)
             .Include(p => p.Attachments.Where(a => !a.IsDeleted && a.IsActive))
                 .ThenInclude(a => a.AttachmentType)
             .FirstOrDefaultAsync(p => p.Id == id && !p.IsDeleted && p.IsActive, cancellationToken);

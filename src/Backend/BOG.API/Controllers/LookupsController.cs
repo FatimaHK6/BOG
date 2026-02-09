@@ -142,6 +142,164 @@ public class LookupsController : ControllerBase
     }
 
     /// <summary>
+    /// Gets all active regions.
+    /// </summary>
+    [HttpGet("regions")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public async Task<ActionResult> GetRegions(CancellationToken cancellationToken)
+    {
+        try
+        {
+            var regions = await _context.Regions
+                .AsNoTracking()
+                .Where(r => r.IsActive && !r.IsDeleted)
+                .OrderBy(r => r.NameAr)
+                .Select(r => new
+                {
+                    r.Id,
+                    r.Name,
+                    r.NameAr,
+                    r.Code
+                })
+                .ToListAsync(cancellationToken);
+
+            return Ok(regions);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error retrieving regions");
+            return StatusCode(StatusCodes.Status500InternalServerError,
+                new { message = "حدث خطأ أثناء استرجاع المناطق" });
+        }
+    }
+
+    /// <summary>
+    /// Gets cities by region ID.
+    /// </summary>
+    [HttpGet("regions/{regionId}/cities")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public async Task<ActionResult> GetCitiesByRegion([FromRoute] int regionId, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var cities = await _context.Cities
+                .AsNoTracking()
+                .Where(c => c.RegionId == regionId && c.IsActive && !c.IsDeleted)
+                .OrderBy(c => c.NameAr)
+                .Select(c => new
+                {
+                    c.Id,
+                    c.Name,
+                    c.NameAr,
+                    c.Code,
+                    c.RegionId
+                })
+                .ToListAsync(cancellationToken);
+
+            return Ok(cities);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error retrieving cities for region {RegionId}", regionId);
+            return StatusCode(StatusCodes.Status500InternalServerError,
+                new { message = "حدث خطأ أثناء استرجاع المدن" });
+        }
+    }
+
+    /// <summary>
+    /// Gets all active plaintiff types.
+    /// </summary>
+    [HttpGet("plaintiff-types")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public async Task<ActionResult> GetPlaintiffTypes(CancellationToken cancellationToken)
+    {
+        try
+        {
+            var types = await _context.PlaintiffTypes
+                .AsNoTracking()
+                .Where(t => t.IsActive && !t.IsDeleted)
+                .OrderBy(t => t.Id)
+                .Select(t => new
+                {
+                    t.Id,
+                    t.Name,
+                    t.NameAr
+                })
+                .ToListAsync(cancellationToken);
+
+            return Ok(types);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error retrieving plaintiff types");
+            return StatusCode(StatusCodes.Status500InternalServerError,
+                new { message = "حدث خطأ أثناء استرجاع أنواع المدعين" });
+        }
+    }
+
+    /// <summary>
+    /// Gets all active identity types.
+    /// </summary>
+    [HttpGet("identity-types")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public async Task<ActionResult> GetIdentityTypes(CancellationToken cancellationToken)
+    {
+        try
+        {
+            var types = await _context.IdentityTypes
+                .AsNoTracking()
+                .Where(t => t.IsActive && !t.IsDeleted)
+                .OrderBy(t => t.Id)
+                .Select(t => new
+                {
+                    t.Id,
+                    t.Name,
+                    t.NameAr
+                })
+                .ToListAsync(cancellationToken);
+
+            return Ok(types);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error retrieving identity types");
+            return StatusCode(StatusCodes.Status500InternalServerError,
+                new { message = "حدث خطأ أثناء استرجاع أنواع الهوية" });
+        }
+    }
+
+    /// <summary>
+    /// Gets all active representative types.
+    /// </summary>
+    [HttpGet("representative-types")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public async Task<ActionResult> GetRepresentativeTypes(CancellationToken cancellationToken)
+    {
+        try
+        {
+            var types = await _context.RepresentativeTypes
+                .AsNoTracking()
+                .Where(t => t.IsActive && !t.IsDeleted)
+                .OrderBy(t => t.Id)
+                .Select(t => new
+                {
+                    t.Id,
+                    t.Name,
+                    t.NameAr
+                })
+                .ToListAsync(cancellationToken);
+
+            return Ok(types);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error retrieving representative types");
+            return StatusCode(StatusCodes.Status500InternalServerError,
+                new { message = "حدث خطأ أثناء استرجاع أنواع الممثلين" });
+        }
+    }
+
+    /// <summary>
     /// Gets all active countries.
     /// </summary>
     [HttpGet("countries")]

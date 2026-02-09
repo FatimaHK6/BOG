@@ -18,27 +18,22 @@ public class RepresentativeBL : IRepresentativeBL
     private readonly IAbsherService _absherService;
     private readonly IUnitOfWork _unitOfWork;
 
-    // Representative type to plaintiff type mapping per SRS table 2.16
-    // Types: 1-Lawyer, 2-Liquidator, 3-BankruptcyTrustee, 4-JudicialCustodian,
-    //        5-CompanyRep, 6-Guardian, 7-GovRep, 8-Conservator, 9-WaqfInspector
+    // Representative type to plaintiff type mapping per plaintiff-user-stories-plan.html table 5.2
+    // DB Representative Types:
+    // 1: وكيل (Agent), 2: ولي (Guardian), 3: وصي (Custodian), 4: ناظر (Executor)
+    // 5: ممثل الورثة (HeirRepresentative), 6: ممثل الشركة (CompanyRepresentative)
+    // 7: ممثل الجهة (AgencyRepresentative), 8: أمين التفليسة (Trustee)
+    // 9: ممثل نظامي (LegalRepresentative), 10: مصفي (Liquidator), 11: حارس قضائي (JudicialCustodian)
     private static readonly Dictionary<int, int[]> AllowedRepresentativeTypes = new()
     {
-        // فرد Individual (1): محامي(1)، ولي(6)، وصي(8)
-        [1] = new[] { 1, 6, 8 },
-        // فرد بدون هوية IndividualNoId (2): محامي(1)، ولي(6)، وصي(8)
-        [2] = new[] { 1, 6, 8 },
-        // صاحب مؤسسة BusinessOwner (3): محامي(1) only
-        [3] = new[] { 1 },
-        // شركة مسجلة RegisteredCompany (4): محامي(1)، مصفي(2)، أمين تفليسة(3)، حارس قضائي(4)، ممثل نظامي(5)
-        [4] = new[] { 1, 2, 3, 4, 5 },
-        // شركة غير مسجلة UnregisteredCompany (5): محامي(1)، مصفي(2)، أمين تفليسة(3)، حارس قضائي(4)، ممثل نظامي(5)
-        [5] = new[] { 1, 2, 3, 4, 5 },
-        // جهة حكومية GovernmentAgency (6): ممثل جهة حكومية(7) only
-        [6] = new[] { 7 },
-        // جمعية/مؤسسة أهلية NGO (7): محامي(1)، ممثل نظامي(5)
-        [7] = new[] { 1, 5 },
-        // وقف Waqf (8): محامي(1)، ناظر(9)
-        [8] = new[] { 1, 9 }
+        [1] = new[] { 1, 2, 3, 8 },            // فرد: وكيل، ولي، وصي، أمين تفليسة
+        [2] = new[] { 1, 2, 3, 4, 7, 8, 9, 10, 11 }, // فرد بدون هوية: جميع الأنواع
+        [3] = new[] { 1, 2, 8 },               // صاحب مؤسسة: وكيل، ولي، أمين تفليسة
+        [4] = new[] { 1, 8, 9, 10, 11 },       // شركة مسجلة: وكيل، أمين تفليسة، ممثل نظامي، مصفي، حارس قضائي
+        [5] = new[] { 1 },                     // شركة غير مسجلة: وكيل فقط
+        [6] = new[] { 1, 7 },                  // جهة حكومية: وكيل، ممثل الجهة
+        [7] = new[] { 1 },                     // جمعية/مؤسسة أهلية: وكيل فقط
+        [8] = new[] { 1, 4 }                   // وقف: وكيل، ناظر
     };
 
     public RepresentativeBL(
@@ -83,6 +78,87 @@ public class RepresentativeBL : IRepresentativeBL
         if (!string.IsNullOrEmpty(dto.IdentityNumber) && dto.IdentityNumber == plaintiff.IdentityNumber)
             throw new InvalidOperationException("ERR012: رقم هوية الممثّل نفس رقم هوية المدّعي");
 
+        // CompanyRepresentative (ممثل الشركة - type 6): Document fields required
+        if (dto.RepresentativeTypeId == 6)
+        {
+            if (string.IsNullOrWhiteSpace(dto.RepresentationDocSource))
+                throw new InvalidOperationException("مصدر مستند التمثيل مطلوب لممثل الشركة");
+            if (string.IsNullOrWhiteSpace(dto.RepresentativeCapacity))
+                throw new InvalidOperationException("صفة الممثل مطلوبة لممثل الشركة");
+            if (string.IsNullOrWhiteSpace(dto.RepresentationDocType))
+                throw new InvalidOperationException("نوع مستند التمثيل مطلوب لممثل الشركة");
+            if (string.IsNullOrWhiteSpace(dto.RepresentationDocNumber))
+                throw new InvalidOperationException("رقم مستند التمثيل مطلوب لممثل الشركة");
+        }
+
+        // LegalRepresentative (ممثل نظامي - type 9): Document fields required (same as type 6)
+        if (dto.RepresentativeTypeId == 9)
+        {
+            if (string.IsNullOrWhiteSpace(dto.RepresentationDocSource))
+                throw new InvalidOperationException("مصدر مستند التمثيل مطلوب لممثل نظامي");
+            if (string.IsNullOrWhiteSpace(dto.RepresentativeCapacity))
+                throw new InvalidOperationException("صفة الممثل مطلوبة لممثل نظامي");
+            if (string.IsNullOrWhiteSpace(dto.RepresentationDocType))
+                throw new InvalidOperationException("نوع مستند التمثيل مطلوب لممثل نظامي");
+            if (string.IsNullOrWhiteSpace(dto.RepresentationDocNumber))
+                throw new InvalidOperationException("رقم مستند التمثيل مطلوب لممثل نظامي");
+        }
+
+        // AgencyRepresentative (ممثل الجهة - type 7): Letter fields required
+        if (dto.RepresentativeTypeId == 7)
+        {
+            if (string.IsNullOrWhiteSpace(dto.RepresentationLetterNumber))
+                throw new InvalidOperationException("رقم خطاب التمثيل مطلوب لممثل الجهة");
+            if (!dto.RepresentationLetterDate.HasValue)
+                throw new InvalidOperationException("تاريخ خطاب التمثيل مطلوب لممثل الجهة");
+            if (string.IsNullOrWhiteSpace(dto.RepresentationLetterSource))
+                throw new InvalidOperationException("مصدر خطاب التمثيل مطلوب لممثل الجهة");
+        }
+
+        // Liquidator (مصفي - type 10): Decision fields required
+        if (dto.RepresentativeTypeId == 10)
+        {
+            if (string.IsNullOrWhiteSpace(dto.DecisionNumber))
+                throw new InvalidOperationException("رقم القرار مطلوب لمصفي");
+            if (!dto.DecisionDate.HasValue)
+                throw new InvalidOperationException("تاريخ القرار مطلوب لمصفي");
+            if (string.IsNullOrWhiteSpace(dto.DecisionSource))
+                throw new InvalidOperationException("مصدر القرار مطلوب لمصفي");
+        }
+
+        // JudicialCustodian (حارس قضائي - type 11): Decision fields required (same as type 10/4)
+        if (dto.RepresentativeTypeId == 11)
+        {
+            if (string.IsNullOrWhiteSpace(dto.DecisionNumber))
+                throw new InvalidOperationException("رقم القرار / الدعوى مطلوب لحارس قضائي");
+            if (!dto.DecisionDate.HasValue)
+                throw new InvalidOperationException("تاريخ القرار / الدعوى مطلوب لحارس قضائي");
+            if (string.IsNullOrWhiteSpace(dto.DecisionSource))
+                throw new InvalidOperationException("مصدر القرار / الحكم مطلوب لحارس قضائي");
+        }
+
+        // Executor (ناظر - type 4): Decision fields required
+        if (dto.RepresentativeTypeId == 4)
+        {
+            if (string.IsNullOrWhiteSpace(dto.DecisionNumber))
+                throw new InvalidOperationException("رقم القرار مطلوب لنوع الممثل ناظر");
+            if (!dto.DecisionDate.HasValue)
+                throw new InvalidOperationException("تاريخ القرار مطلوب لنوع الممثل ناظر");
+            if (string.IsNullOrWhiteSpace(dto.DecisionSource))
+                throw new InvalidOperationException("مصدر القرار مطلوب لنوع الممثل ناظر");
+        }
+
+        // Custodian (وصي - type 3): Deed fields required
+        if (dto.RepresentativeTypeId == 3)
+        {
+            if (string.IsNullOrWhiteSpace(dto.DeedNumber))
+                throw new InvalidOperationException("رقم الصك مطلوب لنوع الممثل وصي");
+            if (!dto.DeedDate.HasValue)
+                throw new InvalidOperationException("تاريخ الصك مطلوب لنوع الممثل وصي");
+            if (string.IsNullOrWhiteSpace(dto.DeedSource))
+                throw new InvalidOperationException("مصدر الصك مطلوب لنوع الممثل وصي");
+        }
+
         // ERR008: Check for duplicate representative
         var exists = await _representativeRepository.ExistsByIdentityAsync(plaintiffId, dto.IdentityNumber, cancellationToken);
         if (exists)
@@ -126,8 +202,36 @@ public class RepresentativeBL : IRepresentativeBL
             IdentityIssueDate = dto.IdentityIssueDate,
             IdentityExpiryDate = dto.IdentityExpiryDate,
             DataSourceId = dataSourceId,
+            // Residence Address (عنوان السكن)
+            ResidenceRegionId = dto.ResidenceRegionId,
+            ResidenceCityId = dto.ResidenceCityId,
+            ResidenceDistrict = dto.ResidenceDistrict,
+            ResidenceStreet = dto.ResidenceStreet,
+            ResidenceBuildingNumber = dto.ResidenceBuildingNumber,
+            ResidenceUnitNumber = dto.ResidenceUnitNumber,
+            ResidencePostalCode = dto.ResidencePostalCode,
+            ResidenceAdditionalCode = dto.ResidenceAdditionalCode,
+            // Employment Data (بيانات العمل)
+            EmploymentStatus = dto.EmploymentStatus,
+            Employer = dto.Employer,
+            Profession = dto.Profession,
+            // Work Address (عنوان العمل)
+            WorkRegionId = dto.WorkRegionId,
+            WorkCityId = dto.WorkCityId,
+            WorkDistrict = dto.WorkDistrict,
+            WorkStreet = dto.WorkStreet,
+            WorkBuildingNumber = dto.WorkBuildingNumber,
+            WorkUnitNumber = dto.WorkUnitNumber,
+            WorkPostalCode = dto.WorkPostalCode,
+            WorkAdditionalCode = dto.WorkAdditionalCode,
+            // Contact Info
             MobileNumber = dto.MobileNumber,
             Email = dto.Email,
+            // Lawyer License (بيانات رخصة المحاماة)
+            LawyerLicenseNumber = dto.LawyerLicenseNumber,
+            LawyerLicenseDate = dto.LawyerLicenseDate,
+            LawyerLicenseExpiryDate = dto.LawyerLicenseExpiryDate,
+            // Authorization fields
             AuthorizationNumber = dto.AuthorizationNumber,
             AuthorizationDate = dto.AuthorizationDate,
             AuthorizationSource = dto.AuthorizationSource,
@@ -141,9 +245,41 @@ public class RepresentativeBL : IRepresentativeBL
             DeedDate = dto.DeedDate,
             DeedSource = dto.DeedSource,
             GuardianshipType = dto.GuardianshipType,
+            // CompanyRepresentative fields
+            RepresentationDocSource = dto.RepresentationDocSource,
+            RepresentativeCapacity = dto.RepresentativeCapacity,
+            RepresentationDocType = dto.RepresentationDocType,
+            RepresentationDocNumber = dto.RepresentationDocNumber,
+            // AgencyRepresentative fields
+            RepresentationLetterNumber = dto.RepresentationLetterNumber,
+            RepresentationLetterDate = dto.RepresentationLetterDate,
+            RepresentationLetterSource = dto.RepresentationLetterSource,
             IsActive = true,
-            CreatedDate = DateTime.UtcNow
+            CreatedDate = DateTime.UtcNow,
+            Attachments = new List<RepresentativeAttachment>()
         };
+
+        // Add attachments for representative (صورة التمثيل)
+        if (dto.Attachments != null && dto.Attachments.Count > 0)
+        {
+            foreach (var attachmentDto in dto.Attachments)
+            {
+                var storedFileName = $"rep_{Guid.NewGuid()}{Path.GetExtension(attachmentDto.FileName)}";
+                var attachment = new RepresentativeAttachment
+                {
+                    AttachmentTypeId = attachmentDto.AttachmentTypeId,
+                    FileName = attachmentDto.FileName,
+                    StoredFileName = storedFileName,
+                    ContentType = attachmentDto.ContentType,
+                    FileSizeBytes = attachmentDto.FileSizeBytes,
+                    Description = attachmentDto.Description,
+                    UploadDate = DateTime.UtcNow,
+                    IsActive = true,
+                    CreatedDate = DateTime.UtcNow
+                };
+                representative.Attachments.Add(attachment);
+            }
+        }
 
         await _representativeRepository.AddAsync(representative, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
@@ -176,9 +312,39 @@ public class RepresentativeBL : IRepresentativeBL
             if (dto.IdentityExpiryDate.HasValue) representative.IdentityExpiryDate = dto.IdentityExpiryDate;
         }
 
+        // Residence Address (عنوان السكن)
+        if (dto.ResidenceRegionId.HasValue) representative.ResidenceRegionId = dto.ResidenceRegionId;
+        if (dto.ResidenceCityId.HasValue) representative.ResidenceCityId = dto.ResidenceCityId;
+        if (dto.ResidenceDistrict != null) representative.ResidenceDistrict = dto.ResidenceDistrict;
+        if (dto.ResidenceStreet != null) representative.ResidenceStreet = dto.ResidenceStreet;
+        if (dto.ResidenceBuildingNumber != null) representative.ResidenceBuildingNumber = dto.ResidenceBuildingNumber;
+        if (dto.ResidenceUnitNumber != null) representative.ResidenceUnitNumber = dto.ResidenceUnitNumber;
+        if (dto.ResidencePostalCode != null) representative.ResidencePostalCode = dto.ResidencePostalCode;
+        if (dto.ResidenceAdditionalCode != null) representative.ResidenceAdditionalCode = dto.ResidenceAdditionalCode;
+
+        // Employment Data (بيانات العمل)
+        if (dto.EmploymentStatus != null) representative.EmploymentStatus = dto.EmploymentStatus;
+        if (dto.Employer != null) representative.Employer = dto.Employer;
+        if (dto.Profession != null) representative.Profession = dto.Profession;
+
+        // Work Address (عنوان العمل)
+        if (dto.WorkRegionId.HasValue) representative.WorkRegionId = dto.WorkRegionId;
+        if (dto.WorkCityId.HasValue) representative.WorkCityId = dto.WorkCityId;
+        if (dto.WorkDistrict != null) representative.WorkDistrict = dto.WorkDistrict;
+        if (dto.WorkStreet != null) representative.WorkStreet = dto.WorkStreet;
+        if (dto.WorkBuildingNumber != null) representative.WorkBuildingNumber = dto.WorkBuildingNumber;
+        if (dto.WorkUnitNumber != null) representative.WorkUnitNumber = dto.WorkUnitNumber;
+        if (dto.WorkPostalCode != null) representative.WorkPostalCode = dto.WorkPostalCode;
+        if (dto.WorkAdditionalCode != null) representative.WorkAdditionalCode = dto.WorkAdditionalCode;
+
         // Contact info can always be updated
         if (dto.MobileNumber != null) representative.MobileNumber = dto.MobileNumber;
         if (dto.Email != null) representative.Email = dto.Email;
+
+        // Lawyer License (بيانات رخصة المحاماة)
+        if (dto.LawyerLicenseNumber != null) representative.LawyerLicenseNumber = dto.LawyerLicenseNumber;
+        if (dto.LawyerLicenseDate.HasValue) representative.LawyerLicenseDate = dto.LawyerLicenseDate;
+        if (dto.LawyerLicenseExpiryDate.HasValue) representative.LawyerLicenseExpiryDate = dto.LawyerLicenseExpiryDate;
 
         // Authorization info
         if (dto.AuthorizationNumber != null) representative.AuthorizationNumber = dto.AuthorizationNumber;
@@ -197,7 +363,43 @@ public class RepresentativeBL : IRepresentativeBL
         if (dto.DeedSource != null) representative.DeedSource = dto.DeedSource;
         if (dto.GuardianshipType != null) representative.GuardianshipType = dto.GuardianshipType;
 
+        // CompanyRepresentative fields
+        if (dto.RepresentationDocSource != null) representative.RepresentationDocSource = dto.RepresentationDocSource;
+        if (dto.RepresentativeCapacity != null) representative.RepresentativeCapacity = dto.RepresentativeCapacity;
+        if (dto.RepresentationDocType != null) representative.RepresentationDocType = dto.RepresentationDocType;
+        if (dto.RepresentationDocNumber != null) representative.RepresentationDocNumber = dto.RepresentationDocNumber;
+        // AgencyRepresentative fields
+        if (dto.RepresentationLetterNumber != null) representative.RepresentationLetterNumber = dto.RepresentationLetterNumber;
+        if (dto.RepresentationLetterDate.HasValue) representative.RepresentationLetterDate = dto.RepresentationLetterDate;
+        if (dto.RepresentationLetterSource != null) representative.RepresentationLetterSource = dto.RepresentationLetterSource;
+
         representative.ModifiedDate = DateTime.UtcNow;
+
+        // Handle new attachments
+        if (dto.Attachments != null && dto.Attachments.Count > 0)
+        {
+            // Initialize collection if null
+            representative.Attachments ??= new List<RepresentativeAttachment>();
+
+            foreach (var attachmentDto in dto.Attachments)
+            {
+                var storedFileName = $"rep_{representative.Id}_{Guid.NewGuid()}{Path.GetExtension(attachmentDto.FileName)}";
+                var attachment = new RepresentativeAttachment
+                {
+                    RepresentativeId = representative.Id,
+                    AttachmentTypeId = attachmentDto.AttachmentTypeId,
+                    FileName = attachmentDto.FileName,
+                    StoredFileName = storedFileName,
+                    ContentType = attachmentDto.ContentType,
+                    FileSizeBytes = attachmentDto.FileSizeBytes,
+                    Description = attachmentDto.Description,
+                    UploadDate = DateTime.UtcNow,
+                    IsActive = true,
+                    CreatedDate = DateTime.UtcNow
+                };
+                representative.Attachments.Add(attachment);
+            }
+        }
 
         await _representativeRepository.UpdateAsync(representative, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
@@ -258,8 +460,36 @@ public class RepresentativeBL : IRepresentativeBL
             IdentityExpiryDate = rep.IdentityExpiryDate,
             DataSourceId = rep.DataSourceId,
             DataSourceName = rep.DataSource?.NameAr,
+            // Residence Address (عنوان السكن)
+            ResidenceRegionId = rep.ResidenceRegionId,
+            ResidenceCityId = rep.ResidenceCityId,
+            ResidenceDistrict = rep.ResidenceDistrict,
+            ResidenceStreet = rep.ResidenceStreet,
+            ResidenceBuildingNumber = rep.ResidenceBuildingNumber,
+            ResidenceUnitNumber = rep.ResidenceUnitNumber,
+            ResidencePostalCode = rep.ResidencePostalCode,
+            ResidenceAdditionalCode = rep.ResidenceAdditionalCode,
+            // Employment Data (بيانات العمل)
+            EmploymentStatus = rep.EmploymentStatus,
+            Employer = rep.Employer,
+            Profession = rep.Profession,
+            // Work Address (عنوان العمل)
+            WorkRegionId = rep.WorkRegionId,
+            WorkCityId = rep.WorkCityId,
+            WorkDistrict = rep.WorkDistrict,
+            WorkStreet = rep.WorkStreet,
+            WorkBuildingNumber = rep.WorkBuildingNumber,
+            WorkUnitNumber = rep.WorkUnitNumber,
+            WorkPostalCode = rep.WorkPostalCode,
+            WorkAdditionalCode = rep.WorkAdditionalCode,
+            // Contact Info
             MobileNumber = rep.MobileNumber,
             Email = rep.Email,
+            // Lawyer License (بيانات رخصة المحاماة)
+            LawyerLicenseNumber = rep.LawyerLicenseNumber,
+            LawyerLicenseDate = rep.LawyerLicenseDate,
+            LawyerLicenseExpiryDate = rep.LawyerLicenseExpiryDate,
+            // Authorization fields
             AuthorizationNumber = rep.AuthorizationNumber,
             AuthorizationDate = rep.AuthorizationDate,
             AuthorizationSource = rep.AuthorizationSource,
@@ -273,7 +503,32 @@ public class RepresentativeBL : IRepresentativeBL
             DeedDate = rep.DeedDate,
             DeedSource = rep.DeedSource,
             GuardianshipType = rep.GuardianshipType,
-            CreatedDate = rep.CreatedDate
+            // CompanyRepresentative fields
+            RepresentationDocSource = rep.RepresentationDocSource,
+            RepresentativeCapacity = rep.RepresentativeCapacity,
+            RepresentationDocType = rep.RepresentationDocType,
+            RepresentationDocNumber = rep.RepresentationDocNumber,
+            // AgencyRepresentative fields
+            RepresentationLetterNumber = rep.RepresentationLetterNumber,
+            RepresentationLetterDate = rep.RepresentationLetterDate,
+            RepresentationLetterSource = rep.RepresentationLetterSource,
+            CreatedDate = rep.CreatedDate,
+            // Attachments (صورة التمثيل)
+            Attachments = rep.Attachments?.Where(a => !a.IsDeleted && a.IsActive)
+                .Select(a => new RepresentativeAttachmentVM
+                {
+                    Id = a.Id,
+                    RepresentativeId = a.RepresentativeId,
+                    AttachmentTypeId = a.AttachmentTypeId,
+                    AttachmentTypeName = a.AttachmentType?.Name ?? "",
+                    AttachmentTypeNameAr = a.AttachmentType?.NameAr ?? "",
+                    FileName = a.FileName,
+                    FileSizeBytes = a.FileSizeBytes,
+                    ContentType = a.ContentType,
+                    DownloadUrl = $"/api/representatives/{a.RepresentativeId}/attachments/{a.Id}/download",
+                    UploadDate = a.UploadDate,
+                    Description = a.Description
+                }).ToList() ?? new List<RepresentativeAttachmentVM>()
         };
     }
 }

@@ -207,6 +207,25 @@ public class Representative : BaseEntity
 
     #endregion
 
+    #region Lawyer License Data (بيانات رخصة المحاماة)
+
+    /// <summary>
+    /// Lawyer license number (رقم رخصة المحاماة).
+    /// </summary>
+    public string? LawyerLicenseNumber { get; set; }
+
+    /// <summary>
+    /// Lawyer license date (تاريخ الرخصة).
+    /// </summary>
+    public DateTime? LawyerLicenseDate { get; set; }
+
+    /// <summary>
+    /// Lawyer license expiry date (تاريخ انتهاء الرخصة).
+    /// </summary>
+    public DateTime? LawyerLicenseExpiryDate { get; set; }
+
+    #endregion
+
     #region Authorization Document
 
     /// <summary>
@@ -274,6 +293,49 @@ public class Representative : BaseEntity
 
     #endregion
 
+    #region CompanyRepresentative Data (ممثل الشركة - Type 6)
+
+    /// <summary>
+    /// Representation document source (مصدر مستند التمثيل).
+    /// </summary>
+    public string? RepresentationDocSource { get; set; }
+
+    /// <summary>
+    /// Representative capacity (صفة الممثل).
+    /// </summary>
+    public string? RepresentativeCapacity { get; set; }
+
+    /// <summary>
+    /// Representation document type (نوع مستند التمثيل).
+    /// </summary>
+    public string? RepresentationDocType { get; set; }
+
+    /// <summary>
+    /// Representation document number (رقم مستند التمثيل).
+    /// </summary>
+    public string? RepresentationDocNumber { get; set; }
+
+    #endregion
+
+    #region AgencyRepresentative Data (ممثل الجهة - Type 7)
+
+    /// <summary>
+    /// Representation letter number (رقم خطاب التمثيل).
+    /// </summary>
+    public string? RepresentationLetterNumber { get; set; }
+
+    /// <summary>
+    /// Representation letter date (تاريخ خطاب التمثيل).
+    /// </summary>
+    public DateTime? RepresentationLetterDate { get; set; }
+
+    /// <summary>
+    /// Representation letter source (مصدر خطاب التمثيل).
+    /// </summary>
+    public string? RepresentationLetterSource { get; set; }
+
+    #endregion
+
     /// <summary>
     /// Whether the representative is active.
     /// </summary>
@@ -300,6 +362,11 @@ public class Representative : BaseEntity
     /// Navigation property for data source.
     /// </summary>
     public virtual DataSource? DataSource { get; set; }
+
+    /// <summary>
+    /// Navigation property for attachments (صورة التمثيل).
+    /// </summary>
+    public virtual ICollection<RepresentativeAttachment> Attachments { get; set; } = new List<RepresentativeAttachment>();
 
     #endregion
 }

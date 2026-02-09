@@ -1,0 +1,112 @@
+{
+  "address": {
+    "regionId": 1,
+    "cityId": 1,
+    "districtId": "حي النزهة",
+    "street": "شارع الملك فهد",
+    "buildingNumber": "1234",
+    "unitNumber": "1",
+    "postalCode": "12345",
+    "additionalCode": "6789"
+  },
+  "type1_individual": {
+    "typeId": 1,
+    "typeName": "فرد",
+    "identityTypeId": 1,
+    "identityNumber": "1234567890",
+    "firstName": "أحمد",
+    "fatherName": "محمد",
+    "grandfatherName": "عبدالله",
+    "clanName": "شمر",
+    "familyName": "الشمري",
+    "birthDate": "01/01/1990",
+    "gender": "ذكر",
+    "nationalityId": 1,
+    "identityIssueDate": "01/01/2020",
+    "identityExpiryDate": "01/01/2030",
+    "employmentStatusId": 1,
+    "employer": "وزارة الصحة",
+    "profession": "طبيب",
+    "mobileNumber": "0512345678",
+    "email": "ahmed@test.com"
+  },
+  "type2_individual_no_id": {
+    "typeId": 2,
+    "typeName": "فرد بدون هوية",
+    "documentNumber": "DOC123456",
+    "firstName": "خالد",
+    "fatherName": "سعد",
+    "grandfatherName": "فهد",
+    "clanName": "",
+    "familyName": "العتيبي",
+    "birthDate": "05/15/1985",
+    "gender": "ذكر",
+    "mobileNumber": "0551234567",
+    "email": ""
+  },
+  "type3_business_owner": {
+    "typeId": 3,
+    "typeName": "صاحب مؤسسة",
+    "identityTypeId": 1,
+    "identityNumber": "1098765432",
+    "firstName": "سعود",
+    "fatherName": "عبدالرحمن",
+    "grandfatherName": "صالح",
+    "clanName": "",
+    "familyName": "القحطاني",
+    "birthDate": "03/20/1980",
+    "gender": "ذكر",
+    "nationalityId": 1,
+    "identityIssueDate": "06/01/2019",
+    "identityExpiryDate": "06/01/2029",
+    "mobileNumber": "0598765432",
+    "email": "saud@business.com",
+    "commercialRegNumber": "1010101010",
+    "companyName": "مؤسسة النور للتجارة",
+    "crStartDate": "01/01/2015",
+    "crEndDate": "01/01/2030"
+  },
+  "type4_registered_company": {
+    "typeId": 4,
+    "typeName": "شركة مسجلة",
+    "commercialRegNumber": "2020202020",
+    "companyName": "شركة الرياض للتقنية",
+    "crStartDate": "06/01/2018",
+    "crEndDate": "06/01/2028"
+  },
+  "type5_unregistered_company": {
+    "typeId": 5,
+    "typeName": "شركة غير مسجلة",
+    "commercialRegNumber": "REG12345",
+    "unregisteredCompanyName": "شركة دولية للتجارة",
+    "unregisteredCountryId": 1,
+    "unregisteredCity": "جدة",
+    "unregisteredDescription": "شركة تعمل في مجال التجارة الدولية والاستيراد والتصدير"
+  },
+  "type6_government_agency": {
+    "typeId": 6,
+    "typeName": "جهة حكومية",
+    "governmentAgencyId": 1,
+    "headquarters": "الرياض",
+    "additionalStatement": "بيان إضافي للجهة الحكومية"
+  },
+  "type7_ngo": {
+    "typeId": 7,
+    "typeName": "جمعية/مؤسسة أهلية",
+    "ngoName": "جمعية البر الخيرية",
+    "licenseNumber": "3030303030",
+    "licenseSourceId": 1,
+    "licenseDate": "01/01/2020"
+  },
+  "type8_waqf": {
+    "typeId": 8,
+    "typeName": "وقف",
+    "courtDeedNumber": "4040404040",
+    "waqfName": "وقف الخير",
+    "deedDate": "01/01/2019",
+    "deedSource": "المحكمة العامة",
+    "waqfOversightType": "أهلية",
+    "waqfDescription": "وقف خيري لخدمة المجتمع",
+    "waqfAgencyName": ""
+  }
+}

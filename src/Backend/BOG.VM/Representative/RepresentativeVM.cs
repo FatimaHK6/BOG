@@ -277,6 +277,25 @@ public class RepresentativeVM
 
     #endregion
 
+    #region Lawyer License Data (بيانات رخصة المحاماة)
+
+    /// <summary>
+    /// Lawyer license number (رقم رخصة المحاماة).
+    /// </summary>
+    public string? LawyerLicenseNumber { get; set; }
+
+    /// <summary>
+    /// Lawyer license date (تاريخ الرخصة).
+    /// </summary>
+    public DateTime? LawyerLicenseDate { get; set; }
+
+    /// <summary>
+    /// Lawyer license expiry date (تاريخ انتهاء الرخصة).
+    /// </summary>
+    public DateTime? LawyerLicenseExpiryDate { get; set; }
+
+    #endregion
+
     #region Authorization Document
 
     /// <summary>
@@ -344,8 +363,30 @@ public class RepresentativeVM
 
     #endregion
 
+    #region CompanyRepresentative Data (ممثل الشركة - Type 6)
+
+    public string? RepresentationDocSource { get; set; }
+    public string? RepresentativeCapacity { get; set; }
+    public string? RepresentationDocType { get; set; }
+    public string? RepresentationDocNumber { get; set; }
+
+    #endregion
+
+    #region AgencyRepresentative Data (ممثل الجهة - Type 7)
+
+    public string? RepresentationLetterNumber { get; set; }
+    public DateTime? RepresentationLetterDate { get; set; }
+    public string? RepresentationLetterSource { get; set; }
+
+    #endregion
+
     /// <summary>
     /// Creation date.
     /// </summary>
     public DateTime CreatedDate { get; set; }
+
+    /// <summary>
+    /// Attachments (صورة التمثيل).
+    /// </summary>
+    public List<RepresentativeAttachmentVM> Attachments { get; set; } = new();
 }

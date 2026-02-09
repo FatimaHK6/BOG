@@ -149,10 +149,42 @@ export interface RepresentativeVM {
   nationalityName?: string;
   identityIssueDate?: Date;   // تاريخ إصدار الهوية - SRS 6.3.1
   identityExpiryDate?: Date;  // تاريخ انتهاء الهوية - SRS 6.3.1
+
+  // Residence Address (عنوان السكن - 6.3.2)
+  residenceRegionId?: number;
+  residenceRegionName?: string;
+  residenceCityId?: number;
+  residenceCityName?: string;
+  residenceDistrict?: string;
+  residenceStreet?: string;
+  residenceBuildingNumber?: string;
+  residenceUnitNumber?: string;
+  residencePostalCode?: string;
+  residenceAdditionalCode?: string;
+
+  // Employment Data (بيانات العمل)
+  employmentStatus?: string;  // government/private/unemployed
+  employer?: string;          // جهة العمل
+  profession?: string;        // المهنة
+
+  // Work Address (عنوان العمل - 6.3.2)
+  workRegionId?: number;
+  workRegionName?: string;
+  workCityId?: number;
+  workCityName?: string;
+  workDistrict?: string;
+  workStreet?: string;
+  workBuildingNumber?: string;
+  workUnitNumber?: string;
+  workPostalCode?: string;
+  workAdditionalCode?: string;
+
+  // Contact Info
   mobileNumber?: string;
   email?: string;
   dataSourceId?: number;
   dataSourceName?: string;
+
   // Lawyer/Agent (محامي/وكيل) authorization fields
   authorizationNumber?: string;
   authorizationDate?: Date;
@@ -170,6 +202,15 @@ export interface RepresentativeVM {
   deedDate?: Date;            // تاريخ الصك
   deedSource?: string;        // مصدر الصك
   guardianshipType?: string;  // نوع الولاية
+  // CompanyRepresentative fields (ممثل الشركة - Type 6)
+  representationDocSource?: string;   // مصدر مستند التمثيل
+  representativeCapacity?: string;    // صفة الممثل
+  representationDocType?: string;     // نوع مستند التمثيل
+  representationDocNumber?: string;   // رقم مستند التمثيل
+  // AgencyRepresentative fields (ممثل الجهة - Type 7)
+  representationLetterNumber?: string;  // رقم خطاب التمثيل
+  representationLetterDate?: Date;      // تاريخ خطاب التمثيل
+  representationLetterSource?: string;  // مصدر خطاب التمثيل
   isApplicant: boolean;
   createdDate: Date;
   attachments?: RepresentativeAttachmentVM[];
