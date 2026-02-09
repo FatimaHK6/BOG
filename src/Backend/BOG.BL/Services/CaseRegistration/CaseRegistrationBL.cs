@@ -426,27 +426,27 @@ public class CaseRegistrationBL : ICaseRegistrationBL
 
         // ERR002: At least one defendant required
         if (!request.CaseRequestDefendants?.Any() ?? true)
-            errors.Add("ERR002: يجب تحديد مدعى عليه واحد على الأقل");
+            errors.Add("يجب تحديد مدعى عليه واحد على الأقل");
 
         // ERR006: Subject is required
         if (string.IsNullOrWhiteSpace(request.Subject))
-            errors.Add("ERR006: الموضوع مطلوب");
+            errors.Add("الموضوع مطلوب");
 
         // ERR007: Evidence is required
         if (string.IsNullOrWhiteSpace(request.Evidence))
-            errors.Add("ERR007: الأدلة مطلوبة");
+            errors.Add("الأدلة مطلوبة");
 
         // ERR004: If plaintiffs exist, at least one must be applicant
         if (request.CaseRequestPlaintiffs?.Any() ?? false)
         {
             var hasApplicant = request.CaseRequestPlaintiffs.Any(p => p.Plaintiff?.IsApplicant ?? false);
             if (!hasApplicant)
-                errors.Add("ERR004: يجب تحديد مدعٍ واحد على الأقل كمدعٍ");
+                errors.Add("يجب تحديد مدعٍ واحد على الأقل كمدعٍ");
         }
 
         // ERR005: Classifications must be specified
         if (!request.Classifications?.Any() ?? true)
-            errors.Add("ERR005: يجب تحديد تصنيف واحد على الأقل للدعوى");
+            errors.Add("يجب تحديد تصنيف واحد على الأقل للدعوى");
 
         // ERR003: Mandatory attachments must be complete
         var mandatoryTypes = await _attachmentTypeRepository.FindAsync(
@@ -463,7 +463,7 @@ public class CaseRegistrationBL : ICaseRegistrationBL
             if (missingTypes.Any())
             {
                 var missingNames = string.Join(", ", missingTypes.Select(t => t.NameAr));
-                errors.Add($"ERR003: المرفقات الإلزامية المفقودة: {missingNames}");
+                errors.Add($"المرفقات الإلزامية المفقودة: {missingNames}");
             }
         }
 

@@ -366,15 +366,15 @@ public class RequestActionBL : IRequestActionBL
         {
             // ERR005: Check at least one classification
             if (!request.Classifications?.Any(c => !c.IsDeleted) ?? true)
-                throw new InvalidOperationException("ERR005: يجب تحديد تصنيف واحد على الأقل للدعوى");
+                throw new InvalidOperationException("يجب تحديد تصنيف واحد على الأقل للدعوى");
 
             // ERR002: Check at least one defendant
             if (!request.CaseRequestDefendants?.Any(d => !d.IsDeleted) ?? true)
-                throw new InvalidOperationException("ERR002: يجب تحديد مدعى عليه واحد على الأقل");
+                throw new InvalidOperationException("يجب تحديد مدعى عليه واحد على الأقل");
 
             // ERR010: Check at least one attachment
             if (!request.Attachments?.Any(a => !a.IsDeleted) ?? true)
-                throw new InvalidOperationException("ERR010: يجب إضافة مرفق واحد على الأقل");
+                throw new InvalidOperationException("يجب إضافة مرفق واحد على الأقل");
         }
 
         // Route to appropriate action method based on decision type
