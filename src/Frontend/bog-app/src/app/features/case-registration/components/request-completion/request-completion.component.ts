@@ -123,7 +123,7 @@ export class RequestCompletionComponent implements OnInit {
           const messages: Record<string, string> = {
             [DecisionType.Register]: 'تم قيد الدعوى بنجاح',
             [DecisionType.SendToJudge]: 'تم العرض على رئيس المحكمة بنجاح',
-            [DecisionType.Reject]: 'تم رفض الطلب',
+            [DecisionType.Reject]: 'تم حفظ الطلب بنجاح',
             [DecisionType.RequestCompletion]: 'تم طلب استكمال النواقص'
           };
 
