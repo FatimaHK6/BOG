@@ -1,13 +1,87 @@
 <div class="case-registration-layout" dir="rtl">
-  <!-- Header Bar -->
-  <header class="layout-header">
-    <div class="header-content">
-      <h1>{{ pageTitle }}</h1>
-      <div class="header-info">
-        <span class="request-number" *ngIf="requestId">رقم الطلب: {{ requestId }}</span>
-        <span class="request-status" [class]="'status-' + currentStatus">
-          {{ currentStatusName }}
-        </span>
+  <!-- NEW: Action Buttons Bar (NO background - sits on page background) -->
+  <header class="action-buttons-bar">
+    <div class="action-bar-content">
+      <!-- Title (Right side in RTL) -->
+      <h2 class="page-header-title">طلب قيد دعوى</h2>
+
+      <!-- Buttons (Left side in RTL) -->
+      <div class="buttons-container">
+        <button mat-raised-button
+                class="back-button"
+                (click)="navigateBack()">
+          <span>عودة</span>
+        </button>
+
+        <button mat-raised-button
+                class="save-button"
+                (click)="saveRequest()"
+                [disabled]="!canSave || isSaving"
+                *ngIf="canEdit">
+          <span>حفظ كمسودة</span>
+        </button>
+
+        <!-- Save Status Indicators -->
+        <div class="save-status" *ngIf="isSaving">
+          <mat-spinner diameter="20"></mat-spinner>
+          <span>جاري الحفظ...</span>
+        </div>
+
+        <div class="save-success" *ngIf="saveSuccess && !isSaving">
+          <mat-icon>check_circle</mat-icon>
+          <span>تم الحفظ</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- NEW: White Metadata Bar -->
+  <header class="metadata-bar">
+    <div class="metadata-content">
+      <!-- Row 1: Top Row -->
+      <div class="metadata-row">
+        <div class="metadata-field">
+          <span class="field-label">المحكمة:</span>
+          <span class="field-value">{{ courtName || 'غير محدد' }}</span>
+        </div>
+
+        <div class="metadata-field">
+          <span class="field-label">طريقة التسجيل:</span>
+          <span class="field-value">{{ registrationMethod || 'غير محدد' }}</span>
+        </div>
+
+        <div class="metadata-field">
+          <span class="field-label">رقم الطلب:</span>
+          <span class="field-value">{{ requestId }}</span>
+        </div>
+
+        <div class="metadata-field">
+          <span class="field-label">حالة الطلب:</span>
+          <span class="field-value">{{ arabicStatusName }}</span>
+        </div>
+      </div>
+
+      <!-- Row 2: Bottom Row -->
+      <div class="metadata-row">
+        <div class="metadata-field">
+          <span class="field-label">تاريخ الطلب:</span>
+          <span class="field-value">{{ createdDate | date:'dd/MM/yyyy' }}</span>
+        </div>
+
+        <div class="metadata-field">
+          <span class="field-label">رقم قيد الدعوى:</span>
+          <span class="field-value">{{ caseRegistrationNumber || 'غير محدد' }}</span>
+        </div>
+
+        <div class="metadata-field">
+          <span class="field-label">تاريخ قيد الدعوى:</span>
+          <span class="field-value">{{ caseRegistrationDate ? (caseRegistrationDate | date:'dd/MM/yyyy') : 'غير محدد' }}</span>
+        </div>
+
+        <div class="metadata-field">
+          <span class="field-label">نوع الدعوى:</span>
+          <span class="field-value">{{ caseType || 'غير محدد' }}</span>
+        </div>
       </div>
     </div>
   </header>
@@ -25,17 +99,34 @@
             <span class="count-badge" *ngIf="defendantsCount > 0">{{ defendantsCount }}</span>
           </li>
 
-          <li class="nav-item" [class.active]="activeSection === 'case-data'"
-              (click)="scrollToSection('case-data')">
-            <mat-icon>description</mat-icon>
-            <span>بيانات الدعوى</span>
-          </li>
+          <!-- Case Data - Expandable Section -->
+          <li class="nav-item expandable"
+              [class.active]="activeSection === 'case-data'"
+              [class.expanded]="caseDataExpanded">
 
-          <li class="nav-item" [class.active]="activeSection === 'attachments'"
-              (click)="scrollToSection('attachments')">
-            <mat-icon>attach_file</mat-icon>
-            <span>المرفقات</span>
-            <span class="count-badge" *ngIf="attachmentsCount > 0">{{ attachmentsCount }}</span>
+            <!-- Main Item Header -->
+            <div class="nav-item-header" (click)="toggleCaseDataExpanded()">
+              <mat-icon>description</mat-icon>
+              <span>بيانات الدعوى</span>
+              <mat-icon class="expand-icon">
+                {{ caseDataExpanded ? 'expand_less' : 'expand_more' }}
+              </mat-icon>
+            </div>
+
+            <!-- Sub-items (shown when expanded) -->
+            <ul class="nav-subitems" *ngIf="caseDataExpanded">
+              <li *ngFor="let tab of caseDataTabs"
+                  class="nav-subitem"
+                  [class.active]="activeCaseDataTab === tab.id"
+                  (click)="selectCaseDataTab(tab.id); $event.stopPropagation()">
+                <mat-icon class="subitem-icon">{{ tab.icon }}</mat-icon>
+                <span>{{ tab.label }}</span>
+                <span class="count-badge"
+                      *ngIf="tab.showCount && getCaseDataTabCount(tab.id)">
+                  {{ getCaseDataTabCount(tab.id) }}
+                </span>
+              </li>
+            </ul>
           </li>
 
           <li class="nav-item" [class.active]="activeSection === 'additional-info'"
@@ -45,39 +136,39 @@
           </li>
 
           <li class="nav-item" [class.active]="activeSection === 'deficiencies'"
-              (click)="scrollToSection('deficiencies')"
-              *ngIf="hasDeficiencies">
+              (click)="scrollToSection('deficiencies')">
             <mat-icon>warning</mat-icon>
-            <span>أوجه القصور</span>
-            <span class="count-badge error">{{ deficienciesCount }}</span>
+            <span>النواقص</span>
+            <span class="count-badge error" *ngIf="deficienciesCount > 0">{{ deficienciesCount }}</span>
           </li>
 
-          <li class="nav-item" [class.active]="activeSection === 'actions'"
-              (click)="scrollToSection('actions')">
-            <mat-icon>check_circle</mat-icon>
-            <span>إجراءات الطلب</span>
+          <li class="nav-item" [class.active]="activeSection === 'completion'"
+              (click)="scrollToSection('completion')">
+            <mat-icon>done_all</mat-icon>
+            <span>إنهاء الطلب</span>
           </li>
         </ul>
       </nav>
-
-      <!-- Sticky Action Buttons -->
-      <div class="sidebar-actions">
-        <button mat-raised-button color="primary"
-                (click)="saveRequest()"
-                [disabled]="!canSave"
-                *ngIf="canEdit">
-          <mat-icon>save</mat-icon>
-          حفظ
-        </button>
-        <button mat-stroked-button (click)="navigateBack()">
-          <mat-icon>arrow_back</mat-icon>
-          رجوع
-        </button>
-      </div>
     </aside>
 
     <!-- Content Area -->
     <main class="content-area">
+      <!-- NEW: Green Tab Name Bar (INSIDE content area) -->
+      <header class="tab-name-bar">
+        <div class="tab-name-content">
+          <h1>{{ getActiveTabName() }}</h1>
+
+          <!-- Next Button (only for case-data tabs) -->
+          <button mat-raised-button
+                  class="next-tab-button"
+                  (click)="goToNextCaseDataTab()"
+                  *ngIf="activeSection === 'case-data' && hasNextCaseDataTab()">
+            <span>التالي</span>
+            <mat-icon>arrow_back</mat-icon>
+          </button>
+        </div>
+      </header>
+
       <!-- Loading State -->
       <div class="loading-container" *ngIf="loading">
         <mat-spinner></mat-spinner>
@@ -96,21 +187,14 @@
           </app-defendants-list>
         </section>
 
-        <!-- Case Data Tab -->
+        <!-- Case Data Tab (Contains 6 Sub-tabs in Sidebar) -->
         <section id="case-data" *ngSwitchCase="'case-data'" class="tab-content">
-          <app-case-data-form
-            [requestId]="requestId"
-            [canEdit]="canEdit">
-          </app-case-data-form>
-        </section>
-
-        <!-- Attachments Tab -->
-        <section id="attachments" *ngSwitchCase="'attachments'" class="tab-content">
-          <app-attachments-list
+          <app-case-data-container
             [requestId]="requestId"
             [canEdit]="canEdit"
-            [showValidation]="showValidation">
-          </app-attachments-list>
+            [activeTab]="activeCaseDataTab"
+            (saveComplete)="onSaveComplete($event)">
+          </app-case-data-container>
         </section>
 
         <!-- Additional Info Tab -->
@@ -123,12 +207,15 @@
 
         <!-- Deficiencies Tab -->
         <section id="deficiencies" *ngSwitchCase="'deficiencies'" class="tab-content">
-          <app-deficiencies-list *ngIf="hasDeficiencies" [requestId]="requestId"></app-deficiencies-list>
+          <app-deficiencies-list [requestId]="requestId"></app-deficiencies-list>
         </section>
 
-        <!-- Request Actions Tab -->
-        <section id="actions" *ngSwitchCase="'actions'" class="tab-content">
-          <app-request-actions [requestId]="requestId"></app-request-actions>
+        <!-- Request Completion Tab -->
+        <section id="completion" *ngSwitchCase="'completion'" class="tab-content">
+          <app-request-completion
+            [requestId]="requestId"
+            [currentStatus]="currentStatus">
+          </app-request-completion>
         </section>
 
         <!-- No Content Message -->

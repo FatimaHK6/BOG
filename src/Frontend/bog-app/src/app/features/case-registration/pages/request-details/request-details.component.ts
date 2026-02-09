@@ -8,6 +8,7 @@ import { CaseDataStateService } from '../../services/case-data-state.service';
 import { ClaimsApiService } from '../../services/claims-api.service';
 import { RelatedCaseApiService } from '../../services/related-case-api.service';
 import { CaseRequestVM, CaseRequestCreateDTO } from '../../models/case-request.model';
+import { RequestStatusLabels, RequestStatus } from '../../models/enums';
 import { CaseDataContainerComponent } from '../../components/case-data/case-data-container/case-data-container.component';
 
 @Component({
@@ -348,8 +349,8 @@ export class RequestDetailsComponent implements OnInit, OnDestroy {
       'defendants': 'المدعى عليهم',
       'case-data': 'بيانات الدعوى',
       'additional-info': 'معلومات إضافية',
-      'deficiencies': 'أوجه القصور',
-      'actions': 'إجراءات الطلب'
+      'deficiencies': 'النواقص',
+      'completion': 'إنهاء الطلب'
     };
 
     // If in case-data section, append the active sub-tab name
@@ -442,5 +443,12 @@ export class RequestDetailsComponent implements OnInit, OnDestroy {
 
   navigateBack() {
     this.router.navigate(['/case-registration']);
+  }
+
+  /**
+   * Get Arabic status label from enum
+   */
+  get arabicStatusName(): string {
+    return RequestStatusLabels[this.currentStatus as RequestStatus] || 'غير معروف';
   }
 }
