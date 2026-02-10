@@ -1,0 +1,73 @@
+<div dir="rtl" class="subject-evidence-container">
+  <form [formGroup]="subjectEvidenceForm" class="se-form">
+
+    <!-- Subject (موضوع الدعوى) -->
+    <div class="form-section">
+      <label class="section-label">موضوع الدعوى</label>
+
+      <div class="editor-wrapper" [class.disabled]="!canEdit">
+        <ngx-editor
+          [editor]="subjectEditor"
+          formControlName="subject"
+          placeholder="أدخل موضوع الدعوى هنا...">
+        </ngx-editor>
+      </div>
+
+      <!-- Validation Error -->
+      <div class="validation-error" *ngIf="hasError('subject', 'required')">
+        موضوع الدعوى مطلوب
+      </div>
+      <div class="validation-error" *ngIf="hasError('subject', 'maxlength')">
+        يجب ألا يتجاوز {{ getMaxCharacters('subject') }} حرف
+      </div>
+
+      <!-- Character Counter -->
+      <div class="character-counter">
+        <span class="count">
+          {{ getCharacterCount('subject') }} / {{ getMaxCharacters('subject') }}
+        </span>
+        <mat-progress-bar
+          mode="determinate"
+          [value]="getCharacterPercentage('subject')"
+          [class.warning]="getCharacterPercentage('subject') > 80"
+          [class.error]="getCharacterPercentage('subject') >= 100">
+        </mat-progress-bar>
+      </div>
+    </div>
+
+    <!-- Evidence (أسانيد الدعوى) -->
+    <div class="form-section">
+      <label class="section-label">أسانيد الدعوى</label>
+
+      <div class="editor-wrapper" [class.disabled]="!canEdit">
+        <ngx-editor
+          [editor]="evidenceEditor"
+          formControlName="evidence"
+          placeholder="أدخل أسانيد الدعوى هنا...">
+        </ngx-editor>
+      </div>
+
+      <!-- Validation Error -->
+      <div class="validation-error" *ngIf="hasError('evidence', 'required')">
+        أسانيد الدعوى مطلوبة
+      </div>
+      <div class="validation-error" *ngIf="hasError('evidence', 'maxlength')">
+        يجب ألا يتجاوز {{ getMaxCharacters('evidence') }} حرف
+      </div>
+
+      <!-- Character Counter -->
+      <div class="character-counter">
+        <span class="count">
+          {{ getCharacterCount('evidence') }} / {{ getMaxCharacters('evidence') }}
+        </span>
+        <mat-progress-bar
+          mode="determinate"
+          [value]="getCharacterPercentage('evidence')"
+          [class.warning]="getCharacterPercentage('evidence') > 80"
+          [class.error]="getCharacterPercentage('evidence') >= 100">
+        </mat-progress-bar>
+      </div>
+    </div>
+
+  </form>
+</div>

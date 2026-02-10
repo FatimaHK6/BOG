@@ -1,0 +1,58 @@
+<div dir="rtl" class="case-data-container">
+  <!-- Tab Content Section -->
+  <div class="tab-content" [ngSwitch]="activeTab">
+
+    <!-- Subject & Evidence Tab -->
+    <section *ngSwitchCase="'subject-evidence'" class="tab-pane">
+      <app-subject-evidence-form
+        [canEdit]="canEdit">
+      </app-subject-evidence-form>
+    </section>
+
+    <!-- Claims Tab -->
+    <section *ngSwitchCase="'claims'" class="tab-pane">
+      <app-claims-list
+        [requestId]="requestId"
+        [canEdit]="canEdit"
+        (countChanged)="claimsCount = $event">
+      </app-claims-list>
+    </section>
+
+    <!-- Related Cases Tab -->
+    <section *ngSwitchCase="'related-cases'" class="tab-pane">
+      <app-related-cases-list
+        [requestId]="requestId"
+        [canEdit]="canEdit"
+        (countChanged)="relatedCasesCount = $event">
+      </app-related-cases-list>
+    </section>
+
+    <!-- Classifications Tab -->
+    <section *ngSwitchCase="'classifications'" class="tab-pane">
+      <app-classifications-tab
+        [canEdit]="canEdit"
+        (countChanged)="classificationsCount = $event">
+      </app-classifications-tab>
+    </section>
+
+    <!-- Contact Info Tab -->
+    <section *ngSwitchCase="'contact-info'" class="tab-pane">
+      <app-contact-info-form
+        [canEdit]="canEdit">
+      </app-contact-info-form>
+    </section>
+
+    <!-- Attachments Tab -->
+    <section *ngSwitchCase="'attachments'" class="tab-pane">
+      <app-attachments-list
+        [requestId]="requestId"
+        [canEdit]="canEdit">
+      </app-attachments-list>
+    </section>
+
+    <!-- Default (No Tab Selected) -->
+    <div *ngSwitchDefault class="no-tab-message">
+      <p>يرجى اختيار قسم من القائمة الجانبية</p>
+    </div>
+  </div>
+</div>

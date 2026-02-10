@@ -1,0 +1,136 @@
+// Grid layout for 2 columns
+.grid-2col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 16px;
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.full-width {
+  grid-column: 1 / -1;
+}
+
+// Section styling matching Adobe XD design
+.section-box {
+  border: 1px solid #c8e6c9;
+  border-radius: 4px;
+  padding: 20px;
+  margin-bottom: 24px;
+  background-color: #ffffff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  transition: box-shadow 0.2s ease-in-out;
+
+  &:hover {
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+  }
+}
+
+// Section header with icon
+.section-header {
+  color: #2e7d32;
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0 0 20px 0;
+  padding: 0;
+  text-align: right;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+
+  .section-icon {
+    color: #558b2f;
+    font-size: 24px;
+    width: 24px;
+    height: 24px;
+  }
+}
+
+// Type-specific styling
+.type1-section {
+  border-color: #c8e6c9;
+  .section-header {
+    color: #2e7d32;
+  }
+}
+
+.type2-section {
+  border-color: #bbdefb;
+  .section-header {
+    color: #1565c0;
+  }
+}
+
+.type3-section {
+  border-color: #f8bbd0;
+  .section-header {
+    color: #c2185b;
+  }
+}
+
+// Form fields
+mat-form-field {
+  width: 100%;
+
+  ::ng-deep {
+    .mat-form-field-appearance-outline {
+      .mat-form-field-outline {
+        top: 1.0625em;
+      }
+    }
+  }
+}
+
+// Loading spinner
+.loading-spinner {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+  padding: 40px 20px;
+  text-align: center;
+  color: #666;
+  font-size: 14px;
+  min-height: 200px;
+}
+
+// Auto-save indicator
+.save-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: #666;
+  font-size: 13px;
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid #e0e0e0;
+}
+
+// Disabled state for readonly inputs
+::ng-deep {
+  .mat-form-field-appearance-outline.mat-focused .mat-form-field-outline-thick {
+    color: #2e7d32;
+  }
+
+  .mat-form-field-invalid .mat-form-field-outline-thick {
+    color: #d32f2f;
+  }
+}
+
+// Print styles
+@media print {
+  .save-indicator {
+    display: none;
+  }
+
+  .section-box {
+    page-break-inside: avoid;
+    border: 1px solid #999;
+    box-shadow: none;
+  }
+}

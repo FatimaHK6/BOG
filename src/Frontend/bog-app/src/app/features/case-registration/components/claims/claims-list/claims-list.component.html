@@ -1,0 +1,71 @@
+<div dir="rtl">
+  <!-- Add Button -->
+  <div class="section-actions" *ngIf="canEdit">
+    <button mat-raised-button class="gold-button" (click)="openAddClaim()">
+      <mat-icon>add</mat-icon>
+      إضافة طلب دعوى
+    </button>
+  </div>
+
+  <!-- Validation Error -->
+  <app-validation-message
+    *ngIf="showValidation && claims.length === 0"
+    type="error"
+    message="ERR003: يجب إضافة طلب دعوى واحد على الأقل">
+  </app-validation-message>
+
+  <!-- Claims List -->
+  <div class="claims-list" *ngIf="claims.length > 0">
+    <mat-card class="claim-card" *ngFor="let claim of claims">
+      <mat-card-header>
+        <div class="claim-header">
+          <div class="claim-info">
+            <span class="claim-number">طلب #{{ claim.id }}</span>
+            <span class="claim-date">{{ claim.modifiedDate | date: 'dd/MM/yyyy' }}</span>
+          </div>
+          <div class="claim-actions" *ngIf="canEdit">
+            <button mat-icon-button [matMenuTriggerFor]="menu">
+              <mat-icon>more_vert</mat-icon>
+            </button>
+            <mat-menu #menu="matMenu">
+              <button mat-menu-item (click)="editClaim(claim)">
+                <mat-icon>edit</mat-icon>
+                <span>تعديل</span>
+              </button>
+              <button mat-menu-item (click)="deleteClaim(claim)">
+                <mat-icon>delete</mat-icon>
+                <span>حذف</span>
+              </button>
+            </mat-menu>
+          </div>
+        </div>
+      </mat-card-header>
+
+      <mat-card-content>
+        <div class="claim-text" [innerHTML]="claim.claimText"></div>
+        <div class="claim-stats">
+          <span class="char-count">
+            {{ getCharacterCount(claim.claimText) }} / 2000 حرف
+          </span>
+          <mat-progress-bar
+            mode="determinate"
+            [value]="getCharacterPercentage(claim.claimText)"
+            class="char-bar">
+          </mat-progress-bar>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <!-- Empty State -->
+  <div class="empty-state" *ngIf="claims.length === 0 && !showValidation">
+    <mat-icon>description</mat-icon>
+    <p>لا يوجد اي سجلات</p>
+  </div>
+
+  <!-- Loading State -->
+  <div class="loading-state" *ngIf="loading">
+    <mat-spinner diameter="40"></mat-spinner>
+  </div>
+</div>
+

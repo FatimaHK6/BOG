@@ -1,0 +1,32 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <IsPackable>false</IsPackable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.2" />
+    <PackageReference Include="xunit" Version="2.6.6" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.5.6">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="8.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="8.0.0" />
+    <PackageReference Include="Moq" Version="4.20.70" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Backend\BOG.API\BOG.API.csproj" />
+    <ProjectReference Include="..\..\src\Backend\BOG.BL\BOG.BL.csproj" />
+    <ProjectReference Include="..\..\src\Backend\BOG.DAL\BOG.DAL.csproj" />
+    <ProjectReference Include="..\..\src\Backend\BOG.DbModel\BOG.DbModel.csproj" />
+    <ProjectReference Include="..\..\src\Backend\BOG.DTO\BOG.DTO.csproj" />
+    <ProjectReference Include="..\..\src\Backend\BOG.VM\BOG.VM.csproj" />
+    <ProjectReference Include="..\..\src\Backend\BOG.Integration\BOG.Integration.csproj" />
+  </ItemGroup>
+
+</Project>

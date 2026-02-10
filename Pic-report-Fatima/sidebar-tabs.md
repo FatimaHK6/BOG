@@ -1,0 +1,111 @@
+- generic [ref=e3]:
+  - banner [ref=e4]:
+    - generic [ref=e5]:
+      - heading "نظام إدارة الدعاوى" [level=1] [ref=e6]
+      - navigation [ref=e7]:
+        - list [ref=e8]:
+          - listitem [ref=e9]:
+            - link "إدارة الدعاوى" [ref=e10] [cursor=pointer]:
+              - /url: /case-registration
+          - listitem [ref=e11]:
+            - link "المستخدمين" [ref=e12] [cursor=pointer]:
+              - /url: "#"
+          - listitem [ref=e13]:
+            - link "الإعدادات" [ref=e14] [cursor=pointer]:
+              - /url: "#"
+  - main [ref=e15]:
+    - generic [ref=e17]:
+      - generic [ref=e19]:
+        - heading "طلب قيد دعوى" [level=2] [ref=e20]
+        - generic [ref=e21]:
+          - button "عودة" [ref=e22] [cursor=pointer]:
+            - generic [ref=e23]: عودة
+          - button "حفظ كمسودة" [ref=e24] [cursor=pointer]:
+            - generic [ref=e25]: حفظ كمسودة
+      - generic [ref=e27]:
+        - generic [ref=e28]:
+          - generic [ref=e29]:
+            - generic [ref=e30]: "المحكمة:"
+            - generic [ref=e31]: غير محدد
+          - generic [ref=e32]:
+            - generic [ref=e33]: "طريقة التسجيل:"
+            - generic [ref=e34]: غير محدد
+          - generic [ref=e35]:
+            - generic [ref=e36]: "رقم الطلب:"
+            - generic [ref=e37]: "1"
+          - generic [ref=e38]:
+            - generic [ref=e39]: "حالة الطلب:"
+            - generic [ref=e40]: مسودة
+        - generic [ref=e41]:
+          - generic [ref=e43]: "تاريخ الطلب:"
+          - generic [ref=e44]:
+            - generic [ref=e45]: "رقم قيد الدعوى:"
+            - generic [ref=e46]: غير محدد
+          - generic [ref=e47]:
+            - generic [ref=e48]: "تاريخ قيد الدعوى:"
+            - generic [ref=e49]: غير محدد
+          - generic [ref=e50]:
+            - generic [ref=e51]: "نوع الدعوى:"
+            - generic [ref=e52]: غير محدد
+      - generic [ref=e53]:
+        - complementary [ref=e54]:
+          - navigation [ref=e55]:
+            - list [ref=e56]:
+              - listitem [ref=e57] [cursor=pointer]:
+                - img [ref=e58]: group
+                - generic [ref=e59]: المدعى عليهم
+              - listitem [ref=e60] [cursor=pointer]:
+                - generic [ref=e61]:
+                  - img [ref=e62]: description
+                  - generic [ref=e63]: بيانات الدعوى
+                  - img [ref=e64]: expand_less
+                - list [ref=e65]:
+                  - listitem [ref=e66]:
+                    - img [ref=e67]: description
+                    - generic [ref=e68]: موضوع وأسانيد الدعوى
+                  - listitem [ref=e69]:
+                    - img [ref=e70]: format_list_numbered
+                    - generic [ref=e71]: طلبات الدعوى
+                  - listitem [ref=e72]:
+                    - img [ref=e73]: link
+                    - generic [ref=e74]: الدعاوى المرتبطة
+                  - listitem [ref=e75]:
+                    - img [ref=e76]: category
+                    - generic [ref=e77]: تصنيف الدعوى
+                  - listitem [ref=e78]:
+                    - img [ref=e79]: phone
+                    - generic [ref=e80]: بيانات التواصل
+                  - listitem [ref=e81]:
+                    - img [ref=e82]: attach_file
+                    - generic [ref=e83]: المرفقات
+              - listitem [ref=e84] [cursor=pointer]:
+                - img [ref=e85]: info
+                - generic [ref=e86]: معلومات إضافية
+              - listitem [ref=e87] [cursor=pointer]:
+                - img [ref=e88]: warning
+                - generic [ref=e89]: النواقص
+              - listitem [ref=e90] [cursor=pointer]:
+                - img [ref=e91]: done_all
+                - generic [ref=e92]: إنهاء الطلب
+        - main [ref=e93]:
+          - heading "المدعى عليهم" [level=1] [ref=e96]
+          - generic "المدعى عليهم" [ref=e100]:
+            - generic [ref=e101]:
+              - generic [ref=e102]:
+                - heading "المدعى عليهم" [level=2] [ref=e103]
+                - img [ref=e104]: group
+                - generic [ref=e105]: "0"
+              - generic [ref=e106]:
+                - button "إضافة مدعى عليه" [ref=e108] [cursor=pointer]:
+                  - generic [ref=e109]:
+                    - img [ref=e110]: add
+                    - text: إضافة مدعى عليه
+                - generic [ref=e111]:
+                  - img [ref=e112]: group_off
+                  - paragraph [ref=e113]: لم يتم إضافة أي مدعى عليه بعد
+                  - button "إضافة أول مدعى عليه" [ref=e114] [cursor=pointer]:
+                    - generic [ref=e115]:
+                      - img [ref=e116]: add
+                      - text: إضافة أول مدعى عليه
+  - contentinfo [ref=e117]:
+    - paragraph [ref=e118]: © 2026 نظام إدارة الدعاوى - جميع الحقوق محفوظة

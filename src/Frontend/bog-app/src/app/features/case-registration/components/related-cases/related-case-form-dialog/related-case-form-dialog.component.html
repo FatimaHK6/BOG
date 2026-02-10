@@ -1,0 +1,81 @@
+<div dir="rtl">
+  <h2 mat-dialog-title *ngIf="mode === 'create'">إضافة دعوى مرتبطة جديدة</h2>
+  <h2 mat-dialog-title *ngIf="mode === 'edit'">تعديل الدعوى المرتبطة</h2>
+  <h2 mat-dialog-title *ngIf="mode === 'view'">عرض الدعوى المرتبطة</h2>
+
+  <mat-dialog-content [formGroup]="relatedCaseForm">
+    <!-- Server Error -->
+    <app-validation-message
+      *ngIf="serverError"
+      type="error"
+      [message]="serverError">
+    </app-validation-message>
+
+    <!-- Court Dropdown -->
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>المحكمة (اختياري)</mat-label>
+      <mat-select formControlName="courtId" [disabled]="mode === 'view' || loadingCourts">
+        <mat-select-trigger *ngIf="relatedCaseForm.get('courtId')?.value">
+          {{ getCourtName(relatedCaseForm.get('courtId')?.value) }}
+        </mat-select-trigger>
+        <mat-optgroup label="المحاكم" *ngIf="!loadingCourts">
+          <mat-option [value]="null">بدون محكمة</mat-option>
+          <mat-option *ngFor="let court of courts" [value]="court.id">
+            {{ court.nameAr }}
+          </mat-option>
+        </mat-optgroup>
+        <div *ngIf="loadingCourts" class="loading-courts">جارٍ التحميل...</div>
+      </mat-select>
+    </mat-form-field>
+
+    <!-- Case Number Input -->
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>رقم الدعوى</mat-label>
+      <input
+        matInput
+        formControlName="caseNumber"
+        type="number"
+        placeholder="أدخل رقم الدعوى"
+        [disabled]="mode === 'view'">
+      <mat-hint>رقم صحيح فقط</mat-hint>
+      <mat-error *ngIf="relatedCaseForm.get('caseNumber')?.hasError('required')">
+        رقم الدعوى مطلوب
+      </mat-error>
+      <mat-error *ngIf="relatedCaseForm.get('caseNumber')?.hasError('pattern')">
+        يجب إدخال رقم صحيح فقط
+      </mat-error>
+    </mat-form-field>
+
+    <!-- Case Year Input (Gregorian) -->
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>السنة (ميلادية)</mat-label>
+      <input
+        matInput
+        formControlName="caseYear"
+        type="number"
+        placeholder="أدخل السنة الميلادية (1900-2100)"
+        [disabled]="mode === 'view'">
+      <mat-hint>السنة الميلادية بصيغة 4 أرقام (مثل: 2025)</mat-hint>
+      <mat-error *ngIf="relatedCaseForm.get('caseYear')?.hasError('required')">
+        السنة مطلوبة
+      </mat-error>
+      <mat-error *ngIf="relatedCaseForm.get('caseYear')?.hasError('min') || relatedCaseForm.get('caseYear')?.hasError('max')">
+        يجب أن تكون السنة بين 1900 و 2100
+      </mat-error>
+    </mat-form-field>
+  </mat-dialog-content>
+
+  <!-- Dialog Actions -->
+  <mat-dialog-actions align="end" dir="ltr">
+    <button mat-button (click)="onCancel()" [disabled]="saving">إلغاء</button>
+    <button mat-raised-button color="primary"
+      (click)="onSave()"
+      [disabled]="!relatedCaseForm.valid || saving"
+      *ngIf="mode !== 'view'">
+      <mat-icon *ngIf="!saving">save</mat-icon>
+      <mat-spinner diameter="20" *ngIf="saving"></mat-spinner>
+      {{ saving ? 'جارٍ الحفظ...' : 'حفظ' }}
+    </button>
+  </mat-dialog-actions>
+</div>
+

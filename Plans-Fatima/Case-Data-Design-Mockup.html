@@ -1,0 +1,1034 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>بيانات الدعوى - Design Mockup</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Cairo', sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+            direction: rtl;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .section-header {
+            padding: 20px;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-header .material-icons {
+            color: #3f51b5;
+            font-size: 28px;
+        }
+
+        .section-header h1 {
+            font-size: 24px;
+            color: #333;
+            font-weight: 600;
+        }
+
+        .content-layout {
+            display: flex;
+            min-height: 600px;
+        }
+
+        .tabs-container {
+            display: flex;
+            flex-direction: column;
+            border-left: 1px solid #e0e0e0;
+            background: #f8f9fa;
+            min-width: 280px;
+            max-width: 280px;
+            padding: 16px 0;
+        }
+
+        .tab {
+            padding: 14px 20px;
+            cursor: pointer;
+            border: none;
+            background: transparent;
+            font-family: 'Cairo', sans-serif;
+            font-size: 14px;
+            font-weight: 400;
+            color: #555;
+            text-align: right;
+            position: relative;
+            transition: all 0.2s;
+            border-radius: 0;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            justify-content: flex-end;
+            margin: 2px 8px;
+            border-radius: 4px;
+        }
+
+        .tab .material-icons {
+            font-size: 20px;
+            color: #777;
+        }
+
+        .tab:hover {
+            background: #e8f4f8;
+            color: #2c7a7b;
+        }
+
+        .tab:hover .material-icons {
+            color: #2c7a7b;
+        }
+
+        .tab.active {
+            color: #2c7a7b;
+            font-weight: 600;
+            background: #d1ecf1;
+        }
+
+        .tab.active .material-icons {
+            color: #2c7a7b;
+        }
+
+        .tab.active::before {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 4px;
+            height: 70%;
+            background: #2c7a7b;
+            border-radius: 2px 0 0 2px;
+        }
+
+        .tab-content {
+            padding: 24px;
+            display: none;
+            flex: 1;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Tab 1: Subject & Evidence - Rich Text Editors */
+        .editor-wrapper {
+            margin-bottom: 24px;
+        }
+
+        .editor-label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #333;
+        }
+
+        .editor-label .required {
+            color: #f44336;
+        }
+
+        .editor-toolbar {
+            border: 1px solid #ccc;
+            border-bottom: none;
+            background: #f9f9f9;
+            padding: 8px;
+            display: flex;
+            gap: 4px;
+            flex-wrap: wrap;
+        }
+
+        .toolbar-btn {
+            padding: 6px 8px;
+            border: 1px solid #ddd;
+            background: white;
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+
+        .toolbar-btn:hover {
+            background: #e3f2fd;
+        }
+
+        .editor-content {
+            border: 1px solid #ccc;
+            min-height: 200px;
+            padding: 12px;
+            background: white;
+            font-size: 14px;
+            line-height: 1.8;
+        }
+
+        .char-counter {
+            text-align: left;
+            font-size: 12px;
+            color: #666;
+            margin-top: 4px;
+        }
+
+        /* Tab 2 & 3: Lists with Tables */
+        .list-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .add-btn {
+            background: #3f51b5;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-family: 'Cairo', sans-serif;
+            font-weight: 500;
+        }
+
+        .add-btn:hover {
+            background: #303f9f;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            border: 1px solid #e0e0e0;
+        }
+
+        thead {
+            background: #f5f5f5;
+        }
+
+        th {
+            padding: 12px;
+            text-align: right;
+            font-weight: 600;
+            color: #333;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        tr:hover {
+            background: #f9f9f9;
+        }
+
+        .drag-handle {
+            cursor: move;
+            color: #999;
+        }
+
+        .action-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 4px;
+            color: #666;
+        }
+
+        .action-btn:hover {
+            color: #3f51b5;
+        }
+
+        /* Tab 4: Classifications */
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 16px;
+        }
+
+        .form-field {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-field label {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #333;
+        }
+
+        .form-field select,
+        .form-field input {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-family: 'Cairo', sans-serif;
+            font-size: 14px;
+        }
+
+        /* Tab 5: Basic Info Display */
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .info-item {
+            padding: 16px;
+            background: #f9f9f9;
+            border-radius: 4px;
+            border-right: 4px solid #3f51b5;
+        }
+
+        .info-label {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 4px;
+        }
+
+        .info-value {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        /* Tab 6: Attachments */
+        .upload-area {
+            border: 2px dashed #ccc;
+            border-radius: 4px;
+            padding: 40px;
+            text-align: center;
+            margin-bottom: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .upload-area:hover {
+            border-color: #3f51b5;
+            background: #f5f8ff;
+        }
+
+        .attachment-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px;
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+            margin-bottom: 8px;
+        }
+
+        .attachment-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .file-icon {
+            color: #f44336;
+            font-size: 32px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+        }
+
+        .empty-state .material-icons {
+            font-size: 64px;
+            color: #ccc;
+            margin-bottom: 16px;
+        }
+
+        /* Fixed Save Button Bar */
+        .fixed-action-bar {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: white;
+            padding: 16px 24px;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .fixed-action-bar button {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: 'Cairo', sans-serif;
+            font-weight: 500;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        .fixed-action-bar button.primary {
+            background: #1976d2;
+            color: white;
+            border: none;
+        }
+
+        .fixed-action-bar button.primary:hover:not(:disabled) {
+            background: #1565c0;
+        }
+
+        .fixed-action-bar button.secondary {
+            background: white;
+            color: #1976d2;
+            border: 1px solid #1976d2;
+        }
+
+        .fixed-action-bar button.secondary:hover:not(:disabled) {
+            background: #f5f5f5;
+            border-color: #1565c0;
+            color: #1565c0;
+        }
+
+        .fixed-action-bar button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .fixed-action-bar button .material-icons {
+            font-size: 20px;
+        }
+
+        .save-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #1976d2;
+            font-size: 14px;
+        }
+
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid #e0e0e0;
+            border-top-color: #1976d2;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        .success-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #4caf50;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .success-indicator .material-icons {
+            color: #4caf50;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Section Header -->
+        <div class="section-header">
+            <span class="material-icons">description</span>
+            <h1>بيانات الدعوى</h1>
+        </div>
+
+        <!-- Content Layout with Tabs on Right -->
+        <div class="content-layout">
+            <!-- Tab Contents on Left -->
+            <div style="flex: 1;">
+                <!-- Fixed Action Bar with Back and Save Buttons -->
+                <div class="fixed-action-bar">
+                    <button class="secondary" id="back-btn" onclick="goBackToList()">
+                        <span class="material-icons">arrow_forward</span>
+                        عودة
+                    </button>
+                    <button class="primary" id="save-btn" onclick="simulateSave()">
+                        <span class="material-icons">save</span>
+                        حفظ كمسودة
+                    </button>
+                    <span class="save-indicator" id="saving-indicator" style="display: none;">
+                        <div class="spinner"></div>
+                        <span>جاري الحفظ...</span>
+                    </span>
+                    <span class="success-indicator" id="success-indicator" style="display: none;">
+                        <span class="material-icons">check_circle</span>
+                        <span>تم الحفظ بنجاح</span>
+                    </span>
+                </div>
+
+                <!-- Tab 1: موضوع وأسانيد الدعوى -->
+        <div class="tab-content active" id="tab-0">
+            <div class="editor-wrapper">
+                <label class="editor-label">موضوع الدعوى <span class="required">*</span></label>
+                <div class="editor-toolbar">
+                    <button class="toolbar-btn"><b>B</b></button>
+                    <button class="toolbar-btn"><i>I</i></button>
+                    <button class="toolbar-btn"><u>U</u></button>
+                    <button class="toolbar-btn">🎨</button>
+                    <button class="toolbar-btn">📝</button>
+                    <button class="toolbar-btn">⋮</button>
+                    <button class="toolbar-btn">⇿</button>
+                </div>
+                <div class="editor-content" contenteditable="true">
+                    أدخل موضوع الدعوى بالتفصيل...
+                </div>
+                <div class="char-counter">25/4000</div>
+            </div>
+
+            <div class="editor-wrapper">
+                <label class="editor-label">أسانيد الدعوى <span class="required">*</span></label>
+                <div class="editor-toolbar">
+                    <button class="toolbar-btn"><b>B</b></button>
+                    <button class="toolbar-btn"><i>I</i></button>
+                    <button class="toolbar-btn"><u>U</u></button>
+                    <button class="toolbar-btn">🎨</button>
+                    <button class="toolbar-btn">📝</button>
+                    <button class="toolbar-btn">⋮</button>
+                    <button class="toolbar-btn">⇿</button>
+                </div>
+                <div class="editor-content" contenteditable="true">
+                    أدخل الأسانيد القانونية للدعوى...
+                </div>
+                <div class="char-counter">29/4000</div>
+            </div>
+
+        </div>
+
+        <!-- Tab 2: طلبات الدعوى -->
+        <div class="tab-content" id="tab-1">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h3 style="margin: 0;">قائمة الطلبات</h3>
+                <button style="padding: 10px 20px; background: #d4a017; color: white; border: none; border-radius: 4px; cursor: pointer; font-family: 'Cairo', sans-serif; font-weight: 500; display: flex; align-items: center; gap: 8px;">
+                    <span class="material-icons">add</span>
+                    إضافة طلب
+                </button>
+            </div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 150px; text-align: center;">رقم الطلب</th>
+                        <th>تفاصيل الطلب</th>
+                        <th style="width: 80px;"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td style="text-align: center; font-weight: 600;">1</td>
+                        <td>كسائر التراعة ومطالبة جهة</td>
+                        <td style="text-align: center;">
+                            <button class="action-btn">
+                                <span class="material-icons">more_vert</span>
+                            </button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: center; font-weight: 600;">2</td>
+                        <td>طلب التعويض عن الأضرار المادية والمعنوية</td>
+                        <td style="text-align: center;">
+                            <button class="action-btn">
+                                <span class="material-icons">more_vert</span>
+                            </button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="empty-state" style="display: none;">
+                <span class="material-icons">inbox</span>
+                <p>لا توجد طلبات مضافة</p>
+            </div>
+        </div>
+
+        <!-- Tab 3: الدعاوى المرتبطة -->
+        <div class="tab-content" id="tab-2">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h3 style="margin: 0;">قائمة الدعاوى المرتبطة</h3>
+                <button style="padding: 10px 20px; background: #d4a017; color: white; border: none; border-radius: 4px; cursor: pointer; font-family: 'Cairo', sans-serif; font-weight: 500; display: flex; align-items: center; gap: 8px;">
+                    <span class="material-icons">add</span>
+                    إضافة دعوى مرتبطة
+                </button>
+            </div>
+
+            <!-- Inline Form (shown when "إضافة دعوى مرتبطة" is clicked) -->
+            <div style="background: #f9f9f9; border: 1px solid #e0e0e0; border-radius: 4px; padding: 20px; margin-bottom: 20px; display: none;" id="inline-form">
+                <h4 style="margin-top: 0; margin-bottom: 16px;">إضافة دعوى مرتبطة</h4>
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;">
+                    <div class="form-field">
+                        <label>المحكمة</label>
+                        <select>
+                            <option value="">اختر المحكمة</option>
+                            <option>المحكمة الإدارية بالرياض</option>
+                            <option>المحكمة العامة بجدة</option>
+                        </select>
+                    </div>
+                    <div class="form-field">
+                        <label>رقم القيد الدعوى</label>
+                        <input type="text" placeholder="أدخل رقم القيد">
+                    </div>
+                    <div class="form-field">
+                        <label>عام الدعوى</label>
+                        <input type="number" min="1900" max="2100" placeholder="2019">
+                    </div>
+                </div>
+                <div style="display: flex; gap: 12px; margin-top: 16px;">
+                    <button style="padding: 10px 20px; background: #2e7d32; color: white; border: none; border-radius: 4px; cursor: pointer; font-family: 'Cairo', sans-serif; font-weight: 500; display: flex; align-items: center; gap: 8px;">
+                        <span class="material-icons">save</span>
+                        حفظ الدعوى المرتبطة
+                    </button>
+                    <button style="padding: 10px 20px; border: 1px solid #ccc; background: white; border-radius: 4px; cursor: pointer; font-family: 'Cairo', sans-serif; font-weight: 500;">
+                        إلغاء
+                    </button>
+                </div>
+            </div>
+
+            <!-- Table -->
+            <table style="display: none;" id="related-cases-table">
+                <thead>
+                    <tr>
+                        <th>المحكمة</th>
+                        <th style="width: 200px; text-align: center;">رقم الدعوى</th>
+                        <th style="width: 150px; text-align: center;">عام الدعوى</th>
+                        <th style="width: 80px;"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>المحكمة الإدارية بالرياض</td>
+                        <td style="text-align: center; font-weight: 600;">135411221</td>
+                        <td style="text-align: center;">2019</td>
+                        <td style="text-align: center;">
+                            <button class="action-btn">
+                                <span class="material-icons">more_vert</span>
+                            </button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!-- Empty State -->
+            <div class="empty-state" style="display: block;">
+                <span class="material-icons">folder_open</span>
+                <p>لا يوجد سجلات</p>
+            </div>
+        </div>
+
+        <!-- Tab 4: تصنيف الدعوى -->
+        <div class="tab-content" id="tab-3">
+            <!-- Header with Add Button -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                <h3 style="margin: 0;">تصنيفات الدعوى</h3>
+                <button style="padding: 10px 20px; background: #d4a017; color: white; border: none; border-radius: 4px; cursor: pointer; font-family: 'Cairo', sans-serif; font-weight: 500; display: flex; align-items: center; gap: 8px;" onclick="document.getElementById('classification-dialog').style.display='block';">
+                    <span class="material-icons">add</span>
+                    إضافة تصنيف
+                </button>
+            </div>
+
+            <!-- Selected Classifications Table -->
+            <div id="selected-classifications" style="margin-bottom: 24px; display: block;">
+                <table style="width: 100%; border-collapse: collapse; background: white; border: 1px solid #e0e0e0; border-radius: 4px;">
+                    <thead>
+                        <tr style="background: #f5f5f5; border-bottom: 2px solid #e0e0e0;">
+                            <th style="padding: 12px; text-align: right; color: #666; font-weight: 600; font-size: 13px;">التصنيف الأول</th>
+                            <th style="padding: 12px; text-align: right; color: #666; font-weight: 600; font-size: 13px;">التصنيف الثاني</th>
+                            <th style="padding: 12px; text-align: right; color: #666; font-weight: 600; font-size: 13px;">التصنيف الثالث</th>
+                            <th style="padding: 12px; text-align: right; color: #666; font-weight: 600; font-size: 13px;">التصنيف الرابع</th>
+                            <th style="padding: 12px; text-align: center; color: #666; font-weight: 600; font-size: 13px; width: 80px;">إجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Row 1 -->
+                        <tr style="border-bottom: 1px solid #e0e0e0;">
+                            <td style="padding: 12px; text-align: right; color: #333; font-size: 14px;">دعاوى مدنية</td>
+                            <td style="padding: 12px; text-align: right; color: #333; font-size: 14px;">دعاوى الملكية</td>
+                            <td style="padding: 12px; text-align: right; color: #333; font-size: 14px;">منازعات الأراضي</td>
+                            <td style="padding: 12px; text-align: right; color: #333; font-size: 14px;">نزاع حدود</td>
+                            <td style="padding: 12px; text-align: center;">
+                                <button style="background: none; border: none; cursor: pointer; color: #d32f2f; padding: 0; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 50%; transition: background 0.2s;" onmouseover="this.style.background='#ffebee';" onmouseout="this.style.background='none';">
+                                    <span class="material-icons">close</span>
+                                </button>
+                            </td>
+                        </tr>
+                        <!-- Row 2 -->
+                        <tr style="border-bottom: 1px solid #e0e0e0;">
+                            <td style="padding: 12px; text-align: right; color: #333; font-size: 14px;">دعاوى تجارية</td>
+                            <td style="padding: 12px; text-align: right; color: #333; font-size: 14px;">نزاعات العقود</td>
+                            <td style="padding: 12px; text-align: right; color: #333; font-size: 14px;">عقود البيع والشراء</td>
+                            <td style="padding: 12px; text-align: right; color: #333; font-size: 14px;">نزاع في السعر</td>
+                            <td style="padding: 12px; text-align: center;">
+                                <button style="background: none; border: none; cursor: pointer; color: #d32f2f; padding: 0; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 50%; transition: background 0.2s;" onmouseover="this.style.background='#ffebee';" onmouseout="this.style.background='none';">
+                                    <span class="material-icons">close</span>
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Empty State (shown when no classifications selected) -->
+            <div style="text-align: center; padding: 40px 20px; color: #999; display: none;" id="empty-state">
+                <span class="material-icons" style="font-size: 64px; color: #ccc; margin-bottom: 16px; display: block;">category</span>
+                <p style="font-size: 14px;">لم يتم اختيار أي تصنيف</p>
+            </div>
+
+            <!-- Classification Selection Dialog -->
+            <div id="classification-dialog" style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.4);">
+                <div style="background-color: white; margin: 10% auto; padding: 0; width: 90%; max-width: 1200px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); max-height: 80vh; overflow-y: auto; direction: rtl;">
+                    <!-- Dialog Header -->
+                    <div style="padding: 20px; border-bottom: 1px solid #e0e0e0; display: flex; justify-content: space-between; align-items: center;">
+                        <h2 style="margin: 0; font-size: 18px;">اختيار التصنيفات</h2>
+                        <button onclick="document.getElementById('classification-dialog').style.display='none';" style="background: none; border: none; cursor: pointer; font-size: 24px; color: #999;">×</button>
+                    </div>
+
+                    <!-- Dialog Content -->
+                    <div style="padding: 20px;">
+                        <!-- Search Field -->
+                        <div style="margin-bottom: 20px;">
+                            <input type="text" id="classification-search" placeholder="ابحث في أي مستوى..." style="width: 100%; padding: 10px 12px; border: 1px solid #ccc; border-radius: 4px; font-family: 'Cairo', sans-serif; font-size: 14px;">
+                        </div>
+
+                        <!-- Classifications Table -->
+                        <div style="overflow-x: auto; margin-bottom: 20px;">
+                            <table style="width: 100%; border-collapse: collapse; background: white;">
+                                <thead>
+                                    <tr style="background: #f5f5f5; border-bottom: 2px solid #e0e0e0;">
+                                        <th style="padding: 12px; text-align: center; width: 50px;">
+                                            <input type="checkbox" id="select-all">
+                                        </th>
+                                        <th style="padding: 12px; text-align: right; color: #666; font-weight: 600; font-size: 13px; width: 200px;">التصنيف الأول</th>
+                                        <th style="padding: 12px; text-align: right; color: #666; font-weight: 600; font-size: 13px; width: 200px;">التصنيف الثاني</th>
+                                        <th style="padding: 12px; text-align: right; color: #666; font-weight: 600; font-size: 13px; width: 200px;">التصنيف الثالث</th>
+                                        <th style="padding: 12px; text-align: right; color: #666; font-weight: 600; font-size: 13px; width: 200px;">التصنيف الرابع</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Classification Row 1 -->
+                                    <tr style="border-bottom: 1px solid #e0e0e0;">
+                                        <td style="padding: 12px; text-align: center;"><input type="checkbox" class="classification-checkbox"></td>
+                                        <td style="padding: 12px; text-align: right;">دعاوى مدنية</td>
+                                        <td style="padding: 12px; text-align: right;">دعاوى الملكية</td>
+                                        <td style="padding: 12px; text-align: right;">منازعات الأراضي</td>
+                                        <td style="padding: 12px; text-align: right;">نزاع حدود</td>
+                                    </tr>
+                                    <!-- Classification Row 2 -->
+                                    <tr style="border-bottom: 1px solid #e0e0e0;">
+                                        <td style="padding: 12px; text-align: center;"><input type="checkbox" class="classification-checkbox"></td>
+                                        <td style="padding: 12px; text-align: right;">دعاوى مدنية</td>
+                                        <td style="padding: 12px; text-align: right;">دعاوى الملكية</td>
+                                        <td style="padding: 12px; text-align: right;">منازعات العقارات</td>
+                                        <td style="padding: 12px; text-align: right;">نزاع ملكية</td>
+                                    </tr>
+                                    <!-- Classification Row 3 -->
+                                    <tr style="border-bottom: 1px solid #e0e0e0;">
+                                        <td style="padding: 12px; text-align: center;"><input type="checkbox" class="classification-checkbox"></td>
+                                        <td style="padding: 12px; text-align: right;">دعاوى تجارية</td>
+                                        <td style="padding: 12px; text-align: right;">نزاعات العقود</td>
+                                        <td style="padding: 12px; text-align: right;">عقود البيع والشراء</td>
+                                        <td style="padding: 12px; text-align: right;">نزاع في السعر</td>
+                                    </tr>
+                                    <!-- Classification Row 4 -->
+                                    <tr style="border-bottom: 1px solid #e0e0e0;">
+                                        <td style="padding: 12px; text-align: center;"><input type="checkbox" class="classification-checkbox"></td>
+                                        <td style="padding: 12px; text-align: right;">دعاوى عمالية</td>
+                                        <td style="padding: 12px; text-align: right;">نزاعات التوظيف</td>
+                                        <td style="padding: 12px; text-align: right;">عقد العمل</td>
+                                        <td style="padding: 12px; text-align: right;">نزاع في الراتب</td>
+                                    </tr>
+                                    <!-- Classification Row 5 -->
+                                    <tr style="border-bottom: 1px solid #e0e0e0;">
+                                        <td style="padding: 12px; text-align: center;"><input type="checkbox" class="classification-checkbox"></td>
+                                        <td style="padding: 12px; text-align: right;">دعاوى إدارية</td>
+                                        <td style="padding: 12px; text-align: right;">نزاعات مع الجهات الحكومية</td>
+                                        <td style="padding: 12px; text-align: right;">منح وتراخيص</td>
+                                        <td style="padding: 12px; text-align: right;">رفض الترخيص</td>
+                                    </tr>
+                                    <!-- Classification Row 6 -->
+                                    <tr style="border-bottom: 1px solid #e0e0e0;">
+                                        <td style="padding: 12px; text-align: center;"><input type="checkbox" class="classification-checkbox"></td>
+                                        <td style="padding: 12px; text-align: right;">دعاوى إدارية</td>
+                                        <td style="padding: 12px; text-align: right;">نزاعات مع الجهات الحكومية</td>
+                                        <td style="padding: 12px; text-align: right;">الاستئناف الإداري</td>
+                                        <td style="padding: 12px; text-align: right;">قرار إداري مخالف</td>
+                                    </tr>
+                                    <!-- Classification Row 7 -->
+                                    <tr style="border-bottom: 1px solid #e0e0e0;">
+                                        <td style="padding: 12px; text-align: center;"><input type="checkbox" class="classification-checkbox"></td>
+                                        <td style="padding: 12px; text-align: right;">دعاوى عقارية</td>
+                                        <td style="padding: 12px; text-align: right;">نزاعات الإيجار</td>
+                                        <td style="padding: 12px; text-align: right;">عقد الإيجار</td>
+                                        <td style="padding: 12px; text-align: right;">نزاع في الأجرة</td>
+                                    </tr>
+                                    <!-- Classification Row 8 -->
+                                    <tr style="border-bottom: 1px solid #e0e0e0;">
+                                        <td style="padding: 12px; text-align: center;"><input type="checkbox" class="classification-checkbox"></td>
+                                        <td style="padding: 12px; text-align: right;">دعاوى أسرية</td>
+                                        <td style="padding: 12px; text-align: right;">نزاعات الزواج والطلاق</td>
+                                        <td style="padding: 12px; text-align: right;">الطلاق والنفقة</td>
+                                        <td style="padding: 12px; text-align: right;">نزاع نفقة أطفال</td>
+                                    </tr>
+                                    <!-- Classification Row 9 -->
+                                    <tr style="border-bottom: 1px solid #e0e0e0;">
+                                        <td style="padding: 12px; text-align: center;"><input type="checkbox" class="classification-checkbox"></td>
+                                        <td style="padding: 12px; text-align: right;">دعاوى مالية</td>
+                                        <td style="padding: 12px; text-align: right;">دعاوى الديون</td>
+                                        <td style="padding: 12px; text-align: right;">ديون تجارية</td>
+                                        <td style="padding: 12px; text-align: right;">عدم السداد</td>
+                                    </tr>
+                                    <!-- Classification Row 10 -->
+                                    <tr style="border-bottom: 1px solid #e0e0e0;">
+                                        <td style="padding: 12px; text-align: center;"><input type="checkbox" class="classification-checkbox"></td>
+                                        <td style="padding: 12px; text-align: right;">دعاوى مالية</td>
+                                        <td style="padding: 12px; text-align: right;">دعاوى الديون</td>
+                                        <td style="padding: 12px; text-align: right;">ديون شخصية</td>
+                                        <td style="padding: 12px; text-align: right;">سند ديني</td>
+                                    </tr>
+                                    <!-- Classification Row 11 -->
+                                    <tr style="border-bottom: 1px solid #e0e0e0;">
+                                        <td style="padding: 12px; text-align: center;"><input type="checkbox" class="classification-checkbox"></td>
+                                        <td style="padding: 12px; text-align: right;">دعاوى براءات الاختراع</td>
+                                        <td style="padding: 12px; text-align: right;">الملكية الفكرية</td>
+                                        <td style="padding: 12px; text-align: right;">براءات الاختراع والعلامات</td>
+                                        <td style="padding: 12px; text-align: right;">انتهاك براءة اختراع</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Selection Summary -->
+                        <div style="padding: 12px 0; border-top: 1px solid #e0e0e0; border-bottom: 1px solid #e0e0e0; margin-bottom: 20px;">
+                            <span id="selection-count" style="color: #666; font-size: 14px;">0 تصنيف محدد</span>
+                        </div>
+                    </div>
+
+                    <!-- Dialog Footer -->
+                    <div style="padding: 16px 20px; background: #f9f9f9; border-top: 1px solid #e0e0e0; display: flex; justify-content: flex-end; gap: 8px; border-radius: 0 0 8px 8px;">
+                        <button onclick="document.getElementById('classification-dialog').style.display='none';" style="padding: 8px 16px; border: 1px solid #ccc; background: white; border-radius: 4px; cursor: pointer; font-family: 'Cairo', sans-serif; font-weight: 500;">إلغاء</button>
+                        <button style="padding: 8px 16px; background: #d4a017; color: white; border: none; border-radius: 4px; cursor: pointer; font-family: 'Cairo', sans-serif; font-weight: 500;">حفظ الاختيار</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab 5: بيانات التواصل -->
+        <div class="tab-content" id="tab-4">
+            <div style="margin-bottom: 20px;">
+                <h3 style="margin: 0 0 20px 0;">بيانات التواصل</h3>
+            </div>
+
+            <div class="form-grid">
+                <div class="form-field">
+                    <label>رقم الجوال الأساسي</label>
+                    <input type="tel" value="0512345678" placeholder="05XXXXXXXX" maxlength="10">
+                </div>
+
+                <div class="form-field">
+                    <label>رقم الجوال الثانوي</label>
+                    <input type="tel" value="0509876543" placeholder="05XXXXXXXX" maxlength="10">
+                </div>
+
+                <div class="form-field">
+                    <label>البريد الإلكتروني</label>
+                    <input type="email" value="user@example.com" placeholder="example@domain.com">
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab 6: المرفقات -->
+        <div class="tab-content" id="tab-5">
+            <h3 style="margin-bottom: 20px;">مرفقات الدعوى</h3>
+
+            <div class="form-grid" style="margin-bottom: 20px;">
+                <div class="form-field">
+                    <label>نوع المرفق <span class="required">*</span></label>
+                    <select>
+                        <option value="">اختر نوع المرفق</option>
+                        <option>صحيفة الدعوى (إلزامي)</option>
+                        <option>المستندات الثبوتية</option>
+                        <option>التوكيل</option>
+                        <option>أخرى</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="upload-area">
+                <span class="material-icons" style="font-size: 48px; color: #999;">cloud_upload</span>
+                <p style="margin-top: 12px; color: #666;">اسحب الملفات هنا أو انقر للتحميل</p>
+                <p style="margin-top: 8px; font-size: 13px; color: #999;">ملفات PDF فقط - الحد الأقصى 4 ميجابايت</p>
+            </div>
+
+            <div style="margin-top: 24px;">
+                <h4 style="margin-bottom: 12px; color: #666;">المرفقات المحملة (3)</h4>
+
+                <div class="attachment-item">
+                    <div class="attachment-info">
+                        <span class="material-icons file-icon">picture_as_pdf</span>
+                        <div>
+                            <div style="font-weight: 600;">صحيفة-الدعوى.pdf</div>
+                            <div style="font-size: 12px; color: #999;">1.2 MB • تم التحميل في 2026-01-26</div>
+                        </div>
+                    </div>
+                    <div>
+                        <button class="action-btn">
+                            <span class="material-icons">visibility</span>
+                        </button>
+                        <button class="action-btn">
+                            <span class="material-icons">download</span>
+                        </button>
+                        <button class="action-btn">
+                            <span class="material-icons">delete</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="attachment-item">
+                    <div class="attachment-info">
+                        <span class="material-icons file-icon">picture_as_pdf</span>
+                        <div>
+                            <div style="font-weight: 600;">التوكيل.pdf</div>
+                            <div style="font-size: 12px; color: #999;">856 KB • تم التحميل في 2026-01-26</div>
+                        </div>
+                    </div>
+                    <div>
+                        <button class="action-btn">
+                            <span class="material-icons">visibility</span>
+                        </button>
+                        <button class="action-btn">
+                            <span class="material-icons">download</span>
+                        </button>
+                        <button class="action-btn">
+                            <span class="material-icons">delete</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="attachment-item">
+                    <div class="attachment-info">
+                        <span class="material-icons file-icon">picture_as_pdf</span>
+                        <div>
+                            <div style="font-weight: 600;">مستندات-ثبوتية.pdf</div>
+                            <div style="font-size: 12px; color: #999;">3.5 MB • تم التحميل في 2026-01-25</div>
+                        </div>
+                    </div>
+                    <div>
+                        <button class="action-btn">
+                            <span class="material-icons">visibility</span>
+                        </button>
+                        <button class="action-btn">
+                            <span class="material-icons">download</span>
+                        </button>
+                        <button class="action-btn">
+                            <span class="material-icons">delete</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            </div>
+
+            <!-- Tabs on Right -->
+            <div class="tabs-container">
+                <button class="tab active" onclick="switchTab(0)">
+                    <span>موضوع وأسانيد الدعوى</span>
+                    <span class="material-icons">description</span>
+                </button>
+                <button class="tab" onclick="switchTab(1)">
+                    <span>طلبات الدعوى</span>
+                    <span class="material-icons">list_alt</span>
+                </button>
+                <button class="tab" onclick="switchTab(2)">
+                    <span>الدعاوى المرتبطة</span>
+                    <span class="material-icons">link</span>
+                </button>
+                <button class="tab" onclick="switchTab(3)">
+                    <span>تصنيف الدعوى</span>
+                    <span class="material-icons">category</span>
+                </button>
+                <button class="tab" onclick="switchTab(4)">
+                    <span>بيانات التواصل</span>
+                    <span class="material-icons">contact_mail</span>
+                </button>
+                <button class="tab" onclick="switchTab(5)">
+                    <span>المرفقات</span>
+                    <span class="material-icons">attach_file</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function switchTab(index) {
+            // Remove active class from all tabs and contents
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+
+            // Add active class to selected tab and content
+            document.querySelectorAll('.tab')[index].classList.add('active');
+            document.getElementById('tab-' + index).classList.add('active');
+        }
+
+        function goBackToList() {
+            // In the actual application, this would navigate back to the requests list
+            // For this mockup, we'll just show a confirmation and then navigate
+            if (confirm('هل تريد العودة إلى قائمة الطلبات؟ سيتم فقدان أي تغييرات غير محفوظة.')) {
+                // In real app: router.navigate(['/case-registration/requests']);
+                alert('سيتم التوجيه إلى قائمة الطلبات');
+            }
+        }
+
+        function simulateSave() {
+            const saveBtn = document.getElementById('save-btn');
+            const backBtn = document.getElementById('back-btn');
+            const savingIndicator = document.getElementById('saving-indicator');
+            const successIndicator = document.getElementById('success-indicator');
+
+            // Hide success indicator if visible
+            successIndicator.style.display = 'none';
+
+            // Show saving indicator and disable buttons
+            saveBtn.style.display = 'none';
+            backBtn.style.display = 'none';
+            savingIndicator.style.display = 'flex';
+
+            // Simulate API call delay (2 seconds)
+            setTimeout(() => {
+                // Hide saving indicator
+                savingIndicator.style.display = 'none';
+
+                // Show success indicator
+                successIndicator.style.display = 'flex';
+
+                // Show save button again after 3 seconds
+                setTimeout(() => {
+                    successIndicator.style.display = 'none';
+                    saveBtn.style.display = 'flex';
+                    backBtn.style.display = 'flex';
+                }, 3000);
+            }, 2000);
+        }
+    </script>
+</body>
+</html>

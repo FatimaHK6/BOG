@@ -1,0 +1,101 @@
+<app-section-container
+  title="المدعى عليهم"
+  sectionId="defendants"
+  icon="group"
+  [count]="defendants.length">
+
+  <!-- Add Button -->
+  <div class="section-actions" *ngIf="canEdit">
+    <button mat-raised-button class="gold-button" (click)="openAddDefendant()">
+      <mat-icon>add</mat-icon>
+      إضافة مدعى عليه
+    </button>
+  </div>
+
+  <!-- Validation Error -->
+  <app-validation-message
+    *ngIf="showValidation && defendants.length === 0"
+    type="error"
+    message="ERR002: يجب إضافة مدعى عليه واحد على الأقل">
+  </app-validation-message>
+
+  <!-- Defendants Table -->
+  <div class="table-container" *ngIf="defendants.length > 0">
+    <table mat-table [dataSource]="defendants" class="defendants-table">
+      <ng-container matColumnDef="type">
+        <th mat-header-cell *matHeaderCellDef>النوع</th>
+        <td mat-cell *matCellDef="let defendant">
+          <span class="defendant-type-badge">{{ defendant.defendantTypeName }}</span>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="name">
+        <th mat-header-cell *matHeaderCellDef>الاسم الكامل</th>
+        <td mat-cell *matCellDef="let defendant">
+          <strong>{{ defendant.fullName }}</strong>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="identity">
+        <th mat-header-cell *matHeaderCellDef>رقم الهوية</th>
+        <td mat-cell *matCellDef="let defendant">
+          <div *ngIf="defendant.identityNumber; else noIdentity">
+            <div>{{ defendant.identityNumber }}</div>
+            <small class="identity-type">{{ defendant.identityTypeName }}</small>
+          </div>
+          <ng-template #noIdentity>
+            <span class="no-data">-</span>
+          </ng-template>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="address">
+        <th mat-header-cell *matHeaderCellDef>العنوان</th>
+        <td mat-cell *matCellDef="let defendant">
+          {{ defendant.addressText || '-' }}
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef>الإجراءات</th>
+        <td mat-cell *matCellDef="let defendant">
+          <button mat-icon-button [matMenuTriggerFor]="menu" *ngIf="canEdit">
+            <mat-icon>more_vert</mat-icon>
+          </button>
+          <mat-menu #menu="matMenu">
+            <button mat-menu-item (click)="editDefendant(defendant)">
+              <mat-icon>edit</mat-icon>
+              <span>تعديل</span>
+            </button>
+            <button mat-menu-item (click)="deleteDefendant(defendant)">
+              <mat-icon>delete</mat-icon>
+              <span>حذف</span>
+            </button>
+          </mat-menu>
+
+          <button mat-icon-button (click)="viewDefendant(defendant)" *ngIf="!canEdit">
+            <mat-icon>visibility</mat-icon>
+          </button>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+    </table>
+  </div>
+
+  <!-- Empty State -->
+  <div class="empty-state" *ngIf="defendants.length === 0 && !showValidation">
+    <mat-icon>group_off</mat-icon>
+    <p>لم يتم إضافة أي مدعى عليه بعد</p>
+    <button mat-raised-button class="gold-button" (click)="openAddDefendant()" *ngIf="canEdit">
+      <mat-icon>add</mat-icon>
+      إضافة أول مدعى عليه
+    </button>
+  </div>
+
+  <!-- Loading State -->
+  <div class="loading-state" *ngIf="loading">
+    <mat-spinner diameter="40"></mat-spinner>
+  </div>
+</app-section-container>

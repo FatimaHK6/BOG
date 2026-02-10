@@ -1,0 +1,141 @@
+- generic [ref=e1]:
+  - generic [ref=e3]:
+    - banner [ref=e4]:
+      - generic [ref=e5]:
+        - heading [level=1] [ref=e140]: نظام إدارة الدعاوى
+        - navigation [ref=e7]:
+          - list [ref=e8]:
+            - listitem [ref=e9]:
+              - link [ref=e141] [cursor=pointer]:
+                - /url: /case-registration
+                - text: إدارة الدعاوى
+            - listitem [ref=e11]:
+              - link [ref=e142] [cursor=pointer]:
+                - /url: "#"
+                - text: المستخدمين
+            - listitem [ref=e13]:
+              - link [ref=e143] [cursor=pointer]:
+                - /url: "#"
+                - text: الإعدادات
+    - main [ref=e15]:
+      - generic [ref=e17]:
+        - generic [ref=e19]:
+          - heading [level=2] [ref=e144]: طلب قيد دعوى
+          - generic [ref=e21]:
+            - button [ref=e145] [cursor=pointer]:
+              - generic [ref=e23]: عودة
+            - button [ref=e146] [cursor=pointer]:
+              - generic [ref=e25]: حفظ كمسودة
+        - generic [ref=e27]:
+          - generic [ref=e28]:
+            - generic [ref=e29]:
+              - generic [ref=e30]: "المحكمة:"
+              - generic [ref=e31]: غير محدد
+            - generic [ref=e32]:
+              - generic [ref=e33]: "طريقة التسجيل:"
+              - generic [ref=e34]: غير محدد
+            - generic [ref=e35]:
+              - generic [ref=e36]: "رقم الطلب:"
+              - generic [ref=e37]: "1406"
+            - generic [ref=e38]:
+              - generic [ref=e39]: "حالة الطلب:"
+              - generic [ref=e40]: Draft
+          - generic [ref=e41]:
+            - generic [ref=e42]:
+              - generic [ref=e43]: "تاريخ الطلب:"
+              - generic [ref=e44]: 19/01/2026
+            - generic [ref=e45]:
+              - generic [ref=e46]: "رقم قيد الدعوى:"
+              - generic [ref=e47]: غير محدد
+            - generic [ref=e48]:
+              - generic [ref=e49]: "تاريخ قيد الدعوى:"
+              - generic [ref=e50]: غير محدد
+            - generic [ref=e51]:
+              - generic [ref=e52]: "نوع الدعوى:"
+              - generic [ref=e53]: غير محدد
+        - generic [ref=e54]:
+          - complementary [ref=e55]:
+            - navigation [ref=e56]:
+              - list [ref=e57]:
+                - listitem [ref=e58] [cursor=pointer]:
+                  - img [ref=e59]: group
+                  - generic [ref=e60]: المدعى عليهم
+                - listitem [ref=e61] [cursor=pointer]:
+                  - generic [ref=e62]:
+                    - img [ref=e63]: description
+                    - generic [ref=e64]: بيانات الدعوى
+                    - img [ref=e65]: expand_less
+                  - list [ref=e66]:
+                    - listitem [ref=e67]:
+                      - img [ref=e68]: description
+                      - generic [ref=e69]: موضوع وأسانيد الدعوى
+                    - listitem [ref=e70]:
+                      - img [ref=e71]: format_list_numbered
+                      - generic [ref=e72]: طلبات الدعوى
+                    - listitem [ref=e73]:
+                      - img [ref=e74]: link
+                      - generic [ref=e75]: الدعاوى المرتبطة
+                    - listitem [ref=e76]:
+                      - img [ref=e77]: category
+                      - generic [ref=e78]: تصنيف الدعوى
+                    - listitem [ref=e79]:
+                      - img [ref=e80]: phone
+                      - generic [ref=e81]: بيانات التواصل
+                    - listitem [ref=e82]:
+                      - img [ref=e83]: attach_file
+                      - generic [ref=e84]: المرفقات
+                - listitem [ref=e85] [cursor=pointer]:
+                  - img [ref=e86]: info
+                  - generic [ref=e87]: معلومات إضافية
+                - listitem [ref=e88] [cursor=pointer]:
+                  - img [ref=e89]: check_circle
+                  - generic [ref=e90]: إجراءات الطلب
+          - main [ref=e91]:
+            - generic [ref=e93]:
+              - heading [level=1] [ref=e147]: بيانات الدعوى - الدعاوى المرتبطة
+              - button [ref=e148] [cursor=pointer]:
+                - generic [ref=e120]:
+                  - text: التالي
+                  - img [ref=e121]: arrow_back
+            - generic [ref=e128]:
+              - button [ref=e149] [cursor=pointer]:
+                - generic [ref=e131]:
+                  - img [ref=e132]: add
+                  - text: إضافة دعوى مرتبطة
+              - generic [ref=e133]:
+                - img [ref=e134]: link_off
+                - paragraph [ref=e135]: لا يوجد أي سجلات
+                - paragraph [ref=e136]: لم يتم إضافة أي دعاوى مرتبطة بعد
+                - button [ref=e150] [cursor=pointer]:
+                  - generic [ref=e138]:
+                    - img [ref=e139]: add
+                    - text: إضافة أول دعوى مرتبطة
+    - contentinfo [ref=e115]:
+      - paragraph [ref=e116]: © 2026 نظام إدارة الدعاوى - جميع الحقوق محفوظة
+  - dialog "إضافة دعوى مرتبطة جديدة" [ref=e154]:
+    - generic [ref=e156]:
+      - heading "إضافة دعوى مرتبطة جديدة" [level=2] [ref=e157]
+      - generic [ref=e158]:
+        - generic [ref=e162] [cursor=pointer]:
+          - combobox "المحكمة (اختياري) المحكمة العامة - الرياض" [ref=e206]:
+            - generic [ref=e207]: المحكمة العامة - الرياض
+          - generic:
+            - generic: المحكمة (اختياري)
+        - generic [ref=e170]:
+          - generic [ref=e172]:
+            - spinbutton "رقم الدعوى" [ref=e173]: "12345"
+            - generic:
+              - generic: رقم الدعوى *
+          - generic [ref=e176]: رقم صحيح فقط
+        - generic [ref=e179]:
+          - generic [ref=e181]:
+            - spinbutton "السنة (هجرية 4 أرقام)" [active] [ref=e182]: "1445"
+            - generic:
+              - generic: السنة (هجرية 4 أرقام) *
+          - generic [ref=e185]: "السنة الهجرية بصيغة 4 أرقام (مثل: 1445)"
+      - generic [ref=e187]:
+        - button "إلغاء" [ref=e188] [cursor=pointer]: إلغاء
+        - button "حفظ" [ref=e189] [cursor=pointer]:
+          - generic [ref=e190]:
+            - img [ref=e191]: save
+            - text: حفظ

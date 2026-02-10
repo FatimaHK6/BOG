@@ -1,0 +1,147 @@
+- generic [ref=e3]:
+  - banner [ref=e4]:
+    - generic [ref=e5]:
+      - heading "نظام إدارة الدعاوى" [level=1] [ref=e6]
+      - navigation [ref=e7]:
+        - list [ref=e8]:
+          - listitem [ref=e9]:
+            - link "إدارة الدعاوى" [ref=e10] [cursor=pointer]:
+              - /url: /case-registration
+          - listitem [ref=e11]:
+            - link "المستخدمين" [ref=e12] [cursor=pointer]:
+              - /url: "#"
+          - listitem [ref=e13]:
+            - link "الإعدادات" [ref=e14] [cursor=pointer]:
+              - /url: "#"
+  - main [ref=e15]:
+    - generic [ref=e17]:
+      - generic [ref=e19]:
+        - heading "تعديل طلب تسجيل الدعوى" [level=1] [ref=e20]
+        - generic [ref=e21]:
+          - generic [ref=e22]: "رقم الطلب: 1408"
+          - generic [ref=e23]: Draft
+      - generic [ref=e24]:
+        - complementary [ref=e25]:
+          - navigation [ref=e26]:
+            - list [ref=e27]:
+              - listitem [ref=e28] [cursor=pointer]:
+                - img [ref=e29]: group
+                - generic [ref=e30]: المدعى عليهم
+                - generic [ref=e58]: "1"
+              - listitem [ref=e31] [cursor=pointer]:
+                - img [ref=e32]: description
+                - generic [ref=e33]: بيانات الدعوى
+              - listitem [ref=e34] [cursor=pointer]:
+                - img [ref=e35]: attach_file
+                - generic [ref=e36]: المرفقات
+              - listitem [ref=e37] [cursor=pointer]:
+                - img [ref=e38]: info
+                - generic [ref=e39]: معلومات إضافية
+              - listitem [ref=e40] [cursor=pointer]:
+                - img [ref=e41]: check_circle
+                - generic [ref=e42]: إجراءات الطلب
+          - generic [ref=e43]:
+            - button "حفظ" [ref=e44] [cursor=pointer]:
+              - generic [ref=e45]:
+                - img [ref=e46]: save
+                - text: حفظ
+            - button "رجوع" [ref=e47] [cursor=pointer]:
+              - generic [ref=e48]:
+                - img [ref=e49]: arrow_back
+                - text: رجوع
+        - main [ref=e50]:
+          - generic "معلومات إضافية" [ref=e100]:
+            - generic [ref=e101]:
+              - generic [ref=e102]:
+                - heading "معلومات إضافية" [level=2] [ref=e103]
+                - img [ref=e104]: info
+              - generic [ref=e106]:
+                - generic [ref=e107]:
+                  - heading "دعاوى إلغاء القرارات الإدارية" [level=3] [ref=e108]:
+                    - img [ref=e109]: gavel
+                    - text: دعاوى إلغاء القرارات الإدارية
+                  - generic [ref=e110]:
+                    - generic [ref=e114]:
+                      - textbox "رقم القرار" [ref=e115]: "121"
+                      - generic:
+                        - generic: رقم القرار
+                    - generic [ref=e118]:
+                      - generic [ref=e119]:
+                        - textbox "تاريخ القرار" [ref=e120]: 12/31/2025
+                        - generic:
+                          - generic: تاريخ القرار
+                      - button "Open calendar" [ref=e123] [cursor=pointer]:
+                        - img [ref=e125]
+                    - generic [ref=e130] [cursor=pointer]:
+                      - combobox "طريقة العلم بالقرار العلم به" [ref=e131]:
+                        - generic [ref=e134]: العلم به
+                      - generic:
+                        - generic: طريقة العلم بالقرار
+                    - generic [ref=e139]:
+                      - generic [ref=e140]:
+                        - textbox "تاريخ العلم بالقرار" [ref=e141]: 12/31/2025
+                        - generic:
+                          - generic: تاريخ العلم بالقرار
+                      - button "Open calendar" [ref=e144] [cursor=pointer]:
+                        - img [ref=e146]
+                    - generic [ref=e151] [cursor=pointer]:
+                      - combobox "جهة إصدار القرار وزارة العدل" [active] [ref=e259]:
+                        - generic [ref=e260]: وزارة العدل
+                      - generic:
+                        - generic: جهة إصدار القرار
+                - generic [ref=e158]:
+                  - heading "دعاوى الحقوق المتعلقة بالخدمة والتقاعد ودعاوى الإلغاء" [level=3] [ref=e159]:
+                    - img [ref=e160]: work
+                    - text: دعاوى الحقوق المتعلقة بالخدمة والتقاعد ودعاوى الإلغاء
+                  - generic [ref=e161]:
+                    - generic [ref=e165] [cursor=pointer]:
+                      - combobox "يوجد تظلم نعم" [ref=e166]:
+                        - generic [ref=e169]: نعم
+                      - generic:
+                        - generic: يوجد تظلم
+                    - generic [ref=e175]:
+                      - textbox "رقم التظلم" [ref=e176]: "1211"
+                      - generic:
+                        - generic: رقم التظلم
+                    - generic [ref=e179]:
+                      - generic [ref=e180]:
+                        - textbox "تاريخ التظلم" [ref=e181]: 1/3/2026
+                        - generic:
+                          - generic: تاريخ التظلم
+                      - button "Open calendar" [ref=e184] [cursor=pointer]:
+                        - img [ref=e186]
+                    - generic [ref=e191] [cursor=pointer]:
+                      - combobox "الجهة المتظلم لها" [ref=e192]
+                      - generic:
+                        - generic: الجهة المتظلم لها
+                    - generic [ref=e200]:
+                      - generic [ref=e201]:
+                        - textbox "تاريخ البت في التظلم" [ref=e202]: 1/10/2026
+                        - generic:
+                          - generic: تاريخ البت في التظلم
+                      - button "Open calendar" [ref=e205] [cursor=pointer]:
+                        - img [ref=e207]
+                    - generic [ref=e210]:
+                      - generic [ref=e212]:
+                        - textbox "نتيجة النظام" [ref=e213]: ff
+                        - generic:
+                          - generic: نتيجة النظام
+                      - generic [ref=e217]: 2/500
+                - generic [ref=e218]:
+                  - heading "نزاع علامة تجارية" [level=3] [ref=e219]:
+                    - img [ref=e220]: store
+                    - text: نزاع علامة تجارية
+                  - generic [ref=e221]:
+                    - generic [ref=e225]:
+                      - textbox "رقم الطلب" [ref=e226]: "1221"
+                      - generic:
+                        - generic: رقم الطلب
+                    - generic [ref=e229]:
+                      - generic [ref=e230]:
+                        - textbox "تاريخه" [ref=e231]: 1/2/2026
+                        - generic:
+                          - generic: تاريخه
+                      - button "Open calendar" [ref=e234] [cursor=pointer]:
+                        - img [ref=e236]
+  - contentinfo [ref=e56]:
+    - paragraph [ref=e57]: © 2026 نظام إدارة الدعاوى - جميع الحقوق محفوظة

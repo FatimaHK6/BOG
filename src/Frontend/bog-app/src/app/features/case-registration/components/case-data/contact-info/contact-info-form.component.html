@@ -1,0 +1,88 @@
+<div dir="rtl" class="contact-info-container">
+  <form [formGroup]="contactForm" class="contact-form">
+
+    <!-- Primary Mobile Phone -->
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>رقم الجوال الأساسي</mat-label>
+      <input
+        matInput
+        formControlName="primaryMobile"
+        type="tel"
+        placeholder="05XXXXXXXX"
+        [disabled]="!canEdit"
+        maxlength="10">
+      <mat-hint>الصيغة: 05xxxxxxxx (10 أرقام تبدأ بـ 05)</mat-hint>
+      <mat-error *ngIf="contactForm.get('primaryMobile')?.hasError('required')">
+        رقم الجوال الأساسي مطلوب
+      </mat-error>
+      <mat-error *ngIf="contactForm.get('primaryMobile')?.hasError('pattern')">
+        يجب أن يكون بصيغة صحيحة (05xxxxxxxx)
+      </mat-error>
+      <button
+        matSuffix
+        mat-icon-button
+        type="button"
+        (click)="clearField('primaryMobile')"
+        *ngIf="contactForm.get('primaryMobile')?.value && canEdit"
+        aria-label="مسح الحقل">
+        <mat-icon>close</mat-icon>
+      </button>
+    </mat-form-field>
+
+    <!-- Secondary Mobile Phone -->
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>رقم الجوال الثانوي (اختياري)</mat-label>
+      <input
+        matInput
+        formControlName="secondaryMobile"
+        type="tel"
+        placeholder="05XXXXXXXX"
+        [disabled]="!canEdit"
+        maxlength="10">
+      <mat-hint>الصيغة: 05xxxxxxxx (10 أرقام تبدأ بـ 05)</mat-hint>
+      <mat-error *ngIf="contactForm.get('secondaryMobile')?.hasError('pattern')">
+        يجب أن يكون بصيغة صحيحة (05xxxxxxxx)
+      </mat-error>
+      <button
+        matSuffix
+        mat-icon-button
+        type="button"
+        (click)="clearField('secondaryMobile')"
+        *ngIf="contactForm.get('secondaryMobile')?.value && canEdit"
+        aria-label="مسح الحقل">
+        <mat-icon>close</mat-icon>
+      </button>
+    </mat-form-field>
+
+    <!-- Email -->
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>البريد الإلكتروني (اختياري)</mat-label>
+      <input
+        matInput
+        formControlName="email"
+        type="email"
+        placeholder="example@domain.com"
+        [disabled]="!canEdit">
+      <mat-hint>أدخل بريد إلكتروني صحيح</mat-hint>
+      <mat-error *ngIf="contactForm.get('email')?.hasError('email')">
+        البريد الإلكتروني غير صحيح
+      </mat-error>
+      <button
+        matSuffix
+        mat-icon-button
+        type="button"
+        (click)="clearField('email')"
+        *ngIf="contactForm.get('email')?.value && canEdit"
+        aria-label="مسح الحقل">
+        <mat-icon>close</mat-icon>
+      </button>
+    </mat-form-field>
+
+  </form>
+
+  <!-- Info Box -->
+  <div class="info-box" *ngIf="canEdit">
+    <mat-icon>info</mat-icon>
+    <span>سيتم استخدام هذه المعلومات للتواصل بشأن الطلب</span>
+  </div>
+</div>

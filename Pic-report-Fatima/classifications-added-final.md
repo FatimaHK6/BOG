@@ -1,0 +1,113 @@
+- generic [ref=e3]:
+  - banner [ref=e4]:
+    - generic [ref=e5]:
+      - heading "نظام إدارة الدعاوى" [level=1] [ref=e588]
+      - navigation [ref=e7]:
+        - list [ref=e8]:
+          - listitem [ref=e9]:
+            - link "إدارة الدعاوى" [ref=e589] [cursor=pointer]:
+              - /url: /case-registration
+          - listitem [ref=e11]:
+            - link "المستخدمين" [ref=e590] [cursor=pointer]:
+              - /url: "#"
+          - listitem [ref=e13]:
+            - link "الإعدادات" [ref=e591] [cursor=pointer]:
+              - /url: "#"
+  - main [ref=e15]:
+    - generic [ref=e102]:
+      - generic [ref=e104]:
+        - heading "طلب قيد دعوى" [level=2] [ref=e592]
+        - generic [ref=e106]:
+          - button "عودة" [ref=e593] [cursor=pointer]:
+            - generic [ref=e108]: عودة
+          - button "حفظ كمسودة" [ref=e594] [cursor=pointer]:
+            - generic [ref=e110]: حفظ كمسودة
+      - generic [ref=e112]:
+        - generic [ref=e113]:
+          - generic [ref=e114]:
+            - generic [ref=e115]: "المحكمة:"
+            - generic [ref=e116]: غير محدد
+          - generic [ref=e117]:
+            - generic [ref=e118]: "طريقة التسجيل:"
+            - generic [ref=e119]: غير محدد
+          - generic [ref=e120]:
+            - generic [ref=e121]: "رقم الطلب:"
+            - generic [ref=e122]: "1414"
+          - generic [ref=e123]:
+            - generic [ref=e124]: "حالة الطلب:"
+            - generic [ref=e125]: Draft
+        - generic [ref=e126]:
+          - generic [ref=e127]:
+            - generic [ref=e128]: "تاريخ الطلب:"
+            - generic [ref=e129]: 04/02/2026
+          - generic [ref=e130]:
+            - generic [ref=e131]: "رقم قيد الدعوى:"
+            - generic [ref=e132]: غير محدد
+          - generic [ref=e133]:
+            - generic [ref=e134]: "تاريخ قيد الدعوى:"
+            - generic [ref=e135]: غير محدد
+          - generic [ref=e136]:
+            - generic [ref=e137]: "نوع الدعوى:"
+            - generic [ref=e138]: غير محدد
+      - generic [ref=e139]:
+        - complementary [ref=e140]:
+          - navigation [ref=e141]:
+            - list [ref=e142]:
+              - listitem [ref=e143] [cursor=pointer]:
+                - img [ref=e144]: group
+                - generic [ref=e145]: المدعى عليهم
+              - listitem [ref=e146] [cursor=pointer]:
+                - generic [ref=e147]:
+                  - img [ref=e148]: description
+                  - generic [ref=e149]: بيانات الدعوى
+                  - img [ref=e150]: expand_less
+                - list [ref=e151]:
+                  - listitem [ref=e152]:
+                    - img [ref=e153]: description
+                    - generic [ref=e154]: موضوع وأسانيد الدعوى
+                  - listitem [ref=e155]:
+                    - img [ref=e156]: format_list_numbered
+                    - generic [ref=e157]: طلبات الدعوى
+                  - listitem [ref=e158]:
+                    - img [ref=e159]: link
+                    - generic [ref=e160]: الدعاوى المرتبطة
+                  - listitem [ref=e161]:
+                    - img [ref=e162]: category
+                    - generic [ref=e163]: تصنيف الدعوى
+                    - generic [ref=e595]: "1"
+                  - listitem [ref=e164]:
+                    - img [ref=e165]: phone
+                    - generic [ref=e166]: بيانات التواصل
+                  - listitem [ref=e167]:
+                    - img [ref=e168]: attach_file
+                    - generic [ref=e169]: المرفقات
+              - listitem [ref=e170] [cursor=pointer]:
+                - img [ref=e171]: info
+                - generic [ref=e172]: معلومات إضافية
+              - listitem [ref=e173] [cursor=pointer]:
+                - img [ref=e174]: check_circle
+                - generic [ref=e175]: إجراءات الطلب
+        - main [ref=e176]:
+          - generic [ref=e178]:
+            - heading "بيانات الدعوى - تصنيف الدعوى" [level=1] [ref=e596]
+            - button "التالي" [ref=e597] [cursor=pointer]:
+              - generic [ref=e203]:
+                - text: التالي
+                - img [ref=e204]: arrow_back
+          - generic [ref=e211]:
+            - button "إضافة تصنيف" [active] [ref=e598] [cursor=pointer]:
+              - generic [ref=e214]:
+                - img [ref=e215]: add
+                - text: إضافة تصنيف
+            - generic [ref=e216]:
+              - img [ref=e217]: category
+              - paragraph [ref=e218]: لم يتم اختيار أي تصنيفات بعد
+              - button "إضافة أول تصنيف" [ref=e599] [cursor=pointer]:
+                - generic [ref=e220]:
+                  - img [ref=e221]: add
+                  - text: إضافة أول تصنيف
+            - generic [ref=e222]:
+              - img [ref=e223]: info
+              - generic [ref=e224]: يمكنك اختيار عدة تصنيفات للدعوى من مستويات هرمية مختلفة
+  - contentinfo [ref=e99]:
+    - paragraph [ref=e100]: © 2026 نظام إدارة الدعاوى - جميع الحقوق محفوظة
