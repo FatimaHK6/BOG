@@ -1,5 +1,5 @@
 import { Component, Inject, OnInit, OnDestroy } from '@angular/core';
-import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Editor, Toolbar } from 'ngx-editor';
@@ -12,7 +12,7 @@ import { CaseDataStateService } from '../../../services/case-data-state.service'
   styleUrls: ['./claim-form-dialog.component.scss']
 })
 export class ClaimFormDialogComponent implements OnInit, OnDestroy {
-  claimForm!: UntypedFormGroup;
+  claimForm!: FormGroup;
   mode: 'create' | 'edit' | 'view';
   requestId: number;
   claim?: ClaimVM;
@@ -41,7 +41,7 @@ export class ClaimFormDialogComponent implements OnInit, OnDestroy {
   }
 
   constructor(
-    private fb: UntypedFormBuilder,
+    private fb: FormBuilder,
     private caseDataState: CaseDataStateService,
     private snackBar: MatSnackBar,
     public dialogRef: MatDialogRef<ClaimFormDialogComponent>,

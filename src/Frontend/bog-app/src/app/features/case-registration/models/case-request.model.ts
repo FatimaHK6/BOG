@@ -62,3 +62,16 @@ export interface CaseClassificationVM {
   nameEn?: string;
   code?: string;
 }
+
+export interface CaseTypeVM {
+  id: number;
+  name: string;
+  nameAr?: string;
+  description?: string;
+}
+
+export interface RequestDecisionDTO {
+  decisionType: string | number;
+  caseTypeId: number;
+  notes?: string;
+}

@@ -1,5 +1,5 @@
 import { Component, Input, OnInit, OnDestroy } from '@angular/core';
-import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Subject } from 'rxjs';
 import { takeUntil, debounceTime, distinctUntilChanged } from 'rxjs/operators';
@@ -23,7 +23,7 @@ export class AdditionalInfoFormComponent implements OnInit, OnDestroy {
   @Input() requestId!: number;
   @Input() canEdit = false;
 
-  infoForm: UntypedFormGroup;
+  infoForm: FormGroup;
   loading = false;
   saving = false;
 
@@ -36,7 +36,7 @@ export class AdditionalInfoFormComponent implements OnInit, OnDestroy {
   private saveInProgress = false;
 
   constructor(
-    private fb: UntypedFormBuilder,
+    private fb: FormBuilder,
     private snackBar: MatSnackBar,
     private additionalInfoApi: AdditionalInfoApiService,
     private lookupsApi: LookupsApiService
@@ -66,7 +66,7 @@ export class AdditionalInfoFormComponent implements OnInit, OnDestroy {
    * Type 2: 6 fields
    * Type 3: 2 fields
    */
-  private createForm(): UntypedFormGroup {
+  private createForm(): FormGroup {
     return this.fb.group({
       // Type 1: Management Decision Cancellation (إلغاء قرار إداري)
       decisionNumber: ['', [Validators.maxLength(50)]],

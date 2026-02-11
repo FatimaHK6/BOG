@@ -1,5 +1,5 @@
 import { Component, Inject, OnInit } from '@angular/core';
-import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { RelatedCaseVM, RelatedCaseDTO, CourtLookup } from '../../../models/related-case.model';
@@ -12,7 +12,7 @@ import { LookupsApiService } from '../../../services/lookups-api.service';
   styleUrls: ['./related-case-form-dialog.component.scss']
 })
 export class RelatedCaseFormDialogComponent implements OnInit {
-  relatedCaseForm!: UntypedFormGroup;
+  relatedCaseForm!: FormGroup;
   mode: 'create' | 'edit' | 'view';
   requestId: number;
   relatedCase?: RelatedCaseVM;
@@ -22,7 +22,7 @@ export class RelatedCaseFormDialogComponent implements OnInit {
   loadingCourts = false;
 
   constructor(
-    private fb: UntypedFormBuilder,
+    private fb: FormBuilder,
     private caseDataState: CaseDataStateService,
     private lookupsApi: LookupsApiService,
     private snackBar: MatSnackBar,

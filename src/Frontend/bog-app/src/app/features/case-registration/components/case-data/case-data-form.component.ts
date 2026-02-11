@@ -1,5 +1,5 @@
 import { Component, Input, OnInit, OnDestroy } from '@angular/core';
-import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { CaseRegistrationApiService } from '../../services/case-registration-api.service';
 import { ClassificationApiService, ClassificationVM } from '../../services/classification-api.service';
@@ -16,7 +16,7 @@ export class CaseDataFormComponent implements OnInit, OnDestroy {
   @Input() requestId!: number;
   @Input() canEdit = false;
 
-  caseDataForm!: UntypedFormGroup;
+  caseDataForm!: FormGroup;
   saving = false;
   saveSuccess = false;
   classifications: ClassificationVM[] = [];
@@ -32,7 +32,7 @@ export class CaseDataFormComponent implements OnInit, OnDestroy {
   }
 
   constructor(
-    private fb: UntypedFormBuilder,
+    private fb: FormBuilder,
     private caseApi: CaseRegistrationApiService,
     private classificationApi: ClassificationApiService,
     private caseDataState: CaseDataStateService,
