@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, AfterViewInit } from '@angular/core';
+import { Component, OnInit, ViewChild, AfterViewInit, Input } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatTableDataSource } from '@angular/material/table';
@@ -20,7 +20,7 @@ interface DefendantType {
   styleUrls: ['./defendant-list.component.scss']
 })
 export class DefendantListComponent implements OnInit, AfterViewInit {
-  requestId: number = 0;
+  @Input() requestId: number = 0;
   defendants: DefendantListVM[] = [];
   dataSource = new MatTableDataSource<DefendantListVM>([]);
   isLoading = false;
@@ -55,18 +55,10 @@ export class DefendantListComponent implements OnInit, AfterViewInit {
   ) { }
 
   ngOnInit(): void {
-    this.route.queryParams.subscribe(params => {
-      const newRequestId = params['requestId'] ? +params['requestId'] : 0;
-      if (newRequestId !== this.requestId) {
-        this.requestId = newRequestId;
-        if (this.requestId > 0) {
-          this.loadDefendants();
-        } else {
-          this.defendants = [];
-          this.dataSource.data = [];
-        }
-      }
-    });
+    // Load defendants if requestId is provided
+    if (this.requestId > 0) {
+      this.loadDefendants();
+    }
   }
 
   ngAfterViewInit(): void {

@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, AfterViewInit } from '@angular/core';
+import { Component, OnInit, ViewChild, AfterViewInit, Input } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { MatPaginator } from '@angular/material/paginator';
@@ -22,8 +22,7 @@ interface PlaintiffType {
   styleUrls: ['./plaintiff-list.component.scss']
 })
 export class PlaintiffListComponent implements OnInit, AfterViewInit {
-  // Get requestId from route query params
-  requestId: number = 0;
+  @Input() requestId: number = 0;
   isSaving = false;
 
   plaintiffs: PlaintiffListVM[] = [];
@@ -70,22 +69,10 @@ export class PlaintiffListComponent implements OnInit, AfterViewInit {
   ) { }
 
   ngOnInit(): void {
-    // Get requestId from query params
-    this.route.queryParams.subscribe(params => {
-      const newRequestId = params['requestId'] ? +params['requestId'] : 0;
-      if (newRequestId !== this.requestId) {
-        this.requestId = newRequestId;
-        if (this.requestId > 0) {
-          this.loadPlaintiffs();
-        } else {
-          // No request selected, show empty state or redirect
-          this.plaintiffs = [];
-          this.dataSource.data = [];
-          this.allRepresentatives = [];
-          this.representativesDataSource.data = [];
-        }
-      }
-    });
+    // Load plaintiffs if requestId is provided
+    if (this.requestId > 0) {
+      this.loadPlaintiffs();
+    }
   }
 
   onSaveAsDraft(): void {
