@@ -15,7 +15,7 @@ import { RequestCompletionComponent } from './components/request-completion/requ
 const routes: Routes = [
   {
     path: '',
-    redirectTo: 'plaintiffs',
+    redirectTo: 'requests',
     pathMatch: 'full'
   },
   {
