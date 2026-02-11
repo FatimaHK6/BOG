@@ -1,1 +1,116 @@
-<router-outlet></router-outlet>
+<div class="app-container" dir="rtl">
+  <!-- Header/Navbar -->
+  <header class="app-header">
+    <div class="header-content">
+      <h1>نظام إدارة الدعاوى</h1>
+      <nav class="main-nav">
+        <ul>
+          <li><a routerLink="/case-registration" routerLinkActive="active">إدارة الدعاوى</a></li>
+          <li><a href="#" routerLinkActive="active">المستخدمين</a></li>
+          <li><a href="#" routerLinkActive="active">الإعدادات</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="app-main">
+    <router-outlet></router-outlet>
+  </main>
+
+  <!-- Footer -->
+  <footer class="app-footer">
+    <p>&copy; 2026 نظام إدارة الدعاوى - جميع الحقوق محفوظة</p>
+  </footer>
+</div>
+
+<style>
+  .app-container {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    background: #f5f5f5;
+  }
+
+  .app-header {
+    background: #1B5E20;
+    color: white;
+    padding: 16px 24px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  .header-content {
+    max-width: 1600px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+    .header-content h1 {
+      margin: 0;
+      font-size: 24px;
+      font-weight: 600;
+    }
+
+  .main-nav ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    gap: 24px;
+  }
+
+  .main-nav a {
+    color: white;
+    text-decoration: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    transition: background 0.2s;
+  }
+
+    .main-nav a:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .main-nav a.active {
+      background: rgba(255, 255, 255, 0.2);
+      font-weight: 600;
+    }
+
+  .app-main {
+    flex: 1;
+    max-width: 1600px;
+    width: 100%;
+    margin: 0 auto;
+    padding: 24px;
+  }
+
+  .app-footer {
+    background: #2E2E2E;
+    color: white;
+    text-align: center;
+    padding: 16px;
+    margin-top: auto;
+  }
+
+    .app-footer p {
+      margin: 0;
+    }
+
+  @media (max-width: 768px) {
+    .header-content {
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .main-nav ul {
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .app-main {
+      padding: 16px;
+    }
+  }
+</style>

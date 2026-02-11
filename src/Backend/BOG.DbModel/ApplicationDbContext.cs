@@ -65,6 +65,12 @@ public class ApplicationDbContext : DbContext
     public DbSet<City> Cities { get; set; }
     public DbSet<GovernmentAgency> GovernmentAgencies { get; set; }
 
+    // Additional lookup tables
+    public DbSet<Classification> Classifications { get; set; }
+    public DbSet<NotificationMethod> NotificationMethods { get; set; }
+    public DbSet<GovernmentEntity> GovernmentEntities { get; set; }
+    public DbSet<CaseType> CaseTypes { get; set; }
+
     #endregion
 
     #region Common DbSets
@@ -87,6 +93,12 @@ public class ApplicationDbContext : DbContext
     public DbSet<Representative> Representatives { get; set; }
     public DbSet<RequestAttachment> RequestAttachments { get; set; }
 
+    // Additional info tables
+    public DbSet<AdditionalInfo> AdditionalInfos { get; set; }
+    public DbSet<AdditionalInfoManagementDecision> AdditionalInfoManagementDecisions { get; set; }
+    public DbSet<AdditionalInfoServiceRights> AdditionalInfoServiceRights { get; set; }
+    public DbSet<AdditionalInfoTrademark> AdditionalInfoTrademarks { get; set; }
+
     #endregion
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -99,8 +111,10 @@ public class ApplicationDbContext : DbContext
         ConfigureUserEntity(modelBuilder);
         ConfigureIdentityEntities(modelBuilder);
         ConfigureLookupEntities(modelBuilder);
+        ConfigureAdditionalLookupEntities(modelBuilder);
         ConfigureCommonEntities(modelBuilder);
         ConfigureCaseRegistrationEntities(modelBuilder);
+        ConfigureAdditionalInfoEntities(modelBuilder);
         SeedRoles(modelBuilder);
         SeedLookupData(modelBuilder);
     }
@@ -500,6 +514,61 @@ public class ApplicationDbContext : DbContext
     }
 
     /// <summary>
+    /// Configures additional lookup entities (Classification, NotificationMethod, GovernmentEntity, CaseType).
+    /// </summary>
+    private void ConfigureAdditionalLookupEntities(ModelBuilder modelBuilder)
+    {
+        // Classification
+        modelBuilder.Entity<Classification>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Name).IsRequired().HasMaxLength(200);
+            entity.Property(e => e.NameAr).IsRequired().HasMaxLength(200);
+            entity.Property(e => e.Description).HasMaxLength(500);
+            entity.Property(e => e.Level1).HasMaxLength(100);
+            entity.Property(e => e.Level2).HasMaxLength(100);
+            entity.Property(e => e.Level3).HasMaxLength(100);
+            entity.Property(e => e.Level4).HasMaxLength(100);
+            entity.Property(e => e.IsActive).HasDefaultValue(true);
+            entity.Property(e => e.IsDeleted).HasDefaultValue(false);
+        });
+
+        // NotificationMethod
+        modelBuilder.Entity<NotificationMethod>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Name).IsRequired().HasMaxLength(100);
+            entity.Property(e => e.NameAr).IsRequired().HasMaxLength(100);
+            entity.Property(e => e.Description).HasMaxLength(500);
+            entity.Property(e => e.IsActive).HasDefaultValue(true);
+            entity.Property(e => e.IsDeleted).HasDefaultValue(false);
+        });
+
+        // GovernmentEntity
+        modelBuilder.Entity<GovernmentEntity>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Name).IsRequired().HasMaxLength(200);
+            entity.Property(e => e.NameAr).IsRequired().HasMaxLength(200);
+            entity.Property(e => e.Code).HasMaxLength(50);
+            entity.Property(e => e.Description).HasMaxLength(500);
+            entity.Property(e => e.IsActive).HasDefaultValue(true);
+            entity.Property(e => e.IsDeleted).HasDefaultValue(false);
+        });
+
+        // CaseType
+        modelBuilder.Entity<CaseType>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Name).IsRequired().HasMaxLength(100);
+            entity.Property(e => e.NameAr).IsRequired().HasMaxLength(100);
+            entity.Property(e => e.Description).HasMaxLength(500);
+            entity.Property(e => e.IsActive).HasDefaultValue(true);
+            entity.Property(e => e.IsDeleted).HasDefaultValue(false);
+        });
+    }
+
+    /// <summary>
     /// Configures Common entities.
     /// </summary>
     private void ConfigureCommonEntities(ModelBuilder modelBuilder)
@@ -828,6 +897,88 @@ public class ApplicationDbContext : DbContext
     }
 
     /// <summary>
+    /// Configures AdditionalInfo and related entities.
+    /// </summary>
+    private void ConfigureAdditionalInfoEntities(ModelBuilder modelBuilder)
+    {
+        // AdditionalInfo
+        modelBuilder.Entity<AdditionalInfo>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.IsDeleted).HasDefaultValue(false);
+
+            entity.HasOne(e => e.CaseRegistrationRequest)
+                .WithMany()
+                .HasForeignKey(e => e.CaseRegistrationRequestId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(e => e.ManagementDecision)
+                .WithOne(m => m.AdditionalInfo)
+                .HasForeignKey<AdditionalInfoManagementDecision>(m => m.AdditionalInfoId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(e => e.ServiceRights)
+                .WithOne(s => s.AdditionalInfo)
+                .HasForeignKey<AdditionalInfoServiceRights>(s => s.AdditionalInfoId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(e => e.Trademark)
+                .WithOne(t => t.AdditionalInfo)
+                .HasForeignKey<AdditionalInfoTrademark>(t => t.AdditionalInfoId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // AdditionalInfoManagementDecision
+        modelBuilder.Entity<AdditionalInfoManagementDecision>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.DecisionNumber).IsRequired().HasMaxLength(50);
+            entity.Property(e => e.DecisionDate).IsRequired();
+            entity.Property(e => e.NotificationDate).IsRequired();
+            entity.Property(e => e.IsDeleted).HasDefaultValue(false);
+
+            entity.HasOne(e => e.AdditionalInfo)
+                .WithOne(a => a.ManagementDecision)
+                .HasForeignKey<AdditionalInfoManagementDecision>(e => e.AdditionalInfoId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(e => e.NotificationMethod)
+                .WithMany()
+                .HasForeignKey(e => e.NotificationMethodId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(e => e.IssuingAuthority)
+                .WithMany()
+                .HasForeignKey(e => e.IssuingAuthorityId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        // AdditionalInfoServiceRights
+        modelBuilder.Entity<AdditionalInfoServiceRights>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.IsDeleted).HasDefaultValue(false);
+
+            entity.HasOne(e => e.AdditionalInfo)
+                .WithOne(a => a.ServiceRights)
+                .HasForeignKey<AdditionalInfoServiceRights>(e => e.AdditionalInfoId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // AdditionalInfoTrademark
+        modelBuilder.Entity<AdditionalInfoTrademark>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.IsDeleted).HasDefaultValue(false);
+
+            entity.HasOne(e => e.AdditionalInfo)
+                .WithOne(a => a.Trademark)
+                .HasForeignKey<AdditionalInfoTrademark>(e => e.AdditionalInfoId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+    }
+
+    /// <summary>
     /// Seeds lookup data.
     /// </summary>
     private void SeedLookupData(ModelBuilder modelBuilder)
@@ -938,6 +1089,34 @@ public class ApplicationDbContext : DbContext
             new City { Id = 11, Name = "Abha", NameAr = "أبها", RegionId = 6, IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
             new City { Id = 12, Name = "Hail", NameAr = "حائل", RegionId = 8, IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
             new City { Id = 13, Name = "Najran", NameAr = "نجران", RegionId = 11, IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now }
+        );
+
+        // Classifications (25 hierarchical classifications)
+        modelBuilder.Entity<Classification>().HasData(
+            new Classification { Id = 7, Name = "RealEstateSaleContract", NameAr = "عقد بيع عقار", Description = "Sale contract for real estate", Level1 = "عقود", Level2 = "عقود مدنية", Level3 = "عقود البيع", Level4 = "عقد بيع عقار", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
+            new Classification { Id = 8, Name = "ResidentialLeaseContract", NameAr = "عقد إيجار سكني", Description = "Lease contract for residential property", Level1 = "عقود", Level2 = "عقود مدنية", Level3 = "عقود الإيجار", Level4 = "عقد إيجار سكني", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
+            new Classification { Id = 9, Name = "CompanyFormationContract", NameAr = "عقد تأسيس شركة", Description = "Partnership formation agreement", Level1 = "عقود", Level2 = "عقود تجارية", Level3 = "عقود الشركات", Level4 = "عقد تأسيس شركة", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
+            new Classification { Id = 10, Name = "FixedTermEmploymentContract", NameAr = "عقد عمل محدد المدة", Description = "Fixed term employment agreement", Level1 = "عقود", Level2 = "عقود تجارية", Level3 = "عقود العمل", Level4 = "عقد عمل محدد المدة", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
+            new Classification { Id = 11, Name = "RealEstateOwnershipDispute", NameAr = "نزاع ملكية عقار", Description = "Property ownership dispute", Level1 = "دعاوى مدنية", Level2 = "دعاوى الملكية", Level3 = "النزاعات العقارية", Level4 = "نزاع ملكية عقار", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
+            new Classification { Id = 12, Name = "FinancialCompensation", NameAr = "تعويض عن ضرر مالي", Description = "Claim for financial damages", Level1 = "دعاوى مدنية", Level2 = "دعاوى التعويض", Level3 = "التعويض المالي", Level4 = "تعويض عن ضرر مادي", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
+            new Classification { Id = 13, Name = "CommercialDebtCollection", NameAr = "دعوى تحصيل دين تجاري", Description = "Collection of commercial debt", Level1 = "دعاوى مدنية", Level2 = "دعاوى الديون", Level3 = "تحصيل الديون", Level4 = "دعوى تحصيل دين تجاري", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
+            new Classification { Id = 14, Name = "PartnershipDividendDispute", NameAr = "نزاع توزيع أرباح", Description = "Partnership profit distribution dispute", Level1 = "دعاوى تجارية", Level2 = "منازعات الشركات", Level3 = "النزاعات بين الشركاء", Level4 = "نزاع توزيع أرباح", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
+            new Classification { Id = 15, Name = "BankruptcyDeclaration", NameAr = "طلب إشهار إفلاس", Description = "Bankruptcy filing request", Level1 = "دعاوى تجارية", Level2 = "الإفلاس والتصفية", Level3 = "إجراءات الإفلاس", Level4 = "طلب إشهار إفلاس", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
+            new Classification { Id = 16, Name = "CommercialContractDispute", NameAr = "نزاع عقد تجاري", Description = "Commercial contract dispute", Level1 = "دعاوى تجارية", Level2 = "منازعات العقود", Level3 = "نزاعات التنفيذ", Level4 = "نزاع عقد تجاري", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
+            new Classification { Id = 17, Name = "UnpaidWagesClaim", NameAr = "مطالبة بأجور متأخرة", Description = "Claim for unpaid wages", Level1 = "دعاوى عمالية", Level2 = "حقوق العمال", Level3 = "مستحقات مالية", Level4 = "مطالبة بأجور متأخرة", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
+            new Classification { Id = 18, Name = "UnfairTermination", NameAr = "دعوى فصل تعسفي", Description = "Unfair termination lawsuit", Level1 = "دعاوى عمالية", Level2 = "إنهاء الخدمة", Level3 = "الفصل التعسفي", Level4 = "دعوى فصل تعسفي", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
+            new Classification { Id = 19, Name = "WorkplaceInjury", NameAr = "دعوى إصابة عمل", Description = "Workplace injury claim", Level1 = "دعاوى عمالية", Level2 = "الحقوق والواجبات", Level3 = "الحماية والأمان", Level4 = "دعوى إصابة عمل", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
+            new Classification { Id = 20, Name = "MarriageCase", NameAr = "دعوى زواج", Description = "Marriage-related case", Level1 = "دعاوى أحوال شخصية", Level2 = "دعاوى الزواج", Level3 = "", Level4 = "", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
+            new Classification { Id = 21, Name = "DivorceCase", NameAr = "دعوى طلاق", Description = "Divorce case", Level1 = "دعاوى أحوال شخصية", Level2 = "دعاوى الطلاق", Level3 = "", Level4 = "", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
+            new Classification { Id = 22, Name = "CommercialLeaseContract", NameAr = "عقد إيجار تجاري", Description = "Commercial property lease", Level1 = "عقود", Level2 = "عقود مدنية", Level3 = "عقود الإيجار", Level4 = "عقد إيجار تجاري", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
+            new Classification { Id = 23, Name = "GiftContract", NameAr = "عقد هبة", Description = "Gift agreement", Level1 = "عقود", Level2 = "عقود مدنية", Level3 = "عقود الملكية", Level4 = "عقد هبة", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
+            new Classification { Id = 24, Name = "LoanContract", NameAr = "عقد قرض", Description = "Loan agreement", Level1 = "عقود", Level2 = "عقود مدنية", Level3 = "عقود الالتزام", Level4 = "عقد قرض", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
+            new Classification { Id = 25, Name = "PersonalInjuryCompensation", NameAr = "تعويض عن إصابة شخصية", Description = "Personal injury compensation", Level1 = "دعاوى مدنية", Level2 = "دعاوى التعويض", Level3 = "التعويض الشخصي", Level4 = "تعويض عن إصابة شخصية", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
+            new Classification { Id = 26, Name = "PropertyDamageCompensation", NameAr = "تعويض عن تلف الملكية", Description = "Property damage compensation", Level1 = "دعاوى مدنية", Level2 = "دعاوى التعويض", Level3 = "تعويض عن الأضرار", Level4 = "تعويض عن تلف الملكية", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
+            new Classification { Id = 27, Name = "PaymentDefaultCase", NameAr = "دعوى عدم السداد", Description = "Non-payment default case", Level1 = "دعاوى مدنية", Level2 = "دعاوى الديون", Level3 = "ديون المستهلكين", Level4 = "دعوى عدم السداد", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
+            new Classification { Id = 28, Name = "IntellectualPropertyDispute", NameAr = "نزاع الملكية الفكرية", Description = "Intellectual property dispute", Level1 = "دعاوى تجارية", Level2 = "حقوق الملكية", Level3 = "براءات الاختراع", Level4 = "نزاع براءة اختراع", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
+            new Classification { Id = 29, Name = "CompetitionLawViolation", NameAr = "انتهاك قانون المنافسة", Description = "Competition law violation", Level1 = "دعاوى تجارية", Level2 = "الممارسات غير العادلة", Level3 = "الاحتكار والتنافس", Level4 = "انتهاك قانون المنافسة", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
+            new Classification { Id = 30, Name = "WorkplaceHarassment", NameAr = "دعوى التحرش في العمل", Description = "Workplace harassment claim", Level1 = "دعاوى عمالية", Level2 = "حقوق العمال", Level3 = "الحقوق الشخصية", Level4 = "دعوى التحرش في العمل", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now }
         );
     }
 }

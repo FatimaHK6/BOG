@@ -9,7 +9,14 @@
       "Bash(ls:*)",
       "Bash(node:*)",
       "Bash(npm:*)",
-      "Bash(ng build:*)"
+      "Bash(ng build:*)",
+      "Bash(taskkill:*)",
+      "Bash(dir:*)",
+      "Bash(__NEW_LINE_b1e783c0c447463a__ cd \"C:\\\\Users\\\\Lenovo\\\\Desktop\\\\Claude\\\\BOG - Copy\\\\src\\\\Frontend\\\\bog-app\")",
+      "Bash(__NEW_LINE_f4f9baf79d85e64f__ cd \"C:\\\\Users\\\\Lenovo\\\\Desktop\\\\Claude\\\\BOG - Copy\\\\src\\\\Frontend\\\\bog-app\")",
+      "Bash(ng serve:*)",
+      "WebSearch",
+      "WebFetch(domain:angular.dev)"
     ]
   }
 }
