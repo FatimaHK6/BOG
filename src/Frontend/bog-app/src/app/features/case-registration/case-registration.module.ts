@@ -1,7 +1,7 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
-import { HttpClientModule } from '@angular/common/http';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
 // Material modules
 import { MatButtonModule } from '@angular/material/button';
@@ -71,79 +71,73 @@ import { ClassificationsTabComponent } from './components/case-data/classificati
 import { ClassificationSelectionDialogComponent } from './components/case-data/classifications-tab/classification-selection-dialog/classification-selection-dialog.component';
 import { RequestCompletionComponent } from './components/request-completion/request-completion.component';
 
-@NgModule({
-  declarations: [
-    // Shared components
-    SectionContainerComponent,
-    ValidationMessageComponent,
-    ConfirmationDialogComponent,
-    // Page components
-    RequestDetailsComponent,
-    RequestListComponent,
-    // Defendants components
-    DefendantsListComponent,
-    DefendantFormDialogComponent,
-    // Other components
-    CaseDataFormComponent,
-    AttachmentsListComponent,
-    AdditionalInfoFormComponent,
-    DeficienciesListComponent,
-    ClaimsListComponent,
-    ClaimFormDialogComponent,
-    RelatedCasesListComponent,
-    RelatedCaseFormDialogComponent,
-    // Case Data Sub-components (Phase 3)
-    ContactInfoFormComponent,
-    SubjectEvidenceFormComponent,
-    // Case Data Container & Classifications (Phase 4)
-    CaseDataContainerComponent,
-    ClassificationsTabComponent,
-    ClassificationSelectionDialogComponent,
-    // Request Completion (Phase 5)
-    RequestCompletionComponent
-  ],
-  imports: [
-    CommonModule,
-    HttpClientModule,
-    ReactiveFormsModule,
-    FormsModule,
-    CaseRegistrationRoutingModule,
-    NgxEditorModule,
-    // Material modules
-    MatButtonModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatSelectModule,
-    MatOptionModule,
-    MatTableModule,
-    MatPaginatorModule,
-    MatDialogModule,
-    MatIconModule,
-    MatCardModule,
-    MatProgressSpinnerModule,
-    MatSnackBarModule,
-    MatDatepickerModule,
-    MatNativeDateModule,
-    MatMenuModule,
-    MatTabsModule,
-    MatCheckboxModule,
-    MatChipsModule,
-    MatListModule,
-    MatProgressBarModule,
-    MatTooltipModule
-  ],
-  providers: [
-    CaseRegistrationApiService,
-    DefendantApiService,
-    RequestStateService,
-    ClassificationApiService,
-    AttachmentApiService,
-    AdditionalInfoApiService,
-    LookupsApiService,
-    ClaimApiService,
-    RelatedCaseApiService,
-    CaseDataStateService,
-    ClassificationsApiService
-  ]
-})
+@NgModule({ declarations: [
+        // Shared components
+        SectionContainerComponent,
+        ValidationMessageComponent,
+        ConfirmationDialogComponent,
+        // Page components
+        RequestDetailsComponent,
+        RequestListComponent,
+        // Defendants components
+        DefendantsListComponent,
+        DefendantFormDialogComponent,
+        // Other components
+        CaseDataFormComponent,
+        AttachmentsListComponent,
+        AdditionalInfoFormComponent,
+        DeficienciesListComponent,
+        ClaimsListComponent,
+        ClaimFormDialogComponent,
+        RelatedCasesListComponent,
+        RelatedCaseFormDialogComponent,
+        // Case Data Sub-components (Phase 3)
+        ContactInfoFormComponent,
+        SubjectEvidenceFormComponent,
+        // Case Data Container & Classifications (Phase 4)
+        CaseDataContainerComponent,
+        ClassificationsTabComponent,
+        ClassificationSelectionDialogComponent,
+        // Request Completion (Phase 5)
+        RequestCompletionComponent
+    ], imports: [CommonModule,
+        ReactiveFormsModule,
+        FormsModule,
+        CaseRegistrationRoutingModule,
+        NgxEditorModule,
+        // Material modules
+        MatButtonModule,
+        MatFormFieldModule,
+        MatInputModule,
+        MatSelectModule,
+        MatOptionModule,
+        MatTableModule,
+        MatPaginatorModule,
+        MatDialogModule,
+        MatIconModule,
+        MatCardModule,
+        MatProgressSpinnerModule,
+        MatSnackBarModule,
+        MatDatepickerModule,
+        MatNativeDateModule,
+        MatMenuModule,
+        MatTabsModule,
+        MatCheckboxModule,
+        MatChipsModule,
+        MatListModule,
+        MatProgressBarModule,
+        MatTooltipModule], providers: [
+        CaseRegistrationApiService,
+        DefendantApiService,
+        RequestStateService,
+        ClassificationApiService,
+        AttachmentApiService,
+        AdditionalInfoApiService,
+        LookupsApiService,
+        ClaimApiService,
+        RelatedCaseApiService,
+        CaseDataStateService,
+        ClassificationsApiService,
+        provideHttpClient(withInterceptorsFromDi())
+    ] })
 export class CaseRegistrationModule { }
