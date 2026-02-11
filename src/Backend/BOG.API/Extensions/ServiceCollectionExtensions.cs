@@ -122,6 +122,7 @@ public static class ServiceCollectionExtensions
         // Feature-specific services
         services.AddScoped<IUserBL, UserBL>();
         services.AddScoped<ICaseRegistrationBL, CaseRegistrationBL>();
+        services.AddScoped<ICaseRegistrationRequestBL, CaseRegistrationRequestBL>();
         services.AddScoped<IRequestActionBL, RequestActionBL>();
 
         // Case registration related services
