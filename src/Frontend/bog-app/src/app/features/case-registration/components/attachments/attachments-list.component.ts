@@ -36,7 +36,7 @@ import { RequestStateService } from '../../services/request-state.service';
           <!-- Attachment Type Selection -->
           <mat-form-field appearance="outline" class="full-width">
             <mat-label>نوع المرفق *</mat-label>
-            <mat-select [(ngModel)]="selectedAttachmentTypeId" required [disabled]="!canEdit">
+            <mat-select [value]="selectedAttachmentTypeId" (selectionChange)="selectedAttachmentTypeId = $event.value" required [disabled]="!canEdit">
               <mat-option *ngFor="let type of attachmentTypes" [value]="type.id">
                 {{ type.nameAr }}
                 <span *ngIf="type.isMandatory" class="mandatory-badge">(إلزامي)</span>
@@ -47,7 +47,7 @@ import { RequestStateService } from '../../services/request-state.service';
           <!-- Description Field -->
           <mat-form-field appearance="outline" class="full-width">
             <mat-label>الوصف (اختياري)</mat-label>
-            <textarea matInput [(ngModel)]="attachmentDescription" rows="2"></textarea>
+            <textarea matInput [value]="attachmentDescription" (input)="onDescriptionChange($event)" rows="2"></textarea>
           </mat-form-field>
 
           <input #fileInput type="file" accept=".pdf" (change)="onFileSelected($event)" style="display:none">
@@ -185,6 +185,10 @@ export class AttachmentsListComponent implements OnInit {
     if (!this.showUploadForm) {
       this.resetForm();
     }
+  }
+
+  onDescriptionChange(event: Event) {
+    this.attachmentDescription = (event.target as HTMLTextAreaElement).value;
   }
 
   private loadAttachmentTypes() {

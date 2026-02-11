@@ -1,7 +1,7 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
-import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { HttpClientModule } from '@angular/common/http';
 
 // Material modules
 import { MatButtonModule } from '@angular/material/button';
@@ -103,6 +103,7 @@ import { RequestCompletionComponent } from './components/request-completion/requ
     ], imports: [CommonModule,
         ReactiveFormsModule,
         FormsModule,
+        HttpClientModule,
         CaseRegistrationRoutingModule,
         NgxEditorModule,
         // Material modules
@@ -137,7 +138,6 @@ import { RequestCompletionComponent } from './components/request-completion/requ
         ClaimApiService,
         RelatedCaseApiService,
         CaseDataStateService,
-        ClassificationsApiService,
-        provideHttpClient(withInterceptorsFromDi())
+        ClassificationsApiService
     ] })
 export class CaseRegistrationModule { }
