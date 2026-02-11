@@ -43,7 +43,6 @@ public class CaseRegistrationRequestRepository : Repository<CaseRegistrationRequ
             .Include(r => r.Claims)
             .Include(r => r.Attachments)
             .Include(r => r.Classifications.Where(c => !c.IsDeleted))
-                .ThenInclude(rc => rc.Classification)
             .FirstOrDefaultAsync(r => r.Id == requestId && !r.IsDeleted, cancellationToken);
 
         if (request == null)

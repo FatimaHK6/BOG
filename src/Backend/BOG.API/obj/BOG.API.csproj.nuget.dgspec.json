@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\Lenovo\\Desktop\\Claude\\BOG\\src\\Backend\\BOG.API\\BOG.API.csproj": {}
+    "C:\\Users\\Lenovo\\Desktop\\Claude\\BOG - Copy\\src\\Backend\\BOG.API\\BOG.API.csproj": {}
   },
   "projects": {
-    "C:\\Users\\Lenovo\\Desktop\\Claude\\BOG\\src\\Backend\\BOG.API\\BOG.API.csproj": {
+    "C:\\Users\\Lenovo\\Desktop\\Claude\\BOG - Copy\\src\\Backend\\BOG.API\\BOG.API.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\Lenovo\\Desktop\\Claude\\BOG\\src\\Backend\\BOG.API\\BOG.API.csproj",
+        "projectUniqueName": "C:\\Users\\Lenovo\\Desktop\\Claude\\BOG - Copy\\src\\Backend\\BOG.API\\BOG.API.csproj",
         "projectName": "BOG.API",
-        "projectPath": "C:\\Users\\Lenovo\\Desktop\\Claude\\BOG\\src\\Backend\\BOG.API\\BOG.API.csproj",
+        "projectPath": "C:\\Users\\Lenovo\\Desktop\\Claude\\BOG - Copy\\src\\Backend\\BOG.API\\BOG.API.csproj",
         "packagesPath": "C:\\Users\\Lenovo\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\Lenovo\\Desktop\\Claude\\BOG\\src\\Backend\\BOG.API\\obj\\",
+        "outputPath": "C:\\Users\\Lenovo\\Desktop\\Claude\\BOG - Copy\\src\\Backend\\BOG.API\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages",
@@ -34,17 +34,17 @@
           "net8.0": {
             "targetAlias": "net8.0",
             "projectReferences": {
-              "C:\\Users\\Lenovo\\Desktop\\Claude\\BOG\\src\\Backend\\BOG.BL\\BOG.BL.csproj": {
-                "projectPath": "C:\\Users\\Lenovo\\Desktop\\Claude\\BOG\\src\\Backend\\BOG.BL\\BOG.BL.csproj"
+              "C:\\Users\\Lenovo\\Desktop\\Claude\\BOG - Copy\\src\\Backend\\BOG.BL\\BOG.BL.csproj": {
+                "projectPath": "C:\\Users\\Lenovo\\Desktop\\Claude\\BOG - Copy\\src\\Backend\\BOG.BL\\BOG.BL.csproj"
               },
-              "C:\\Users\\Lenovo\\Desktop\\Claude\\BOG\\src\\Backend\\BOG.DTO\\BOG.DTO.csproj": {
-                "projectPath": "C:\\Users\\Lenovo\\Desktop\\Claude\\BOG\\src\\Backend\\BOG.DTO\\BOG.DTO.csproj"
+              "C:\\Users\\Lenovo\\Desktop\\Claude\\BOG - Copy\\src\\Backend\\BOG.DTO\\BOG.DTO.csproj": {
+                "projectPath": "C:\\Users\\Lenovo\\Desktop\\Claude\\BOG - Copy\\src\\Backend\\BOG.DTO\\BOG.DTO.csproj"
               },
-              "C:\\Users\\Lenovo\\Desktop\\Claude\\BOG\\src\\Backend\\BOG.Integration\\BOG.Integration.csproj": {
-                "projectPath": "C:\\Users\\Lenovo\\Desktop\\Claude\\BOG\\src\\Backend\\BOG.Integration\\BOG.Integration.csproj"
+              "C:\\Users\\Lenovo\\Desktop\\Claude\\BOG - Copy\\src\\Backend\\BOG.Integration\\BOG.Integration.csproj": {
+                "projectPath": "C:\\Users\\Lenovo\\Desktop\\Claude\\BOG - Copy\\src\\Backend\\BOG.Integration\\BOG.Integration.csproj"
               },
-              "C:\\Users\\Lenovo\\Desktop\\Claude\\BOG\\src\\Backend\\BOG.VM\\BOG.VM.csproj": {
-                "projectPath": "C:\\Users\\Lenovo\\Desktop\\Claude\\BOG\\src\\Backend\\BOG.VM\\BOG.VM.csproj"
+              "C:\\Users\\Lenovo\\Desktop\\Claude\\BOG - Copy\\src\\Backend\\BOG.VM\\BOG.VM.csproj": {
+                "projectPath": "C:\\Users\\Lenovo\\Desktop\\Claude\\BOG - Copy\\src\\Backend\\BOG.VM\\BOG.VM.csproj"
               }
             }
           }
@@ -98,18 +98,18 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.416/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.417/PortableRuntimeIdentifierGraph.json"
         }
       }
     },
-    "C:\\Users\\Lenovo\\Desktop\\Claude\\BOG\\src\\Backend\\BOG.BL\\BOG.BL.csproj": {
+    "C:\\Users\\Lenovo\\Desktop\\Claude\\BOG - Copy\\src\\Backend\\BOG.BL\\BOG.BL.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\Lenovo\\Desktop\\Claude\\BOG\\src\\Backend\\BOG.BL\\BOG.BL.csproj",
+        "projectUniqueName": "C:\\Users\\Lenovo\\Desktop\\Claude\\BOG - Copy\\src\\Backend\\BOG.BL\\BOG.BL.csproj",
         "projectName": "BOG.BL",
-        "projectPath": "C:\\Users\\Lenovo\\Desktop\\Claude\\BOG\\src\\Backend\\BOG.BL\\BOG.BL.csproj",
+        "projectPath": "C:\\Users\\Lenovo\\Desktop\\Claude\\BOG - Copy\\src\\Backend\\BOG.BL\\BOG.BL.csproj",
         "packagesPath": "C:\\Users\\Lenovo\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\Lenovo\\Desktop\\Claude\\BOG\\src\\Backend\\BOG.BL\\obj\\",
+        "outputPath": "C:\\Users\\Lenovo\\Desktop\\Claude\\BOG - Copy\\src\\Backend\\BOG.BL\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages",
@@ -132,17 +132,20 @@
           "net8.0": {
             "targetAlias": "net8.0",
             "projectReferences": {
-              "C:\\Users\\Lenovo\\Desktop\\Claude\\BOG\\src\\Backend\\BOG.DAL\\BOG.DAL.csproj": {
-                "projectPath": "C:\\Users\\Lenovo\\Desktop\\Claude\\BOG\\src\\Backend\\BOG.DAL\\BOG.DAL.csproj"
+              "C:\\Users\\Lenovo\\Desktop\\Claude\\BOG - Copy\\src\\Backend\\BOG.DAL\\BOG.DAL.csproj": {
+                "projectPath": "C:\\Users\\Lenovo\\Desktop\\Claude\\BOG - Copy\\src\\Backend\\BOG.DAL\\BOG.DAL.csproj"
               },
-              "C:\\Users\\Lenovo\\Desktop\\Claude\\BOG\\src\\Backend\\BOG.DbModel\\BOG.DbModel.csproj": {
-                "projectPath": "C:\\Users\\Lenovo\\Desktop\\Claude\\BOG\\src\\Backend\\BOG.DbModel\\BOG.DbModel.csproj"
+              "C:\\Users\\Lenovo\\Desktop\\Claude\\BOG - Copy\\src\\Backend\\BOG.DbModel\\BOG.DbModel.csproj": {
+                "projectPath": "C:\\Users\\Lenovo\\Desktop\\Claude\\BOG - Copy\\src\\Backend\\BOG.DbModel\\BOG.DbModel.csproj"
               },
-              "C:\\Users\\Lenovo\\Desktop\\Claude\\BOG\\src\\Backend\\BOG.DTO\\BOG.DTO.csproj": {
-                "projectPath": "C:\\Users\\Lenovo\\Desktop\\Claude\\BOG\\src\\Backend\\BOG.DTO\\BOG.DTO.csproj"
+              "C:\\Users\\Lenovo\\Desktop\\Claude\\BOG - Copy\\src\\Backend\\BOG.DTO\\BOG.DTO.csproj": {
+                "projectPath": "C:\\Users\\Lenovo\\Desktop\\Claude\\BOG - Copy\\src\\Backend\\BOG.DTO\\BOG.DTO.csproj"
               },
-              "C:\\Users\\Lenovo\\Desktop\\Claude\\BOG\\src\\Backend\\BOG.VM\\BOG.VM.csproj": {
-                "projectPath": "C:\\Users\\Lenovo\\Desktop\\Claude\\BOG\\src\\Backend\\BOG.VM\\BOG.VM.csproj"
+              "C:\\Users\\Lenovo\\Desktop\\Claude\\BOG - Copy\\src\\Backend\\BOG.Integration\\BOG.Integration.csproj": {
+                "projectPath": "C:\\Users\\Lenovo\\Desktop\\Claude\\BOG - Copy\\src\\Backend\\BOG.Integration\\BOG.Integration.csproj"
+              },
+              "C:\\Users\\Lenovo\\Desktop\\Claude\\BOG - Copy\\src\\Backend\\BOG.VM\\BOG.VM.csproj": {
+                "projectPath": "C:\\Users\\Lenovo\\Desktop\\Claude\\BOG - Copy\\src\\Backend\\BOG.VM\\BOG.VM.csproj"
               }
             }
           }
@@ -177,18 +180,18 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.416/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.417/PortableRuntimeIdentifierGraph.json"
         }
       }
     },
-    "C:\\Users\\Lenovo\\Desktop\\Claude\\BOG\\src\\Backend\\BOG.DAL\\BOG.DAL.csproj": {
+    "C:\\Users\\Lenovo\\Desktop\\Claude\\BOG - Copy\\src\\Backend\\BOG.DAL\\BOG.DAL.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\Lenovo\\Desktop\\Claude\\BOG\\src\\Backend\\BOG.DAL\\BOG.DAL.csproj",
+        "projectUniqueName": "C:\\Users\\Lenovo\\Desktop\\Claude\\BOG - Copy\\src\\Backend\\BOG.DAL\\BOG.DAL.csproj",
         "projectName": "BOG.DAL",
-        "projectPath": "C:\\Users\\Lenovo\\Desktop\\Claude\\BOG\\src\\Backend\\BOG.DAL\\BOG.DAL.csproj",
+        "projectPath": "C:\\Users\\Lenovo\\Desktop\\Claude\\BOG - Copy\\src\\Backend\\BOG.DAL\\BOG.DAL.csproj",
         "packagesPath": "C:\\Users\\Lenovo\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\Lenovo\\Desktop\\Claude\\BOG\\src\\Backend\\BOG.DAL\\obj\\",
+        "outputPath": "C:\\Users\\Lenovo\\Desktop\\Claude\\BOG - Copy\\src\\Backend\\BOG.DAL\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages",
@@ -211,11 +214,11 @@
           "net8.0": {
             "targetAlias": "net8.0",
             "projectReferences": {
-              "C:\\Users\\Lenovo\\Desktop\\Claude\\BOG\\src\\Backend\\BOG.DbModel\\BOG.DbModel.csproj": {
-                "projectPath": "C:\\Users\\Lenovo\\Desktop\\Claude\\BOG\\src\\Backend\\BOG.DbModel\\BOG.DbModel.csproj"
+              "C:\\Users\\Lenovo\\Desktop\\Claude\\BOG - Copy\\src\\Backend\\BOG.DbModel\\BOG.DbModel.csproj": {
+                "projectPath": "C:\\Users\\Lenovo\\Desktop\\Claude\\BOG - Copy\\src\\Backend\\BOG.DbModel\\BOG.DbModel.csproj"
               },
-              "C:\\Users\\Lenovo\\Desktop\\Claude\\BOG\\src\\Backend\\BOG.DTO\\BOG.DTO.csproj": {
-                "projectPath": "C:\\Users\\Lenovo\\Desktop\\Claude\\BOG\\src\\Backend\\BOG.DTO\\BOG.DTO.csproj"
+              "C:\\Users\\Lenovo\\Desktop\\Claude\\BOG - Copy\\src\\Backend\\BOG.DTO\\BOG.DTO.csproj": {
+                "projectPath": "C:\\Users\\Lenovo\\Desktop\\Claude\\BOG - Copy\\src\\Backend\\BOG.DTO\\BOG.DTO.csproj"
               }
             }
           }
@@ -250,18 +253,18 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.416/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.417/PortableRuntimeIdentifierGraph.json"
         }
       }
     },
-    "C:\\Users\\Lenovo\\Desktop\\Claude\\BOG\\src\\Backend\\BOG.DbModel\\BOG.DbModel.csproj": {
+    "C:\\Users\\Lenovo\\Desktop\\Claude\\BOG - Copy\\src\\Backend\\BOG.DbModel\\BOG.DbModel.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\Lenovo\\Desktop\\Claude\\BOG\\src\\Backend\\BOG.DbModel\\BOG.DbModel.csproj",
+        "projectUniqueName": "C:\\Users\\Lenovo\\Desktop\\Claude\\BOG - Copy\\src\\Backend\\BOG.DbModel\\BOG.DbModel.csproj",
         "projectName": "BOG.DbModel",
-        "projectPath": "C:\\Users\\Lenovo\\Desktop\\Claude\\BOG\\src\\Backend\\BOG.DbModel\\BOG.DbModel.csproj",
+        "projectPath": "C:\\Users\\Lenovo\\Desktop\\Claude\\BOG - Copy\\src\\Backend\\BOG.DbModel\\BOG.DbModel.csproj",
         "packagesPath": "C:\\Users\\Lenovo\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\Lenovo\\Desktop\\Claude\\BOG\\src\\Backend\\BOG.DbModel\\obj\\",
+        "outputPath": "C:\\Users\\Lenovo\\Desktop\\Claude\\BOG - Copy\\src\\Backend\\BOG.DbModel\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages",
@@ -338,18 +341,18 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.416/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.417/PortableRuntimeIdentifierGraph.json"
         }
       }
     },
-    "C:\\Users\\Lenovo\\Desktop\\Claude\\BOG\\src\\Backend\\BOG.DTO\\BOG.DTO.csproj": {
+    "C:\\Users\\Lenovo\\Desktop\\Claude\\BOG - Copy\\src\\Backend\\BOG.DTO\\BOG.DTO.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\Lenovo\\Desktop\\Claude\\BOG\\src\\Backend\\BOG.DTO\\BOG.DTO.csproj",
+        "projectUniqueName": "C:\\Users\\Lenovo\\Desktop\\Claude\\BOG - Copy\\src\\Backend\\BOG.DTO\\BOG.DTO.csproj",
         "projectName": "BOG.DTO",
-        "projectPath": "C:\\Users\\Lenovo\\Desktop\\Claude\\BOG\\src\\Backend\\BOG.DTO\\BOG.DTO.csproj",
+        "projectPath": "C:\\Users\\Lenovo\\Desktop\\Claude\\BOG - Copy\\src\\Backend\\BOG.DTO\\BOG.DTO.csproj",
         "packagesPath": "C:\\Users\\Lenovo\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\Lenovo\\Desktop\\Claude\\BOG\\src\\Backend\\BOG.DTO\\obj\\",
+        "outputPath": "C:\\Users\\Lenovo\\Desktop\\Claude\\BOG - Copy\\src\\Backend\\BOG.DTO\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages",
@@ -404,18 +407,18 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.416/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.417/PortableRuntimeIdentifierGraph.json"
         }
       }
     },
-    "C:\\Users\\Lenovo\\Desktop\\Claude\\BOG\\src\\Backend\\BOG.Integration\\BOG.Integration.csproj": {
+    "C:\\Users\\Lenovo\\Desktop\\Claude\\BOG - Copy\\src\\Backend\\BOG.Integration\\BOG.Integration.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\Lenovo\\Desktop\\Claude\\BOG\\src\\Backend\\BOG.Integration\\BOG.Integration.csproj",
+        "projectUniqueName": "C:\\Users\\Lenovo\\Desktop\\Claude\\BOG - Copy\\src\\Backend\\BOG.Integration\\BOG.Integration.csproj",
         "projectName": "BOG.Integration",
-        "projectPath": "C:\\Users\\Lenovo\\Desktop\\Claude\\BOG\\src\\Backend\\BOG.Integration\\BOG.Integration.csproj",
+        "projectPath": "C:\\Users\\Lenovo\\Desktop\\Claude\\BOG - Copy\\src\\Backend\\BOG.Integration\\BOG.Integration.csproj",
         "packagesPath": "C:\\Users\\Lenovo\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\Lenovo\\Desktop\\Claude\\BOG\\src\\Backend\\BOG.Integration\\obj\\",
+        "outputPath": "C:\\Users\\Lenovo\\Desktop\\Claude\\BOG - Copy\\src\\Backend\\BOG.Integration\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages",
@@ -454,6 +457,32 @@
       "frameworks": {
         "net8.0": {
           "targetAlias": "net8.0",
+          "dependencies": {
+            "Microsoft.Extensions.Configuration": {
+              "target": "Package",
+              "version": "[8.0.0, )"
+            },
+            "Microsoft.Extensions.Configuration.Abstractions": {
+              "target": "Package",
+              "version": "[8.0.0, )"
+            },
+            "Microsoft.Extensions.DependencyInjection": {
+              "target": "Package",
+              "version": "[8.0.0, )"
+            },
+            "Microsoft.Extensions.Logging.Abstractions": {
+              "target": "Package",
+              "version": "[8.0.0, )"
+            },
+            "Microsoft.Extensions.Options": {
+              "target": "Package",
+              "version": "[8.0.0, )"
+            },
+            "Microsoft.Extensions.Options.ConfigurationExtensions": {
+              "target": "Package",
+              "version": "[8.0.0, )"
+            }
+          },
           "imports": [
             "net461",
             "net462",
@@ -470,18 +499,18 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.416/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.417/PortableRuntimeIdentifierGraph.json"
         }
       }
     },
-    "C:\\Users\\Lenovo\\Desktop\\Claude\\BOG\\src\\Backend\\BOG.VM\\BOG.VM.csproj": {
+    "C:\\Users\\Lenovo\\Desktop\\Claude\\BOG - Copy\\src\\Backend\\BOG.VM\\BOG.VM.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\Lenovo\\Desktop\\Claude\\BOG\\src\\Backend\\BOG.VM\\BOG.VM.csproj",
+        "projectUniqueName": "C:\\Users\\Lenovo\\Desktop\\Claude\\BOG - Copy\\src\\Backend\\BOG.VM\\BOG.VM.csproj",
         "projectName": "BOG.VM",
-        "projectPath": "C:\\Users\\Lenovo\\Desktop\\Claude\\BOG\\src\\Backend\\BOG.VM\\BOG.VM.csproj",
+        "projectPath": "C:\\Users\\Lenovo\\Desktop\\Claude\\BOG - Copy\\src\\Backend\\BOG.VM\\BOG.VM.csproj",
         "packagesPath": "C:\\Users\\Lenovo\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\Lenovo\\Desktop\\Claude\\BOG\\src\\Backend\\BOG.VM\\obj\\",
+        "outputPath": "C:\\Users\\Lenovo\\Desktop\\Claude\\BOG - Copy\\src\\Backend\\BOG.VM\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages",
@@ -536,7 +565,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.416/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.417/PortableRuntimeIdentifierGraph.json"
         }
       }
     }

@@ -62,6 +62,11 @@ public class UnitOfWork : IUnitOfWork
         return await _dbContext.SaveChangesAsync(cancellationToken);
     }
 
+    public void ClearChangeTracker()
+    {
+        _dbContext.ChangeTracker.Clear();
+    }
+
     public IRepository<TEntity> GetRepository<TEntity>() where TEntity : class
     {
         var type = typeof(TEntity);
