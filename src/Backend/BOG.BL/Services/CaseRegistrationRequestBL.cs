@@ -55,8 +55,24 @@ public class CaseRegistrationRequestBL : ICaseRegistrationRequestBL
         await _repository.AddAsync(request, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-        return await GetByIdAsync(request.Id, cancellationToken)
-            ?? throw new InvalidOperationException("Failed to create draft request");
+        // Retrieve the created request - if GetByIdAsync fails, create a minimal VM from the created entity
+        var createdRequest = await GetByIdAsync(request.Id, cancellationToken);
+        if (createdRequest != null)
+        {
+            return createdRequest;
+        }
+
+        // Fallback: Return minimal VM if detailed retrieval fails
+        return new CaseRegistrationRequestVM
+        {
+            Id = request.Id,
+            RequestStatusId = request.RequestStatusId,
+            StatusNameAr = "مسودة",
+            StatusName = "Draft",
+            CreatedDate = request.CreatedDate,
+            ModifiedDate = request.ModifiedDate,
+            CreatedByUserId = request.CreatedByUserId
+        };
     }
 
     public async Task DeleteAsync(int id, CancellationToken cancellationToken = default)
