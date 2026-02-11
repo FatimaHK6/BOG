@@ -1,6 +1,16 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { SharedModule } from '../../shared/shared.module';
+import { CaseRegistrationSharedModule } from './shared/case-registration-shared.module';
+import { CaseDataModule } from './case-data/case-data.module';
+
+// Page components
+import { RequestDetailsComponent } from './pages/request-details/request-details.component';
+
+// Remaining components
+import { AdditionalInfoFormComponent } from './components/additional-info/additional-info-form.component';
+import { DeficienciesListComponent } from './components/deficiencies/deficiencies-list.component';
+import { RequestCompletionComponent } from './components/request-completion/request-completion.component';
 
 const routes: Routes = [
   {
@@ -26,8 +36,15 @@ const routes: Routes = [
 ];
 
 @NgModule({
-  declarations: [],
+  declarations: [
+    RequestDetailsComponent,
+    AdditionalInfoFormComponent,
+    DeficienciesListComponent,
+    RequestCompletionComponent
+  ],
   imports: [
+    CaseRegistrationSharedModule,
+    CaseDataModule,
     SharedModule,
     RouterModule.forChild(routes)
   ]

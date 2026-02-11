@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import { RequestListComponent } from './pages/request-list/request-list.component';
+import { RequestListComponent } from './requests/components/request-list/request-list.component';
 import { RequestDetailsComponent } from './pages/request-details/request-details.component';
 
 const routes: Routes = [
