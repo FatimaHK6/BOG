@@ -561,7 +561,7 @@ public class ApplicationDbContext : DbContext
             entity.HasKey(e => e.Id);
             entity.Property(e => e.Name).IsRequired().HasMaxLength(100);
             entity.Property(e => e.NameAr).IsRequired().HasMaxLength(100);
-            entity.Property(e => e.Code).HasMaxLength(3);
+            entity.Property(e => e.Description).HasMaxLength(500);
             entity.Property(e => e.IsActive).HasDefaultValue(true);
             entity.Property(e => e.IsDeleted).HasDefaultValue(false);
         });
@@ -739,7 +739,6 @@ public class ApplicationDbContext : DbContext
             entity.Property(e => e.CompanyName).HasMaxLength(200);
             entity.Property(e => e.AdditionalStatement).HasMaxLength(4000);
             entity.Property(e => e.LicenseNumber).HasMaxLength(50);
-            entity.Property(e => e.LicenseSource).HasMaxLength(200);
             entity.Property(e => e.CourtDeedNumber).HasMaxLength(50);
             entity.Property(e => e.DeedSource).HasMaxLength(200);
             entity.Property(e => e.WaqfOversightType).HasMaxLength(50);
@@ -768,6 +767,16 @@ public class ApplicationDbContext : DbContext
                 .HasForeignKey(e => e.GovernmentAgencyId)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            entity.HasOne(e => e.LicenseSource)
+                .WithMany()
+                .HasForeignKey(e => e.LicenseSourceId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(e => e.Country)
+                .WithMany()
+                .HasForeignKey(e => e.CountryId)
+                .OnDelete(DeleteBehavior.Restrict);
+
             entity.HasOne(e => e.ResidenceAddress)
                 .WithMany()
                 .HasForeignKey(e => e.ResidenceAddressId)
@@ -778,10 +787,34 @@ public class ApplicationDbContext : DbContext
                 .HasForeignKey(e => e.WorkAddressId)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            entity.HasOne(e => e.BusinessAddress)
+                .WithMany()
+                .HasForeignKey(e => e.BusinessAddressId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(e => e.CompanyAddress)
+                .WithMany()
+                .HasForeignKey(e => e.CompanyAddressId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(e => e.NGOAddress)
+                .WithMany()
+                .HasForeignKey(e => e.NGOAddressId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(e => e.WaqfAddress)
+                .WithMany()
+                .HasForeignKey(e => e.WaqfAddressId)
+                .OnDelete(DeleteBehavior.Restrict);
+
             entity.HasOne(e => e.SelectedAddress)
                 .WithMany()
                 .HasForeignKey(e => e.SelectedAddressId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            // Navigation for EmploymentStatus (optional relationship)
+            // Note: EmploymentStatus lookup is referenced by EmploymentStatusId but not explicitly configured
+            // as it's a simple lookup reference without dedicated navigation property in Plaintiff
         });
 
         // CaseRequestPlaintiff (junction table)

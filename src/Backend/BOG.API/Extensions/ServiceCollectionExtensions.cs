@@ -90,6 +90,7 @@ public static class ServiceCollectionExtensions
 
         // Case registration related repositories
         services.AddScoped<IDefendantRepository, DefendantRepository>();
+        services.AddScoped<ICaseRequestDefendantRepository, CaseRequestDefendantRepository>();
         services.AddScoped<IRequestAttachmentRepository, RequestAttachmentRepository>();
         services.AddScoped<IAdditionalInfoRepository, AdditionalInfoRepository>();
         services.AddScoped<IClaimRepository, ClaimRepository>();
