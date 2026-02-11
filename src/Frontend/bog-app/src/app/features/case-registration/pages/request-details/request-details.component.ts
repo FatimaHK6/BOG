@@ -27,7 +27,7 @@ export class RequestDetailsComponent implements OnInit, OnDestroy {
 
   currentStatus = 1;
   currentStatusName = 'مسودة';
-  activeSection = 'defendants';
+  activeSection = 'plaintiffs';
 
   // Metadata bar properties
   courtName: string = '';
@@ -346,6 +346,7 @@ export class RequestDetailsComponent implements OnInit, OnDestroy {
    */
   getActiveTabName(): string {
     const tabNames: {[key: string]: string} = {
+      'plaintiffs': 'المدعيين',
       'defendants': 'المدعى عليهم',
       'case-data': 'بيانات الدعوى',
       'additional-info': 'معلومات إضافية',

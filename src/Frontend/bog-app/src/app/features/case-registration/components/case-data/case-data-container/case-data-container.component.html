@@ -1,58 +1,81 @@
 <div dir="rtl" class="case-data-container">
-  <!-- Tab Content Section -->
-  <div class="tab-content" [ngSwitch]="activeTab">
+  <!-- Material Tabs for Case Data Sub-sections -->
+  <mat-tab-group
+    class="case-data-tabs"
+    [(selectedIndex)]="activeTabIndex"
+    (selectedIndexChange)="onTabChange($event)">
 
     <!-- Subject & Evidence Tab -->
-    <section *ngSwitchCase="'subject-evidence'" class="tab-pane">
-      <app-subject-evidence-form
-        [canEdit]="canEdit">
-      </app-subject-evidence-form>
-    </section>
+    <mat-tab label="موضوع وأسانيد الدعوى" dir="rtl">
+      <ng-template matTabContent>
+        <div class="tab-content-wrapper">
+          <app-subject-evidence-form
+            [canEdit]="canEdit">
+          </app-subject-evidence-form>
+        </div>
+      </ng-template>
+    </mat-tab>
 
     <!-- Claims Tab -->
-    <section *ngSwitchCase="'claims'" class="tab-pane">
-      <app-claims-list
-        [requestId]="requestId"
-        [canEdit]="canEdit"
-        (countChanged)="claimsCount = $event">
-      </app-claims-list>
-    </section>
+    <mat-tab label="طلبات الدعوى" dir="rtl">
+      <ng-template matTabContent>
+        <div class="tab-content-wrapper">
+          <app-claims-list
+            [requestId]="requestId"
+            [canEdit]="canEdit"
+            (countChanged)="claimsCount = $event">
+          </app-claims-list>
+        </div>
+      </ng-template>
+    </mat-tab>
 
     <!-- Related Cases Tab -->
-    <section *ngSwitchCase="'related-cases'" class="tab-pane">
-      <app-related-cases-list
-        [requestId]="requestId"
-        [canEdit]="canEdit"
-        (countChanged)="relatedCasesCount = $event">
-      </app-related-cases-list>
-    </section>
+    <mat-tab label="الدعاوى المرتبطة" dir="rtl">
+      <ng-template matTabContent>
+        <div class="tab-content-wrapper">
+          <app-related-cases-list
+            [requestId]="requestId"
+            [canEdit]="canEdit"
+            (countChanged)="relatedCasesCount = $event">
+          </app-related-cases-list>
+        </div>
+      </ng-template>
+    </mat-tab>
 
     <!-- Classifications Tab -->
-    <section *ngSwitchCase="'classifications'" class="tab-pane">
-      <app-classifications-tab
-        [canEdit]="canEdit"
-        (countChanged)="classificationsCount = $event">
-      </app-classifications-tab>
-    </section>
+    <mat-tab label="تصنيف الدعوى" dir="rtl">
+      <ng-template matTabContent>
+        <div class="tab-content-wrapper">
+          <app-classifications-tab
+            [canEdit]="canEdit"
+            (countChanged)="classificationsCount = $event">
+          </app-classifications-tab>
+        </div>
+      </ng-template>
+    </mat-tab>
 
     <!-- Contact Info Tab -->
-    <section *ngSwitchCase="'contact-info'" class="tab-pane">
-      <app-contact-info-form
-        [canEdit]="canEdit">
-      </app-contact-info-form>
-    </section>
+    <mat-tab label="بيانات التواصل" dir="rtl">
+      <ng-template matTabContent>
+        <div class="tab-content-wrapper">
+          <app-contact-info-form
+            [canEdit]="canEdit">
+          </app-contact-info-form>
+        </div>
+      </ng-template>
+    </mat-tab>
 
     <!-- Attachments Tab -->
-    <section *ngSwitchCase="'attachments'" class="tab-pane">
-      <app-attachments-list
-        [requestId]="requestId"
-        [canEdit]="canEdit">
-      </app-attachments-list>
-    </section>
+    <mat-tab label="المرفقات" dir="rtl">
+      <ng-template matTabContent>
+        <div class="tab-content-wrapper">
+          <app-attachments-list
+            [requestId]="requestId"
+            [canEdit]="canEdit">
+          </app-attachments-list>
+        </div>
+      </ng-template>
+    </mat-tab>
 
-    <!-- Default (No Tab Selected) -->
-    <div *ngSwitchDefault class="no-tab-message">
-      <p>يرجى اختيار قسم من القائمة الجانبية</p>
-    </div>
-  </div>
+  </mat-tab-group>
 </div>

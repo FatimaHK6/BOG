@@ -92,6 +92,13 @@
     <aside class="sidebar" [class.mobile-hidden]="isMobileView && !sidebarOpen">
       <nav class="sidebar-nav">
         <ul class="nav-sections">
+          <li class="nav-item" [class.active]="activeSection === 'plaintiffs'"
+              (click)="scrollToSection('plaintiffs')">
+            <mat-icon>people</mat-icon>
+            <span>المدعيين</span>
+            <span class="count-badge" *ngIf="plaintiffsCount > 0">{{ plaintiffsCount }}</span>
+          </li>
+
           <li class="nav-item" [class.active]="activeSection === 'defendants'"
               (click)="scrollToSection('defendants')">
             <mat-icon>group</mat-icon>
@@ -177,6 +184,15 @@
 
       <!-- Content Sections - Tabbed View -->
       <div class="content-sections" *ngIf="!loading" [ngSwitch]="activeSection">
+
+        <!-- Plaintiffs Tab -->
+        <section id="plaintiffs" *ngSwitchCase="'plaintiffs'" class="tab-content">
+          <app-plaintiff-list
+            [requestId]="requestId"
+            [canEdit]="canEdit"
+            [showValidation]="showValidation">
+          </app-plaintiff-list>
+        </section>
 
         <!-- Defendants Tab -->
         <section id="defendants" *ngSwitchCase="'defendants'" class="tab-content">

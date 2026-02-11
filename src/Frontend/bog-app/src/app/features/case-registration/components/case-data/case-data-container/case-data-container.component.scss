@@ -1,31 +1,74 @@
 .case-data-container {
-  display: flex;
-  flex-direction: column;
+  display: block;
   height: 100%;
 
-  .tab-content {
-    flex: 1;
-    overflow-y: auto;
-    background: white;
+  .case-data-tabs {
+    height: 100%;
 
-    .tab-pane {
-      height: 100%;
-      overflow-y: auto;
+    // Material Tab Styling
+    ::ng-deep {
+      .mat-mdc-tab-group {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+      }
+
+      .mat-mdc-tab-labels {
+        background-color: #f5f5f5;
+        border-bottom: 2px solid #1B5E20;
+        margin: 0;
+      }
+
+      .mat-mdc-tab-label {
+        color: #666;
+        font-weight: 500;
+        font-size: 13px;
+        min-width: 120px;
+        text-align: center;
+
+        &.mdc-tab--active {
+          color: #1B5E20;
+        }
+      }
+
+      .mat-mdc-tab-body-wrapper {
+        flex: 1;
+        overflow-y: auto;
+      }
+
+      .mat-mdc-tab-body-content {
+        padding: 24px;
+      }
     }
+  }
 
-    .no-tab-message {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      height: 100%;
-      color: #999;
-      font-size: 16px;
+  .tab-content-wrapper {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+
+    app-subject-evidence-form,
+    app-claims-list,
+    app-related-cases-list,
+    app-classifications-tab,
+    app-contact-info-form,
+    app-attachments-list {
+      flex: 1;
     }
   }
 }
 
 @media (max-width: 768px) {
-  .case-data-container .tab-content {
-    padding: 0;
+  .case-data-container .case-data-tabs {
+    ::ng-deep {
+      .mat-mdc-tab-label {
+        min-width: 100px;
+        font-size: 12px;
+      }
+
+      .mat-mdc-tab-body-content {
+        padding: 16px;
+      }
+    }
   }
 }

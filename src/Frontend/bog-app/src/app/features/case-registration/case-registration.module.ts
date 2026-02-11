@@ -3,6 +3,7 @@ import { RouterModule, Routes } from '@angular/router';
 import { SharedModule } from '../../shared/shared.module';
 import { CaseRegistrationSharedModule } from './shared/case-registration-shared.module';
 import { CaseDataModule } from './case-data/case-data.module';
+import { PlaintiffsModule } from './plaintiffs/plaintiffs.module';
 
 // Page components
 import { RequestDetailsComponent } from './pages/request-details/request-details.component';
@@ -45,6 +46,7 @@ const routes: Routes = [
   imports: [
     CaseRegistrationSharedModule,
     CaseDataModule,
+    PlaintiffsModule,
     SharedModule,
     RouterModule.forChild(routes)
   ]
