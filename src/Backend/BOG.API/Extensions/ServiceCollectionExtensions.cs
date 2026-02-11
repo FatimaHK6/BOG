@@ -91,6 +91,7 @@ public static class ServiceCollectionExtensions
         // Case registration related repositories
         services.AddScoped<IDefendantRepository, DefendantRepository>();
         services.AddScoped<IPlaintiffRepository, PlaintiffRepository>();
+        services.AddScoped<IPlaintiffAttachmentRepository, PlaintiffAttachmentRepository>();
         services.AddScoped<ICaseRequestDefendantRepository, CaseRequestDefendantRepository>();
         services.AddScoped<ICaseRequestPlaintiffRepository, CaseRequestPlaintiffRepository>();
         services.AddScoped<IRepresentativeRepository, RepresentativeRepository>();
@@ -132,6 +133,7 @@ public static class ServiceCollectionExtensions
         // Case registration related services
         services.AddScoped<IDefendantBL, DefendantBL>();
         services.AddScoped<IPlaintiffBL, PlaintiffBL>();
+        services.AddScoped<IPlaintiffAttachmentBL, PlaintiffAttachmentBL>();
         services.AddScoped<IRequestAttachmentBL, RequestAttachmentBL>();
         services.AddScoped<IAdditionalInfoBL, AdditionalInfoBL>();
         services.AddScoped<IClaimBL, ClaimBL>();
