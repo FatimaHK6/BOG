@@ -1,0 +1,235 @@
+<div class="defendant-form-container">
+  <!-- Header -->
+  <div class="form-header">
+    <h2 class="form-title">{{ isViewMode ? 'عرض مدعى عليه - شركة مسجلة في المملكة' : (isEditMode ? 'تعديل مدعى عليه - شركة مسجلة في المملكة' : 'إضافة مدعى عليه - شركة مسجلة في المملكة') }}</h2>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="isLoading" class="loading-container">
+    <mat-spinner diameter="40"></mat-spinner>
+  </div>
+
+  <!-- Form -->
+  <mat-card *ngIf="!isLoading">
+    <mat-card-content>
+      <form [formGroup]="form" (ngSubmit)="onSubmit()">
+
+        <div class="form-layout">
+          <!-- Internal Tabs (Left Side) -->
+          <div class="form-tabs">
+            <button type="button" class="tab-btn" [class.active]="activeTab === 0"
+                    [class.has-error]="hasTab1Errors()"
+                    (click)="setActiveTab(0)">
+              بيانات السجل التجاري
+            </button>
+            <button type="button" class="tab-btn" [class.active]="activeTab === 1"
+                    [class.has-error]="hasTab2Errors()"
+                    (click)="setActiveTab(1)">
+              بيانات العنوان الوطني للشركة
+            </button>
+          </div>
+
+          <!-- Form Content (Right Side) -->
+          <div class="form-content">
+
+            <!-- Tab 1: بيانات السجل التجاري -->
+            <div class="form-section" *ngIf="activeTab === 0">
+
+              <div class="form-row">
+                <!-- Commercial Registration Number -->
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>رقم السجل التجاري</mat-label>
+                  <input matInput formControlName="commercialRegNumber"
+                         maxlength="10"
+                         placeholder="أدخل رقم السجل التجاري (10 أرقام)">
+                  <mat-hint align="end">{{ form.value.commercialRegNumber?.length || 0 }} / 10</mat-hint>
+                  <mat-error *ngIf="f['commercialRegNumber'].hasError('required')">
+                    رقم السجل التجاري مطلوب
+                  </mat-error>
+                  <mat-error *ngIf="f['commercialRegNumber'].hasError('pattern')">
+                    رقم السجل التجاري يجب أن يكون 10 أرقام
+                  </mat-error>
+                </mat-form-field>
+              </div>
+
+              <div class="form-row">
+                <!-- Company Name -->
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>اسم المؤسسة / الشركة</mat-label>
+                  <input matInput formControlName="companyName"
+                         maxlength="200"
+                         placeholder="أدخل اسم الشركة">
+                  <mat-hint align="end">{{ form.value.companyName?.length || 0 }} / 200</mat-hint>
+                  <mat-error *ngIf="f['companyName'].hasError('required')">
+                    اسم الشركة مطلوب
+                  </mat-error>
+                  <mat-error *ngIf="f['companyName'].hasError('maxlength')">
+                    اسم الشركة يجب ألا يتجاوز 200 حرف
+                  </mat-error>
+                </mat-form-field>
+              </div>
+
+              <div class="form-row two-columns">
+                <!-- Registration Start Date -->
+                <mat-form-field appearance="outline">
+                  <mat-label>تاريخ بداية السجل</mat-label>
+                  <input matInput [matDatepicker]="startPicker" formControlName="registrationStartDate"
+                         [max]="maxDate"
+                         placeholder="اختر التاريخ">
+                  <mat-datepicker-toggle matIconSuffix [for]="startPicker"></mat-datepicker-toggle>
+                  <mat-datepicker #startPicker></mat-datepicker>
+                  <mat-error *ngIf="f['registrationStartDate'].hasError('required')">
+                    تاريخ بداية السجل مطلوب
+                  </mat-error>
+                </mat-form-field>
+
+                <!-- Registration End Date -->
+                <mat-form-field appearance="outline">
+                  <mat-label>تاريخ نهاية السجل</mat-label>
+                  <input matInput [matDatepicker]="endPicker" formControlName="registrationEndDate"
+                         placeholder="اختر التاريخ">
+                  <mat-datepicker-toggle matIconSuffix [for]="endPicker"></mat-datepicker-toggle>
+                  <mat-datepicker #endPicker></mat-datepicker>
+                  <mat-error *ngIf="f['registrationEndDate'].hasError('required')">
+                    تاريخ نهاية السجل مطلوب
+                  </mat-error>
+                </mat-form-field>
+              </div>
+            </div>
+
+            <!-- Tab 2: بيانات العنوان الوطني للشركة -->
+            <div class="form-section" *ngIf="activeTab === 1">
+
+              <div class="form-row two-columns">
+                <!-- Region -->
+                <mat-form-field appearance="outline">
+                  <mat-label>المنطقة</mat-label>
+                  <mat-select formControlName="regCompanyRegionId"
+                              (selectionChange)="onRegionChange($event.value)">
+                    <mat-option *ngFor="let region of regions" [value]="region.id">
+                      {{ region.nameAr }}
+                    </mat-option>
+                  </mat-select>
+                  <mat-error *ngIf="f['regCompanyRegionId'].hasError('required')">
+                    المنطقة مطلوبة
+                  </mat-error>
+                </mat-form-field>
+
+                <!-- City -->
+                <mat-form-field appearance="outline">
+                  <mat-label>المدينة</mat-label>
+                  <mat-select formControlName="regCompanyCityId">
+                    <mat-option *ngFor="let city of cities" [value]="city.id">
+                      {{ city.nameAr }}
+                    </mat-option>
+                  </mat-select>
+                  <mat-error *ngIf="f['regCompanyCityId'].hasError('required')">
+                    المدينة مطلوبة
+                  </mat-error>
+                </mat-form-field>
+              </div>
+
+              <div class="form-row">
+                <!-- District -->
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>الحي</mat-label>
+                  <input matInput formControlName="regCompanyDistrict"
+                         maxlength="100"
+                         placeholder="أدخل اسم الحي">
+                  <mat-error *ngIf="f['regCompanyDistrict'].hasError('required')">
+                    الحي مطلوب
+                  </mat-error>
+                </mat-form-field>
+              </div>
+
+              <div class="form-row">
+                <!-- Street -->
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>الشارع</mat-label>
+                  <input matInput formControlName="regCompanyStreet"
+                         maxlength="200"
+                         placeholder="أدخل اسم الشارع">
+                  <mat-error *ngIf="f['regCompanyStreet'].hasError('required')">
+                    الشارع مطلوب
+                  </mat-error>
+                </mat-form-field>
+              </div>
+
+              <div class="form-row two-columns">
+                <!-- Building Number -->
+                <mat-form-field appearance="outline">
+                  <mat-label>رقم المبنى</mat-label>
+                  <input matInput formControlName="regCompanyBuildingNumber"
+                         maxlength="4"
+                         placeholder="0000">
+                  <mat-error *ngIf="f['regCompanyBuildingNumber'].hasError('required')">
+                    رقم المبنى مطلوب
+                  </mat-error>
+                  <mat-error *ngIf="f['regCompanyBuildingNumber'].hasError('pattern')">
+                    يجب إدخال 4 أرقام فقط
+                  </mat-error>
+                </mat-form-field>
+
+                <!-- Unit Number -->
+                <mat-form-field appearance="outline">
+                  <mat-label>رقم الوحدة</mat-label>
+                  <input matInput formControlName="regCompanyUnitNumber"
+                         placeholder="أدخل رقم الوحدة">
+                  <mat-error *ngIf="f['regCompanyUnitNumber'].hasError('required')">
+                    رقم الوحدة مطلوب
+                  </mat-error>
+                  <mat-error *ngIf="f['regCompanyUnitNumber'].hasError('pattern')">
+                    أرقام فقط
+                  </mat-error>
+                </mat-form-field>
+              </div>
+
+              <div class="form-row two-columns">
+                <!-- Postal Code -->
+                <mat-form-field appearance="outline">
+                  <mat-label>الرمز البريدي</mat-label>
+                  <input matInput formControlName="regCompanyPostalCode"
+                         maxlength="5"
+                         placeholder="00000">
+                  <mat-error *ngIf="f['regCompanyPostalCode'].hasError('required')">
+                    الرمز البريدي مطلوب
+                  </mat-error>
+                  <mat-error *ngIf="f['regCompanyPostalCode'].hasError('pattern')">
+                    يجب إدخال 5 أرقام فقط
+                  </mat-error>
+                </mat-form-field>
+
+                <!-- Additional Code -->
+                <mat-form-field appearance="outline">
+                  <mat-label>الرمز الإضافي</mat-label>
+                  <input matInput formControlName="regCompanyAdditionalCode"
+                         maxlength="4"
+                         placeholder="0000">
+                  <mat-error *ngIf="f['regCompanyAdditionalCode'].hasError('required')">
+                    الرمز الإضافي مطلوب
+                  </mat-error>
+                  <mat-error *ngIf="f['regCompanyAdditionalCode'].hasError('pattern')">
+                    يجب إدخال 4 أرقام فقط
+                  </mat-error>
+                </mat-form-field>
+              </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="form-actions">
+              <button mat-button type="button" (click)="onCancel()">
+                {{ isViewMode ? 'رجوع' : 'إلغاء' }}
+              </button>
+              <button *ngIf="!isViewMode" mat-raised-button type="submit" class="save-btn"
+                      [disabled]="isSaving">
+                <mat-spinner *ngIf="isSaving" diameter="20" class="inline-spinner"></mat-spinner>
+                <span *ngIf="!isSaving">حفظ المدعى عليه</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+      </form>
+    </mat-card-content>
+  </mat-card>
+</div>

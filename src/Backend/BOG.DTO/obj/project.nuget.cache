@@ -1,8 +1,12 @@
 {
   "version": 2,
-  "dgSpecHash": "GMvfnNmBBtE=",
+  "dgSpecHash": "0FHzlPcHJWI=",
   "success": true,
-  "projectFilePath": "C:\\Users\\Lenovo\\Desktop\\Claude\\BOG - Copy\\src\\Backend\\BOG.DTO\\BOG.DTO.csproj",
-  "expectedPackageFiles": [],
+  "projectFilePath": "D:\\Work\\Bog\\BOG\\src\\Backend\\BOG.DTO\\BOG.DTO.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\Lenovo\\.nuget\\packages\\microsoft.windowsdesktop.app.ref\\8.0.22\\microsoft.windowsdesktop.app.ref.8.0.22.nupkg.sha512",
+    "C:\\Users\\Lenovo\\.nuget\\packages\\microsoft.netcore.app.ref\\8.0.22\\microsoft.netcore.app.ref.8.0.22.nupkg.sha512",
+    "C:\\Users\\Lenovo\\.nuget\\packages\\microsoft.aspnetcore.app.ref\\8.0.22\\microsoft.aspnetcore.app.ref.8.0.22.nupkg.sha512"
+  ],
   "logs": []
 }

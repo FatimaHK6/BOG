@@ -1,0 +1,267 @@
+<div class="defendant-form-container">
+  <!-- Header -->
+  <div class="form-header">
+    <h2 class="form-title">{{ isViewMode ? 'عرض مدعى عليه - وقف' : (isEditMode ? 'تعديل مدعى عليه - وقف' : 'إضافة مدعى عليه - وقف') }}</h2>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="isLoading" class="loading-container">
+    <mat-spinner diameter="40"></mat-spinner>
+  </div>
+
+  <!-- Form -->
+  <mat-card *ngIf="!isLoading">
+    <mat-card-content>
+      <form [formGroup]="form" (ngSubmit)="onSubmit()">
+
+        <div class="form-layout">
+          <!-- Internal Tabs (Left Side) -->
+          <div class="form-tabs">
+            <button type="button" class="tab-btn" [class.active]="activeTab === 0"
+                    [class.has-error]="hasTab1Errors()"
+                    (click)="setActiveTab(0)">
+              بيانات الوقف
+            </button>
+            <button type="button" class="tab-btn" [class.active]="activeTab === 1"
+                    [class.has-error]="hasTab2Errors()"
+                    (click)="setActiveTab(1)">
+              بيانات العنوان الوطني للوقف
+            </button>
+          </div>
+
+          <!-- Form Content (Right Side) -->
+          <div class="form-content">
+
+            <!-- Tab 1: بيانات الوقف -->
+            <div class="form-section" *ngIf="activeTab === 0">
+
+              <div class="form-row">
+                <!-- Waqf Name -->
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>اسم الوقف</mat-label>
+                  <input matInput formControlName="waqfName"
+                         maxlength="200"
+                         placeholder="أدخل اسم الوقف">
+                  <mat-hint align="end">{{ form.value.waqfName?.length || 0 }} / 200</mat-hint>
+                  <mat-error *ngIf="f['waqfName'].hasError('required')">
+                    اسم الوقف مطلوب
+                  </mat-error>
+                  <mat-error *ngIf="f['waqfName'].hasError('maxlength')">
+                    اسم الوقف يجب ألا يتجاوز 200 حرف
+                  </mat-error>
+                </mat-form-field>
+              </div>
+
+              <div class="form-row">
+                <!-- Court Deed Number -->
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>رقم صك المحكمة</mat-label>
+                  <input matInput formControlName="courtDeedNumber"
+                         maxlength="10"
+                         placeholder="أدخل رقم صك المحكمة">
+                  <mat-hint align="end">{{ form.value.courtDeedNumber?.length || 0 }} / 10</mat-hint>
+                  <mat-error *ngIf="f['courtDeedNumber'].hasError('required')">
+                    رقم صك المحكمة مطلوب
+                  </mat-error>
+                  <mat-error *ngIf="f['courtDeedNumber'].hasError('maxlength')">
+                    رقم صك المحكمة يجب ألا يتجاوز 10 أحرف
+                  </mat-error>
+                </mat-form-field>
+              </div>
+
+              <div class="form-row">
+                <!-- Court Deed Date -->
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>تاريخ صك المحكمة</mat-label>
+                  <input matInput [matDatepicker]="picker" formControlName="courtDeedDate"
+                         [max]="maxDate"
+                         placeholder="اختر التاريخ">
+                  <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+                  <mat-datepicker #picker></mat-datepicker>
+                  <mat-error *ngIf="f['courtDeedDate'].hasError('required')">
+                    تاريخ صك المحكمة مطلوب
+                  </mat-error>
+                </mat-form-field>
+              </div>
+
+              <div class="form-row">
+                <!-- Deed Source -->
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>مصدر الصك</mat-label>
+                  <input matInput formControlName="deedSource"
+                         maxlength="100"
+                         placeholder="أدخل مصدر الصك">
+                  <mat-hint align="end">{{ form.value.deedSource?.length || 0 }} / 100</mat-hint>
+                  <mat-error *ngIf="f['deedSource'].hasError('required')">
+                    مصدر الصك مطلوب
+                  </mat-error>
+                  <mat-error *ngIf="f['deedSource'].hasError('maxlength')">
+                    مصدر الصك يجب ألا يتجاوز 100 حرف
+                  </mat-error>
+                </mat-form-field>
+              </div>
+
+              <div class="form-row">
+                <!-- Waqf Supervisory Type -->
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>نظارة الوقف</mat-label>
+                  <mat-select formControlName="waqfSupervisoryTypeId">
+                    <mat-option *ngFor="let type of waqfSupervisoryTypes" [value]="type.id">
+                      {{ type.nameAr }}
+                    </mat-option>
+                  </mat-select>
+                  <mat-error *ngIf="f['waqfSupervisoryTypeId'].hasError('required')">
+                    نظارة الوقف مطلوبة
+                  </mat-error>
+                </mat-form-field>
+              </div>
+
+              <!-- Agency Name (conditional - only if حكومية) -->
+              <div class="form-row" *ngIf="showAgencyName">
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>اسم الجهة</mat-label>
+                  <input matInput formControlName="waqfAgencyName"
+                         maxlength="200"
+                         placeholder="أدخل اسم الجهة الحكومية">
+                  <mat-hint align="end">{{ form.value.waqfAgencyName?.length || 0 }} / 200</mat-hint>
+                  <mat-error *ngIf="f['waqfAgencyName'].hasError('required')">
+                    اسم الجهة مطلوب عند اختيار نظارة حكومية
+                  </mat-error>
+                  <mat-error *ngIf="f['waqfAgencyName'].hasError('maxlength')">
+                    اسم الجهة يجب ألا يتجاوز 200 حرف
+                  </mat-error>
+                </mat-form-field>
+              </div>
+            </div>
+
+            <!-- Tab 2: بيانات العنوان الوطني للوقف -->
+            <div class="form-section" *ngIf="activeTab === 1">
+
+              <div class="form-row two-columns">
+                <!-- Region -->
+                <mat-form-field appearance="outline">
+                  <mat-label>المنطقة</mat-label>
+                  <mat-select formControlName="waqfRegionId"
+                              (selectionChange)="onRegionChange($event.value)">
+                    <mat-option *ngFor="let region of regions" [value]="region.id">
+                      {{ region.nameAr }}
+                    </mat-option>
+                  </mat-select>
+                  <mat-error *ngIf="f['waqfRegionId'].hasError('required')">
+                    المنطقة مطلوبة
+                  </mat-error>
+                </mat-form-field>
+
+                <!-- City -->
+                <mat-form-field appearance="outline">
+                  <mat-label>المدينة</mat-label>
+                  <mat-select formControlName="waqfCityId">
+                    <mat-option *ngFor="let city of cities" [value]="city.id">
+                      {{ city.nameAr }}
+                    </mat-option>
+                  </mat-select>
+                  <mat-error *ngIf="f['waqfCityId'].hasError('required')">
+                    المدينة مطلوبة
+                  </mat-error>
+                </mat-form-field>
+              </div>
+
+              <div class="form-row">
+                <!-- District -->
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>الحي</mat-label>
+                  <input matInput formControlName="waqfDistrict"
+                         maxlength="100"
+                         placeholder="أدخل اسم الحي (اختياري)">
+                </mat-form-field>
+              </div>
+
+              <div class="form-row">
+                <!-- Street -->
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>الشارع</mat-label>
+                  <input matInput formControlName="waqfStreet"
+                         maxlength="200"
+                         placeholder="أدخل اسم الشارع (اختياري)">
+                </mat-form-field>
+              </div>
+
+              <div class="form-row two-columns">
+                <!-- Building Number -->
+                <mat-form-field appearance="outline">
+                  <mat-label>رقم المبنى</mat-label>
+                  <input matInput formControlName="waqfBuildingNumber"
+                         maxlength="4"
+                         placeholder="0000">
+                  <mat-error *ngIf="f['waqfBuildingNumber'].hasError('pattern')">
+                    يجب إدخال 4 أرقام فقط
+                  </mat-error>
+                </mat-form-field>
+
+                <!-- Unit Number -->
+                <mat-form-field appearance="outline">
+                  <mat-label>رقم الوحدة</mat-label>
+                  <input matInput formControlName="waqfUnitNumber"
+                         placeholder="اختياري">
+                  <mat-error *ngIf="f['waqfUnitNumber'].hasError('pattern')">
+                    أرقام فقط
+                  </mat-error>
+                </mat-form-field>
+              </div>
+
+              <div class="form-row two-columns">
+                <!-- Postal Code -->
+                <mat-form-field appearance="outline">
+                  <mat-label>الرمز البريدي</mat-label>
+                  <input matInput formControlName="waqfPostalCode"
+                         maxlength="5"
+                         placeholder="00000">
+                  <mat-error *ngIf="f['waqfPostalCode'].hasError('pattern')">
+                    يجب إدخال 5 أرقام فقط
+                  </mat-error>
+                </mat-form-field>
+
+                <!-- Additional Code -->
+                <mat-form-field appearance="outline">
+                  <mat-label>الرمز الإضافي</mat-label>
+                  <input matInput formControlName="waqfAdditionalCode"
+                         maxlength="4"
+                         placeholder="0000">
+                  <mat-error *ngIf="f['waqfAdditionalCode'].hasError('pattern')">
+                    يجب إدخال 4 أرقام فقط
+                  </mat-error>
+                </mat-form-field>
+              </div>
+
+              <div class="form-row">
+                <!-- Address Description -->
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>وصف تقريبي</mat-label>
+                  <textarea matInput formControlName="waqfAddressDescription"
+                            rows="3"
+                            placeholder="أدخل وصف تقريبي للموقع"></textarea>
+                  <mat-error *ngIf="f['waqfAddressDescription'].hasError('required')">
+                    وصف تقريبي مطلوب
+                  </mat-error>
+                </mat-form-field>
+              </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="form-actions">
+              <button mat-button type="button" (click)="onCancel()">
+                {{ isViewMode ? 'رجوع' : 'إلغاء' }}
+              </button>
+              <button *ngIf="!isViewMode" mat-raised-button type="submit" class="save-btn"
+                      [disabled]="isSaving">
+                <mat-spinner *ngIf="isSaving" diameter="20" class="inline-spinner"></mat-spinner>
+                <span *ngIf="!isSaving">حفظ المدعى عليه</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+      </form>
+    </mat-card-content>
+  </mat-card>
+</div>

@@ -1,0 +1,973 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Developer A: Plaintiffs & Representatives Module - BOG</title>
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #1e40af;
+            --accent-color: #3b82f6;
+            --success-color: #059669;
+            --warning-color: #d97706;
+            --danger-color: #dc2626;
+            --bg-color: #f0f9ff;
+            --card-bg: #ffffff;
+            --text-color: #1e293b;
+            --border-color: #bfdbfe;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', 'Arial', Tahoma, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.8;
+            direction: rtl;
+        }
+
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+
+        header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 40px 20px;
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 5px solid var(--accent-color);
+        }
+
+        header .badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.2);
+            padding: 8px 20px;
+            border-radius: 25px;
+            font-size: 1rem;
+            margin-bottom: 15px;
+        }
+
+        header h1 { font-size: 2rem; margin-bottom: 10px; }
+        header p { font-size: 1rem; opacity: 0.9; }
+
+        .meta-info {
+            background: var(--card-bg);
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-right: 4px solid var(--primary-color);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .meta-item { flex: 1; min-width: 200px; }
+        .meta-item strong { color: var(--primary-color); }
+
+        .toc {
+            background: var(--card-bg);
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .toc h2 { color: var(--primary-color); margin-bottom: 15px; font-size: 1.3rem; }
+        .toc ol { padding-right: 25px; }
+        .toc li { margin: 8px 0; }
+        .toc a { color: var(--primary-color); text-decoration: none; }
+        .toc a:hover { text-decoration: underline; }
+
+        .section {
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        h2 {
+            color: var(--primary-color);
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid var(--accent-color);
+        }
+
+        h3 {
+            color: var(--text-color);
+            font-size: 1.2rem;
+            margin: 25px 0 15px 0;
+        }
+
+        h4 {
+            color: #475569;
+            font-size: 1.1rem;
+            margin: 20px 0 10px 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+            font-size: 0.95rem;
+        }
+
+        th, td {
+            border: 1px solid var(--border-color);
+            padding: 12px 15px;
+            text-align: right;
+        }
+
+        th {
+            background: var(--primary-color);
+            color: white;
+            font-weight: 600;
+        }
+
+        tr:nth-child(even) { background-color: #eff6ff; }
+        tr:hover { background-color: #dbeafe; }
+
+        pre {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            direction: ltr;
+            text-align: left;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            margin: 15px 0;
+        }
+
+        code {
+            font-family: 'Consolas', 'Monaco', monospace;
+            background: #e0f2fe;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.9em;
+            color: #0369a1;
+        }
+
+        pre code { background: none; padding: 0; color: inherit; }
+
+        .file-tree {
+            background: #eff6ff;
+            padding: 20px;
+            border-radius: 8px;
+            font-family: monospace;
+            direction: ltr;
+            text-align: left;
+            white-space: pre;
+            overflow-x: auto;
+            margin: 15px 0;
+            border: 1px solid var(--border-color);
+        }
+
+        .note {
+            background: #fef3c7;
+            border-right: 4px solid var(--warning-color);
+            padding: 15px 20px;
+            border-radius: 0 8px 8px 0;
+            margin: 15px 0;
+        }
+
+        .info {
+            background: #dbeafe;
+            border-right: 4px solid var(--primary-color);
+            padding: 15px 20px;
+            border-radius: 0 8px 8px 0;
+            margin: 15px 0;
+        }
+
+        .success {
+            background: #d1fae5;
+            border-right: 4px solid var(--success-color);
+            padding: 15px 20px;
+            border-radius: 0 8px 8px 0;
+            margin: 15px 0;
+        }
+
+        .danger {
+            background: #fee2e2;
+            border-right: 4px solid var(--danger-color);
+            padding: 15px 20px;
+            border-radius: 0 8px 8px 0;
+            margin: 15px 0;
+        }
+
+        ul, ol { padding-right: 25px; margin: 10px 0; }
+        li { margin: 5px 0; }
+
+        .priority-high { color: var(--danger-color); font-weight: bold; }
+        .priority-medium { color: var(--warning-color); font-weight: bold; }
+        .priority-low { color: var(--success-color); font-weight: bold; }
+
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: #64748b;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 768px) {
+            .container { padding: 10px; }
+            .section { padding: 15px; }
+            table { font-size: 0.85rem; }
+            th, td { padding: 8px; }
+            .meta-info { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="badge">Developer A</div>
+        <h1>Plaintiffs & Representatives Module</h1>
+        <h1>Plaintiffs & Representatives Module</h1>
+        <p>Use Cases 6.5.1.1.1 - 6.5.1.1.10 | 10 Use Cases</p>
+    </header>
+
+    <div class="container">
+        <div class="meta-info">
+            <div class="meta-item"><strong>Scope:</strong> UC 6.5.1.1.1 - 6.5.1.1.10 (10 use cases)</div>
+            <div class="meta-item"><strong>Focus:</strong> Plaintiff management, Representatives, Attachments, Selected Address</div>
+            <div class="meta-item"><strong>Dependency:</strong> Phase 1 (Database) must be completed first</div>
+        </div>
+
+        <div class="toc">
+            <h2>Table of Contents</h2>
+            <ol>
+                <li><a href="#usecases">Use Cases</a></li>
+                <li><a href="#files">Required Files</a></li>
+                <li><a href="#endpoints">API Endpoints</a></li>
+                <li><a href="#rules">Business Rules</a></li>
+                <li><a href="#absher">Absher Integration</a></li>
+                <li><a href="#verification">Verification</a></li>
+                <li><a href="#frontend">Frontend (واجهة المستخدم)</a></li>
+            </ol>
+        </div>
+
+        <div class="section" id="usecases">
+            <h2>1. Use Cases</h2>
+
+            <table>
+                <thead>
+                    <tr><th>Code</th><th>Name</th><th>Description</th><th>Priority</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td>6.5.1.1.1</td><td>Plaintiffs</td><td>Display plaintiff list in request</td><td class="priority-high">High</td></tr>
+                    <tr><td>6.5.1.1.2</td><td>Add Plaintiff</td><td>Add new plaintiff (8 types)</td><td class="priority-high">High</td></tr>
+                    <tr><td>6.5.1.1.3</td><td>View Plaintiff Details</td><td>View complete plaintiff data</td><td class="priority-high">High</td></tr>
+                    <tr><td>6.5.1.1.4</td><td>Edit Plaintiff</td><td>Edit existing plaintiff data</td><td class="priority-high">High</td></tr>
+                    <tr><td>6.5.1.1.5</td><td>Plaintiff Attachments</td><td>Add/delete plaintiff attachments</td><td class="priority-medium">Medium</td></tr>
+                    <tr><td>6.5.1.1.6</td><td>Selected Address</td><td>Set notification address</td><td class="priority-medium">Medium</td></tr>
+                    <tr><td>6.5.1.1.7</td><td>Add Representative</td><td>Add representative for plaintiff (9 types)</td><td class="priority-high">High</td></tr>
+                    <tr><td>6.5.1.1.8</td><td>Representative Details</td><td>View representative data</td><td class="priority-high">High</td></tr>
+                    <tr><td>6.5.1.1.9</td><td>Edit Representative</td><td>Edit representative data</td><td class="priority-high">High</td></tr>
+                    <tr><td>6.5.1.1.10</td><td>Applicant</td><td>Set plaintiff as applicant</td><td class="priority-high">High</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="section" id="files">
+            <h2>2. Required Files</h2>
+
+            <h3>2.1 Data Access Layer (BOG.DAL)</h3>
+
+            <div class="file-tree">BOG.DAL/
++-- Interfaces/
+|   +-- IPlaintiffRepository.cs
+|   +-- IRepresentativeRepository.cs
+|   +-- IPlaintiffAttachmentRepository.cs
+|   +-- IAddressRepository.cs
++-- Repositories/
+    +-- PlaintiffRepository.cs
+    +-- RepresentativeRepository.cs
+    +-- PlaintiffAttachmentRepository.cs
+    +-- AddressRepository.cs</div>
+
+            <h4>Plaintiff Repository Interface</h4>
+            <pre><code>// IPlaintiffRepository.cs
+public interface IPlaintiffRepository : IRepository&lt;Plaintiff&gt;
+{
+    Task&lt;IEnumerable&lt;Plaintiff&gt;&gt; GetByRequestIdAsync(int requestId);
+    Task&lt;Plaintiff?&gt; GetByIdentityAsync(int requestId, string identityNumber, int plaintiffTypeId);
+    Task&lt;bool&gt; ExistsByIdentityAsync(int requestId, string identityNumber, int plaintiffTypeId);
+}</code></pre>
+
+            <h4>Representative Repository Interface</h4>
+            <pre><code>// IRepresentativeRepository.cs
+public interface IRepresentativeRepository : IRepository&lt;Representative&gt;
+{
+    Task&lt;IEnumerable&lt;Representative&gt;&gt; GetByPlaintiffIdAsync(int plaintiffId);
+    Task&lt;Representative?&gt; GetByIdentityAsync(int plaintiffId, string identityNumber);
+    Task&lt;bool&gt; ExistsByIdentityAsync(int plaintiffId, string identityNumber);
+}</code></pre>
+
+            <h3>2.2 Data Transfer Objects (BOG.DTO)</h3>
+
+            <div class="file-tree">BOG.DTO/
++-- Plaintiff/
+|   +-- PlaintiffCreateDTO.cs        # Create new plaintiff
+|   +-- PlaintiffUpdateDTO.cs        # Update plaintiff data
+|   +-- PlaintiffAttachmentDTO.cs    # Plaintiff attachments
+|   +-- SelectedAddressDTO.cs        # Selected address
++-- Representative/
+    +-- RepresentativeCreateDTO.cs   # Create new representative
+    +-- RepresentativeUpdateDTO.cs   # Update representative data</div>
+
+            <h4>Plaintiff Create DTO</h4>
+            <pre><code>// PlaintiffCreateDTO.cs
+public class PlaintiffCreateDTO
+{
+    [Required]
+    public int PlaintiffTypeId { get; set; }           // Plaintiff type
+
+    // Personal Data (for Individuals)
+    public int? IdentityTypeId { get; set; }
+    public string? IdentityNumber { get; set; }
+
+    // Names (can be filled from Absher)
+    public string? FirstName { get; set; }
+    public string? FatherName { get; set; }
+    public string? GrandfatherName { get; set; }
+    public string? FamilyName { get; set; }
+    public DateTime? BirthDate { get; set; }
+    public string? Gender { get; set; }
+
+    // Contact Info
+    public string? MobileNumber { get; set; }
+    public string? Email { get; set; }
+
+    // For Business/Companies
+    public string? CommercialRegNumber { get; set; }
+    public string? CompanyName { get; set; }
+
+    // For Government Agencies
+    public int? GovernmentAgencyId { get; set; }
+    public string? AdditionalStatement { get; set; }
+}</code></pre>
+
+            <h3>2.3 View Models (BOG.VM)</h3>
+
+            <div class="file-tree">BOG.VM/
++-- Plaintiff/
+|   +-- PlaintiffVM.cs               # Complete plaintiff details
+|   +-- PlaintiffListVM.cs           # Summary for list view
+|   +-- PlaintiffAttachmentVM.cs     # Attachment display
++-- Representative/
+    +-- RepresentativeVM.cs          # Representative details</div>
+
+            <h4>Plaintiff View Model</h4>
+            <pre><code>// PlaintiffVM.cs
+public class PlaintiffVM
+{
+    public int Id { get; set; }
+    public int PlaintiffTypeId { get; set; }
+    public string PlaintiffTypeName { get; set; }
+    public string PlaintiffTypeNameAr { get; set; }
+
+    // Computed Full Name
+    public string FullName =&gt; $"{FirstName} {FatherName} {GrandfatherName} {FamilyName}".Trim();
+
+    public string? FirstName { get; set; }
+    public string? FatherName { get; set; }
+    public string? GrandfatherName { get; set; }
+    public string? FamilyName { get; set; }
+
+    public string? IdentityNumber { get; set; }
+    public int? DataSourceId { get; set; }             // Data source (1=Absher, 2=User)
+    public string? DataSourceName { get; set; }        // Data source name
+
+    public string? MobileNumber { get; set; }
+    public string? Email { get; set; }
+
+    // Addresses
+    public AddressVM? ResidenceAddress { get; set; }
+    public AddressVM? WorkAddress { get; set; }
+    public AddressVM? SelectedAddress { get; set; }
+
+    // Representatives
+    public List&lt;RepresentativeVM&gt; Representatives { get; set; }
+
+    // Attachments
+    public List&lt;PlaintiffAttachmentVM&gt; Attachments { get; set; }
+}</code></pre>
+
+            <h3>2.4 Business Logic Layer (BOG.BL)</h3>
+
+            <div class="file-tree">BOG.BL/
++-- Interfaces/
+|   +-- IPlaintiffBL.cs
+|   +-- IRepresentativeBL.cs
+|   +-- IPlaintiffAttachmentBL.cs
++-- Services/
+    +-- PlaintiffBL.cs
+    +-- RepresentativeBL.cs
+    +-- PlaintiffAttachmentBL.cs</div>
+
+            <h4>Plaintiff Business Logic Interface</h4>
+            <pre><code>// IPlaintiffBL.cs
+public interface IPlaintiffBL
+{
+    Task&lt;IEnumerable&lt;PlaintiffListVM&gt;&gt; GetByRequestIdAsync(int requestId);
+    Task&lt;PlaintiffVM&gt; GetByIdAsync(int id);
+    Task&lt;PlaintiffVM&gt; CreateAsync(int requestId, PlaintiffCreateDTO dto);
+    Task&lt;PlaintiffVM&gt; UpdateAsync(int id, PlaintiffUpdateDTO dto);
+    Task DeleteAsync(int id);
+    Task SetAsApplicantAsync(int plaintiffId);
+    Task&lt;AddressVM&gt; GetSelectedAddressAsync(int plaintiffId);
+    Task&lt;AddressVM&gt; SetSelectedAddressAsync(int plaintiffId, SelectedAddressDTO dto);
+}</code></pre>
+
+            <h3>2.5 API Controllers (BOG.API)</h3>
+
+            <div class="file-tree">BOG.API/Controllers/
++-- PlaintiffsController.cs
++-- RepresentativesController.cs</div>
+        </div>
+
+        <div class="section" id="endpoints">
+            <h2>3. API Endpoints</h2>
+
+            <h3>3.1 Plaintiffs Controller</h3>
+            <table>
+                <thead><tr><th>Method</th><th>Route</th><th>Description</th></tr></thead>
+                <tbody>
+                    <tr><td>GET</td><td>/api/case-requests/{requestId}/plaintiffs</td><td>Get plaintiffs in request</td></tr>
+                    <tr><td>POST</td><td>/api/case-requests/{requestId}/plaintiffs</td><td>Add new plaintiff</td></tr>
+                    <tr><td>GET</td><td>/api/plaintiffs/{id}</td><td>Get plaintiff details</td></tr>
+                    <tr><td>PUT</td><td>/api/plaintiffs/{id}</td><td>Update plaintiff</td></tr>
+                    <tr><td>DELETE</td><td>/api/plaintiffs/{id}</td><td>Delete plaintiff</td></tr>
+                    <tr><td>POST</td><td>/api/plaintiffs/{id}/set-applicant</td><td>Set as applicant</td></tr>
+                </tbody>
+            </table>
+
+            <h3>3.2 Plaintiff Attachments</h3>
+            <table>
+                <thead><tr><th>Method</th><th>Route</th><th>Description</th></tr></thead>
+                <tbody>
+                    <tr><td>GET</td><td>/api/plaintiffs/{id}/attachments</td><td>Get attachment list</td></tr>
+                    <tr><td>POST</td><td>/api/plaintiffs/{id}/attachments</td><td>Add attachment</td></tr>
+                    <tr><td>DELETE</td><td>/api/plaintiffs/{id}/attachments/{attachmentId}</td><td>Delete attachment</td></tr>
+                </tbody>
+            </table>
+
+            <h3>3.3 Selected Address</h3>
+            <table>
+                <thead><tr><th>Method</th><th>Route</th><th>Description</th></tr></thead>
+                <tbody>
+                    <tr><td>GET</td><td>/api/plaintiffs/{id}/selected-address</td><td>Get current address</td></tr>
+                    <tr><td>PUT</td><td>/api/plaintiffs/{id}/selected-address</td><td>Update address</td></tr>
+                </tbody>
+            </table>
+
+            <h3>3.4 Representatives Controller</h3>
+            <table>
+                <thead><tr><th>Method</th><th>Route</th><th>Description</th></tr></thead>
+                <tbody>
+                    <tr><td>GET</td><td>/api/plaintiffs/{plaintiffId}/representatives</td><td>Get plaintiff's representatives</td></tr>
+                    <tr><td>POST</td><td>/api/plaintiffs/{plaintiffId}/representatives</td><td>Add representative</td></tr>
+                    <tr><td>GET</td><td>/api/representatives/{id}</td><td>Get representative details</td></tr>
+                    <tr><td>PUT</td><td>/api/representatives/{id}</td><td>Update representative</td></tr>
+                    <tr><td>DELETE</td><td>/api/representatives/{id}</td><td>Delete representative</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="section" id="rules">
+            <h2>4. Business Rules</h2>
+
+            <h3>4.1 Plaintiff Types and Allowed Representative Types</h3>
+            <table>
+                <thead><tr><th>Plaintiff Type</th><th>Allowed Representative Types</th></tr></thead>
+                <tbody>
+                    <tr><td>Individual</td><td>Lawyer, Liquidator, Bankruptcy Trustee, Judicial Custodian, Guardian, Conservator</td></tr>
+                    <tr><td>Individual without ID</td><td>Lawyer, Liquidator, Bankruptcy Trustee, Judicial Custodian, Guardian, Conservator</td></tr>
+                    <tr><td>Business Owner</td><td>Lawyer, Liquidator, Bankruptcy Trustee, Judicial Custodian</td></tr>
+                    <tr><td>Registered Company</td><td>Lawyer, Liquidator, Bankruptcy Trustee, Judicial Custodian, Company Representative</td></tr>
+                    <tr><td>Unregistered Company</td><td>Lawyer, Liquidator, Bankruptcy Trustee, Judicial Custodian</td></tr>
+                    <tr><td>Government Agency</td><td>Lawyer, Government Representative</td></tr>
+                    <tr><td>Society/NGO</td><td>Lawyer, Company Representative</td></tr>
+                    <tr><td>Waqf/Endowment</td><td>Lawyer, Waqf Inspector</td></tr>
+                </tbody>
+            </table>
+
+            <h3>4.2 Validation Messages</h3>
+            <table>
+                <thead><tr><th>Code</th><th>Message</th><th>Description</th></tr></thead>
+                <tbody>
+                    <tr><td>ERR008</td><td>Representative already exists for plaintiff</td><td>Cannot add same representative twice</td></tr>
+                    <tr><td>ERR011</td><td>Plaintiff already exists with same identity</td><td>Duplicate check</td></tr>
+                    <tr><td>ERR012</td><td>Representative ID same as plaintiff ID</td><td>Representative cannot be the plaintiff</td></tr>
+                </tbody>
+            </table>
+
+            <h3>4.3 Applicant Rules (BC07)</h3>
+            <div class="info">
+                <ul>
+                    <li>Only <strong>"Individual"</strong> or <strong>"Individual without ID"</strong> plaintiffs can be applicants</li>
+                    <li>Applicant must be either: Original (plaintiff), Agent (representative), or Both</li>
+                </ul>
+            </div>
+
+            <h3>4.4 Selected Address Rules (BC03)</h3>
+            <div class="info">
+                <ul>
+                    <li>If plaintiff's city differs from court's city</li>
+                    <li>Plaintiff must select a notification address</li>
+                    <li>Address can be residence or work address</li>
+                </ul>
+            </div>
+
+            <h3>4.5 Attachment Rules (BR04)</h3>
+            <div class="note">
+                <ul>
+                    <li><strong>File Type:</strong> PDF only</li>
+                    <li><strong>Max Size:</strong> 4 MB</li>
+                    <li>Attachments by plaintiff type:
+                        <ul>
+                            <li>Individual: ID copy</li>
+                            <li>Registered Company: Commercial registration</li>
+                            <li>Government Agency: Representation decision</li>
+                            <li>Waqf: Waqf deed</li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="section" id="absher">
+            <h2>5. Absher Integration</h2>
+
+            <h3>5.0 Data Source Table</h3>
+            <table>
+                <thead><tr><th>Id</th><th>Name</th><th>NameAr</th><th>Description</th></tr></thead>
+                <tbody>
+                    <tr><td>1</td><td>FromAbsher</td><td>From Absher</td><td>Data fetched from Absher system</td></tr>
+                    <tr><td>2</td><td>FromUser</td><td>From User</td><td>Data entered manually</td></tr>
+                </tbody>
+            </table>
+
+            <div class="info">
+                <strong>Note:</strong> Use <code>DataSourceId</code> instead of <code>IsAbsherVerified</code> to track data source for plaintiffs and representatives.
+            </div>
+
+            <h3>5.1 Using Absher Service</h3>
+            <p>"Individual" plaintiffs must be verified through Absher:</p>
+
+            <pre><code>// In PlaintiffBL.cs
+public async Task&lt;PlaintiffVM&gt; CreateAsync(int requestId, PlaintiffCreateDTO dto)
+{
+    // Check for duplicates
+    if (await _repository.ExistsByIdentityAsync(requestId, dto.IdentityNumber, dto.PlaintiffTypeId))
+    {
+        throw new BusinessException("ERR011", "Plaintiff already exists with same identity");
+    }
+
+    // Verify identity for individuals
+    if (dto.PlaintiffTypeId == PlaintiffTypes.Individual)
+    {
+        var verificationResult = await _absherService.VerifyIdentityAsync(
+            dto.IdentityNumber,
+            dto.IdentityTypeId ?? 1
+        );
+
+        if (!verificationResult.IsVerified)
+        {
+            throw new BusinessException("ERR_ABSHER", verificationResult.ErrorMessageAr);
+        }
+
+        // Auto-fill personal data
+        var personData = await _absherService.GetPersonDataAsync(
+            dto.IdentityNumber,
+            dto.IdentityTypeId ?? 1
+        );
+
+        if (personData != null)
+        {
+            dto.FirstName = personData.FirstName;
+            dto.FatherName = personData.FatherName;
+            dto.GrandfatherName = personData.GrandfatherName;
+            dto.FamilyName = personData.FamilyName;
+            dto.BirthDate = personData.BirthDate;
+            dto.Gender = personData.Gender;
+            dto.MobileNumber = personData.MobileNumber;
+            dto.Email = personData.Email;
+        }
+    }
+
+    // Create plaintiff
+    var plaintiff = _mapper.Map&lt;Plaintiff&gt;(dto);
+    plaintiff.CaseRegistrationRequestId = requestId;
+    // DataSourceId: 1 = FromAbsher, 2 = FromUser
+    plaintiff.DataSourceId = dto.PlaintiffTypeId == PlaintiffTypes.Individual ? 1 : 2;
+
+    await _repository.AddAsync(plaintiff);
+    await _unitOfWork.SaveChangesAsync();
+
+    return _mapper.Map&lt;PlaintiffVM&gt;(plaintiff);
+}</code></pre>
+
+            <h3>5.2 Representative Verification</h3>
+            <pre><code>// In RepresentativeBL.cs
+public async Task&lt;RepresentativeVM&gt; CreateAsync(int plaintiffId, RepresentativeCreateDTO dto)
+{
+    var plaintiff = await _plaintiffRepository.GetByIdAsync(plaintiffId);
+    if (plaintiff == null)
+    {
+        throw new NotFoundException("Plaintiff not found");
+    }
+
+    // Check allowed representative type
+    if (!IsRepresentativeTypeAllowed(plaintiff.PlaintiffTypeId, dto.RepresentativeTypeId))
+    {
+        throw new BusinessException("ERR_REP_TYPE", "Representative type not allowed for this plaintiff type");
+    }
+
+    // Check representative ID is not same as plaintiff
+    if (dto.IdentityNumber == plaintiff.IdentityNumber)
+    {
+        throw new BusinessException("ERR012", "Representative ID same as plaintiff ID");
+    }
+
+    // Check for duplicates
+    if (await _repository.ExistsByIdentityAsync(plaintiffId, dto.IdentityNumber))
+    {
+        throw new BusinessException("ERR008", "Representative already exists for plaintiff");
+    }
+
+    // Verify through Absher
+    var verificationResult = await _absherService.VerifyIdentityAsync(
+        dto.IdentityNumber,
+        dto.IdentityTypeId
+    );
+
+    // Create representative
+    var representative = _mapper.Map&lt;Representative&gt;(dto);
+    representative.PlaintiffId = plaintiffId;
+    // DataSourceId: 1 = FromAbsher, 2 = FromUser
+    representative.DataSourceId = verificationResult.IsVerified ? 1 : 2;
+
+    await _repository.AddAsync(representative);
+    await _unitOfWork.SaveChangesAsync();
+
+    return _mapper.Map&lt;RepresentativeVM&gt;(representative);
+}</code></pre>
+        </div>
+
+        <div class="section" id="verification">
+            <h2>6. Verification</h2>
+
+            <h3>6.1 Test Scenarios</h3>
+            <ol>
+                <li><strong>Add Individual Plaintiff:</strong>
+                    <ul>
+                        <li>Enter valid identity number</li>
+                        <li>Verify through Absher</li>
+                        <li>Auto-fill data</li>
+                        <li>Save plaintiff</li>
+                    </ul>
+                </li>
+                <li><strong>Add Company Plaintiff:</strong>
+                    <ul>
+                        <li>Enter commercial registration number</li>
+                        <li>Add company representative</li>
+                        <li>Save plaintiff</li>
+                    </ul>
+                </li>
+                <li><strong>Add Representative:</strong>
+                    <ul>
+                        <li>Check allowed representative type</li>
+                        <li>Check for duplicates</li>
+                        <li>Verify through Absher</li>
+                        <li>Save representative</li>
+                    </ul>
+                </li>
+                <li><strong>Set Applicant:</strong>
+                    <ul>
+                        <li>Verify plaintiff is Individual</li>
+                        <li>Set as applicant</li>
+                    </ul>
+                </li>
+                <li><strong>Select Address:</strong>
+                    <ul>
+                        <li>When plaintiff city differs from court city</li>
+                        <li>Set selected address</li>
+                    </ul>
+                </li>
+            </ol>
+
+            <h3>6.2 Test Commands</h3>
+            <pre><code># Build solution
+dotnet build src/Backend/BOG.sln
+
+# Run API
+dotnet run --project src/Backend/BOG.API
+
+# Test with Swagger
+# https://localhost:5001/swagger</code></pre>
+
+            <div class="success">
+                <strong>References:</strong>
+                <ul>
+                    <li>Main Implementation Plan: <code>UC-6.5.1-Implementation-Plan.md</code></li>
+                    <li>Requirements Document: <code>docs/srs/use-cases/6.5.1-case-registration/SRS_UC_6.5.1_Full_AR.md</code></li>
+                    <li>Absher Service: <code>BOG.Integration/Services/AbsherMockService.cs</code></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="section" id="frontend">
+            <h2>7. Frontend (واجهة المستخدم)</h2>
+
+            <h3>7.1 Folder Structure</h3>
+            <div class="file-tree">src/Frontend/bog-app/src/app/features/case-registration/
++-- plaintiffs/
+|   +-- components/
+|   |   +-- plaintiff-list/
+|   |   +-- plaintiff-wizard/
+|   |   |   +-- step-personal-data/
+|   |   |   +-- step-representatives/
+|   |   |   +-- step-attachments/
+|   |   |   +-- step-additional-data/
+|   |   +-- plaintiff-details/
+|   |   +-- set-applicant-dialog/
+|   +-- models/
+|   |   +-- plaintiff.model.ts
+|   |   +-- plaintiff-type.model.ts
+|   +-- services/
+|   |   +-- plaintiff.service.ts
+|   +-- plaintiffs.module.ts
++-- representatives/
+|   +-- components/
+|   |   +-- representative-list/
+|   |   +-- representative-form/
+|   |   +-- representative-details/
+|   +-- models/
+|   |   +-- representative.model.ts
+|   +-- services/
+|   |   +-- representative.service.ts
++-- attachments/
+|   +-- components/
+|   |   +-- attachment-list/
+|   |   +-- attachment-upload/
+|   +-- models/
+|   |   +-- attachment.model.ts
+|   +-- services/
+|   |   +-- attachment.service.ts
++-- shared/
+    +-- services/
+    |   +-- absher.service.ts
+    +-- components/
+        +-- identity-lookup/
+        +-- address-form/</div>
+
+            <h3>7.2 Main Components</h3>
+
+            <h4>Plaintiff List Component</h4>
+            <pre><code>// plaintiff-list.component.ts
+@Component({
+  selector: 'app-plaintiff-list',
+  templateUrl: './plaintiff-list.component.html'
+})
+export class PlaintiffListComponent implements OnInit {
+  plaintiffs: PlaintiffListVM[] = [];
+  displayedColumns = ['type', 'identityNumber', 'fullName',
+                      'representativesCount', 'attachmentStatus', 'isApplicant', 'actions'];
+
+  onAddPlaintiff(): void {
+    // Navigate to wizard
+  }
+
+  onSetApplicant(plaintiff: PlaintiffListVM): void {
+    // Open set applicant dialog
+  }
+}</code></pre>
+
+            <h4>Plaintiff Wizard Component (4 Steps)</h4>
+            <pre><code>// plaintiff-wizard.component.ts
+@Component({
+  selector: 'app-plaintiff-wizard',
+  templateUrl: './plaintiff-wizard.component.html'
+})
+export class PlaintiffWizardComponent implements OnInit {
+  currentStep = 0;
+  steps = [
+    { label: 'بيانات الشخصي', completed: false },
+    { label: 'بيانات الممثلين', completed: false },
+    { label: 'المرفقات', completed: false },
+    { label: 'بيانات إضافية', completed: false }
+  ];
+
+  onIdentityLookup(): void {
+    // Call Absher service
+  }
+
+  onNext(): void {
+    this.steps[this.currentStep].completed = true;
+    this.currentStep++;
+  }
+
+  onPrevious(): void {
+    this.currentStep--;
+  }
+}</code></pre>
+
+            <h4>Attachment Upload Component</h4>
+            <pre><code>// attachment-upload.component.ts
+@Component({
+  selector: 'app-attachment-upload',
+  templateUrl: './attachment-upload.component.html'
+})
+export class AttachmentUploadComponent {
+  @Input() plaintiffId: number;
+  maxFileSize = 4 * 1024 * 1024; // 4MB
+  allowedTypes = ['application/pdf'];
+
+  onFileSelected(event: Event): void {
+    const file = (event.target as HTMLInputElement).files?.[0];
+    if (file) {
+      this.validateAndUpload(file);
+    }
+  }
+}</code></pre>
+
+            <h3>7.3 Models</h3>
+            <pre><code>// plaintiff.model.ts
+export interface Plaintiff {
+  id: number;
+  plaintiffTypeId: number;
+  plaintiffTypeName: string;
+  identityNumber?: string;
+  fullName: string;
+  mobileNumber?: string;
+  email?: string;
+  dataSourceId?: number;
+  isApplicant: boolean;
+  representativesCount: number;
+  attachmentStatus: 'complete' | 'incomplete';
+}
+
+// representative.model.ts
+export interface Representative {
+  id: number;
+  plaintiffId: number;
+  representativeTypeId: number;
+  representativeTypeName: string;
+  identityNumber: string;
+  fullName: string;
+  powerOfAttorneyNumber?: string;
+}
+
+// attachment.model.ts
+export interface Attachment {
+  id: number;
+  attachmentTypeId: number;
+  attachmentTypeName: string;
+  fileName: string;
+  fileSize: number;
+  uploadDate: Date;
+}</code></pre>
+
+            <h3>7.4 Services</h3>
+            <pre><code>// plaintiff.service.ts
+@Injectable({ providedIn: 'root' })
+export class PlaintiffService {
+  private apiUrl = `${environment.apiUrl}/api`;
+
+  getPlaintiffs(requestId: number): Observable&lt;PlaintiffListVM[]&gt; {
+    return this.http.get&lt;PlaintiffListVM[]&gt;(
+      `${this.apiUrl}/case-requests/${requestId}/plaintiffs`
+    );
+  }
+
+  createPlaintiff(requestId: number, plaintiff: PlaintiffCreateDTO): Observable&lt;Plaintiff&gt; {
+    return this.http.post&lt;Plaintiff&gt;(
+      `${this.apiUrl}/case-requests/${requestId}/plaintiffs`, plaintiff
+    );
+  }
+
+  setAsApplicant(id: number): Observable&lt;void&gt; {
+    return this.http.post&lt;void&gt;(`${this.apiUrl}/plaintiffs/${id}/set-applicant`, {});
+  }
+}
+
+// absher.service.ts
+@Injectable({ providedIn: 'root' })
+export class AbsherService {
+  private apiUrl = `${environment.apiUrl}/api/absher`;
+
+  verifyIdentity(identityNumber: string, identityTypeId: number): Observable&lt;VerificationResult&gt; {
+    return this.http.post&lt;VerificationResult&gt;(`${this.apiUrl}/verify`, {
+      identityNumber, identityTypeId
+    });
+  }
+
+  getPersonData(identityNumber: string, identityTypeId: number): Observable&lt;PersonData&gt; {
+    return this.http.get&lt;PersonData&gt;(`${this.apiUrl}/person-data`, {
+      params: { identityNumber, identityTypeId: identityTypeId.toString() }
+    });
+  }
+}</code></pre>
+
+            <h3>7.5 Validation Messages</h3>
+            <table>
+                <thead><tr><th>Code</th><th>Arabic Message</th><th>Usage</th></tr></thead>
+                <tbody>
+                    <tr><td>ERR008</td><td>الممثّل موجود مسبقاً للمدعي</td><td>When adding duplicate representative</td></tr>
+                    <tr><td>ERR011</td><td>المدّعي موجود مسبقاً بنفس رقم الهوية</td><td>When adding duplicate plaintiff</td></tr>
+                    <tr><td>ERR012</td><td>رقم هوية الممثّل نفس رقم هوية المدّعي</td><td>When adding representative</td></tr>
+                    <tr><td>BR04_TYPE</td><td>يجب أن يكون الملف بصيغة PDF فقط</td><td>When uploading attachments</td></tr>
+                    <tr><td>BR04_SIZE</td><td>حجم الملف يتجاوز الحد الأقصى (4 ميجابايت)</td><td>When uploading attachments</td></tr>
+                    <tr><td>BC07</td><td>فقط المدعي من نوع 'فرد' يمكنه أن يكون مقدم الطلب</td><td>When setting applicant</td></tr>
+                </tbody>
+            </table>
+
+            <h3>7.6 Component Generation Commands</h3>
+            <pre><code># Navigate to project
+cd src/Frontend/bog-app
+
+# Generate modules
+ng generate module features/case-registration/plaintiffs --routing
+ng generate module features/case-registration/representatives --routing
+ng generate module features/case-registration/attachments --routing
+
+# Plaintiff components
+ng generate component features/case-registration/plaintiffs/components/plaintiff-list
+ng generate component features/case-registration/plaintiffs/components/plaintiff-wizard
+ng generate component features/case-registration/plaintiffs/components/plaintiff-wizard/step-personal-data
+ng generate component features/case-registration/plaintiffs/components/plaintiff-wizard/step-representatives
+ng generate component features/case-registration/plaintiffs/components/plaintiff-wizard/step-attachments
+ng generate component features/case-registration/plaintiffs/components/plaintiff-wizard/step-additional-data
+ng generate component features/case-registration/plaintiffs/components/set-applicant-dialog
+
+# Representative components
+ng generate component features/case-registration/representatives/components/representative-list
+ng generate component features/case-registration/representatives/components/representative-form
+
+# Attachment components
+ng generate component features/case-registration/attachments/components/attachment-list
+ng generate component features/case-registration/attachments/components/attachment-upload
+
+# Shared components
+ng generate component features/case-registration/shared/components/identity-lookup
+ng generate component features/case-registration/shared/components/address-form
+
+# Services
+ng generate service features/case-registration/plaintiffs/services/plaintiff
+ng generate service features/case-registration/representatives/services/representative
+ng generate service features/case-registration/attachments/services/attachment
+ng generate service features/case-registration/shared/services/absher</code></pre>
+        </div>
+
+        <footer>
+            <p>Developer A: Plaintiffs & Representatives Module - BOG Legal Case Management System</p>
+            <p>Generated: 2026-01-15</p>
+        </footer>
+    </div>
+</body>
+</html>

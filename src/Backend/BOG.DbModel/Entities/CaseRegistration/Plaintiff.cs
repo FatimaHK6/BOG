@@ -76,6 +76,11 @@ public class Plaintiff : BaseEntity
     public DateTime? IdentityExpiryDate { get; set; }
 
     /// <summary>
+    /// Document number for individual without ID (رقم الوثيقة) - SRS 6.3.10.
+    /// </summary>
+    public string? DocumentNumber { get; set; }
+
+    /// <summary>
     /// Foreign key to DataSource (مصدر البيانات - أبشر/المستخدم).
     /// </summary>
     public int? DataSourceId { get; set; }
@@ -99,14 +104,34 @@ public class Plaintiff : BaseEntity
     #region Address References
 
     /// <summary>
-    /// Foreign key to residence address.
+    /// Foreign key to residence address (for Individual types).
     /// </summary>
     public int? ResidenceAddressId { get; set; }
 
     /// <summary>
-    /// Foreign key to work address.
+    /// Foreign key to work address (for Individual types).
     /// </summary>
     public int? WorkAddressId { get; set; }
+
+    /// <summary>
+    /// Foreign key to business/institution address (for Type 3 - Business Owner).
+    /// </summary>
+    public int? BusinessAddressId { get; set; }
+
+    /// <summary>
+    /// Foreign key to company address (for Type 4 - Registered Company).
+    /// </summary>
+    public int? CompanyAddressId { get; set; }
+
+    /// <summary>
+    /// Foreign key to NGO address (for Type 7 - NGO).
+    /// </summary>
+    public int? NGOAddressId { get; set; }
+
+    /// <summary>
+    /// Foreign key to Waqf address (for Type 8 - Waqf).
+    /// </summary>
+    public int? WaqfAddressId { get; set; }
 
     /// <summary>
     /// Foreign key to selected address for correspondence (العنوان المختار).
@@ -130,21 +155,50 @@ public class Plaintiff : BaseEntity
     /// <summary>
     /// Commercial registration start date.
     /// </summary>
-    public DateTime? CRStartDate { get; set; }
+    public DateOnly? CRStartDate { get; set; }
 
     /// <summary>
     /// Commercial registration end date.
     /// </summary>
-    public DateTime? CREndDate { get; set; }
+    public DateOnly? CREndDate { get; set; }
 
     #endregion
 
-    #region Government Agency Data
+    #region Unregistered Company Data (Type 5)
+
+    /// <summary>
+    /// Company address text for unregistered company (عنوان الشركة).
+    /// </summary>
+    public string? UnregisteredCompanyAddress { get; set; }
+
+    /// <summary>
+    /// Country ID for unregistered company (الدولة).
+    /// </summary>
+    public int? CountryId { get; set; }
+
+    /// <summary>
+    /// City name for unregistered company (المدينة).
+    /// </summary>
+    public string? UnregisteredCompanyCity { get; set; }
+
+    /// <summary>
+    /// Approximate description (وصف تقريبي) - max 1000 characters.
+    /// </summary>
+    public string? Description { get; set; }
+
+    #endregion
+
+    #region Government Agency Data (Type 6)
 
     /// <summary>
     /// Foreign key to GovernmentAgency.
     /// </summary>
     public int? GovernmentAgencyId { get; set; }
+
+    /// <summary>
+    /// Headquarters (المقر) - auto-filled based on agency.
+    /// </summary>
+    public string? Headquarters { get; set; }
 
     /// <summary>
     /// Additional statement (بيان إضافي) - max 4000 characters.
@@ -153,53 +207,80 @@ public class Plaintiff : BaseEntity
 
     #endregion
 
-    #region Society/NGO Data
+    #region Society/NGO Data (Type 7)
 
     /// <summary>
-    /// License number.
+    /// License number (رقم الترخيص) - 10 digits.
     /// </summary>
     public string? LicenseNumber { get; set; }
 
     /// <summary>
-    /// License source/issuer.
+    /// Foreign key to LicenseSource (مصدر الترخيص).
     /// </summary>
-    public string? LicenseSource { get; set; }
+    public int? LicenseSourceId { get; set; }
 
     /// <summary>
-    /// License date.
+    /// NGO name (اسم الجمعية/المؤسسة).
+    /// </summary>
+    public string? NGOName { get; set; }
+
+    /// <summary>
+    /// License date (تاريخ الترخيص).
     /// </summary>
     public DateTime? LicenseDate { get; set; }
 
     #endregion
 
-    #region Waqf Data
+    #region Waqf Data (Type 8)
 
     /// <summary>
-    /// Court deed number.
+    /// Court deed number (رقم صك المحكمة) - 10 digits.
     /// </summary>
     public string? CourtDeedNumber { get; set; }
 
     /// <summary>
-    /// Deed date.
+    /// Waqf name (اسم الوقف).
+    /// </summary>
+    public string? WaqfName { get; set; }
+
+    /// <summary>
+    /// Deed date (تاريخ صك المحكمة).
     /// </summary>
     public DateTime? DeedDate { get; set; }
 
     /// <summary>
-    /// Deed source/issuer.
+    /// Deed source/issuer (مصدر الصك).
     /// </summary>
     public string? DeedSource { get; set; }
 
     /// <summary>
-    /// Waqf oversight type (خاصة/حكومية).
+    /// Waqf oversight type (نظارة الوقف - خاصة/حكومية).
     /// </summary>
     public string? WaqfOversightType { get; set; }
+
+    /// <summary>
+    /// Waqf agency name (اسم الجهة) - required if WaqfOversightType is حكومية.
+    /// </summary>
+    public string? WaqfAgencyName { get; set; }
+
+    /// <summary>
+    /// Waqf description (وصف تقريبي).
+    /// </summary>
+    public string? WaqfDescription { get; set; }
 
     #endregion
 
     #region Employment Data (for Individual)
 
     /// <summary>
-    /// Employer name.
+    /// Employment status ID: 1-Government, 2-Private, 3-Unemployed.
+    /// Required for types 1 (Individual) and 3 (Business Owner).
+    /// </summary>
+    public int? EmploymentStatusId { get; set; }
+
+    /// <summary>
+    /// Employer name - required when EmploymentStatusId is 1 (Government) or 2 (Private).
+    /// BC01: Hidden when EmploymentStatusId is 3 (Unemployed).
     /// </summary>
     public string? Employer { get; set; }
 
@@ -247,6 +328,16 @@ public class Plaintiff : BaseEntity
     public virtual GovernmentAgency? GovernmentAgency { get; set; }
 
     /// <summary>
+    /// Navigation property for license source.
+    /// </summary>
+    public virtual LicenseSource? LicenseSource { get; set; }
+
+    /// <summary>
+    /// Navigation property for country (for unregistered company).
+    /// </summary>
+    public virtual Country? Country { get; set; }
+
+    /// <summary>
     /// Navigation property for residence address.
     /// </summary>
     public virtual Address? ResidenceAddress { get; set; }
@@ -255,6 +346,26 @@ public class Plaintiff : BaseEntity
     /// Navigation property for work address.
     /// </summary>
     public virtual Address? WorkAddress { get; set; }
+
+    /// <summary>
+    /// Navigation property for business address.
+    /// </summary>
+    public virtual Address? BusinessAddress { get; set; }
+
+    /// <summary>
+    /// Navigation property for company address.
+    /// </summary>
+    public virtual Address? CompanyAddress { get; set; }
+
+    /// <summary>
+    /// Navigation property for NGO address.
+    /// </summary>
+    public virtual Address? NGOAddress { get; set; }
+
+    /// <summary>
+    /// Navigation property for Waqf address.
+    /// </summary>
+    public virtual Address? WaqfAddress { get; set; }
 
     /// <summary>
     /// Navigation property for selected address.

@@ -1,0 +1,23 @@
+.info-box {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 12px;
+  background: #FFF3E0;
+  border-radius: 4px;
+  margin-top: 16px;
+
+  mat-icon {
+    color: #FF9800;
+    flex-shrink: 0;
+  }
+
+  span {
+    color: #E65100;
+    font-size: 14px;
+  }
+}
+
+mat-dialog-content {
+  min-width: 300px;
+}

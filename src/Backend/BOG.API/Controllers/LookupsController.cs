@@ -1,280 +1,333 @@
-using BOG.DAL.Interfaces;
-using BOG.DbModel.Entities.Lookups;
-using BOG.DbModel.Entities.Identity;
+using BOG.DbModel;
+using BOG.DbModel.Enums;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace BOG.API.Controllers;
 
 /// <summary>
-/// Lookup data management API controller.
-/// Provides endpoints to retrieve lookup/master data for the application.
+/// Lookups API controller for dropdown data.
 /// </summary>
 [ApiController]
 [Route("api/lookups")]
 public class LookupsController : ControllerBase
 {
-    private readonly IRepository<Classification> _classificationRepository;
-    private readonly IRepository<AttachmentType> _attachmentTypeRepository;
-    private readonly IRepository<NotificationMethod> _notificationMethodRepository;
-    private readonly IRepository<GovernmentEntity> _governmentEntityRepository;
-    private readonly IRepository<Court> _courtRepository;
-    private readonly IRepository<CaseType> _caseTypeRepository;
+    private readonly ApplicationDbContext _context;
     private readonly ILogger<LookupsController> _logger;
 
-    public LookupsController(
-        IRepository<Classification> classificationRepository,
-        IRepository<AttachmentType> attachmentTypeRepository,
-        IRepository<NotificationMethod> notificationMethodRepository,
-        IRepository<GovernmentEntity> governmentEntityRepository,
-        IRepository<Court> courtRepository,
-        IRepository<CaseType> caseTypeRepository,
-        ILogger<LookupsController> logger)
+    public LookupsController(ApplicationDbContext context, ILogger<LookupsController> logger)
     {
-        _classificationRepository = classificationRepository ?? throw new ArgumentNullException(nameof(classificationRepository));
-        _attachmentTypeRepository = attachmentTypeRepository ?? throw new ArgumentNullException(nameof(attachmentTypeRepository));
-        _notificationMethodRepository = notificationMethodRepository ?? throw new ArgumentNullException(nameof(notificationMethodRepository));
-        _governmentEntityRepository = governmentEntityRepository ?? throw new ArgumentNullException(nameof(governmentEntityRepository));
-        _courtRepository = courtRepository ?? throw new ArgumentNullException(nameof(courtRepository));
-        _caseTypeRepository = caseTypeRepository ?? throw new ArgumentNullException(nameof(caseTypeRepository));
+        _context = context ?? throw new ArgumentNullException(nameof(context));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
     /// <summary>
-    /// Gets all active classifications.
-    /// Used by the case registration form to populate the classifications dropdown.
+    /// Gets all active government agencies.
     /// </summary>
-    /// <param name="cancellationToken">Cancellation token</param>
-    /// <returns>List of active classifications</returns>
-    [HttpGet("classifications")]
+    [HttpGet("government-agencies")]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<IEnumerable<object>>> GetClassifications(CancellationToken cancellationToken)
+    public async Task<ActionResult> GetGovernmentAgencies(CancellationToken cancellationToken)
     {
         try
         {
-            var classifications = await _classificationRepository.FindAsync(
-                c => c.IsActive && !c.IsDeleted,
-                cancellationToken);
-
-            var result = classifications
-                .Select(c => new
+            var agencies = await _context.GovernmentAgencies
+                .AsNoTracking()
+                .Where(a => a.IsActive && !a.IsDeleted)
+                .OrderBy(a => a.NameAr)
+                .Select(a => new
                 {
-                    id = c.Id,
-                    nameAr = c.NameAr,
-                    nameEn = c.Name,
-                    description = c.Description,
-                    level1 = c.Level1 ?? string.Empty,
-                    level2 = c.Level2 ?? string.Empty,
-                    level3 = c.Level3 ?? string.Empty,
-                    level4 = c.Level4 ?? string.Empty
+                    a.Id,
+                    a.Name,
+                    a.NameAr,
+                    a.Code
                 })
-                .ToList();
+                .ToListAsync(cancellationToken);
 
-            _logger.LogInformation("Retrieved {Count} classifications", result.Count);
-            return Ok(result);
+            return Ok(agencies);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error retrieving classifications");
+            _logger.LogError(ex, "Error retrieving government agencies");
             return StatusCode(StatusCodes.Status500InternalServerError,
-                new { message = "An error occurred while retrieving classifications." });
+                new { message = "حدث خطأ أثناء استرجاع الجهات الحكومية" });
         }
     }
 
     /// <summary>
-    /// Gets all active attachment types.
-    /// Used by the attachments component to populate the attachment type dropdown.
+    /// Gets all active defendant types.
     /// </summary>
-    /// <param name="cancellationToken">Cancellation token</param>
-    /// <returns>List of active attachment types</returns>
-    [HttpGet("attachment-types")]
+    [HttpGet("defendant-types")]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<IEnumerable<object>>> GetAttachmentTypes(CancellationToken cancellationToken)
+    public async Task<ActionResult> GetDefendantTypes(CancellationToken cancellationToken)
     {
         try
         {
-            var types = await _attachmentTypeRepository.FindAsync(
-                t => t.IsActive && !t.IsDeleted,
-                cancellationToken);
-
-            var result = types
+            var types = await _context.DefendantTypes
+                .AsNoTracking()
+                .Where(t => t.IsActive && !t.IsDeleted)
+                .OrderBy(t => t.Id)
                 .Select(t => new
                 {
-                    id = t.Id,
-                    name = t.Name,
-                    nameAr = t.NameAr,
-                    isMandatory = t.IsMandatory,
-                    description = t.Description
+                    t.Id,
+                    t.Name,
+                    t.NameAr
                 })
-                .ToList();
+                .ToListAsync(cancellationToken);
 
-            _logger.LogInformation("Retrieved {Count} attachment types", result.Count);
-            return Ok(result);
+            return Ok(types);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error retrieving attachment types");
+            _logger.LogError(ex, "Error retrieving defendant types");
             return StatusCode(StatusCodes.Status500InternalServerError,
-                new { message = "An error occurred while retrieving attachment types." });
+                new { message = "حدث خطأ أثناء استرجاع أنواع المدعى عليهم" });
         }
     }
 
     /// <summary>
-    /// Gets all active notification methods.
-    /// Used in the Additional Info section (Type 1: Management Decision) for the notification method dropdown.
+    /// Gets all nationalities (from enum).
     /// </summary>
-    /// <param name="cancellationToken">Cancellation token</param>
-    /// <returns>List of active notification methods</returns>
-    [HttpGet("notification-methods")]
+    [HttpGet("nationalities")]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<IEnumerable<object>>> GetNotificationMethods(CancellationToken cancellationToken)
+    public ActionResult GetNationalities()
+    {
+        var nationalities = Enum.GetValues<Nationality>()
+            .Select(n => new
+            {
+                Id = (int)n,
+                Name = n.ToString(),
+                NameAr = GetNationalityArabicName(n)
+            })
+            .OrderBy(n => n.Id == 1 ? 0 : 1) // Saudi first
+            .ThenBy(n => n.NameAr)
+            .ToList();
+
+        return Ok(nationalities);
+    }
+
+    private static string GetNationalityArabicName(Nationality nationality)
+    {
+        return nationality switch
+        {
+            Nationality.Saudi => "سعودي",
+            Nationality.Emirati => "إماراتي",
+            Nationality.Kuwaiti => "كويتي",
+            Nationality.Bahraini => "بحريني",
+            Nationality.Qatari => "قطري",
+            Nationality.Omani => "عماني",
+            Nationality.Egyptian => "مصري",
+            Nationality.Jordanian => "أردني",
+            Nationality.Lebanese => "لبناني",
+            Nationality.Syrian => "سوري",
+            Nationality.Iraqi => "عراقي",
+            Nationality.Yemeni => "يمني",
+            Nationality.Palestinian => "فلسطيني",
+            Nationality.Sudanese => "سوداني",
+            Nationality.Tunisian => "تونسي",
+            Nationality.Moroccan => "مغربي",
+            Nationality.Algerian => "جزائري",
+            Nationality.Libyan => "ليبي",
+            Nationality.Indian => "هندي",
+            Nationality.Pakistani => "باكستاني",
+            Nationality.Bangladeshi => "بنغلاديشي",
+            Nationality.Filipino => "فلبيني",
+            Nationality.Indonesian => "إندونيسي",
+            Nationality.American => "أمريكي",
+            Nationality.British => "بريطاني",
+            Nationality.French => "فرنسي",
+            Nationality.German => "ألماني",
+            Nationality.Other => "أخرى",
+            _ => nationality.ToString()
+        };
+    }
+
+    /// <summary>
+    /// Gets all active regions.
+    /// </summary>
+    [HttpGet("regions")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public async Task<ActionResult> GetRegions(CancellationToken cancellationToken)
     {
         try
         {
-            var methods = await _notificationMethodRepository.FindAsync(
-                m => m.IsActive && !m.IsDeleted,
-                cancellationToken);
-
-            var result = methods
-                .Select(m => new
+            var regions = await _context.Regions
+                .AsNoTracking()
+                .Where(r => r.IsActive && !r.IsDeleted)
+                .OrderBy(r => r.NameAr)
+                .Select(r => new
                 {
-                    id = m.Id,
-                    name = m.Name,
-                    nameAr = m.NameAr,
-                    description = m.Description
+                    r.Id,
+                    r.Name,
+                    r.NameAr,
+                    r.Code
                 })
-                .ToList();
+                .ToListAsync(cancellationToken);
 
-            _logger.LogInformation("Retrieved {Count} notification methods", result.Count);
-            return Ok(result);
+            return Ok(regions);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error retrieving notification methods");
+            _logger.LogError(ex, "Error retrieving regions");
             return StatusCode(StatusCodes.Status500InternalServerError,
-                new { message = "An error occurred while retrieving notification methods." });
+                new { message = "حدث خطأ أثناء استرجاع المناطق" });
         }
     }
 
     /// <summary>
-    /// Gets all active government entities.
-    /// Used in the Additional Info section for:
-    /// - Type 1: Decision Issuing Authority dropdown
-    /// - Type 2: Authority Complained To dropdown
+    /// Gets cities by region ID.
     /// </summary>
-    /// <param name="cancellationToken">Cancellation token</param>
-    /// <returns>List of active government entities</returns>
-    [HttpGet("government-entities")]
+    [HttpGet("regions/{regionId}/cities")]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<IEnumerable<object>>> GetGovernmentEntities(CancellationToken cancellationToken)
+    public async Task<ActionResult> GetCitiesByRegion([FromRoute] int regionId, CancellationToken cancellationToken)
     {
         try
         {
-            var entities = await _governmentEntityRepository.FindAsync(
-                e => e.IsActive && !e.IsDeleted,
-                cancellationToken);
-
-            var result = entities
-                .Select(e => new
-                {
-                    id = e.Id,
-                    name = e.Name,
-                    nameAr = e.NameAr,
-                    code = e.Code,
-                    description = e.Description
-                })
-                .ToList();
-
-            _logger.LogInformation("Retrieved {Count} government entities", result.Count);
-            return Ok(result);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error retrieving government entities");
-            return StatusCode(StatusCodes.Status500InternalServerError,
-                new { message = "An error occurred while retrieving government entities." });
-        }
-    }
-
-    /// <summary>
-    /// Gets all active courts.
-    /// Used in the Related Cases section for the court dropdown.
-    /// </summary>
-    /// <param name="cancellationToken">Cancellation token</param>
-    /// <returns>List of active courts</returns>
-    [HttpGet("courts")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<IEnumerable<object>>> GetCourts(CancellationToken cancellationToken)
-    {
-        try
-        {
-            var courts = await _courtRepository.GetAllAsync(cancellationToken);
-
-            var result = courts
-                .Where(c => c.IsActive && !c.IsDeleted)
-                .OrderBy(c => c.Id)
+            var cities = await _context.Cities
+                .AsNoTracking()
+                .Where(c => c.RegionId == regionId && c.IsActive && !c.IsDeleted)
+                .OrderBy(c => c.NameAr)
                 .Select(c => new
                 {
-                    id = c.Id,
-                    name = c.Name,
-                    nameAr = c.NameAr,
-                    regionId = c.RegionId,
-                    cityId = c.CityId
+                    c.Id,
+                    c.Name,
+                    c.NameAr,
+                    c.Code,
+                    c.RegionId
                 })
-                .ToList();
+                .ToListAsync(cancellationToken);
 
-            _logger.LogInformation("Retrieved {Count} courts", result.Count);
-            return Ok(result);
+            return Ok(cities);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error retrieving courts");
+            _logger.LogError(ex, "Error retrieving cities for region {RegionId}", regionId);
             return StatusCode(StatusCodes.Status500InternalServerError,
-                new { message = "An error occurred while retrieving courts." });
+                new { message = "حدث خطأ أثناء استرجاع المدن" });
         }
     }
 
     /// <summary>
-    /// Gets all active case types (إداري, تأديبي).
-    /// Used in the Request Completion tab for the case type dropdown.
-    /// ALWAYS REQUIRED for all decision types (Register, SendToJudge, Reject, RequestCompletion).
+    /// Gets all active plaintiff types.
     /// </summary>
-    /// <param name="cancellationToken">Cancellation token</param>
-    /// <returns>List of active case types</returns>
-    [HttpGet("case-types")]
+    [HttpGet("plaintiff-types")]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<IEnumerable<object>>> GetCaseTypes(CancellationToken cancellationToken)
+    public async Task<ActionResult> GetPlaintiffTypes(CancellationToken cancellationToken)
     {
         try
         {
-            var caseTypes = await _caseTypeRepository.FindAsync(
-                ct => ct.IsActive && !ct.IsDeleted,
-                cancellationToken);
-
-            var result = caseTypes
-                .OrderBy(ct => ct.Id)
-                .Select(ct => new
+            var types = await _context.PlaintiffTypes
+                .AsNoTracking()
+                .Where(t => t.IsActive && !t.IsDeleted)
+                .OrderBy(t => t.Id)
+                .Select(t => new
                 {
-                    id = ct.Id,
-                    name = ct.Name,
-                    nameAr = ct.NameAr,
-                    description = ct.Description
+                    t.Id,
+                    t.Name,
+                    t.NameAr
                 })
-                .ToList();
+                .ToListAsync(cancellationToken);
 
-            _logger.LogInformation("Retrieved {Count} case types", result.Count);
-            return Ok(result);
+            return Ok(types);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error retrieving case types");
+            _logger.LogError(ex, "Error retrieving plaintiff types");
             return StatusCode(StatusCodes.Status500InternalServerError,
-                new { message = "حدث خطأ أثناء تحميل أنواع الدعاوى" });
+                new { message = "حدث خطأ أثناء استرجاع أنواع المدعين" });
+        }
+    }
+
+    /// <summary>
+    /// Gets all active identity types.
+    /// </summary>
+    [HttpGet("identity-types")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public async Task<ActionResult> GetIdentityTypes(CancellationToken cancellationToken)
+    {
+        try
+        {
+            var types = await _context.IdentityTypes
+                .AsNoTracking()
+                .Where(t => t.IsActive && !t.IsDeleted)
+                .OrderBy(t => t.Id)
+                .Select(t => new
+                {
+                    t.Id,
+                    t.Name,
+                    t.NameAr
+                })
+                .ToListAsync(cancellationToken);
+
+            return Ok(types);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error retrieving identity types");
+            return StatusCode(StatusCodes.Status500InternalServerError,
+                new { message = "حدث خطأ أثناء استرجاع أنواع الهوية" });
+        }
+    }
+
+    /// <summary>
+    /// Gets all active representative types.
+    /// </summary>
+    [HttpGet("representative-types")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public async Task<ActionResult> GetRepresentativeTypes(CancellationToken cancellationToken)
+    {
+        try
+        {
+            var types = await _context.RepresentativeTypes
+                .AsNoTracking()
+                .Where(t => t.IsActive && !t.IsDeleted)
+                .OrderBy(t => t.Id)
+                .Select(t => new
+                {
+                    t.Id,
+                    t.Name,
+                    t.NameAr
+                })
+                .ToListAsync(cancellationToken);
+
+            return Ok(types);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error retrieving representative types");
+            return StatusCode(StatusCodes.Status500InternalServerError,
+                new { message = "حدث خطأ أثناء استرجاع أنواع الممثلين" });
+        }
+    }
+
+    /// <summary>
+    /// Gets all active countries.
+    /// </summary>
+    [HttpGet("countries")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public async Task<ActionResult> GetCountries(CancellationToken cancellationToken)
+    {
+        try
+        {
+            var countries = await _context.Countries
+                .AsNoTracking()
+                .Where(c => c.IsActive && !c.IsDeleted)
+                .OrderBy(c => c.NameAr)
+                .Select(c => new
+                {
+                    c.Id,
+                    c.Name,
+                    c.NameAr,
+                    c.IsoCode
+                })
+                .ToListAsync(cancellationToken);
+
+            return Ok(countries);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error retrieving countries");
+            return StatusCode(StatusCodes.Status500InternalServerError,
+                new { message = "حدث خطأ أثناء استرجاع الدول" });
         }
     }
 }

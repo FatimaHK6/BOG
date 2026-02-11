@@ -1,0 +1,128 @@
+<div class="attachment-upload-container">
+  <!-- INF01: Required Attachments Info Message (BC01) -->
+  <div class="inf01-message" *ngIf="inf01Message">
+    <mat-icon>info</mat-icon>
+    <div class="inf01-content">
+      <strong>المرفقات المطلوبة:</strong>
+      <pre>{{ inf01Message }}</pre>
+    </div>
+  </div>
+
+  <!-- Required Attachments Status -->
+  <div class="required-info" *ngIf="requiredAttachmentTypes.length > 0">
+    <mat-icon>attachment</mat-icon>
+    <span>حالة المرفقات:</span>
+    <ng-container *ngFor="let type of requiredAttachmentTypes; let last = last">
+      <span class="attachment-type-tag" [class.required]="type.required" [class.uploaded]="isTypeUploaded(type.id)">
+        <mat-icon *ngIf="isTypeUploaded(type.id)">check_circle</mat-icon>
+        <mat-icon *ngIf="!isTypeUploaded(type.id) && type.required">warning</mat-icon>
+        {{ type.nameAr }}
+        <span *ngIf="type.required" class="required-indicator">(مطلوب)</span>
+      </span>
+    </ng-container>
+  </div>
+
+  <!-- Attachments Table -->
+  <div class="attachments-table" *ngIf="attachments.length > 0">
+    <table mat-table [dataSource]="attachments">
+      <!-- Type Column -->
+      <ng-container matColumnDef="type">
+        <th mat-header-cell *matHeaderCellDef>نوع المرفق</th>
+        <td mat-cell *matCellDef="let attachment">{{ attachment.attachmentTypeNameAr }}</td>
+      </ng-container>
+
+      <!-- File Name Column -->
+      <ng-container matColumnDef="fileName">
+        <th mat-header-cell *matHeaderCellDef>اسم الملف</th>
+        <td mat-cell *matCellDef="let attachment">{{ attachment.fileName }}</td>
+      </ng-container>
+
+      <!-- File Size Column -->
+      <ng-container matColumnDef="size">
+        <th mat-header-cell *matHeaderCellDef>الحجم</th>
+        <td mat-cell *matCellDef="let attachment">{{ formatFileSize(attachment.fileSizeBytes) }}</td>
+      </ng-container>
+
+      <!-- Description/Note Column -->
+      <ng-container matColumnDef="description">
+        <th mat-header-cell *matHeaderCellDef>الملاحظة</th>
+        <td mat-cell *matCellDef="let attachment">{{ attachment.description || '-' }}</td>
+      </ng-container>
+
+      <!-- Status Column -->
+      <ng-container matColumnDef="status">
+        <th mat-header-cell *matHeaderCellDef>الحالة</th>
+        <td mat-cell *matCellDef="let attachment">
+          <span class="status-badge uploaded">
+            <mat-icon>check_circle</mat-icon>
+            مرفق
+          </span>
+        </td>
+      </ng-container>
+
+      <!-- Actions Column -->
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef>إجراءات</th>
+        <td mat-cell *matCellDef="let attachment">
+          <button mat-icon-button matTooltip="عرض" (click)="onViewAttachment(attachment)">
+            <mat-icon>visibility</mat-icon>
+          </button>
+          <button mat-icon-button matTooltip="حذف" (click)="onDeleteAttachment(attachment)" class="delete-btn" *ngIf="!readonly">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="['type', 'fileName', 'size', 'description', 'status', 'actions']"></tr>
+      <tr mat-row *matRowDef="let row; columns: ['type', 'fileName', 'size', 'description', 'status', 'actions'];"></tr>
+    </table>
+  </div>
+
+  <!-- Hidden file input (single instance) -->
+  <input #fileInput type="file" accept=".pdf" class="hidden-file-input" (change)="onFileInputChange($event)" [disabled]="readonly">
+
+  <!-- Upload Area (hidden in readonly mode) -->
+  <div class="upload-area" *ngIf="!readonly"
+       [class.drag-over]="isDragOver"
+       (dragover)="onDragOver($event)"
+       (dragleave)="onDragLeave($event)"
+       (drop)="onDrop($event)">
+    <mat-icon class="upload-icon">cloud_upload</mat-icon>
+    <p class="upload-text">اسحب الملفات هنا أو</p>
+
+    <!-- Upload buttons for each required type -->
+    <div class="upload-buttons">
+      <ng-container *ngFor="let type of requiredAttachmentTypes">
+        <button mat-stroked-button color="primary"
+                (click)="openFileDialog(type.id)"
+                *ngIf="!isTypeUploaded(type.id)"
+                [disabled]="isUploading">
+          <mat-icon>upload</mat-icon>
+          رفع {{ type.nameAr }}
+        </button>
+      </ng-container>
+
+      <!-- General upload if no specific types -->
+      <button mat-stroked-button color="primary"
+              (click)="openFileDialog(1)"
+              *ngIf="requiredAttachmentTypes.length === 0"
+              [disabled]="isUploading">
+        <mat-icon>upload</mat-icon>
+        رفع مرفق
+      </button>
+    </div>
+
+    <p class="upload-hint">
+      <mat-icon>info_outline</mat-icon>
+      الحد الأقصى: 4 ميجابايت | الصيغة المسموحة: PDF فقط
+    </p>
+  </div>
+
+  <!-- Status Summary -->
+  <div class="status-summary" [class.complete]="getAttachmentStatus() === 'complete'" [class.incomplete]="getAttachmentStatus() === 'incomplete'">
+    <mat-icon *ngIf="getAttachmentStatus() === 'complete'">check_circle</mat-icon>
+    <mat-icon *ngIf="getAttachmentStatus() === 'incomplete'">warning</mat-icon>
+    <span *ngIf="getAttachmentStatus() === 'complete'">جميع المرفقات المطلوبة مكتملة</span>
+    <span *ngIf="getAttachmentStatus() === 'incomplete'">بعض المرفقات المطلوبة ناقصة</span>
+  </div>
+</div>

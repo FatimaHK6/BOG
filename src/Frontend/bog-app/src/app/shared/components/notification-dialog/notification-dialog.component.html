@@ -1,0 +1,17 @@
+<div class="notification-dialog" [class]="'notification-' + data.type">
+  <!-- Icon Circle -->
+  <div class="icon-container">
+    <mat-icon>{{ icon }}</mat-icon>
+  </div>
+
+  <!-- Title -->
+  <h2 class="notification-title">{{ title }}</h2>
+
+  <!-- Message -->
+  <p class="notification-message">{{ data.message }}</p>
+
+  <!-- Button -->
+  <button mat-raised-button class="notification-button" (click)="onClose()">
+    {{ buttonText }}
+  </button>
+</div>

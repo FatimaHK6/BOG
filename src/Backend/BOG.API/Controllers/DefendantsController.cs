@@ -1,222 +1,178 @@
-using BOG.BL.Interfaces.CaseRegistration;
-using BOG.DTO.CaseRegistration.Defendant;
-using BOG.VM.Defendant;
+using BOG.BL.Interfaces;
+using BOG.DTO.Defendant;
+using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BOG.API.Controllers;
 
 /// <summary>
 /// Defendant management API controller.
-/// Handles CRUD operations for defendants in case registration requests.
-/// Follows Single Responsibility Principle and Dependency Inversion Principle.
 /// </summary>
 [ApiController]
-[Route("api/case-requests")]
+[Route("api")]
 public class DefendantsController : ControllerBase
 {
     private readonly IDefendantBL _defendantBL;
+    private readonly IValidator<DefendantCreateDTO> _validator;
     private readonly ILogger<DefendantsController> _logger;
 
-    public DefendantsController(IDefendantBL defendantBL, ILogger<DefendantsController> logger)
+    public DefendantsController(
+        IDefendantBL defendantBL,
+        IValidator<DefendantCreateDTO> validator,
+        ILogger<DefendantsController> logger)
     {
         _defendantBL = defendantBL ?? throw new ArgumentNullException(nameof(defendantBL));
+        _validator = validator ?? throw new ArgumentNullException(nameof(validator));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
     /// <summary>
-    /// Gets all defendants for a case registration request.
+    /// Gets all defendants for a case request.
     /// </summary>
-    /// <param name="requestId">The case registration request ID</param>
-    /// <param name="cancellationToken">Cancellation token</param>
-    /// <returns>Collection of defendants for the request</returns>
-    [HttpGet("{requestId}/defendants")]
+    [HttpGet("case-requests/{requestId}/defendants")]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<ActionResult<IEnumerable<DefendantListVM>>> GetDefendants(
-        [FromRoute] int requestId,
-        CancellationToken cancellationToken)
+    public async Task<ActionResult> GetDefendantsByRequestId([FromRoute] int requestId, CancellationToken cancellationToken)
     {
         try
         {
-            if (requestId <= 0)
-                return BadRequest(new { message = "Invalid request ID." });
-
-            var defendants = await _defendantBL.GetDefendantsByRequestIdAsync(requestId, cancellationToken);
+            var defendants = await _defendantBL.GetByRequestIdAsync(requestId, cancellationToken);
             return Ok(defendants);
-        }
-        catch (InvalidOperationException ex)
-        {
-            _logger.LogWarning("Request not found: {Message}", ex.Message);
-            return NotFound(new { message = ex.Message });
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error retrieving defendants for request {RequestId}", requestId);
             return StatusCode(StatusCodes.Status500InternalServerError,
-                new { message = "An error occurred while retrieving defendants." });
-        }
-    }
-
-    /// <summary>
-    /// Creates a new defendant for a case registration request.
-    /// </summary>
-    /// <param name="requestId">The case registration request ID</param>
-    /// <param name="createDto">The defendant data to create</param>
-    /// <param name="cancellationToken">Cancellation token</param>
-    /// <returns>The created defendant</returns>
-    [HttpPost("{requestId}/defendants")]
-    [ProducesResponseType(StatusCodes.Status201Created)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<ActionResult<DefendantVM>> CreateDefendant(
-        [FromRoute] int requestId,
-        [FromBody] DefendantCreateDTO createDto,
-        CancellationToken cancellationToken)
-    {
-        try
-        {
-            if (requestId <= 0)
-                return BadRequest(new { message = "Invalid request ID." });
-
-            var defendant = await _defendantBL.CreateDefendantAsync(requestId, createDto, cancellationToken);
-            _logger.LogInformation("Defendant created with ID {DefendantId} for request {RequestId}",
-                defendant.Id, requestId);
-
-            return CreatedAtAction(nameof(GetDefendantById), new { id = defendant.Id }, defendant);
-        }
-        catch (InvalidOperationException ex) when (ex.Message.Contains("ERR013"))
-        {
-            _logger.LogWarning("Duplicate defendant: {Message}", ex.Message);
-            return BadRequest(new { message = ex.Message, errorCode = "ERR013" });
-        }
-        catch (InvalidOperationException ex)
-        {
-            _logger.LogWarning("Failed to create defendant: {Message}", ex.Message);
-            return BadRequest(new { message = ex.Message });
-        }
-        catch (ArgumentException ex)
-        {
-            _logger.LogWarning("Invalid argument: {Message}", ex.Message);
-            return BadRequest(new { message = ex.Message });
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error creating defendant for request {RequestId}", requestId);
-            return StatusCode(StatusCodes.Status500InternalServerError,
-                new { message = "An error occurred while creating the defendant." });
+                new { message = "حدث خطأ أثناء استرجاع بيانات المدعى عليهم" });
         }
     }
 
     /// <summary>
     /// Gets a defendant by ID.
     /// </summary>
-    /// <param name="id">The defendant ID</param>
-    /// <param name="cancellationToken">Cancellation token</param>
-    /// <returns>The defendant details</returns>
     [HttpGet("defendants/{id}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<ActionResult<DefendantVM>> GetDefendantById(
-        [FromRoute] int id,
-        CancellationToken cancellationToken)
+    public async Task<ActionResult> GetDefendantById([FromRoute] int id, CancellationToken cancellationToken)
     {
         try
         {
-            if (id <= 0)
-                return BadRequest(new { message = "Invalid defendant ID." });
-
-            var defendant = await _defendantBL.GetDefendantByIdAsync(id, cancellationToken);
+            var defendant = await _defendantBL.GetByIdAsync(id, cancellationToken);
             if (defendant == null)
-                return NotFound(new { message = $"Defendant with ID {id} not found." });
+                return NotFound(new { message = "المدعى عليه غير موجود" });
 
             return Ok(defendant);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error retrieving defendant with ID {DefendantId}", id);
+            _logger.LogError(ex, "Error retrieving defendant {Id}", id);
             return StatusCode(StatusCodes.Status500InternalServerError,
-                new { message = "An error occurred while retrieving the defendant." });
+                new { message = "حدث خطأ أثناء استرجاع بيانات المدعى عليه" });
+        }
+    }
+
+    /// <summary>
+    /// Creates a new defendant for a case request.
+    /// </summary>
+    [HttpPost("case-requests/{requestId}/defendants")]
+    [ProducesResponseType(StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<ActionResult> CreateDefendant(
+        [FromRoute] int requestId,
+        [FromBody] DefendantCreateDTO dto,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            // Validate DTO
+            var validationResult = await _validator.ValidateAsync(dto, cancellationToken);
+            if (!validationResult.IsValid)
+            {
+                var errors = validationResult.Errors
+                    .GroupBy(e => e.PropertyName)
+                    .ToDictionary(g => g.Key, g => g.Select(e => e.ErrorMessage).ToArray());
+                return BadRequest(new { message = "بيانات غير صالحة", errors });
+            }
+
+            var defendant = await _defendantBL.CreateAsync(requestId, dto, cancellationToken);
+            return CreatedAtAction(nameof(GetDefendantById), new { id = defendant.Id }, defendant);
+        }
+        catch (InvalidOperationException ex)
+        {
+            _logger.LogWarning(ex, "Validation error creating defendant for request {RequestId}", requestId);
+            return BadRequest(new { message = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error creating defendant for request {RequestId}", requestId);
+            return StatusCode(StatusCodes.Status500InternalServerError,
+                new { message = "حدث خطأ أثناء إنشاء المدعى عليه" });
         }
     }
 
     /// <summary>
     /// Updates a defendant.
     /// </summary>
-    /// <param name="id">The defendant ID to update</param>
-    /// <param name="updateDto">The updated defendant data</param>
-    /// <param name="cancellationToken">Cancellation token</param>
-    /// <returns>The updated defendant</returns>
     [HttpPut("defendants/{id}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<ActionResult<DefendantVM>> UpdateDefendant(
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<ActionResult> UpdateDefendant(
         [FromRoute] int id,
-        [FromBody] DefendantUpdateDTO updateDto,
+        [FromBody] DefendantCreateDTO dto,
         CancellationToken cancellationToken)
     {
         try
         {
-            if (id <= 0)
-                return BadRequest(new { message = "Invalid defendant ID." });
+            // Validate DTO
+            var validationResult = await _validator.ValidateAsync(dto, cancellationToken);
+            if (!validationResult.IsValid)
+            {
+                var errors = validationResult.Errors
+                    .GroupBy(e => e.PropertyName)
+                    .ToDictionary(g => g.Key, g => g.Select(e => e.ErrorMessage).ToArray());
+                return BadRequest(new { message = "بيانات غير صالحة", errors });
+            }
 
-            var defendant = await _defendantBL.UpdateDefendantAsync(id, updateDto, cancellationToken);
-            _logger.LogInformation("Defendant {DefendantId} updated", id);
+            var defendant = await _defendantBL.UpdateAsync(id, dto, cancellationToken);
+            if (defendant == null)
+                return NotFound(new { message = "المدعى عليه غير موجود" });
+
             return Ok(defendant);
         }
         catch (InvalidOperationException ex)
         {
-            _logger.LogWarning("Failed to update defendant: {Message}", ex.Message);
-            return NotFound(new { message = ex.Message });
-        }
-        catch (ArgumentException ex)
-        {
-            _logger.LogWarning("Invalid argument: {Message}", ex.Message);
+            _logger.LogWarning(ex, "Validation error updating defendant {Id}", id);
             return BadRequest(new { message = ex.Message });
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error updating defendant {DefendantId}", id);
+            _logger.LogError(ex, "Error updating defendant {Id}", id);
             return StatusCode(StatusCodes.Status500InternalServerError,
-                new { message = "An error occurred while updating the defendant." });
+                new { message = "حدث خطأ أثناء تعديل المدعى عليه" });
         }
     }
 
     /// <summary>
     /// Deletes a defendant (soft delete).
     /// </summary>
-    /// <param name="id">The defendant ID to delete</param>
-    /// <param name="cancellationToken">Cancellation token</param>
-    /// <returns>No content on success</returns>
     [HttpDelete("defendants/{id}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<ActionResult> DeleteDefendant(
-        [FromRoute] int id,
-        CancellationToken cancellationToken)
+    public async Task<ActionResult> DeleteDefendant([FromRoute] int id, CancellationToken cancellationToken)
     {
         try
         {
-            if (id <= 0)
-                return BadRequest(new { message = "Invalid defendant ID." });
+            var result = await _defendantBL.DeleteAsync(id, cancellationToken);
+            if (!result)
+                return NotFound(new { message = "المدعى عليه غير موجود" });
 
-            await _defendantBL.DeleteDefendantAsync(id, cancellationToken);
-            _logger.LogInformation("Defendant {DefendantId} deleted", id);
             return NoContent();
-        }
-        catch (InvalidOperationException ex)
-        {
-            _logger.LogWarning("Failed to delete defendant: {Message}", ex.Message);
-            return NotFound(new { message = ex.Message });
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error deleting defendant {DefendantId}", id);
+            _logger.LogError(ex, "Error deleting defendant {Id}", id);
             return StatusCode(StatusCodes.Status500InternalServerError,
-                new { message = "An error occurred while deleting the defendant." });
+                new { message = "حدث خطأ أثناء حذف المدعى عليه" });
         }
     }
 }

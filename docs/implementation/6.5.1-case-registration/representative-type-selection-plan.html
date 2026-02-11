@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>خطة تغيير اختيار نوع الممثل - Representative Type Selection Change Plan</title>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+            margin: 0; padding: 20px;
+            background: #f5f5f5;
+            color: #333;
+            line-height: 1.7;
+        }
+        .container { max-width: 1100px; margin: 0 auto; }
+        h1 { color: #1565c0; border-bottom: 3px solid #1565c0; padding-bottom: 10px; }
+        h2 { color: #1976d2; border-bottom: 2px solid #e0e0e0; padding-bottom: 8px; margin-top: 30px; }
+        h3 { color: #1e88e5; margin-top: 20px; }
+        table { width: 100%; border-collapse: collapse; margin: 15px 0; background: #fff; }
+        th, td { border: 1px solid #ddd; padding: 10px 14px; text-align: right; }
+        th { background: #e3f2fd; color: #1565c0; font-weight: bold; }
+        tr:nth-child(even) { background: #fafafa; }
+        .badge { padding: 3px 10px; border-radius: 4px; font-size: 0.85em; font-weight: bold; }
+        .badge-easy { background: #e8f5e9; color: #2e7d32; }
+        .badge-medium { background: #fff3e0; color: #e65100; }
+        .badge-hard { background: #ffebee; color: #c62828; }
+        .badge-file { background: #e3f2fd; color: #1565c0; }
+        .badge-new { background: #f3e5f5; color: #7b1fa2; }
+        .badge-edit { background: #fff8e1; color: #f57f17; }
+        .badge-none { background: #e0e0e0; color: #616161; }
+        .card { background: #fff; border-radius: 8px; padding: 20px; margin: 15px 0; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .current-flow, .new-flow {
+            display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+            margin: 15px 0; padding: 15px; border-radius: 8px;
+        }
+        .current-flow { background: #ffebee; border: 1px solid #ffcdd2; }
+        .new-flow { background: #e8f5e9; border: 1px solid #c8e6c9; }
+        .flow-step {
+            background: #fff; padding: 8px 14px; border-radius: 6px;
+            border: 1px solid #ddd; font-weight: bold; font-size: 0.9em;
+        }
+        .flow-arrow { font-size: 1.4em; color: #999; }
+        .summary-box {
+            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+            border: 2px solid #1976d2; border-radius: 10px;
+            padding: 20px; margin: 20px 0;
+        }
+        .cost-grid {
+            display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin: 15px 0;
+        }
+        .cost-item {
+            background: #fff; border-radius: 8px; padding: 15px;
+            border: 1px solid #e0e0e0; text-align: center;
+        }
+        .cost-item .number { font-size: 2em; font-weight: bold; color: #1565c0; }
+        .cost-item .label { font-size: 0.9em; color: #666; }
+        .warning { background: #fff3e0; border: 1px solid #ffe0b2; border-radius: 6px; padding: 12px; margin: 10px 0; }
+        .info { background: #e3f2fd; border: 1px solid #bbdefb; border-radius: 6px; padding: 12px; margin: 10px 0; }
+        code { background: #f5f5f5; padding: 2px 6px; border-radius: 3px; font-family: Consolas, monospace; direction: ltr; display: inline-block; }
+        .file-path { direction: ltr; text-align: left; font-family: Consolas, monospace; font-size: 0.85em; }
+        .step-list { counter-reset: step; list-style: none; padding: 0; }
+        .step-list li {
+            counter-increment: step; padding: 10px 15px; margin: 8px 0;
+            background: #fff; border-radius: 6px; border: 1px solid #e0e0e0;
+        }
+        .step-list li::before {
+            content: "خطوة " counter(step); font-weight: bold;
+            color: #1565c0; margin-left: 10px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <h1>خطة تغيير اختيار نوع الممثل قبل فتح النموذج</h1>
+    <p><strong>التاريخ:</strong> 2026-02-05 &nbsp;|&nbsp; <strong>الحالة:</strong> مقترح</p>
+
+    <!-- ============================================ -->
+    <h2>1. المقارنة: الوضع الحالي مقابل المطلوب</h2>
+    <!-- ============================================ -->
+
+    <div class="card">
+        <h3>الوضع الحالي (الممثل)</h3>
+        <div class="current-flow">
+            <div class="flow-step">زر "إضافة ممثل"</div>
+            <div class="flow-arrow">&larr;</div>
+            <div class="flow-step">يفتح نموذج Dialog مباشرة</div>
+            <div class="flow-arrow">&larr;</div>
+            <div class="flow-step">اختيار نوع الممثل (أول حقل داخل النموذج)</div>
+            <div class="flow-arrow">&larr;</div>
+            <div class="flow-step">تعبئة البيانات</div>
+        </div>
+
+        <h3>الوضع المطلوب (مثل المدعي)</h3>
+        <div class="new-flow">
+            <div class="flow-step">زر "إضافة ممثل"</div>
+            <div class="flow-arrow">&larr;</div>
+            <div class="flow-step">قائمة منسدلة (Menu) لاختيار نوع الممثل</div>
+            <div class="flow-arrow">&larr;</div>
+            <div class="flow-step">يفتح Dialog مع النوع محدد مسبقاً</div>
+            <div class="flow-arrow">&larr;</div>
+            <div class="flow-step">تعبئة البيانات (بدون حقل نوع الممثل)</div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h3>مقارنة تفصيلية</h3>
+        <table>
+            <thead>
+            <tr>
+                <th>الجانب</th>
+                <th>المدعي (الحالي)</th>
+                <th>الممثل (الحالي)</th>
+                <th>الممثل (المطلوب)</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td>واجهة الاختيار</td>
+                <td>قائمة Menu قبل الانتقال</td>
+                <td>Dropdown داخل النموذج</td>
+                <td>قائمة Menu قبل فتح Dialog</td>
+            </tr>
+            <tr>
+                <td>توقيت الاختيار</td>
+                <td>قبل فتح الصفحة</td>
+                <td>داخل النموذج</td>
+                <td>قبل فتح Dialog</td>
+            </tr>
+            <tr>
+                <td>عرض النوع</td>
+                <td>نص عرض فقط (readonly)</td>
+                <td>حقل قابل للتعديل</td>
+                <td>نص عرض فقط (readonly)</td>
+            </tr>
+            <tr>
+                <td>فلترة الأنواع</td>
+                <td>جميع الأنواع (8)</td>
+                <td>حسب نوع المدعي</td>
+                <td>حسب نوع المدعي (نفس الفلترة)</td>
+            </tr>
+            <tr>
+                <td>تغيير النوع</td>
+                <td>إغلاق وإعادة فتح</td>
+                <td>تغيير مباشر من dropdown</td>
+                <td>إغلاق وإعادة فتح</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- ============================================ -->
+    <h2>2. تقييم حجم التغيير</h2>
+    <!-- ============================================ -->
+
+    <div class="summary-box">
+        <h3 style="margin-top: 0;">ملخص التقييم: <span class="badge badge-easy">تغيير بسيط - منخفض التكلفة</span></h3>
+        <p>هذا التغيير <strong>بسيط نسبياً</strong> لأنه لا يتطلب تغيير منطق الأعمال أو الـ Validators أو الـ API. فقط تغيير في واجهة المستخدم (UI flow).</p>
+    </div>
+
+    <div class="cost-grid">
+        <div class="cost-item">
+            <div class="number">3</div>
+            <div class="label">ملفات تحتاج تعديل</div>
+        </div>
+        <div class="cost-item">
+            <div class="number">0</div>
+            <div class="label">ملفات جديدة</div>
+        </div>
+        <div class="cost-item">
+            <div class="number">0</div>
+            <div class="label">تغييرات Backend</div>
+        </div>
+    </div>
+
+    <!-- ============================================ -->
+    <h2>3. الملفات المتأثرة</h2>
+    <!-- ============================================ -->
+
+    <table>
+        <thead>
+        <tr>
+            <th>#</th>
+            <th>الملف</th>
+            <th>نوع التغيير</th>
+            <th>حجم التغيير</th>
+            <th>وصف التغيير</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td>1</td>
+            <td class="file-path">plaintiff-form.component.html</td>
+            <td><span class="badge badge-edit">تعديل</span></td>
+            <td><span class="badge badge-easy">صغير</span></td>
+            <td>
+                تغيير زر "إضافة ممثل" ليستخدم <code>[matMenuTriggerFor]</code> بدلاً من <code>(click)="onAddRepresentative()"</code> مباشرة.
+                <br>إضافة <code>&lt;mat-menu&gt;</code> لعرض أنواع الممثلين المتاحة (مفلترة حسب نوع المدعي).
+            </td>
+        </tr>
+        <tr>
+            <td>2</td>
+            <td class="file-path">plaintiff-form.component.ts</td>
+            <td><span class="badge badge-edit">تعديل</span></td>
+            <td><span class="badge badge-easy">صغير</span></td>
+            <td>
+                تعديل <code>onAddRepresentative()</code> ليقبل <code>representativeTypeId</code> كمعامل.
+                <br>تمرير النوع المختار إلى Dialog عبر <code>dialogData</code>.
+                <br>إضافة متغير لأنواع الممثلين المفلترة (يمكن استخدام <code>ALLOWED_REPRESENTATIVE_TYPES</code> الموجود).
+            </td>
+        </tr>
+        <tr>
+            <td>3</td>
+            <td class="file-path">representative-dialog.component.html</td>
+            <td><span class="badge badge-edit">تعديل</span></td>
+            <td><span class="badge badge-easy">صغير</span></td>
+            <td>
+                تحويل حقل نوع الممثل من <code>&lt;mat-select&gt;</code> قابل للتعديل إلى عرض نص فقط (readonly display).
+                <br>مثل طريقة عرض نوع المدعي في <code>plaintiff-form.component.html</code>.
+            </td>
+        </tr>
+        <tr>
+            <td>4</td>
+            <td class="file-path">representative-dialog.component.ts</td>
+            <td><span class="badge badge-edit">تعديل</span></td>
+            <td><span class="badge badge-easy">صغير</span></td>
+            <td>
+                قراءة <code>representativeTypeId</code> من <code>data</code> المُمررة وتعيينها مباشرة في النموذج.
+                <br>إزالة أو تعديل <code>onRepresentativeTypeChange()</code> لأن النوع لن يتغير.
+                <br>عرض اسم النوع المختار.
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+    <div class="info">
+        <strong>ملاحظة مهمة:</strong> لا يوجد ملف جديد مطلوب. التغيير يتم بالكامل في 3-4 ملفات موجودة (HTML + TS).
+        <br>لا يوجد أي تغيير في Backend أو API أو قاعدة البيانات.
+    </div>
+
+    <!-- ============================================ -->
+    <h2>4. خطة التنفيذ التفصيلية</h2>
+    <!-- ============================================ -->
+
+    <ol class="step-list">
+        <li>
+            <strong>تحميل أنواع الممثلين المفلترة في plaintiff-form</strong>
+            <br>
+            <span class="badge badge-file">plaintiff-form.component.ts</span>
+            <br><br>
+            <strong>التغيير:</strong>
+            <ul>
+                <li>إضافة متغير <code>filteredRepresentativeTypes</code> لتخزين الأنواع المتاحة حسب نوع المدعي المختار</li>
+                <li>عند تغيير نوع المدعي أو عند تحميل النموذج، فلترة الأنواع باستخدام <code>ALLOWED_REPRESENTATIVE_TYPES[plaintiffTypeId]</code></li>
+                <li>استيراد <code>ALLOWED_REPRESENTATIVE_TYPES</code> من <code>representative.model.ts</code> (مستخدم بالفعل)</li>
+            </ul>
+            <br>
+            <strong>كود مقترح:</strong>
+            <pre dir="ltr" style="background:#f5f5f5;padding:10px;border-radius:4px;overflow-x:auto;">
+// في plaintiff-form.component.ts
+filteredRepresentativeTypes: RepresentativeType[] = [];
+
+private loadRepresentativeTypes(): void {
+  this.lookupService.getRepresentativeTypes().subscribe(types => {
+    const allowedIds = ALLOWED_REPRESENTATIVE_TYPES[this.selectedPlaintiffType] || [];
+    this.filteredRepresentativeTypes = types.filter(t => allowedIds.includes(t.id));
+  });
+}
+            </pre>
+        </li>
+
+        <li>
+            <strong>تحويل زر "إضافة ممثل" إلى قائمة Menu</strong>
+            <br>
+            <span class="badge badge-file">plaintiff-form.component.html</span>
+            <br><br>
+            <strong>الوضع الحالي:</strong>
+            <pre dir="ltr" style="background:#ffebee;padding:10px;border-radius:4px;overflow-x:auto;">
+&lt;button mat-raised-button color="primary" (click)="onAddRepresentative()"&gt;
+  إضافة ممثل
+&lt;/button&gt;
+            </pre>
+
+            <strong>المطلوب:</strong>
+            <pre dir="ltr" style="background:#e8f5e9;padding:10px;border-radius:4px;overflow-x:auto;">
+&lt;button mat-raised-button color="primary" [matMenuTriggerFor]="repTypeMenu"&gt;
+  إضافة ممثل
+&lt;/button&gt;
+&lt;mat-menu #repTypeMenu="matMenu"&gt;
+  &lt;button mat-menu-item
+          *ngFor="let type of filteredRepresentativeTypes"
+          (click)="onAddRepresentative(type.id)"&gt;
+    {{ type.nameAr }}
+  &lt;/button&gt;
+&lt;/mat-menu&gt;
+            </pre>
+        </li>
+
+        <li>
+            <strong>تعديل onAddRepresentative() لتمرير النوع</strong>
+            <br>
+            <span class="badge badge-file">plaintiff-form.component.ts</span>
+            <br><br>
+            <strong>الوضع الحالي:</strong>
+            <pre dir="ltr" style="background:#ffebee;padding:10px;border-radius:4px;overflow-x:auto;">
+onAddRepresentative(): void {
+  const dialogData: RepresentativeDialogData = {
+    plaintiffId: this.plaintiffId || 0,
+    plaintiffTypeId: this.selectedPlaintiffType,
+    ...
+  };
+}
+            </pre>
+
+            <strong>المطلوب:</strong>
+            <pre dir="ltr" style="background:#e8f5e9;padding:10px;border-radius:4px;overflow-x:auto;">
+onAddRepresentative(representativeTypeId: number): void {
+  const dialogData: RepresentativeDialogData = {
+    plaintiffId: this.plaintiffId || 0,
+    plaintiffTypeId: this.selectedPlaintiffType,
+    representativeTypeId: representativeTypeId,  // NEW
+    ...
+  };
+}
+            </pre>
+        </li>
+
+        <li>
+            <strong>تعديل RepresentativeDialogData interface</strong>
+            <br>
+            <span class="badge badge-file">representative.model.ts أو representative-dialog.component.ts</span>
+            <br><br>
+            <strong>التغيير:</strong>
+            <ul>
+                <li>إضافة <code>representativeTypeId</code> إلى interface <code>RepresentativeDialogData</code></li>
+            </ul>
+            <pre dir="ltr" style="background:#e8f5e9;padding:10px;border-radius:4px;overflow-x:auto;">
+export interface RepresentativeDialogData {
+  plaintiffId: number;
+  plaintiffTypeId: number;
+  representativeTypeId: number;  // NEW - pre-selected type
+  plaintiffIdentityNumber?: string;
+  existingRepresentatives?: any[];
+}
+            </pre>
+        </li>
+
+        <li>
+            <strong>تعديل representative-dialog: عرض النوع كنص ثابت</strong>
+            <br>
+            <span class="badge badge-file">representative-dialog.component.html</span> + <span class="badge badge-file">representative-dialog.component.ts</span>
+            <br><br>
+            <strong>الوضع الحالي (HTML):</strong>
+            <pre dir="ltr" style="background:#ffebee;padding:10px;border-radius:4px;overflow-x:auto;">
+&lt;mat-form-field appearance="outline" class="full-width"&gt;
+  &lt;mat-label&gt;نوع الممثل&lt;/mat-label&gt;
+  &lt;mat-select formControlName="representativeTypeId" required&gt;
+    &lt;mat-option *ngFor="let type of representativeTypes" [value]="type.id"&gt;
+      {{ type.nameAr }}
+    &lt;/mat-option&gt;
+  &lt;/mat-select&gt;
+&lt;/mat-form-field&gt;
+            </pre>
+
+            <strong>المطلوب (HTML):</strong>
+            <pre dir="ltr" style="background:#e8f5e9;padding:10px;border-radius:4px;overflow-x:auto;">
+&lt;div class="representative-type-display"&gt;
+  &lt;span class="type-label"&gt;نوع الممثل:&lt;/span&gt;
+  &lt;span class="type-value"&gt;{{ selectedRepresentativeTypeName }}&lt;/span&gt;
+&lt;/div&gt;
+            </pre>
+
+            <strong>التغيير (TS):</strong>
+            <pre dir="ltr" style="background:#e8f5e9;padding:10px;border-radius:4px;overflow-x:auto;">
+ngOnInit(): void {
+  // تعيين النوع مباشرة من data
+  this.repForm.patchValue({
+    representativeTypeId: this.data.representativeTypeId
+  });
+  // عرض اسم النوع
+  this.selectedRepresentativeTypeName = this.representativeTypes
+    .find(t => t.id === this.data.representativeTypeId)?.nameAr || '';
+  // تطبيق المنطق المشروط للنوع مباشرة
+  this.onRepresentativeTypeChange(this.data.representativeTypeId);
+}
+            </pre>
+        </li>
+    </ol>
+
+    <!-- ============================================ -->
+    <h2>5. ما لا يتغير (بدون تأثير)</h2>
+    <!-- ============================================ -->
+
+    <table>
+        <thead>
+        <tr>
+            <th>المكون</th>
+            <th>التأثير</th>
+            <th>السبب</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td>Backend API</td>
+            <td><span class="badge badge-none">لا تغيير</span></td>
+            <td>لا يتأثر - نفس البيانات تُرسل بنفس الشكل</td>
+        </tr>
+        <tr>
+            <td>Validators / التحقق</td>
+            <td><span class="badge badge-none">لا تغيير</span></td>
+            <td>نفس المنطق الحالي يعمل بعد تعيين النوع مسبقاً</td>
+        </tr>
+        <tr>
+            <td>قاعدة البيانات</td>
+            <td><span class="badge badge-none">لا تغيير</span></td>
+            <td>لا يوجد تغيير في البنية أو البيانات</td>
+        </tr>
+        <tr>
+            <td>حفظ / تعديل البيانات</td>
+            <td><span class="badge badge-none">لا تغيير</span></td>
+            <td>نفس الـ submit logic يبقى كما هو</td>
+        </tr>
+        <tr>
+            <td>فلترة الأنواع حسب المدعي</td>
+            <td><span class="badge badge-none">لا تغيير</span></td>
+            <td>نفس قاموس ALLOWED_REPRESENTATIVE_TYPES يُستخدم</td>
+        </tr>
+        <tr>
+            <td>المرفقات</td>
+            <td><span class="badge badge-none">لا تغيير</span></td>
+            <td>منطق المرفقات مستقل عن طريقة اختيار النوع</td>
+        </tr>
+        <tr>
+            <td>تعديل ممثل موجود</td>
+            <td><span class="badge badge-none">لا تغيير</span></td>
+            <td>عند التعديل يُفتح Dialog مع بيانات محملة مسبقاً (النوع ثابت)</td>
+        </tr>
+        </tbody>
+    </table>
+
+    <!-- ============================================ -->
+    <h2>6. المخاطر والملاحظات</h2>
+    <!-- ============================================ -->
+
+    <div class="card">
+        <table>
+            <thead>
+            <tr>
+                <th>المخاطرة</th>
+                <th>الاحتمال</th>
+                <th>التأثير</th>
+                <th>الحل</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td>بعض أنواع المدعي لها ممثل واحد فقط (مثل Type 5 = وكيل فقط)</td>
+                <td><span class="badge badge-easy">منخفض</span></td>
+                <td>القائمة تعرض خياراً واحداً فقط</td>
+                <td>إذا كان نوع واحد متاح، يمكن فتح Dialog مباشرة بدون menu، أو إبقاء القائمة كما هي</td>
+            </tr>
+            <tr>
+                <td>تعديل ممثل موجود - يجب أن يبقى النوع ثابتاً</td>
+                <td><span class="badge badge-easy">منخفض</span></td>
+                <td>لا تأثير</td>
+                <td>عند التعديل، Dialog يفتح مباشرة بالنوع المحفوظ (لا يمر بالـ menu)</td>
+            </tr>
+            <tr>
+                <td>الحقول المشروطة حسب نوع الممثل (مثل حقول المحامي)</td>
+                <td><span class="badge badge-easy">منخفض</span></td>
+                <td>لا تأثير</td>
+                <td>نفس المنطق الحالي <code>onRepresentativeTypeChange()</code> يعمل عند التهيئة</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- ============================================ -->
+    <h2>7. أنواع الممثلين المتاحة حسب نوع المدعي (مرجع)</h2>
+    <!-- ============================================ -->
+
+    <table>
+        <thead>
+        <tr>
+            <th>نوع المدعي</th>
+            <th>الأنواع المتاحة</th>
+            <th>عدد الخيارات</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td>1 - فرد</td>
+            <td>وكيل، أمين تفليسة، ولي، وصي</td>
+            <td>4</td>
+        </tr>
+        <tr>
+            <td>2 - فرد بدون هوية</td>
+            <td>جميع الأنواع (9)</td>
+            <td>9</td>
+        </tr>
+        <tr>
+            <td>3 - صاحب مؤسسة</td>
+            <td>وكيل، أمين تفليسة، ولي</td>
+            <td>3</td>
+        </tr>
+        <tr>
+            <td>4 - شركة مسجلة</td>
+            <td>وكيل، مصفي، أمين تفليسة، حارس قضائي، ممثل نظامي</td>
+            <td>5</td>
+        </tr>
+        <tr>
+            <td>5 - شركة غير مسجلة</td>
+            <td>وكيل فقط</td>
+            <td>1</td>
+        </tr>
+        <tr>
+            <td>6 - جهة حكومية</td>
+            <td>وكيل، ممثل جهة حكومية</td>
+            <td>2</td>
+        </tr>
+        <tr>
+            <td>7 - جمعية/مؤسسة أهلية</td>
+            <td>وكيل فقط</td>
+            <td>1</td>
+        </tr>
+        <tr>
+            <td>8 - وقف</td>
+            <td>وكيل، ناظر</td>
+            <td>2</td>
+        </tr>
+        </tbody>
+    </table>
+
+    <div class="warning">
+        <strong>ملاحظة:</strong> للأنواع 5 و 7 (خيار واحد فقط)، يمكن اختيار أحد الأساليب:
+        <ol>
+            <li>عرض القائمة بخيار واحد (بسيط ومتسق)</li>
+            <li>فتح Dialog مباشرة بالنوع الوحيد المتاح (UX أفضل)</li>
+        </ol>
+    </div>
+
+    <!-- ============================================ -->
+    <h2>8. الخلاصة النهائية</h2>
+    <!-- ============================================ -->
+
+    <div class="summary-box">
+        <h3 style="margin-top: 0;">التقييم: <span class="badge badge-easy">منخفض التكلفة</span></h3>
+        <table>
+            <tr>
+                <td><strong>درجة التعقيد:</strong></td>
+                <td><span class="badge badge-easy">منخفض</span></td>
+            </tr>
+            <tr>
+                <td><strong>عدد الملفات:</strong></td>
+                <td>3-4 ملفات تعديل، 0 ملفات جديدة</td>
+            </tr>
+            <tr>
+                <td><strong>تغييرات Backend:</strong></td>
+                <td>لا يوجد</td>
+            </tr>
+            <tr>
+                <td><strong>نوع التغيير:</strong></td>
+                <td>UI/UX فقط - تغيير تدفق الاختيار</td>
+            </tr>
+        </table>
+        <br>
+        <p><strong>الملخص:</strong> التغيير بسيط ومباشر. يتطلب فقط نقل نقطة اختيار نوع الممثل من داخل Dialog إلى قائمة Menu قبل فتح Dialog.
+        جميع منطق الأعمال والتحقق والحفظ يبقى كما هو بدون أي تعديل. الممثل يبقى في Dialog كما هو حالياً.</p>
+    </div>
+
+
+</div>
+</body>
+</html>

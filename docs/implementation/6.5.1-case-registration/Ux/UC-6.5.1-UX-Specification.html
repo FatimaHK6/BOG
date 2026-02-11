@@ -1,0 +1,1180 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UC 6.5.1 Case Registration - UX Specification</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f5f5f5;
+            direction: rtl;
+        }
+        .page {
+            background: white;
+            max-width: 1000px;
+            margin: 20px auto;
+            padding: 40px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            page-break-after: always;
+        }
+        .page:last-child {
+            page-break-after: avoid;
+        }
+        h1 {
+            color: #1B5E20;
+            border-bottom: 3px solid #1B5E20;
+            padding-bottom: 10px;
+            font-size: 24px;
+        }
+        h2 {
+            color: #0D3D14;
+            font-size: 20px;
+            margin-top: 30px;
+        }
+        h3 {
+            color: #333;
+            font-size: 16px;
+        }
+        .wireframe {
+            border: 2px solid #333;
+            border-radius: 8px;
+            margin: 20px 0;
+            overflow: hidden;
+            background: #fff;
+        }
+        .wireframe-header {
+            background: #1B5E20;
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .wireframe-breadcrumb {
+            background: #f0f0f0;
+            padding: 10px 20px;
+            font-size: 14px;
+            border-bottom: 1px solid #ddd;
+        }
+        .wireframe-body {
+            display: flex;
+            min-height: 400px;
+        }
+        .wireframe-sidebar {
+            width: 200px;
+            background: #fafafa;
+            border-left: 1px solid #ddd;
+            padding: 20px;
+        }
+        .wireframe-sidebar ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .wireframe-sidebar li {
+            padding: 12px 15px;
+            margin: 5px 0;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .wireframe-sidebar li:hover {
+            background: #e8f5e9;
+        }
+        .wireframe-sidebar li.active {
+            background: #1B5E20;
+            color: white;
+        }
+        .wireframe-content {
+            flex: 1;
+            padding: 20px;
+        }
+        .wireframe-footer {
+            background: #f5f5f5;
+            padding: 15px 20px;
+            border-top: 1px solid #ddd;
+            display: flex;
+            justify-content: space-between;
+        }
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .btn-primary {
+            background: #1B5E20;
+            color: white;
+        }
+        .btn-secondary {
+            background: #e0e0e0;
+            color: #333;
+        }
+        .btn-danger {
+            background: #F44336;
+            color: white;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: right;
+        }
+        th {
+            background: #1B5E20;
+            color: white;
+        }
+        tr:nth-child(even) {
+            background: #f9f9f9;
+        }
+        .form-group {
+            margin: 15px 0;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #333;
+        }
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        .form-row {
+            display: flex;
+            gap: 20px;
+        }
+        .form-row .form-group {
+            flex: 1;
+        }
+        .card {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            margin: 15px 0;
+            overflow: hidden;
+        }
+        .card-header {
+            background: #f5f5f5;
+            padding: 15px;
+            font-weight: bold;
+            border-bottom: 1px solid #ddd;
+        }
+        .card-body {
+            padding: 20px;
+        }
+        .stepper {
+            display: flex;
+            justify-content: center;
+            margin: 30px 0;
+        }
+        .step {
+            display: flex;
+            align-items: center;
+        }
+        .step-circle {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #e0e0e0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: #666;
+        }
+        .step-circle.active {
+            background: #1B5E20;
+            color: white;
+        }
+        .step-circle.completed {
+            background: #4CAF50;
+            color: white;
+        }
+        .step-label {
+            margin: 10px;
+            font-size: 12px;
+            text-align: center;
+        }
+        .step-line {
+            width: 60px;
+            height: 3px;
+            background: #e0e0e0;
+        }
+        .step-line.completed {
+            background: #4CAF50;
+        }
+        .dialog {
+            border: 2px solid #333;
+            border-radius: 8px;
+            max-width: 500px;
+            margin: 20px auto;
+            background: white;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+        }
+        .dialog-header {
+            background: #FF9800;
+            color: white;
+            padding: 15px 20px;
+            font-weight: bold;
+        }
+        .dialog-body {
+            padding: 20px;
+        }
+        .dialog-footer {
+            padding: 15px 20px;
+            border-top: 1px solid #ddd;
+            display: flex;
+            justify-content: flex-start;
+            gap: 10px;
+        }
+        .status-complete {
+            color: #4CAF50;
+            font-weight: bold;
+        }
+        .status-incomplete {
+            color: #FF9800;
+            font-weight: bold;
+        }
+        .upload-area {
+            border: 2px dashed #ddd;
+            border-radius: 8px;
+            padding: 40px;
+            text-align: center;
+            background: #fafafa;
+            margin: 20px 0;
+        }
+        .upload-area:hover {
+            border-color: #1B5E20;
+            background: #e8f5e9;
+        }
+        .color-box {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            border-radius: 5px;
+            vertical-align: middle;
+            margin-left: 10px;
+            border: 1px solid #ddd;
+        }
+        .note {
+            background: #fff3e0;
+            border-right: 4px solid #FF9800;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+            .page {
+                box-shadow: none;
+                margin: 0;
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Page 1: Title & Overview -->
+<div class="page">
+    <h1>UC 6.5.1 Case Registration - UX Specification</h1>
+    <h1>مواصفات واجهة المستخدم - قيد الدعوى</h1>
+
+    <p style="font-size: 18px; color: #666; margin: 30px 0;">
+        This document defines the UX specifications for UC 6.5.1 Case Registration based on analysis of the old system screenshots and SRS requirements.
+    </p>
+
+    <h2>جدول المحتويات</h2>
+    <ol style="font-size: 16px; line-height: 2;">
+        <li>Page Structure & Navigation - هيكل الصفحة</li>
+        <li>Plaintiffs Section - قسم المدعين</li>
+        <li>Step 1: Personal Data - البيانات الشخصية</li>
+        <li>Step 2: Representatives - الممثلين</li>
+        <li>Step 3: Attachments - المرفقات</li>
+        <li>Step 4: Additional Data - بيانات إضافية</li>
+        <li>Dialogs & Actions - الحوارات والإجراءات</li>
+        <li>Validation Messages - رسائل التحقق</li>
+        <li>Responsive Design - التصميم المتجاوب</li>
+        <li>Color Scheme - نظام الألوان</li>
+    </ol>
+</div>
+
+<!-- Page 2: Main Layout -->
+<div class="page">
+    <h2>1. Page Structure & Navigation - هيكل الصفحة</h2>
+
+    <div class="wireframe">
+        <div class="wireframe-header">
+            <span>🏛️ نظام إدارة الدعاوى</span>
+            <span>👤 محمد أحمد | 🔔</span>
+        </div>
+        <div class="wireframe-breadcrumb">
+            الرئيسية > طلبات قيد الدعوى > تفاصيل الطلب
+        </div>
+        <div class="wireframe-body">
+            <div class="wireframe-sidebar">
+                <ul>
+                    <li class="active">○ المدعين</li>
+                    <li>○ المدعى عليه</li>
+                    <li>○ بيانات الدعوى</li>
+                    <li>○ معلومات إضافية</li>
+                    <li>○ النواقص</li>
+                    <li>○ إنهاء الطلب</li>
+                </ul>
+            </div>
+            <div class="wireframe-content" style="background: #f9f9f9; display: flex; align-items: center; justify-content: center;">
+                <span style="color: #999; font-size: 24px;">Main Content Area</span>
+            </div>
+        </div>
+        <div class="wireframe-footer">
+            <div>
+                <button class="btn btn-primary">حفظ</button>
+                <button class="btn btn-secondary">إلغاء</button>
+            </div>
+            <button class="btn btn-primary">تقديم الطلب</button>
+        </div>
+    </div>
+
+    <h3>Side Navigation Sections</h3>
+    <table>
+        <tr>
+            <th>Section</th>
+            <th>Arabic</th>
+            <th>Description</th>
+        </tr>
+        <tr>
+            <td>Plaintiffs</td>
+            <td>المدعين</td>
+            <td>Manage plaintiffs list</td>
+        </tr>
+        <tr>
+            <td>Defendants</td>
+            <td>المدعى عليه</td>
+            <td>Manage defendants list</td>
+        </tr>
+        <tr>
+            <td>Case Data</td>
+            <td>بيانات الدعوى</td>
+            <td>Subject, claims, evidence</td>
+        </tr>
+        <tr>
+            <td>Additional Info</td>
+            <td>معلومات إضافية</td>
+            <td>Classifications, related cases</td>
+        </tr>
+        <tr>
+            <td>Deficiencies</td>
+            <td>النواقص</td>
+            <td>Missing requirements</td>
+        </tr>
+        <tr>
+            <td>Finish</td>
+            <td>إنهاء الطلب</td>
+            <td>Submit request</td>
+        </tr>
+    </table>
+</div>
+
+<!-- Page 3: Plaintiffs List -->
+<div class="page">
+    <h2>2. Plaintiffs Section - قسم المدعين</h2>
+
+    <h3>2.1 Plaintiffs List View - قائمة المدعين</h3>
+    <div class="wireframe">
+        <div class="wireframe-header">
+            <span>المدعين</span>
+            <button class="btn btn-primary">+ إضافة مدعى جديد</button>
+        </div>
+        <div style="padding: 20px;">
+            <h4>قائمة المدعين</h4>
+            <table>
+                <tr>
+                    <th>نوع المدعي</th>
+                    <th>الرقم</th>
+                    <th>اسم المدعي</th>
+                    <th>عدد الممثلين</th>
+                    <th>حالة المرفقات</th>
+                    <th>مقدم الطلب</th>
+                </tr>
+                <tr>
+                    <td>فرد</td>
+                    <td>1000001</td>
+                    <td>محمد أحمد السعيد</td>
+                    <td>0</td>
+                    <td class="status-complete">مكتملة ✓</td>
+                    <td>✓</td>
+                </tr>
+                <tr>
+                    <td>فرد</td>
+                    <td>2000001</td>
+                    <td>فاطمة خالد المطيري</td>
+                    <td>1</td>
+                    <td class="status-incomplete">ناقصة ⚠</td>
+                    <td></td>
+                </tr>
+            </table>
+            <p style="text-align: center; color: #666;">عرض 1-2 من 2 سجلات | ◀ 1 ▶</p>
+
+            <h4>قائمة الممثلين</h4>
+            <table>
+                <tr>
+                    <th>رقم الهوية</th>
+                    <th>إسم الممثل</th>
+                    <th>ممثل عن</th>
+                    <th>مقدم الطلب</th>
+                </tr>
+                <tr>
+                    <td colspan="4" style="text-align: center; color: #999;">لا يوجد بيانات للعرض</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+    <h3>2.2 Plaintiff Types - أنواع المدعين</h3>
+    <div class="card">
+        <div class="card-header">نوع المدعي: [▼ اختر نوع المدعي]</div>
+        <div class="card-body">
+            <ul style="list-style: none; padding: 0; margin: 0;">
+                <li style="padding: 10px; border-bottom: 1px solid #eee;">فرد (Individual)</li>
+                <li style="padding: 10px; border-bottom: 1px solid #eee;">فرد بدون هوية (Individual without ID)</li>
+                <li style="padding: 10px; border-bottom: 1px solid #eee;">صاحب مؤسسة فردية (Business Owner)</li>
+                <li style="padding: 10px; border-bottom: 1px solid #eee;">شركة مسجلة (Registered Company)</li>
+                <li style="padding: 10px; border-bottom: 1px solid #eee;">شركة غير مسجلة (Unregistered Company)</li>
+                <li style="padding: 10px; border-bottom: 1px solid #eee;">جهة حكومية (Government Agency)</li>
+                <li style="padding: 10px; border-bottom: 1px solid #eee;">جمعية/مؤسسة خيرية (NGO/Charity)</li>
+                <li style="padding: 10px;">وقف (Waqf)</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<!-- Page 4: Wizard Steps -->
+<div class="page">
+    <h2>2.3 Add Plaintiff Wizard - معالج إضافة المدعي</h2>
+
+    <h3>4-Step Wizard Indicator</h3>
+    <div class="stepper">
+        <div class="step">
+            <div>
+                <div class="step-circle active">1</div>
+                <div class="step-label">بيانات الشخصي</div>
+            </div>
+        </div>
+        <div class="step-line"></div>
+        <div class="step">
+            <div>
+                <div class="step-circle">2</div>
+                <div class="step-label">بيانات الممثلين</div>
+            </div>
+        </div>
+        <div class="step-line"></div>
+        <div class="step">
+            <div>
+                <div class="step-circle">3</div>
+                <div class="step-label">المرفقات</div>
+            </div>
+        </div>
+        <div class="step-line"></div>
+        <div class="step">
+            <div>
+                <div class="step-circle">4</div>
+                <div class="step-label">بيانات إضافية</div>
+            </div>
+        </div>
+    </div>
+
+    <h2>3. Step 1: Personal Data - البيانات الشخصية</h2>
+
+    <div class="card">
+        <div class="card-header">البيانات الشخصية</div>
+        <div class="card-body">
+            <div class="form-row">
+                <div class="form-group">
+                    <label>نوع الهوية *</label>
+                    <select><option>هوية وطنية</option></select>
+                </div>
+                <div class="form-group">
+                    <label>رقم الهوية * 🔍</label>
+                    <input type="text" placeholder="أدخل رقم الهوية">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>تاريخ الميلاد</label>
+                <input type="text" placeholder="يوم / شهر / سنة">
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>الاسم الأول *</label>
+                    <input type="text">
+                </div>
+                <div class="form-group">
+                    <label>اسم الأب</label>
+                    <input type="text">
+                </div>
+                <div class="form-group">
+                    <label>اسم الجد</label>
+                    <input type="text">
+                </div>
+                <div class="form-group">
+                    <label>اسم العائلة *</label>
+                    <input type="text">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label><input type="checkbox"> هل من ذوي الهمم؟</label>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>الجنسية *</label>
+                    <select><option>سعودي</option></select>
+                </div>
+                <div class="form-group">
+                    <label>الجنس *</label>
+                    <select><option>ذكر</option></select>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">بيانات التواصل</div>
+        <div class="card-body">
+            <div class="form-row">
+                <div class="form-group">
+                    <label>رقم الجوال *</label>
+                    <input type="text" placeholder="05xxxxxxxx">
+                </div>
+                <div class="form-group">
+                    <label>البريد الإلكتروني</label>
+                    <input type="email" placeholder="example@email.com">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Page 5: National Address -->
+<div class="page">
+    <h3>3.2 National Address - العنوان الوطني</h3>
+
+    <div class="card">
+        <div class="card-header">
+            العنوان الوطني
+            <button class="btn btn-secondary" style="float: left;">طلب بيانات العنوان</button>
+        </div>
+        <div class="card-body">
+            <div class="form-row">
+                <div class="card" style="flex: 1;">
+                    <div class="card-header">بيانات محل الإقامة</div>
+                    <div class="card-body">
+                        <div class="form-group">
+                            <label>المنطقة</label>
+                            <input type="text" value="الرياض" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label>المدينة</label>
+                            <input type="text" value="الرياض" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label>الحي</label>
+                            <input type="text" value="العليا" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label>الشارع</label>
+                            <input type="text" value="الملك فهد" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label>رقم المبنى</label>
+                            <input type="text" value="1234" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label>الرمز البريدي</label>
+                            <input type="text" value="12345" readonly>
+                        </div>
+                    </div>
+                </div>
+                <div class="card" style="flex: 1;">
+                    <div class="card-header">بيانات جهة العمل</div>
+                    <div class="card-body">
+                        <div class="form-group">
+                            <label>المنطقة</label>
+                            <input type="text" value="الرياض" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label>المدينة</label>
+                            <input type="text" value="الرياض" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label>الحي</label>
+                            <input type="text" value="السليمانية" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label>الشارع</label>
+                            <input type="text" value="التحلية" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label>رقم المبنى</label>
+                            <input type="text" value="5678" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label>الرمز البريدي</label>
+                            <input type="text" value="12346" readonly>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group" style="margin-top: 20px;">
+                <label>العنوان المختار للتبليغ:</label>
+                <div style="margin-top: 10px;">
+                    <label style="margin-left: 20px;"><input type="radio" name="address" checked> عنوان الإقامة</label>
+                    <label style="margin-left: 20px;"><input type="radio" name="address"> عنوان العمل</label>
+                    <label><input type="radio" name="address"> آخر</label>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <h3>3.3 Employment Data - بيانات العمل</h3>
+    <div class="card">
+        <div class="card-header">بيانات العمل</div>
+        <div class="card-body">
+            <div class="form-group">
+                <label>جهة العمل</label>
+                <select>
+                    <option>حكومي</option>
+                    <option>خاص</option>
+                    <option>متقاعد</option>
+                    <option>بدون عمل</option>
+                </select>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>جهة العمل (اسم)</label>
+                    <input type="text">
+                </div>
+                <div class="form-group">
+                    <label>المهنة</label>
+                    <input type="text">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Page 6: Representatives -->
+<div class="page">
+    <h2>4. Step 2: Representatives - بيانات الممثلين</h2>
+
+    <h3>4.1 Representatives List</h3>
+    <div class="wireframe">
+        <div class="wireframe-header">
+            <span>الممثلين</span>
+            <button class="btn btn-primary">+ إضافة ممثل جديد</button>
+        </div>
+        <div style="padding: 20px;">
+            <table>
+                <tr>
+                    <th>رقم الهوية</th>
+                    <th>اسم الممثل</th>
+                    <th>نوع الممثل</th>
+                    <th>رقم الوكالة</th>
+                    <th>إجراءات</th>
+                </tr>
+                <tr>
+                    <td>1234567</td>
+                    <td>أحمد محمد</td>
+                    <td>وكيل</td>
+                    <td>12345</td>
+                    <td>
+                        <button class="btn btn-secondary">✏️</button>
+                        <button class="btn btn-danger">🗑️</button>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+    <h3>4.2 Add Representative Form</h3>
+    <div class="card">
+        <div class="card-header">إضافة ممثل</div>
+        <div class="card-body">
+            <div class="form-group">
+                <label>نوع الممثل *</label>
+                <select>
+                    <option>اختر نوع الممثل</option>
+                    <option>وكيل (Agent/Lawyer)</option>
+                    <option>ولي (Guardian)</option>
+                    <option>وصي (Custodian)</option>
+                    <option>ناظر (Executor)</option>
+                    <option>ممثل الورثة (Heir Representative)</option>
+                    <option>ممثل الشركة (Company Representative)</option>
+                    <option>ممثل الجهة (Agency Representative)</option>
+                    <option>أمين التفليسة (Trustee)</option>
+                    <option>ممثل نظامي (Legal Representative)</option>
+                </select>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>نوع الهوية *</label>
+                    <select><option>هوية وطنية</option></select>
+                </div>
+                <div class="form-group">
+                    <label>رقم الهوية * 🔍</label>
+                    <input type="text">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>الاسم الأول *</label>
+                    <input type="text">
+                </div>
+                <div class="form-group">
+                    <label>اسم الأب</label>
+                    <input type="text">
+                </div>
+                <div class="form-group">
+                    <label>اسم الجد</label>
+                    <input type="text">
+                </div>
+                <div class="form-group">
+                    <label>اسم العائلة *</label>
+                    <input type="text">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">بيانات التفويض / الوكالة</div>
+        <div class="card-body">
+            <div class="form-row">
+                <div class="form-group">
+                    <label>رقم الوكالة/القرار</label>
+                    <input type="text">
+                </div>
+                <div class="form-group">
+                    <label>تاريخ الوكالة</label>
+                    <input type="text" placeholder="يوم / شهر / سنة">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>مصدر الوكالة</label>
+                    <select>
+                        <option>كتابة عدل</option>
+                        <option>محكمة</option>
+                        <option>وزارة خارجية</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>نوع الولاية (للولي)</label>
+                    <select>
+                        <option>طبيعية</option>
+                        <option>مكتسبة</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Page 7: Attachments -->
+<div class="page">
+    <h2>5. Step 3: Attachments - المرفقات</h2>
+
+    <div class="wireframe">
+        <div class="wireframe-header">
+            <span>المرفقات</span>
+            <button class="btn btn-primary">+ إضافة مرفق جديد</button>
+        </div>
+        <div style="padding: 20px;">
+            <div class="note">
+                ⚠️ المرفقات المطلوبة حسب نوع المدعي: <strong>صورة الهوية (مطلوب)</strong>
+            </div>
+
+            <table>
+                <tr>
+                    <th>نوع المرفق</th>
+                    <th>اسم الملف</th>
+                    <th>الحجم</th>
+                    <th>الحالة</th>
+                    <th>إجراءات</th>
+                </tr>
+                <tr>
+                    <td>صورة الهوية</td>
+                    <td>identity.pdf</td>
+                    <td>1.2 MB</td>
+                    <td class="status-complete">✓ مرفق</td>
+                    <td>
+                        <button class="btn btn-secondary">👁️</button>
+                        <button class="btn btn-danger">🗑️</button>
+                    </td>
+                </tr>
+            </table>
+
+            <div class="upload-area">
+                <p style="font-size: 48px; margin: 0;">📎</p>
+                <p>اسحب الملفات هنا أو <button class="btn btn-primary">اختر ملف</button></p>
+                <p style="color: #999; font-size: 12px;">الحد الأقصى: 4 ميجابايت | الصيغة المسموحة: PDF فقط</p>
+            </div>
+        </div>
+    </div>
+
+    <h3>Required Attachments by Plaintiff Type</h3>
+    <table>
+        <tr>
+            <th>Plaintiff Type</th>
+            <th>Required Attachments</th>
+        </tr>
+        <tr>
+            <td>فرد (Individual)</td>
+            <td>صورة الهوية</td>
+        </tr>
+        <tr>
+            <td>شركة مسجلة (Registered Company)</td>
+            <td>السجل التجاري</td>
+        </tr>
+        <tr>
+            <td>جهة حكومية (Government Agency)</td>
+            <td>قرار التمثيل</td>
+        </tr>
+        <tr>
+            <td>وقف (Waqf)</td>
+            <td>صك الوقف</td>
+        </tr>
+    </table>
+</div>
+
+<!-- Page 8: Additional Data -->
+<div class="page">
+    <h2>6. Step 4: Additional Data - بيانات إضافية</h2>
+
+    <h3>6.1 Company-Specific Fields - بيانات الشركة</h3>
+    <div class="card">
+        <div class="card-header">بيانات الشركة</div>
+        <div class="card-body">
+            <div class="form-row">
+                <div class="form-group">
+                    <label>رقم السجل التجاري *</label>
+                    <input type="text">
+                </div>
+                <div class="form-group">
+                    <label>اسم الشركة *</label>
+                    <input type="text">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>تاريخ بداية السجل</label>
+                    <input type="text" placeholder="يوم / شهر / سنة">
+                </div>
+                <div class="form-group">
+                    <label>تاريخ نهاية السجل</label>
+                    <input type="text" placeholder="يوم / شهر / سنة">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <h3>6.2 Government Agency Fields - بيانات الجهة الحكومية</h3>
+    <div class="card">
+        <div class="card-header">بيانات الجهة الحكومية</div>
+        <div class="card-body">
+            <div class="form-group">
+                <label>الجهة الحكومية *</label>
+                <select><option>اختر الجهة</option></select>
+            </div>
+            <div class="form-group">
+                <label>بيان إضافي</label>
+                <textarea style="width: 100%; height: 100px; padding: 10px; border: 1px solid #ddd; border-radius: 5px;"></textarea>
+            </div>
+        </div>
+    </div>
+
+    <h3>6.3 Waqf-Specific Fields - بيانات الوقف</h3>
+    <div class="card">
+        <div class="card-header">بيانات الوقف</div>
+        <div class="card-body">
+            <div class="form-row">
+                <div class="form-group">
+                    <label>رقم صك الوقف *</label>
+                    <input type="text">
+                </div>
+                <div class="form-group">
+                    <label>تاريخ الصك</label>
+                    <input type="text" placeholder="يوم / شهر / سنة">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>مصدر الصك</label>
+                    <input type="text">
+                </div>
+                <div class="form-group">
+                    <label>نوع نظارة الوقف *</label>
+                    <select>
+                        <option>خاصة</option>
+                        <option>حكومية</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Page 9: Dialogs -->
+<div class="page">
+    <h2>7. Dialogs & Actions - الحوارات والإجراءات</h2>
+
+    <h3>7.1 Form Actions - أزرار النموذج</h3>
+    <div class="card">
+        <div class="card-body" style="display: flex; justify-content: space-between;">
+            <button class="btn btn-secondary">العودة إلى قائمة المدعين</button>
+            <div>
+                <button class="btn btn-secondary">السابق</button>
+                <button class="btn btn-secondary">التالي</button>
+                <button class="btn btn-primary">حفظ</button>
+            </div>
+        </div>
+    </div>
+
+    <h3>7.2 Delete Confirmation Dialog - حوار تأكيد الحذف</h3>
+    <div class="dialog">
+        <div class="dialog-header">⚠️ تأكيد الحذف</div>
+        <div class="dialog-body">
+            <p>هل أنت متأكد من حذف المدعي "محمد أحمد السعيد"؟</p>
+            <p style="color: #666;">سيتم حذف جميع الممثلين والمرفقات المرتبطة.</p>
+        </div>
+        <div class="dialog-footer">
+            <button class="btn btn-secondary">إلغاء</button>
+            <button class="btn btn-danger">تأكيد الحذف</button>
+        </div>
+    </div>
+
+    <h3>7.3 Set Applicant Dialog - حوار تحديد مقدم الطلب</h3>
+    <div class="dialog">
+        <div class="dialog-header" style="background: #2196F3;">تحديد مقدم الطلب</div>
+        <div class="dialog-body">
+            <p>سيتم تعيين "محمد أحمد السعيد" كمقدم للطلب.</p>
+            <div class="note">
+                ⚠️ ملاحظة: يمكن فقط للمدعي من نوع "فرد" أن يكون مقدم الطلب.
+            </div>
+        </div>
+        <div class="dialog-footer">
+            <button class="btn btn-secondary">إلغاء</button>
+            <button class="btn btn-primary">تأكيد</button>
+        </div>
+    </div>
+</div>
+
+<!-- Page 10: Validation Messages -->
+<div class="page">
+    <h2>8. Validation Messages - رسائل التحقق</h2>
+
+    <h3>8.1 Error Messages - رسائل الخطأ</h3>
+    <table>
+        <tr>
+            <th>Code</th>
+            <th>Message</th>
+        </tr>
+        <tr>
+            <td>ERR008</td>
+            <td style="color: #F44336;">الممثّل موجود مسبقاً للمدعي</td>
+        </tr>
+        <tr>
+            <td>ERR011</td>
+            <td style="color: #F44336;">المدّعي موجود مسبقاً بنفس رقم الهوية</td>
+        </tr>
+        <tr>
+            <td>ERR012</td>
+            <td style="color: #F44336;">رقم هوية الممثّل نفس رقم هوية المدّعي</td>
+        </tr>
+        <tr>
+            <td>BR04</td>
+            <td style="color: #F44336;">يجب أن يكون الملف بصيغة PDF فقط</td>
+        </tr>
+        <tr>
+            <td>BR04</td>
+            <td style="color: #F44336;">حجم الملف يتجاوز الحد الأقصى (4 ميجابايت)</td>
+        </tr>
+        <tr>
+            <td>BC07</td>
+            <td style="color: #F44336;">فقط المدعي من نوع 'فرد' يمكنه أن يكون مقدم الطلب</td>
+        </tr>
+    </table>
+
+    <h3>8.2 Success Messages - رسائل النجاح</h3>
+    <table>
+        <tr>
+            <th>Action</th>
+            <th>Message</th>
+        </tr>
+        <tr>
+            <td>Add Plaintiff</td>
+            <td style="color: #4CAF50;">تم إضافة المدعي بنجاح</td>
+        </tr>
+        <tr>
+            <td>Update Plaintiff</td>
+            <td style="color: #4CAF50;">تم تحديث بيانات المدعي بنجاح</td>
+        </tr>
+        <tr>
+            <td>Delete Plaintiff</td>
+            <td style="color: #4CAF50;">تم حذف المدعي بنجاح</td>
+        </tr>
+        <tr>
+            <td>Add Representative</td>
+            <td style="color: #4CAF50;">تم إضافة الممثل بنجاح</td>
+        </tr>
+        <tr>
+            <td>Add Attachment</td>
+            <td style="color: #4CAF50;">تم رفع المرفق بنجاح</td>
+        </tr>
+        <tr>
+            <td>Set Applicant</td>
+            <td style="color: #4CAF50;">تم تعيين مقدم الطلب بنجاح</td>
+        </tr>
+    </table>
+</div>
+
+<!-- Page 11: Responsive & Colors -->
+<div class="page">
+    <h2>9. Responsive Behavior - التصميم المتجاوب</h2>
+
+    <table>
+        <tr>
+            <th>Screen Size</th>
+            <th>Behavior</th>
+        </tr>
+        <tr>
+            <td><strong>Desktop</strong> (> 1200px)</td>
+            <td>
+                <ul>
+                    <li>Full side navigation visible</li>
+                    <li>2-column forms</li>
+                    <li>Full table with all columns</li>
+                </ul>
+            </td>
+        </tr>
+        <tr>
+            <td><strong>Tablet</strong> (768px - 1200px)</td>
+            <td>
+                <ul>
+                    <li>Collapsible side navigation</li>
+                    <li>1-column forms</li>
+                    <li>Horizontal scrolling tables</li>
+                </ul>
+            </td>
+        </tr>
+        <tr>
+            <td><strong>Mobile</strong> (< 768px)</td>
+            <td>
+                <ul>
+                    <li>Bottom navigation</li>
+                    <li>Card-based list views</li>
+                    <li>Full-width forms</li>
+                </ul>
+            </td>
+        </tr>
+    </table>
+
+    <h2>10. Color Scheme - نظام الألوان</h2>
+
+    <h3>10.1 Primary Colors</h3>
+    <table>
+        <tr>
+            <th>Element</th>
+            <th>Color</th>
+            <th>Hex</th>
+            <th>Preview</th>
+        </tr>
+        <tr>
+            <td>Primary</td>
+            <td>Green</td>
+            <td>#1B5E20</td>
+            <td><span class="color-box" style="background: #1B5E20;"></span></td>
+        </tr>
+        <tr>
+            <td>Secondary</td>
+            <td>Dark Green</td>
+            <td>#0D3D14</td>
+            <td><span class="color-box" style="background: #0D3D14;"></span></td>
+        </tr>
+        <tr>
+            <td>Background</td>
+            <td>Light Gray</td>
+            <td>#F5F5F5</td>
+            <td><span class="color-box" style="background: #F5F5F5;"></span></td>
+        </tr>
+        <tr>
+            <td>Card Background</td>
+            <td>White</td>
+            <td>#FFFFFF</td>
+            <td><span class="color-box" style="background: #FFFFFF;"></span></td>
+        </tr>
+        <tr>
+            <td>Border</td>
+            <td>Light Gray</td>
+            <td>#E0E0E0</td>
+            <td><span class="color-box" style="background: #E0E0E0;"></span></td>
+        </tr>
+    </table>
+
+    <h3>10.2 Status Colors</h3>
+    <table>
+        <tr>
+            <th>Status</th>
+            <th>Color</th>
+            <th>Hex</th>
+            <th>Preview</th>
+        </tr>
+        <tr>
+            <td>Success</td>
+            <td>Green</td>
+            <td>#4CAF50</td>
+            <td><span class="color-box" style="background: #4CAF50;"></span></td>
+        </tr>
+        <tr>
+            <td>Warning</td>
+            <td>Orange</td>
+            <td>#FF9800</td>
+            <td><span class="color-box" style="background: #FF9800;"></span></td>
+        </tr>
+        <tr>
+            <td>Error</td>
+            <td>Red</td>
+            <td>#F44336</td>
+            <td><span class="color-box" style="background: #F44336;"></span></td>
+        </tr>
+        <tr>
+            <td>Info</td>
+            <td>Blue</td>
+            <td>#2196F3</td>
+            <td><span class="color-box" style="background: #2196F3;"></span></td>
+        </tr>
+    </table>
+</div>
+
+</body>
+</html>

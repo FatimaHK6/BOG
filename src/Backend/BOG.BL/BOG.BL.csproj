@@ -4,12 +4,13 @@
     <ProjectReference Include="..\BOG.DAL\BOG.DAL.csproj" />
     <ProjectReference Include="..\BOG.DTO\BOG.DTO.csproj" />
     <ProjectReference Include="..\BOG.DbModel\BOG.DbModel.csproj" />
+    <ProjectReference Include="..\BOG.Integration\BOG.Integration.csproj" />
     <ProjectReference Include="..\BOG.VM\BOG.VM.csproj" />
     <ProjectReference Include="..\BOG.Integration\BOG.Integration.csproj" />
   </ItemGroup>
 
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>

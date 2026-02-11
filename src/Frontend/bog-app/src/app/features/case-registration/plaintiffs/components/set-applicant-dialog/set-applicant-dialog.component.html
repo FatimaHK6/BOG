@@ -1,0 +1,15 @@
+<h2 mat-dialog-title>تحديد مقدم الطلب</h2>
+
+<mat-dialog-content>
+  <p>سيتم تعيين "<strong>{{ data.plaintiff.fullName }}</strong>" كمقدم للطلب.</p>
+
+  <div class="info-box">
+    <mat-icon>info</mat-icon>
+    <span>ملاحظة: يمكن فقط للمدعي من نوع "فرد" أن يكون مقدم الطلب.</span>
+  </div>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="onCancel()">إلغاء</button>
+  <button mat-raised-button color="primary" (click)="onConfirm()">تأكيد</button>
+</mat-dialog-actions>

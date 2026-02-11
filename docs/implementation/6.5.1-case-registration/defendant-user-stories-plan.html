@@ -1,0 +1,2593 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>خطة تنفيذ المدعى عليهم - Defendant Implementation Plan</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Arial, sans-serif;
+            background: #f5f5f5;
+            margin: 0;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #1B5E20;
+            border-bottom: 3px solid #1B5E20;
+            padding-bottom: 15px;
+            margin-bottom: 30px;
+        }
+        h2 {
+            color: #2E7D32;
+            border-bottom: 2px solid #E8F5E9;
+            padding-bottom: 10px;
+            margin-top: 40px;
+        }
+        h3 {
+            color: #388E3C;
+            margin-top: 25px;
+        }
+        h4 {
+            color: #43A047;
+            margin-top: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            font-size: 14px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: right;
+        }
+        th {
+            background: #1B5E20;
+            color: white;
+            font-weight: 600;
+        }
+        tr:nth-child(even) {
+            background: #f9f9f9;
+        }
+        tr:hover {
+            background: #E8F5E9;
+        }
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .badge-required {
+            background: #FFEBEE;
+            color: #C62828;
+        }
+        .badge-optional {
+            background: #E3F2FD;
+            color: #1565C0;
+        }
+        .badge-conditional {
+            background: #FFF3E0;
+            color: #E65100;
+        }
+        .badge-type {
+            background: #E8F5E9;
+            color: #1B5E20;
+        }
+        .card {
+            background: #fafafa;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 15px 0;
+        }
+        .card-header {
+            font-weight: 600;
+            color: #1B5E20;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+        .comparison-table td:nth-child(2) {
+            background: #E8F5E9;
+        }
+        .comparison-table td:nth-child(3) {
+            background: #FFF3E0;
+        }
+        .use-case-box {
+            background: linear-gradient(135deg, #E8F5E9 0%, #C8E6C9 100%);
+            border-right: 4px solid #1B5E20;
+            padding: 15px 20px;
+            margin: 10px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        .use-case-id {
+            font-weight: 700;
+            color: #1B5E20;
+        }
+        .task-list {
+            list-style: none;
+            padding: 0;
+        }
+        .task-list li {
+            padding: 12px 15px;
+            margin: 8px 0;
+            background: #f5f5f5;
+            border-radius: 6px;
+            border-right: 4px solid #1B5E20;
+        }
+        .task-list li:hover {
+            background: #E8F5E9;
+        }
+        .task-priority-high {
+            border-right-color: #C62828;
+        }
+        .task-priority-medium {
+            border-right-color: #F57C00;
+        }
+        .task-priority-low {
+            border-right-color: #1565C0;
+        }
+        .highlight {
+            background: #FFFDE7;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+        .code {
+            font-family: 'Consolas', monospace;
+            background: #263238;
+            color: #80CBC4;
+            padding: 15px;
+            border-radius: 6px;
+            direction: ltr;
+            text-align: left;
+            overflow-x: auto;
+        }
+        .section-number {
+            background: #1B5E20;
+            color: white;
+            padding: 2px 10px;
+            border-radius: 4px;
+            margin-left: 10px;
+            font-size: 14px;
+        }
+        .note {
+            background: #E3F2FD;
+            border-right: 4px solid #1565C0;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        .warning {
+            background: #FFF3E0;
+            border-right: 4px solid #E65100;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        .success {
+            background: #E8F5E9;
+            border-right: 4px solid #2E7D32;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        .toc {
+            background: #fafafa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+        }
+        .toc ul {
+            list-style: none;
+            padding-right: 20px;
+        }
+        .toc a {
+            color: #1B5E20;
+            text-decoration: none;
+        }
+        .toc a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>خطة تنفيذ إدارة المدعى عليهم</h1>
+        <p><strong>المرجع:</strong> SRS UC 6.5.1 - حالات الاستخدام 6.5.1.1.11 إلى 6.5.1.1.14</p>
+        <p><strong>تاريخ الإنشاء:</strong> 2026-01-28</p>
+
+        <div class="toc">
+            <h3>فهرس المحتويات</h3>
+            <ul>
+                <li><a href="#overview">1. نظرة عامة</a></li>
+                <li><a href="#ux-specs">2. مواصفات UX (Adobe XD)</a></li>
+                <li><a href="#use-cases">3. حالات الاستخدام</a></li>
+                <li><a href="#types">4. أنواع المدعى عليهم</a></li>
+                <li><a href="#comparison">5. مقارنة مع المدعي</a></li>
+                <li><a href="#data-models">6. نماذج البيانات</a></li>
+                <li><a href="#business-rules">7. قواعد العمل</a></li>
+                <li><a href="#api">8. واجهات API</a></li>
+                <li><a href="#database">9. مخطط قاعدة البيانات</a></li>
+                <li><a href="#shared">10. المكونات المشتركة</a></li>
+                <li><a href="#implementation">11. خطة التنفيذ</a></li>
+                <li><a href="#tasks">12. المهام التفصيلية</a></li>
+            </ul>
+        </div>
+
+        <!-- Section 1: Overview -->
+        <h2 id="overview"><span class="section-number">1</span> نظرة عامة</h2>
+
+        <p>يتناول هذا المستند تنفيذ وحدة إدارة المدعى عليهم في نظام قيد الدعاوى الإدارية. تتميز هذه الوحدة بكونها <strong>أبسط من وحدة المدعين</strong> من حيث:</p>
+
+        <div class="card">
+            <div class="card-header">الفروقات الرئيسية عن المدعي</div>
+            <ul>
+                <li>✅ عدد أنواع أقل (7 أنواع بدلاً من 8)</li>
+                <li>✅ حقول إجبارية أقل (الحد الأدنى: الاسم فقط)</li>
+                <li>✅ التكامل مع أبشر <strong>اختياري</strong> وليس إجباري</li>
+                <li>✅ العنوان <strong>اختياري</strong></li>
+                <li>❌ لا يوجد ممثلين</li>
+                <li>❌ لا يوجد مرفقات</li>
+                <li>❌ لا يوجد عنوان مختار</li>
+                <li>❌ لا يوجد تحديد كمقدم طلب</li>
+            </ul>
+        </div>
+
+        <!-- Section 2: UX Specifications -->
+        <h2 id="ux-specs"><span class="section-number">2</span> مواصفات UX (Adobe XD)</h2>
+
+        <div class="note">
+            <strong>المصدر:</strong> Adobe XD Design - Flow 2<br>
+            <strong>تاريخ آخر تحديث:</strong> Dec 19, 2021
+        </div>
+
+        <h3>2.1 شاشات UX من Adobe XD</h3>
+
+        <h4>شاشة قائمة المدعى عليهم</h4>
+        <div class="card">
+            <img src="ux-screenshots/defendant-list-screen.png" alt="قائمة المدعى عليهم" style="width: 100%; border: 1px solid #ddd; border-radius: 4px;">
+            <p style="margin-top: 10px; color: #666;">شاشة عرض قائمة المدعى عليهم مع زر إضافة مدعى عليه جديد</p>
+        </div>
+
+        <h4>نافذة اختيار نوع المدعى عليه</h4>
+        <div class="card">
+            <img src="Ux/typesdefendant.png" alt="نافذة اختيار نوع المدعى عليه" style="width: 100%; border: 1px solid #ddd; border-radius: 4px;">
+            <p style="margin-top: 10px; color: #666;">عند اختيار النوع، يتم فتح النموذج المناسب مباشرة</p>
+        </div>
+
+        <div class="success">
+            <strong>أنواع المدعى عليهم (7 أنواع):</strong>
+            <ol style="margin: 10px 0 0 0; padding-right: 30px;">
+                <li><strong>فرد</strong> - Individual</li>
+                <li><strong>شركة مسجلة في المملكة</strong> - RegisteredCompany</li>
+                <li><strong>جهة حكومية</strong> - GovernmentAgency</li>
+                <li><strong>شركة غير مسجلة في المملكة</strong> - UnregisteredCompany</li>
+                <li><strong>صاحب مؤسسة</strong> - BusinessOwner</li>
+                <li><strong>جمعية/مؤسسة أهلية</strong> - NGO</li>
+                <li><strong>وقف</strong> - Waqf</li>
+            </ol>
+        </div>
+
+        <h4>نموذج المدعى عليه - البيانات الشخصية</h4>
+        <div class="card">
+            <img src="ux-screenshots/defendant-screen-30.png" alt="البيانات الشخصية" style="width: 100%; border: 1px solid #ddd; border-radius: 4px;">
+            <p style="margin-top: 10px; color: #666;">نموذج إدخال البيانات الشخصية للمدعى عليه (فرد) مع زر استكمال من أبشر</p>
+        </div>
+
+        <h4>نموذج المدعى عليه - بيانات مكان الإقامة</h4>
+        <div class="card">
+            <img src="ux-screenshots/defendant-screen-31.png" alt="بيانات مكان الإقامة" style="width: 100%; border: 1px solid #ddd; border-radius: 4px;">
+            <p style="margin-top: 10px; color: #666;">نموذج العنوان الوطني (المنطقة، المدينة، الحي، الشارع، رقم المبنى، الرمز البريدي)</p>
+        </div>
+
+        <h4>نموذج المدعى عليه - بيانات جهة العمل</h4>
+        <div class="card">
+            <img src="ux-screenshots/defendant-screen-32.png" alt="بيانات جهة العمل" style="width: 100%; border: 1px solid #ddd; border-radius: 4px;">
+            <p style="margin-top: 10px; color: #666;">نموذج بيانات العمل (جهة العمل، المهنة) مع عنوان العمل</p>
+        </div>
+
+        <h4>نموذج صاحب مؤسسة (مرجع)</h4>
+        <div class="card">
+            <img src="ux-screenshots/defendant-screen-46.png" alt="صاحب مؤسسة" style="width: 100%; border: 1px solid #ddd; border-radius: 4px;">
+            <p style="margin-top: 10px; color: #666;">نموذج صاحب مؤسسة يوضح التبويبات الداخلية (بيانات شخصية، بيانات صاحب المؤسسة، بيانات المؤسسة)</p>
+        </div>
+
+        <h3>2.2 نظام الألوان</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>العنصر</th>
+                    <th>اللون</th>
+                    <th>الكود</th>
+                    <th>الاستخدام</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>اللون الأساسي</td>
+                    <td style="background: #1B5E20; color: white;">أخضر داكن</td>
+                    <td><code>#1B5E20</code></td>
+                    <td>الأزرار الأساسية، الشريط العلوي، العناوين</td>
+                </tr>
+                <tr>
+                    <td>اللون الثانوي</td>
+                    <td style="background: #2E7D32; color: white;">أخضر فاتح</td>
+                    <td><code>#2E7D32</code></td>
+                    <td>حالات Hover، الأيقونات</td>
+                </tr>
+                <tr>
+                    <td>لون الخلفية</td>
+                    <td style="background: #f5f5f5;">رمادي فاتح</td>
+                    <td><code>#f5f5f5</code></td>
+                    <td>خلفية الصفحة</td>
+                </tr>
+                <tr>
+                    <td>لون البطاقات</td>
+                    <td style="background: #ffffff;">أبيض</td>
+                    <td><code>#ffffff</code></td>
+                    <td>خلفية النماذج والجداول</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h3>2.3 الأزرار والتفاعلات</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>الزر</th>
+                    <th>النمط</th>
+                    <th>اللون</th>
+                    <th>الإجراء</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>إضافة مدعي عليه جديد</td>
+                    <td>أساسي مع أيقونة +</td>
+                    <td style="background: #1B5E20; color: white;">#1B5E20</td>
+                    <td>فتح نموذج إضافة مدعى عليه</td>
+                </tr>
+                <tr>
+                    <td>استكمال من ابشر</td>
+                    <td>أساسي صغير</td>
+                    <td style="background: #1B5E20; color: white;">#1B5E20</td>
+                    <td>جلب البيانات من أبشر (اختياري)</td>
+                </tr>
+                <tr>
+                    <td>حفظ المدعي عليه</td>
+                    <td>أساسي</td>
+                    <td style="background: #1B5E20; color: white;">#1B5E20</td>
+                    <td>حفظ بيانات المدعى عليه</td>
+                </tr>
+                <tr>
+                    <td>التالي</td>
+                    <td>محدد (outlined)</td>
+                    <td style="background: white; border: 1px solid #1B5E20; color: #1B5E20;">outlined</td>
+                    <td>الانتقال للخطوة التالية</td>
+                </tr>
+                <tr>
+                    <td>إلغاء</td>
+                    <td>محدد (outlined)</td>
+                    <td style="background: white; border: 1px solid #ccc;">outlined gray</td>
+                    <td>إلغاء وإغلاق النموذج</td>
+                </tr>
+                <tr>
+                    <td>عودة</td>
+                    <td>محدد (outlined)</td>
+                    <td style="background: white; border: 1px solid #ccc;">outlined gray</td>
+                    <td>العودة للقائمة</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h3>2.4 التبويبات الداخلية للنموذج حسب النوع</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>نوع المدعى عليه</th>
+                    <th>التبويب 1</th>
+                    <th>التبويب 2</th>
+                    <th>التبويب 3</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><span class="badge badge-type">1- فرد</span></td>
+                    <td>بيانات شخصية</td>
+                    <td>بيانات مكان الإقامة</td>
+                    <td>بيانات جهة العمل</td>
+                </tr>
+                <tr>
+                    <td><span class="badge badge-type">2- شركة مسجلة</span></td>
+                    <td>بيانات السجل التجاري</td>
+                    <td>بيانات العنوان الوطني للشركة</td>
+                    <td>-</td>
+                </tr>
+                <tr>
+                    <td><span class="badge badge-type">3- جهة حكومية</span></td>
+                    <td>بيانات الجهة الحكومية</td>
+                    <td>-</td>
+                    <td>-</td>
+                </tr>
+                <tr>
+                    <td><span class="badge badge-type">4- شركة غير مسجلة</span></td>
+                    <td>بيانات الشركة</td>
+                    <td>-</td>
+                    <td>-</td>
+                </tr>
+                <tr>
+                    <td><span class="badge badge-type">5- صاحب مؤسسة</span></td>
+                    <td>بيانات شخصية</td>
+                    <td>بيانات صاحب المؤسسة</td>
+                    <td>بيانات المؤسسة</td>
+                </tr>
+                <tr>
+                    <td><span class="badge badge-type">6- جمعية/مؤسسة أهلية</span></td>
+                    <td>بيانات جمعية / مؤسسة أهلية</td>
+                    <td>عنوان الجمعية / المؤسسة الأهلية</td>
+                    <td>-</td>
+                </tr>
+                <tr>
+                    <td><span class="badge badge-type">7- وقف</span></td>
+                    <td>بيانات الوقف</td>
+                    <td>بيانات العنوان الوطني للوقف</td>
+                    <td>-</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="note">
+            <strong>محتوى التبويبات:</strong>
+            <ul>
+                <li><strong>بيانات شخصية (فرد):</strong>
+                    <ul>
+                        <li>نوع الهوية (هوية وطنية / مقيم فقط - بدون جواز سفر)، رقم الهوية، الاسم الأول، اسم الأب، اسم الجد، اسم الفخذ، اسم العائلة، تاريخ الميلاد، الجنسية، الجنس، رقم الجوال</li>
+                        <li><em>حقول مخفية:</em> تاريخ إصدار الهوية، تاريخ انتهاء الهوية</li>
+                        <li><em>الحقول الإجبارية:</em> الاسم الأول، اسم الأب (إجباري فقط إذا نوع الهوية = هوية وطنية)، اسم العائلة، الجنس، الجنسية، رقم الجوال</li>
+                        <li><em>الحقول الاختيارية:</em> نوع الهوية، رقم الهوية، اسم الجد، اسم الفخذ، تاريخ الميلاد</li>
+                    </ul>
+                </li>
+                <li><strong>بيانات مكان الإقامة (فرد):</strong> المنطقة (إجباري)، المدينة (إجباري)، الحي (اختياري)، الشارع (اختياري)، رقم المبنى (اختياري)، رقم الوحدة (اختياري)، الرمز البريدي (اختياري)، الرمز الافتراضي (اختياري)</li>
+                <li><strong>بيانات جهة العمل:</strong> حالة العمل (اختياري)، جهة العمل (إجباري شرطي)، المهنة (إجباري شرطي)
+                    <ul>
+                        <li><em>شرط الإظهار:</em> يظهر حقول جهة العمل والمهنة فقط إذا كانت حالة العمل = حكومي أو خاص</li>
+                        <li><em>شرط الإخفاء:</em> يُخفى حقول جهة العمل والمهنة إذا كانت حالة العمل = بدون عمل أو غير محددة</li>
+                        <li><em>الحقول الإجبارية الشرطية:</em> جهة العمل والمهنة إجبارية عند اختيار حالة العمل = حكومي (1) أو خاص (2)</li>
+                    </ul>
+                </li>
+                <li><strong>عنوان العمل (فرد - خاص فقط):</strong> المنطقة (إجباري)، المدينة (إجباري)، الحي (إجباري)، الشارع (إجباري)، رقم المبنى (إجباري)، رقم الوحدة (إجباري)، الرمز البريدي (إجباري)، الرمز الإضافي (إجباري)
+                    <ul>
+                        <li><em>شرط الإظهار:</em> يظهر نموذج العنوان الوطني للعمل فقط إذا كانت حالة العمل = خاص</li>
+                        <li><em>شرط الإخفاء:</em> يُخفى نموذج العنوان الوطني للعمل إذا كانت حالة العمل = حكومي أو بدون عمل</li>
+                        <li><em>الحقول الإجبارية:</em> جميع حقول عنوان العمل إجبارية عند إظهار النموذج</li>
+                    </ul>
+                </li>
+                <li><strong>بيانات الشركة:</strong> رقم السجل التجاري (20 حرف)، اسم الشركة (200 حرف)، الدولة (اختيار من قاعدة البيانات)، المدينة (100 حرف)، وصف تقريبي (1000 حرف)</li>
+                <li><strong>بيانات السجل التجاري:</strong> رقم السجل، تاريخ البداية، تاريخ النهاية</li>
+                <li><strong>بيانات الجهة الحكومية:</strong> اختيار الجهة من القائمة، المقر، بيان إضافي</li>
+                <li><strong>بيانات شخصية (صاحب مؤسسة):</strong> نوع الهوية (هوية وطنية / مقيم فقط - بدون جواز سفر)، رقم الهوية، الاسم الأول، اسم الأب، اسم الجد، اسم الفخذ، اسم العائلة، تاريخ الميلاد، الجنسية، الجنس، رقم الجوال</li>
+                <li><strong>بيانات صاحب المؤسسة:</strong> بيانات المالك الشخصية</li>
+                <li><strong>بيانات المؤسسة:</strong> اسم المؤسسة، السجل التجاري، العنوان</li>
+                <li><strong>بيانات الجمعية:</strong> اسم الجمعية، عنوان الجمعية</li>
+                <li><strong>بيانات الترخيص:</strong> رقم الترخيص، مصدر الترخيص، تاريخ الترخيص</li>
+                <li><strong>بيانات الوقف:</strong> اسم الوقف، رقم صك المحكمة، تاريخ الصك، مصدر الصك، نظارة الوقف</li>
+            </ul>
+        </div>
+
+        <h3>2.5 قواعد العرض المشروط</h3>
+        <div class="card">
+            <div class="card-header">إظهار/إخفاء الحقول والأقسام</div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>نوع المدعى عليه</th>
+                        <th>الأقسام المعروضة</th>
+                        <th>الحقول الإجبارية</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>فرد (1)</td>
+                        <td>بيانات شخصية، بيانات مكان الإقامة، بيانات جهة العمل، بيانات التواصل</td>
+                        <td>الاسم الأول، اسم العائلة، الجنس، الجنسية، رقم الجوال، المنطقة، المدينة، جهة العمل والمهنة (شرطي عند حالة عمل = حكومي/خاص)</td>
+                    </tr>
+                    <tr>
+                        <td>شركة مسجلة (2)</td>
+                        <td>بيانات الشركة، بيانات السجل التجاري</td>
+                        <td>اسم الشركة</td>
+                    </tr>
+                    <tr>
+                        <td>جهة حكومية (3)</td>
+                        <td>اختيار الجهة الحكومية</td>
+                        <td>الجهة الحكومية</td>
+                    </tr>
+                    <tr>
+                        <td>شركة غير مسجلة (4)</td>
+                        <td>بيانات الشركة، الوصف</td>
+                        <td>اسم الشركة</td>
+                    </tr>
+                    <tr>
+                        <td>صاحب مؤسسة (5)</td>
+                        <td>بيانات شخصية، بيانات صاحب المؤسسة، بيانات المؤسسة</td>
+                        <td>الاسم الأول</td>
+                    </tr>
+                    <tr>
+                        <td>جمعية/مؤسسة أهلية (6)</td>
+                        <td>بيانات الجمعية، رقم الترخيص</td>
+                        <td>اسم الجمعية</td>
+                    </tr>
+                    <tr>
+                        <td>وقف (7)</td>
+                        <td>بيانات الوقف</td>
+                        <td>اسم الوقف</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Section 3: Use Cases -->
+        <h2 id="use-cases"><span class="section-number">3</span> حالات الاستخدام</h2>
+
+        <div class="use-case-box">
+            <span class="use-case-id">6.5.1.1.11</span> - <strong>المدعى عليهم (Defendants List)</strong>
+            <p>عرض قائمة المدعى عليهم المسجلين على طلب قيد الدعوى مع إمكانية الإضافة والتعديل والحذف.</p>
+        </div>
+
+        <div class="use-case-box">
+            <span class="use-case-id">6.5.1.1.12</span> - <strong>إضافة مدّعى عليه (Add Defendant)</strong>
+            <p>إضافة مدّعى عليه جديد بنموذج بيانات مختصر (الحد الأدنى: الاسم).</p>
+        </div>
+
+        <div class="use-case-box">
+            <span class="use-case-id">6.5.1.1.13</span> - <strong>استعراض تفاصيل مدّعى عليه (View Defendant)</strong>
+            <p>عرض تفاصيل المدّعى عليه بوضع القراءة فقط.</p>
+        </div>
+
+        <div class="use-case-box">
+            <span class="use-case-id">6.5.1.1.14</span> - <strong>تعديل مدّعى عليه (Edit Defendant)</strong>
+            <p>تعديل بيانات المدّعى عليه المحفوظة.</p>
+        </div>
+
+        <!-- Section 4: Defendant Types -->
+        <h2 id="types"><span class="section-number">4</span> أنواع المدعى عليهم (7 أنواع)</h2>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>الرمز</th>
+                    <th>النوع بالعربية</th>
+                    <th>النوع بالإنجليزية</th>
+                    <th>الكود</th>
+                    <th>النموذج المستخدم</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>1</td>
+                    <td><span class="badge badge-type">فرد</span></td>
+                    <td>Individual</td>
+                    <td>DEF_IND</td>
+                    <td>بيانات شخصية مختصرة</td>
+                </tr>
+                <tr>
+                    <td>2</td>
+                    <td><span class="badge badge-type">شركة مسجلة</span></td>
+                    <td>Registered Company</td>
+                    <td>DEF_COMP_REG</td>
+                    <td>بيانات السجل التجاري</td>
+                </tr>
+                <tr>
+                    <td>3</td>
+                    <td><span class="badge badge-type">جهة حكومية</span></td>
+                    <td>Government Agency</td>
+                    <td>GovernmentAgency</td>
+                    <td>اختيار من قائمة الجهات</td>
+                </tr>
+                <tr>
+                    <td>4</td>
+                    <td><span class="badge badge-type">شركة غير مسجلة</span></td>
+                    <td>Unregistered Company</td>
+                    <td>UnregisteredCompany</td>
+                    <td>اسم الشركة + الوصف</td>
+                </tr>
+                <tr>
+                    <td>5</td>
+                    <td><span class="badge badge-type">صاحب مؤسسة</span></td>
+                    <td>Business Owner</td>
+                    <td>DEF_BIZ</td>
+                    <td>بيانات شخصية + سجل تجاري</td>
+                </tr>
+                <tr>
+                    <td>6</td>
+                    <td><span class="badge badge-type">جمعية/مؤسسة أهلية</span></td>
+                    <td>NGO</td>
+                    <td>DEF_NGO</td>
+                    <td>رقم الترخيص + بيانات الجمعية</td>
+                </tr>
+                <tr>
+                    <td>7</td>
+                    <td><span class="badge badge-type">وقف</span></td>
+                    <td>Waqf/Endowment</td>
+                    <td>DEF_WAQF</td>
+                    <td>بيانات الوقف</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="warning">
+            <strong>ملاحظة:</strong> النوع المحذوف مقارنة بالمدعي:
+            <ul>
+                <li>❌ فرد بدون هوية (Individual Without ID)</li>
+            </ul>
+        </div>
+
+        <!-- Section 5: Comparison -->
+        <h2 id="comparison"><span class="section-number">5</span> مقارنة بين المدعي والمدعى عليه</h2>
+
+        <table class="comparison-table">
+            <thead>
+                <tr>
+                    <th>الميزة</th>
+                    <th>المدعي (Plaintiff)</th>
+                    <th>المدعى عليه (Defendant)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>عدد الأنواع</td>
+                    <td>8 أنواع</td>
+                    <td>7 أنواع</td>
+                </tr>
+                <tr>
+                    <td>الحقول الإجبارية</td>
+                    <td>كثيرة (حسب النوع)</td>
+                    <td>قليلة (الحد الأدنى: الاسم)</td>
+                </tr>
+                <tr>
+                    <td>التكامل مع أبشر</td>
+                    <td><span class="badge badge-required">إجباري للفرد</span></td>
+                    <td><span class="badge badge-optional">اختياري</span></td>
+                </tr>
+                <tr>
+                    <td>العنوان</td>
+                    <td><span class="badge badge-required">إجباري</span></td>
+                    <td><span class="badge badge-optional">اختياري</span></td>
+                </tr>
+                <tr>
+                    <td>الممثلين</td>
+                    <td>✅ نعم</td>
+                    <td>❌ لا</td>
+                </tr>
+                <tr>
+                    <td>المرفقات</td>
+                    <td>✅ نعم</td>
+                    <td>❌ لا</td>
+                </tr>
+                <tr>
+                    <td>العنوان المختار</td>
+                    <td>✅ نعم</td>
+                    <td>❌ لا</td>
+                </tr>
+                <tr>
+                    <td>تحديد كمقدم طلب</td>
+                    <td>✅ نعم</td>
+                    <td>❌ لا</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- Section 6: Data Models -->
+        <h2 id="data-models"><span class="section-number">6</span> نماذج البيانات</h2>
+
+        <h3>6.1 النموذج الأساسي للمدعى عليه</h3>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>الحقل</th>
+                    <th>Field</th>
+                    <th>النوع</th>
+                    <th>إجباري</th>
+                    <th>القيود</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>نوع المدعى عليه</td>
+                    <td>DefendantTypeId</td>
+                    <td>اختيار</td>
+                    <td><span class="badge badge-required">نعم</span></td>
+                    <td>1-6</td>
+                </tr>
+                <tr>
+                    <td>الاسم</td>
+                    <td>Name</td>
+                    <td>نص</td>
+                    <td><span class="badge badge-required">نعم</span></td>
+                    <td>حد أقصى 500 حرف</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h3>6.2 نموذج فرد (DefendantType = 1)</h3>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>الحقل</th>
+                    <th>Field</th>
+                    <th>النوع</th>
+                    <th>إجباري</th>
+                    <th>القيود</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>نوع الهوية</td>
+                    <td>IdentityTypeId</td>
+                    <td>اختيار</td>
+                    <td><span class="badge badge-optional">لا</span></td>
+                    <td>هوية وطنية / هوية مقيم</td>
+                </tr>
+                <tr>
+                    <td>رقم الهوية</td>
+                    <td>IdentityNumber</td>
+                    <td>نص</td>
+                    <td><span class="badge badge-optional">لا</span></td>
+                    <td>10 أرقام فقط</td>
+                </tr>
+                <tr>
+                    <td>الاسم الأول</td>
+                    <td>FirstName</td>
+                    <td>نص</td>
+                    <td><span class="badge badge-required">نعم</span></td>
+                    <td>-</td>
+                </tr>
+                <tr>
+                    <td>اسم الأب</td>
+                    <td>FatherName</td>
+                    <td>نص</td>
+                    <td><span class="badge badge-conditional">مشروط</span></td>
+                    <td>إجباري فقط إذا نوع الهوية = هوية وطنية</td>
+                </tr>
+                <tr>
+                    <td>اسم الجد</td>
+                    <td>GrandfatherName</td>
+                    <td>نص</td>
+                    <td><span class="badge badge-optional">لا</span></td>
+                    <td>-</td>
+                </tr>
+                <tr>
+                    <td>اسم الفخذ</td>
+                    <td>TribeName</td>
+                    <td>نص</td>
+                    <td><span class="badge badge-optional">لا</span></td>
+                    <td>-</td>
+                </tr>
+                <tr>
+                    <td>اسم العائلة</td>
+                    <td>FamilyName</td>
+                    <td>نص</td>
+                    <td><span class="badge badge-required">نعم</span></td>
+                    <td>-</td>
+                </tr>
+                <tr>
+                    <td>تاريخ الميلاد</td>
+                    <td>BirthDate</td>
+                    <td>تاريخ</td>
+                    <td><span class="badge badge-optional">لا</span></td>
+                    <td>لا يقبل تاريخ في المستقبل</td>
+                </tr>
+                <tr>
+                    <td>الجنس</td>
+                    <td>GenderId</td>
+                    <td>اختيار</td>
+                    <td><span class="badge badge-required">نعم</span></td>
+                    <td>ذكر / أنثى</td>
+                </tr>
+                <tr>
+                    <td>الجنسية</td>
+                    <td>NationalityId</td>
+                    <td>اختيار</td>
+                    <td><span class="badge badge-required">نعم</span></td>
+                    <td>إذا نوع الهوية = هوية وطنية: "سعودي" (عرض فقط). إذا نوع الهوية = هوية مقيم: اختيار من قاعدة البيانات باستثناء السعودي</td>
+                </tr>
+                <tr>
+                    <td>رقم الجوال</td>
+                    <td>MobileNumber</td>
+                    <td>نص</td>
+                    <td><span class="badge badge-required">نعم</span></td>
+                    <td>10 أرقام، يبدأ بـ 05</td>
+                </tr>
+                <tr>
+                    <td>البريد الإلكتروني</td>
+                    <td>Email</td>
+                    <td>نص</td>
+                    <td><span class="badge badge-optional">لا</span></td>
+                    <td>صيغة بريد إلكتروني صحيحة</td>
+                </tr>
+                <tr>
+                    <td>المنطقة</td>
+                    <td>IndRegionId</td>
+                    <td>اختيار</td>
+                    <td><span class="badge badge-required">نعم</span></td>
+                    <td>اختيار من قاعدة البيانات</td>
+                </tr>
+                <tr>
+                    <td>المدينة</td>
+                    <td>IndCityId</td>
+                    <td>اختيار</td>
+                    <td><span class="badge badge-required">نعم</span></td>
+                    <td>اختيار من قاعدة البيانات (يعتمد على المنطقة)</td>
+                </tr>
+                <tr>
+                    <td>الحي</td>
+                    <td>IndDistrict</td>
+                    <td>نص</td>
+                    <td><span class="badge badge-optional">لا</span></td>
+                    <td>حد أقصى 100 حرف</td>
+                </tr>
+                <tr>
+                    <td>الشارع</td>
+                    <td>IndStreet</td>
+                    <td>نص</td>
+                    <td><span class="badge badge-optional">لا</span></td>
+                    <td>حد أقصى 200 حرف</td>
+                </tr>
+                <tr>
+                    <td>رقم المبنى</td>
+                    <td>IndBuildingNumber</td>
+                    <td>نص</td>
+                    <td><span class="badge badge-optional">لا</span></td>
+                    <td>4 أرقام فقط</td>
+                </tr>
+                <tr>
+                    <td>رقم الوحدة</td>
+                    <td>IndUnitNumber</td>
+                    <td>نص</td>
+                    <td><span class="badge badge-optional">لا</span></td>
+                    <td>4 أرقام فقط</td>
+                </tr>
+                <tr>
+                    <td>الرمز البريدي</td>
+                    <td>IndPostalCode</td>
+                    <td>نص</td>
+                    <td><span class="badge badge-optional">لا</span></td>
+                    <td>5 أرقام فقط</td>
+                </tr>
+                <tr>
+                    <td>الرمز الإضافي</td>
+                    <td>IndAdditionalCode</td>
+                    <td>نص</td>
+                    <td><span class="badge badge-optional">لا</span></td>
+                    <td>4 أرقام فقط</td>
+                </tr>
+                <tr>
+                    <td>حالة العمل</td>
+                    <td>EmploymentStatus</td>
+                    <td>اختيار</td>
+                    <td><span class="badge badge-optional">لا</span></td>
+                    <td>حكومي / خاص / بدون عمل</td>
+                </tr>
+                <tr>
+                    <td>جهة العمل</td>
+                    <td>Employer</td>
+                    <td>نص</td>
+                    <td><span class="badge badge-conditional">مشروط</span></td>
+                    <td>إجباري ويظهر فقط إذا حالة العمل = حكومي أو خاص، حد أقصى 200 حرف</td>
+                </tr>
+                <tr>
+                    <td>المهنة</td>
+                    <td>Occupation</td>
+                    <td>نص</td>
+                    <td><span class="badge badge-conditional">مشروط</span></td>
+                    <td>إجباري ويظهر فقط إذا حالة العمل = حكومي أو خاص، حد أقصى 200 حرف</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h4>عنوان العمل (يظهر فقط إذا حالة العمل = خاص)</h4>
+        <p><strong>قاعدة العمل:</strong></p>
+        <ul>
+            <li>يتم إظهار نموذج العنوان الوطني للعمل فقط إذا كانت حالة العمل للفرد = <strong>خاص</strong></li>
+            <li>يتم إخفاء نموذج العنوان الوطني للعمل إذا كانت حالة العمل للفرد = <strong>حكومي</strong> أو <strong>بدون عمل</strong></li>
+            <li><strong>جميع الحقول إجبارية عند إظهار النموذج</strong></li>
+        </ul>
+        <table>
+            <thead>
+                <tr>
+                    <th>الحقل</th>
+                    <th>Field</th>
+                    <th>النوع</th>
+                    <th>إجباري</th>
+                    <th>القيود</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>منطقة العمل</td>
+                    <td>WorkRegionId</td>
+                    <td>اختيار</td>
+                    <td><span class="badge badge-required">نعم</span></td>
+                    <td>اختيار من قاعدة البيانات</td>
+                </tr>
+                <tr>
+                    <td>مدينة العمل</td>
+                    <td>WorkCityId</td>
+                    <td>اختيار</td>
+                    <td><span class="badge badge-required">نعم</span></td>
+                    <td>اختيار من قاعدة البيانات (يعتمد على المنطقة)</td>
+                </tr>
+                <tr>
+                    <td>حي العمل</td>
+                    <td>WorkDistrict</td>
+                    <td>نص</td>
+                    <td><span class="badge badge-required">نعم</span></td>
+                    <td>حد أقصى 100 حرف</td>
+                </tr>
+                <tr>
+                    <td>شارع العمل</td>
+                    <td>WorkStreet</td>
+                    <td>نص</td>
+                    <td><span class="badge badge-required">نعم</span></td>
+                    <td>حد أقصى 200 حرف</td>
+                </tr>
+                <tr>
+                    <td>رقم مبنى العمل</td>
+                    <td>WorkBuildingNumber</td>
+                    <td>نص</td>
+                    <td><span class="badge badge-required">نعم</span></td>
+                    <td>4 أرقام فقط</td>
+                </tr>
+                <tr>
+                    <td>رقم وحدة العمل</td>
+                    <td>WorkUnitNumber</td>
+                    <td>نص</td>
+                    <td><span class="badge badge-required">نعم</span></td>
+                    <td>4 أرقام فقط</td>
+                </tr>
+                <tr>
+                    <td>الرمز البريدي للعمل</td>
+                    <td>WorkPostalCode</td>
+                    <td>نص</td>
+                    <td><span class="badge badge-required">نعم</span></td>
+                    <td>5 أرقام فقط</td>
+                </tr>
+                <tr>
+                    <td>الرمز الإضافي للعمل</td>
+                    <td>WorkAdditionalCode</td>
+                    <td>نص</td>
+                    <td><span class="badge badge-required">نعم</span></td>
+                    <td>4 أرقام فقط</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h3>6.3 نموذج شركة مسجلة (DefendantType = 2)</h3>
+
+        <h4>بيانات الشركة</h4>
+        <table>
+            <thead>
+                <tr>
+                    <th>الحقل</th>
+                    <th>Field</th>
+                    <th>النوع</th>
+                    <th>إجباري</th>
+                    <th>القيود</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>رقم السجل التجاري</td>
+                    <td>CommercialRegNumber</td>
+                    <td>نص</td>
+                    <td><span class="badge badge-required">نعم</span></td>
+                    <td>10 أرقام فقط</td>
+                </tr>
+                <tr>
+                    <td>اسم المؤسسة / الشركة</td>
+                    <td>CompanyName</td>
+                    <td>نص</td>
+                    <td><span class="badge badge-required">نعم</span></td>
+                    <td>حد أقصى 200 حرف، عربي + أرقام</td>
+                </tr>
+                <tr>
+                    <td>تاريخ بداية السجل</td>
+                    <td>RegistrationStartDate</td>
+                    <td>تاريخ</td>
+                    <td><span class="badge badge-required">نعم</span></td>
+                    <td>لا يقبل تاريخ في المستقبل</td>
+                </tr>
+                <tr>
+                    <td>تاريخ نهاية السجل</td>
+                    <td>RegistrationEndDate</td>
+                    <td>تاريخ</td>
+                    <td><span class="badge badge-required">نعم</span></td>
+                    <td>يجب أن يكون أكبر من تاريخ بداية السجل</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h4>العنوان الوطني (جميع الحقول إجبارية)</h4>
+        <table>
+            <thead>
+                <tr>
+                    <th>الحقل</th>
+                    <th>Field</th>
+                    <th>النوع</th>
+                    <th>إجباري</th>
+                    <th>القيود</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>المنطقة</td>
+                    <td>RegionId</td>
+                    <td>اختيار</td>
+                    <td><span class="badge badge-required">نعم</span></td>
+                    <td>13 منطقة في المملكة</td>
+                </tr>
+                <tr>
+                    <td>المدينة</td>
+                    <td>CityId</td>
+                    <td>اختيار</td>
+                    <td><span class="badge badge-required">نعم</span></td>
+                    <td>يعتمد على المنطقة</td>
+                </tr>
+                <tr>
+                    <td>الحي</td>
+                    <td>DistrictId</td>
+                    <td>اختيار</td>
+                    <td><span class="badge badge-required">نعم</span></td>
+                    <td>يعتمد على المدينة</td>
+                </tr>
+                <tr>
+                    <td>الشارع</td>
+                    <td>Street</td>
+                    <td>نص</td>
+                    <td><span class="badge badge-required">نعم</span></td>
+                    <td>حد أقصى 200 حرف</td>
+                </tr>
+                <tr>
+                    <td>رقم المبنى</td>
+                    <td>BuildingNumber</td>
+                    <td>نص</td>
+                    <td><span class="badge badge-required">نعم</span></td>
+                    <td>4 أرقام فقط</td>
+                </tr>
+                <tr>
+                    <td>رقم الوحدة</td>
+                    <td>UnitNumber</td>
+                    <td>نص</td>
+                    <td><span class="badge badge-required">نعم</span></td>
+                    <td>أرقام فقط</td>
+                </tr>
+                <tr>
+                    <td>الرمز البريدي</td>
+                    <td>PostalCode</td>
+                    <td>نص</td>
+                    <td><span class="badge badge-required">نعم</span></td>
+                    <td>5 أرقام فقط</td>
+                </tr>
+                <tr>
+                    <td>الرمز الإضافي</td>
+                    <td>AdditionalCode</td>
+                    <td>نص</td>
+                    <td><span class="badge badge-required">نعم</span></td>
+                    <td>4 أرقام فقط</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h3>6.4 نموذج شركة غير مسجلة (DefendantType = 4)</h3>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>الحقل</th>
+                    <th>Field</th>
+                    <th>النوع</th>
+                    <th>إجباري</th>
+                    <th>القيود</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>رقم السجل التجاري</td>
+                    <td>CommercialRegNumber</td>
+                    <td>نص</td>
+                    <td><span class="badge badge-required">نعم</span></td>
+                    <td>حد أقصى 20 حرف</td>
+                </tr>
+                <tr>
+                    <td>اسم الشركة</td>
+                    <td>CompanyName</td>
+                    <td>نص</td>
+                    <td><span class="badge badge-required">نعم</span></td>
+                    <td>حد أقصى 200 حرف</td>
+                </tr>
+                <tr>
+                    <td>الدولة</td>
+                    <td>CountryId</td>
+                    <td>اختيار</td>
+                    <td><span class="badge badge-required">نعم</span></td>
+                    <td>من قاعدة البيانات</td>
+                </tr>
+                <tr>
+                    <td>المدينة</td>
+                    <td>City</td>
+                    <td>نص</td>
+                    <td><span class="badge badge-required">نعم</span></td>
+                    <td>حد أقصى 100 حرف</td>
+                </tr>
+                <tr>
+                    <td>وصف تقريبي</td>
+                    <td>Description</td>
+                    <td>نص</td>
+                    <td><span class="badge badge-required">نعم</span></td>
+                    <td>حد أقصى 1000 حرف</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h3>6.5 نموذج جهة حكومية (DefendantType = 3)</h3>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>الحقل</th>
+                    <th>Field</th>
+                    <th>النوع</th>
+                    <th>إجباري</th>
+                    <th>القيود</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>الجهة</td>
+                    <td>GovernmentAgencyId</td>
+                    <td>اختيار</td>
+                    <td><span class="badge badge-required">نعم</span></td>
+                    <td>من جدول الجهات الحكومية في قاعدة البيانات</td>
+                </tr>
+                <tr>
+                    <td>المقر</td>
+                    <td>Headquarters</td>
+                    <td>نص</td>
+                    <td><span class="badge badge-required">نعم</span></td>
+                    <td>للقراءة فقط - يتم تعبئته تلقائياً بناءً على الجهة المختارة</td>
+                </tr>
+                <tr>
+                    <td>بيان إضافي</td>
+                    <td>AdditionalStatement</td>
+                    <td>نص</td>
+                    <td><span class="badge badge-optional">لا</span></td>
+                    <td>حد أقصى 4000 حرف</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h3>6.6 نموذج صاحب مؤسسة (DefendantType = 5)</h3>
+
+        <h4>1. البيانات الشخصية (مخصص - يختلف عن الفرد)</h4>
+        <table>
+            <thead>
+                <tr>
+                    <th>الحقل</th>
+                    <th>Field</th>
+                    <th>النوع</th>
+                    <th>إجباري</th>
+                    <th>القيود</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>نوع الهوية</td>
+                    <td>IdentityTypeId</td>
+                    <td>اختيار</td>
+                    <td><span class="badge badge-optional">لا</span></td>
+                    <td>هوية وطنية / هوية مقيم / جواز سفر</td>
+                </tr>
+                <tr>
+                    <td>رقم الهوية</td>
+                    <td>IdentityNumber</td>
+                    <td>نص</td>
+                    <td><span class="badge badge-optional">لا</span></td>
+                    <td>10 أرقام (هوية وطنية/مقيم) أو 20 حرف (جواز سفر)</td>
+                </tr>
+                <tr>
+                    <td>الاسم الأول</td>
+                    <td>FirstName</td>
+                    <td>نص</td>
+                    <td><span class="badge badge-optional">لا</span></td>
+                    <td rowspan="5">للقراءة فقط (من أبشر) للهوية الوطنية/المقيم<br>قابل للتعديل لجواز السفر</td>
+                </tr>
+                <tr>
+                    <td>اسم الأب</td>
+                    <td>FatherName</td>
+                    <td>نص</td>
+                    <td><span class="badge badge-optional">لا</span></td>
+                </tr>
+                <tr>
+                    <td>اسم الجد</td>
+                    <td>GrandfatherName</td>
+                    <td>نص</td>
+                    <td><span class="badge badge-optional">لا</span></td>
+                </tr>
+                <tr>
+                    <td>اسم الفخذ</td>
+                    <td>TribeName</td>
+                    <td>نص</td>
+                    <td><span class="badge badge-optional">لا</span></td>
+                </tr>
+                <tr>
+                    <td>اسم العائلة</td>
+                    <td>FamilyName</td>
+                    <td>نص</td>
+                    <td><span class="badge badge-optional">لا</span></td>
+                </tr>
+                <tr>
+                    <td>تاريخ الميلاد</td>
+                    <td>BirthDate</td>
+                    <td>تاريخ</td>
+                    <td><span class="badge badge-optional">لا</span></td>
+                    <td>لا يقبل تاريخ في المستقبل</td>
+                </tr>
+                <tr>
+                    <td>الجنس</td>
+                    <td>GenderId</td>
+                    <td>اختيار</td>
+                    <td><span class="badge badge-optional">لا</span></td>
+                    <td>ذكر / أنثى</td>
+                </tr>
+                <tr>
+                    <td>الجنسية</td>
+                    <td>NationalityId</td>
+                    <td>اختيار</td>
+                    <td><span class="badge badge-optional">لا</span></td>
+                    <td>إذا نوع الهوية = هوية وطنية: "سعودي" (عرض فقط). إذا نوع الهوية = هوية مقيم أو جواز سفر: اختيار من قاعدة البيانات باستثناء السعودي</td>
+                </tr>
+                <tr>
+                    <td>رقم الجوال</td>
+                    <td>MobileNumber</td>
+                    <td>نص</td>
+                    <td><span class="badge badge-optional">لا</span></td>
+                    <td>10 أرقام، يبدأ بـ 05</td>
+                </tr>
+                <tr>
+                    <td>البريد الإلكتروني</td>
+                    <td>Email</td>
+                    <td>نص</td>
+                    <td><span class="badge badge-optional">لا</span></td>
+                    <td>صيغة بريد إلكتروني صحيحة</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h4>2. عنوان صاحب المؤسسة</h4>
+        <div class="note">
+            يستخدم نموذج العنوان الوطني المشترك
+        </div>
+
+        <h4>3. حالة العمل</h4>
+        <table>
+            <thead>
+                <tr>
+                    <th>الحقل</th>
+                    <th>Field</th>
+                    <th>النوع</th>
+                    <th>إجباري</th>
+                    <th>القيود</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>حالة العمل</td>
+                    <td>EmploymentStatus</td>
+                    <td>اختيار</td>
+                    <td><span class="badge badge-optional">لا</span></td>
+                    <td>حكومي / خاص / بدون عمل</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h4>4. بيانات جهة العمل (BC01)</h4>
+        <div class="warning">
+            <strong>شرط الإظهار:</strong> يظهر فقط إذا حالة العمل = حكومي أو خاص<br>
+            <strong>شرط الإخفاء:</strong> يُخفى إذا حالة العمل = بدون عمل
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>الحقل</th>
+                    <th>Field</th>
+                    <th>النوع</th>
+                    <th>إجباري</th>
+                    <th>القيود</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>جهة العمل</td>
+                    <td>Employer</td>
+                    <td>نص</td>
+                    <td><span class="badge badge-optional">لا</span></td>
+                    <td>حد أقصى 200 حرف</td>
+                </tr>
+                <tr>
+                    <td>المهنة</td>
+                    <td>Occupation</td>
+                    <td>نص</td>
+                    <td><span class="badge badge-optional">لا</span></td>
+                    <td>حد أقصى 200 حرف</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h4>5. العنوان الوطني للعمل (BC02)</h4>
+        <div class="warning">
+            <strong>شرط الإظهار:</strong> يظهر فقط إذا حالة العمل = خاص<br>
+            <strong>شرط الإخفاء:</strong> يُخفى إذا حالة العمل = حكومي أو بدون عمل
+        </div>
+        <div class="note">
+            يستخدم نموذج العنوان الوطني المشترك
+        </div>
+
+        <h4>6. بيانات المكتب/المؤسسة</h4>
+        <div class="note">
+            يستخدم نموذج السجل التجاري المشترك (كما في شركة مسجلة)
+        </div>
+
+        <h4>7. عنوان المؤسسة</h4>
+        <div class="note">
+            يستخدم نموذج العنوان الوطني المشترك
+        </div>
+
+        <h3>6.7 نموذج جمعية/مؤسسة أهلية (DefendantType = 6)</h3>
+
+        <h4>بيانات الجمعية/المؤسسة</h4>
+        <table>
+            <thead>
+                <tr>
+                    <th>الحقل</th>
+                    <th>Field</th>
+                    <th>النوع</th>
+                    <th>إجباري</th>
+                    <th>القيود</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>رقم الترخيص</td>
+                    <td>LicenseNumber</td>
+                    <td>رقمي</td>
+                    <td><span class="badge badge-required">نعم</span></td>
+                    <td>10 أرقام</td>
+                </tr>
+                <tr>
+                    <td>مصدر الترخيص</td>
+                    <td>LicenseSourceId</td>
+                    <td>اختيار</td>
+                    <td><span class="badge badge-required">نعم</span></td>
+                    <td>من قاعدة البيانات</td>
+                </tr>
+                <tr>
+                    <td>اسم الجمعية/المؤسسة</td>
+                    <td>NGOName</td>
+                    <td>نص</td>
+                    <td><span class="badge badge-required">نعم</span></td>
+                    <td>حد أقصى 200 حرف، عربي + أرقام</td>
+                </tr>
+                <tr>
+                    <td>تاريخ الترخيص</td>
+                    <td>LicenseDate</td>
+                    <td>تاريخ</td>
+                    <td><span class="badge badge-required">نعم</span></td>
+                    <td>-</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h4>العنوان الوطني</h4>
+        <table>
+            <thead>
+                <tr>
+                    <th>الحقل</th>
+                    <th>Field</th>
+                    <th>النوع</th>
+                    <th>إجباري</th>
+                    <th>القيود</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>المنطقة</td>
+                    <td>NGORegionId</td>
+                    <td>اختيار</td>
+                    <td><span class="badge badge-required">نعم</span></td>
+                    <td>13 منطقة في المملكة</td>
+                </tr>
+                <tr>
+                    <td>المدينة</td>
+                    <td>NGOCityId</td>
+                    <td>اختيار</td>
+                    <td><span class="badge badge-required">نعم</span></td>
+                    <td>يعتمد على المنطقة</td>
+                </tr>
+                <tr>
+                    <td>الحي</td>
+                    <td>NGODistrict</td>
+                    <td>نص</td>
+                    <td><span class="badge badge-required">نعم</span></td>
+                    <td>حد أقصى 100 حرف</td>
+                </tr>
+                <tr>
+                    <td>الشارع</td>
+                    <td>NGOStreet</td>
+                    <td>نص</td>
+                    <td><span class="badge badge-required">نعم</span></td>
+                    <td>حد أقصى 200 حرف</td>
+                </tr>
+                <tr>
+                    <td>رقم المبنى</td>
+                    <td>NGOBuildingNumber</td>
+                    <td>رقمي</td>
+                    <td><span class="badge badge-required">نعم</span></td>
+                    <td>4 أرقام</td>
+                </tr>
+                <tr>
+                    <td>رقم الوحدة</td>
+                    <td>NGOUnitNumber</td>
+                    <td>رقمي</td>
+                    <td><span class="badge badge-required">نعم</span></td>
+                    <td>أرقام فقط</td>
+                </tr>
+                <tr>
+                    <td>الرمز البريدي</td>
+                    <td>NGOPostalCode</td>
+                    <td>رقمي</td>
+                    <td><span class="badge badge-required">نعم</span></td>
+                    <td>5 أرقام</td>
+                </tr>
+                <tr>
+                    <td>الرمز الإضافي</td>
+                    <td>NGOAdditionalCode</td>
+                    <td>رقمي</td>
+                    <td><span class="badge badge-required">نعم</span></td>
+                    <td>4 أرقام</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h3>6.8 نموذج وقف (DefendantType = 7)</h3>
+
+        <h4>بيانات الوقف</h4>
+        <table>
+            <thead>
+                <tr>
+                    <th>الحقل</th>
+                    <th>Field</th>
+                    <th>النوع</th>
+                    <th>إجباري</th>
+                    <th>القيود</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>رقم صك المحكمة</td>
+                    <td>CourtDeedNumber</td>
+                    <td>نص</td>
+                    <td><span class="badge badge-required">نعم</span></td>
+                    <td>10 حروف</td>
+                </tr>
+                <tr>
+                    <td>اسم الوقف</td>
+                    <td>WaqfName</td>
+                    <td>نص</td>
+                    <td><span class="badge badge-required">نعم</span></td>
+                    <td>حد أقصى 200 حرف، عربي + أرقام</td>
+                </tr>
+                <tr>
+                    <td>تاريخ صك المحكمة</td>
+                    <td>CourtDeedDate</td>
+                    <td>تاريخ</td>
+                    <td><span class="badge badge-required">نعم</span></td>
+                    <td>لا يقبل تاريخ في المستقبل</td>
+                </tr>
+                <tr>
+                    <td>مصدر الصك</td>
+                    <td>DeedSource</td>
+                    <td>نص</td>
+                    <td><span class="badge badge-required">نعم</span></td>
+                    <td>حد أقصى 100 حرف، عربي / إنجليزي / أرقام</td>
+                </tr>
+                <tr>
+                    <td>نظارة الوقف</td>
+                    <td>WaqfSupervisory</td>
+                    <td>اختيار</td>
+                    <td><span class="badge badge-required">نعم</span></td>
+                    <td>أهلية / حكومية</td>
+                </tr>
+                <tr>
+                    <td>اسم الجهة</td>
+                    <td>AgencyName</td>
+                    <td>نص</td>
+                    <td><span class="badge badge-conditional">مشروط</span></td>
+                    <td>يظهر فقط إذا نظارة الوقف = حكومية</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h4>العنوان الوطني</h4>
+        <table>
+            <thead>
+                <tr>
+                    <th>الحقل</th>
+                    <th>Field</th>
+                    <th>النوع</th>
+                    <th>إجباري</th>
+                    <th>القيود</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>المنطقة</td>
+                    <td>RegionId</td>
+                    <td>اختيار</td>
+                    <td><span class="badge badge-required">نعم</span></td>
+                    <td>13 منطقة في المملكة</td>
+                </tr>
+                <tr>
+                    <td>المدينة</td>
+                    <td>CityId</td>
+                    <td>اختيار</td>
+                    <td><span class="badge badge-required">نعم</span></td>
+                    <td>يعتمد على المنطقة</td>
+                </tr>
+                <tr>
+                    <td>الحي</td>
+                    <td>DistrictId</td>
+                    <td>اختيار</td>
+                    <td><span class="badge badge-optional">لا</span></td>
+                    <td>يعتمد على المدينة</td>
+                </tr>
+                <tr>
+                    <td>الشارع</td>
+                    <td>Street</td>
+                    <td>نص</td>
+                    <td><span class="badge badge-optional">لا</span></td>
+                    <td>حد أقصى 200 حرف</td>
+                </tr>
+                <tr>
+                    <td>رقم المبنى</td>
+                    <td>BuildingNumber</td>
+                    <td>نص</td>
+                    <td><span class="badge badge-optional">لا</span></td>
+                    <td>4 أرقام فقط</td>
+                </tr>
+                <tr>
+                    <td>رقم الوحدة</td>
+                    <td>UnitNumber</td>
+                    <td>نص</td>
+                    <td><span class="badge badge-optional">لا</span></td>
+                    <td>أرقام فقط</td>
+                </tr>
+                <tr>
+                    <td>الرمز البريدي</td>
+                    <td>PostalCode</td>
+                    <td>نص</td>
+                    <td><span class="badge badge-optional">لا</span></td>
+                    <td>5 أرقام فقط</td>
+                </tr>
+                <tr>
+                    <td>الرمز الإضافي</td>
+                    <td>AdditionalCode</td>
+                    <td>نص</td>
+                    <td><span class="badge badge-optional">لا</span></td>
+                    <td>4 أرقام فقط</td>
+                </tr>
+                <tr>
+                    <td>وصف تقريبي</td>
+                    <td>Description</td>
+                    <td>نص</td>
+                    <td><span class="badge badge-required">نعم</span></td>
+                    <td>-</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- Section 7: Business Rules -->
+        <h2 id="business-rules"><span class="section-number">7</span> قواعد العمل</h2>
+
+        <h3>7.1 قواعد الإظهار والإخفاء</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>الرمز</th>
+                    <th>القاعدة</th>
+                    <th>الشرط</th>
+                    <th>التطبيق</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>BC01</td>
+                    <td>بيانات جهة العمل (جهة العمل، المهنة)</td>
+                    <td>تظهر إذا حالة العمل = حكومي أو خاص<br>تُخفى إذا حالة العمل = بدون عمل</td>
+                    <td>Frontend + Backend</td>
+                </tr>
+                <tr>
+                    <td>BC02</td>
+                    <td>العنوان الوطني للعمل (صاحب مؤسسة فقط)</td>
+                    <td>يظهر فقط إذا حالة العمل = خاص<br>يُخفى إذا حالة العمل = حكومي أو بدون عمل</td>
+                    <td>Frontend + Backend</td>
+                </tr>
+                <tr>
+                    <td>BC03</td>
+                    <td>التكامل مع أبشر</td>
+                    <td>اختياري وليس إجباري (على عكس المدعي)</td>
+                    <td>Backend Service</td>
+                </tr>
+                <tr>
+                    <td>BC04</td>
+                    <td>اسم الأب</td>
+                    <td>إجباري فقط إذا نوع الهوية = هوية وطنية<br>اختياري إذا نوع الهوية = هوية مقيم</td>
+                    <td>Frontend + Backend</td>
+                </tr>
+                <tr>
+                    <td>BC05</td>
+                    <td>الجنسية</td>
+                    <td>إذا نوع الهوية = هوية وطنية: "سعودي" (للقراءة فقط)<br>إذا نوع الهوية = مقيم/جواز: اختيار من القائمة (بدون سعودي)</td>
+                    <td>Frontend + Backend</td>
+                </tr>
+                <tr>
+                    <td>BC06</td>
+                    <td>اسم الجهة (وقف)</td>
+                    <td>يظهر فقط إذا نظارة الوقف = حكومية<br>يُخفى إذا نظارة الوقف = أهلية</td>
+                    <td>Frontend + Backend</td>
+                </tr>
+                <tr>
+                    <td>BC07</td>
+                    <td>حقول الأسماء (صاحب مؤسسة)</td>
+                    <td>للقراءة فقط إذا تم الجلب من أبشر (هوية وطنية/مقيم)<br>قابلة للتعديل إذا نوع الهوية = جواز سفر</td>
+                    <td>Frontend</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h3>7.2 قواعد التحقق من الحقول</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>الحقل</th>
+                    <th>النوع</th>
+                    <th>الطول</th>
+                    <th>النمط/القيود</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td>رقم الهوية (وطنية/مقيم)</td><td>string</td><td>10</td><td>أرقام فقط، يبدأ بـ 1 أو 2</td></tr>
+                <tr><td>رقم الهوية (جواز)</td><td>string</td><td>max 20</td><td>أحرف وأرقام</td></tr>
+                <tr><td>رقم الجوال</td><td>string</td><td>10</td><td>^05[0-9]{8}$</td></tr>
+                <tr><td>البريد الإلكتروني</td><td>string</td><td>max 255</td><td>صيغة بريد صحيحة</td></tr>
+                <tr><td>تاريخ الميلاد</td><td>date</td><td>-</td><td>≤ اليوم</td></tr>
+                <tr><td>رقم السجل التجاري</td><td>string</td><td>10</td><td>أرقام فقط</td></tr>
+                <tr><td>اسم الشركة/المؤسسة</td><td>string</td><td>max 200</td><td>عربي + أرقام</td></tr>
+                <tr><td>تاريخ بداية السجل</td><td>date</td><td>-</td><td>≤ اليوم</td></tr>
+                <tr><td>تاريخ نهاية السجل</td><td>date</td><td>-</td><td>> تاريخ البداية</td></tr>
+                <tr><td>رقم صك المحكمة</td><td>string</td><td>10</td><td>-</td></tr>
+                <tr><td>اسم الوقف</td><td>string</td><td>max 200</td><td>عربي + أرقام</td></tr>
+                <tr><td>مصدر الصك</td><td>string</td><td>max 100</td><td>عربي / إنجليزي / أرقام</td></tr>
+                <tr><td>بيان إضافي</td><td>string</td><td>max 4000</td><td>-</td></tr>
+                <tr><td>جهة العمل</td><td>string</td><td>max 200</td><td>-</td></tr>
+                <tr><td>المهنة</td><td>string</td><td>max 200</td><td>-</td></tr>
+                <tr><td>الشارع</td><td>string</td><td>max 200</td><td>-</td></tr>
+                <tr><td>رقم المبنى</td><td>string</td><td>4</td><td>أرقام فقط</td></tr>
+                <tr><td>رقم الوحدة</td><td>string</td><td>max 10</td><td>أرقام فقط</td></tr>
+                <tr><td>الرمز البريدي</td><td>string</td><td>5</td><td>أرقام فقط</td></tr>
+                <tr><td>الرمز الإضافي</td><td>string</td><td>4</td><td>أرقام فقط</td></tr>
+            </tbody>
+        </table>
+
+        <h3>7.3 رسائل الخطأ</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>الرمز</th>
+                    <th>الرسالة</th>
+                    <th>السبب</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>ERR013</td>
+                    <td>مدّعى عليه موجود مسبقاً</td>
+                    <td>نفس رقم الهوية ونوع المدّعى عليه مسجل مسبقاً</td>
+                </tr>
+                <tr>
+                    <td>ERR014</td>
+                    <td>رقم الهوية غير صحيح</td>
+                    <td>لا يطابق الصيغة المطلوبة (10 أرقام أو 20 حرف للجواز)</td>
+                </tr>
+                <tr>
+                    <td>ERR015</td>
+                    <td>تاريخ غير صحيح</td>
+                    <td>التاريخ في المستقبل أو تاريخ النهاية قبل البداية</td>
+                </tr>
+                <tr>
+                    <td>ERR016</td>
+                    <td>رقم الجوال غير صحيح</td>
+                    <td>لا يبدأ بـ 05 أو ليس 10 أرقام</td>
+                </tr>
+                <tr>
+                    <td>ERR017</td>
+                    <td>البريد الإلكتروني غير صحيح</td>
+                    <td>صيغة بريد إلكتروني غير صالحة</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- Section 8: API -->
+        <h2 id="api"><span class="section-number">8</span> واجهات API</h2>
+
+        <h3>8.1 Defendants Endpoints</h3>
+        <div class="code">
+// Defendants CRUD
+GET    /api/case-requests/{requestId}/defendants          // Get all defendants
+GET    /api/case-requests/{requestId}/defendants/{id}     // Get defendant by ID
+POST   /api/case-requests/{requestId}/defendants          // Create defendant
+PUT    /api/case-requests/{requestId}/defendants/{id}     // Update defendant
+DELETE /api/case-requests/{requestId}/defendants/{id}     // Delete defendant
+
+// Absher Integration (Optional)
+POST   /api/absher/lookup                                 // Fetch citizen data by ID
+        </div>
+
+        <h3>8.2 Lookup Endpoints</h3>
+        <div class="code">
+GET    /api/lookups/defendant-types                       // 7 defendant types
+GET    /api/lookups/identity-types                        // هوية وطنية، مقيم، جواز سفر
+GET    /api/lookups/nationalities                         // List of nationalities
+GET    /api/lookups/genders                               // ذكر، أنثى
+GET    /api/lookups/employment-statuses                   // حكومي، خاص، بدون عمل
+GET    /api/lookups/waqf-supervisory-types                // أهلية، حكومية
+GET    /api/lookups/government-agencies                   // List of gov agencies
+GET    /api/lookups/regions                               // 13 KSA regions
+GET    /api/lookups/cities?regionId={id}                  // Cities by region
+GET    /api/lookups/districts?cityId={id}                 // Districts by city
+        </div>
+
+        <h3>8.3 DefendantCreateDTO - فرد (Type 1)</h3>
+        <div class="code">
+{
+  "defendantTypeId": 1,
+  // Personal Data
+  "identityTypeId": 1,                    // 1=وطنية, 2=مقيم (no passport for فرد)
+  "identityNumber": "1234567890",         // 10 digits only
+  "firstName": "أحمد",                    // Required
+  "fatherName": "محمد",                   // Required if identityTypeId=1
+  "grandfatherName": "علي",               // Optional
+  "tribeName": "قحطان",                   // Optional
+  "familyName": "السعيد",                 // Required
+  "birthDate": "1990-01-15",              // Optional, not future
+  "genderId": 1,                          // Required
+  "nationalityId": 1,                     // Required (auto=Saudi if national ID)
+  "mobileNumber": "0501234567",           // Required, 05xxxxxxxx
+  "email": "example@email.com",           // Optional
+  // Address (all optional for فرد)
+  "address": {
+    "regionId": 1,
+    "cityId": 1,
+    "districtId": 1,
+    "street": "شارع الملك فهد",
+    "buildingNumber": "1234",             // 4 digits
+    "unitNumber": "10",                   // numbers only
+    "postalCode": "12345",                // 5 digits
+    "additionalCode": "1234"              // 4 digits
+  },
+  // Employment (BC01)
+  "employmentStatus": 1,                  // 1=حكومي, 2=خاص, 3=بدون عمل
+  "employer": "وزارة التعليم",            // Show if status=1,2
+  "occupation": "موظف"                    // Show if status=1,2
+}
+        </div>
+
+        <h3>8.4 DefendantCreateDTO - شركة مسجلة (Type 2)</h3>
+        <div class="code">
+{
+  "defendantTypeId": 2,
+  // Company Data
+  "commercialRegNumber": "1234567890",    // Required, 10 digits
+  "companyName": "شركة النور",            // Required, max 200, Arabic+numbers
+  "registrationStartDate": "2020-01-01",  // Required, not future
+  "registrationEndDate": "2025-01-01",    // Required, > startDate
+  // Address (all required)
+  "address": {
+    "regionId": 1,                        // Required
+    "cityId": 1,                          // Required
+    "districtId": 1,                      // Required
+    "street": "شارع العليا",              // Required, max 200
+    "buildingNumber": "1234",             // Required, 4 digits
+    "unitNumber": "10",                   // Required, numbers only
+    "postalCode": "12345",                // Required, 5 digits
+    "additionalCode": "1234"              // Required, 4 digits
+  }
+}
+        </div>
+
+        <h3>8.5 DefendantCreateDTO - جهة حكومية (Type 4)</h3>
+        <div class="code">
+{
+  "defendantTypeId": 4,
+  "governmentAgencyId": 1,                // Required, from lookup
+  "headquarters": "الرياض",               // Required, auto-filled (read-only)
+  "additionalStatement": "بيان إضافي"     // Optional, max 4000
+}
+        </div>
+
+        <h3>8.6 DefendantCreateDTO - صاحب مؤسسة (Type 5)</h3>
+        <div class="code">
+{
+  "defendantTypeId": 5,
+  // Personal Data (all optional, differs from فرد)
+  "identityTypeId": 3,                    // 1=وطنية, 2=مقيم, 3=جواز سفر
+  "identityNumber": "AB12345678901234567",// 10 or 20 chars
+  "firstName": "أحمد",
+  "fatherName": "محمد",
+  "grandfatherName": "علي",
+  "tribeName": "قحطان",
+  "familyName": "السعيد",
+  "birthDate": "1990-01-15",
+  "genderId": 1,
+  "nationalityId": 2,                     // Auto=Saudi for national, else dropdown
+  "mobileNumber": "0501234567",
+  "email": "example@email.com",
+  // Owner Address
+  "ownerAddress": { /* same address structure */ },
+  // Employment (BC01 + BC02)
+  "employmentStatus": 2,                  // خاص
+  "employer": "مؤسسة النور",
+  "occupation": "صاحب مؤسسة",
+  "workAddress": { /* BC02: show only if خاص */ },
+  // Business Data (Commercial Registry)
+  "commercialRegNumber": "1234567890",
+  "companyName": "مؤسسة النور التجارية",
+  "registrationStartDate": "2020-01-01",
+  "registrationEndDate": "2025-01-01",
+  // Business Address
+  "businessAddress": { /* same address structure */ }
+}
+        </div>
+
+        <h3>8.7 DefendantCreateDTO - وقف (Type 7)</h3>
+        <div class="code">
+{
+  "defendantTypeId": 7,
+  // Waqf Data
+  "courtDeedNumber": "1234567890",        // Required, 10 chars
+  "waqfName": "وقف الخير",                // Required, max 200, Arabic+numbers
+  "courtDeedDate": "2020-01-01",          // Required, not future
+  "deedSource": "محكمة الرياض",           // Required, max 100
+  "waqfSupervisory": 2,                   // 1=أهلية, 2=حكومية
+  "agencyName": "وزارة الأوقاف",          // BC06: show only if supervisory=2
+  // Address (region+city required, others optional)
+  "address": {
+    "regionId": 1,                        // Required
+    "cityId": 1,                          // Required
+    "districtId": null,                   // Optional
+    "street": null,                       // Optional
+    "buildingNumber": null,               // Optional
+    "unitNumber": null,                   // Optional
+    "postalCode": null,                   // Optional
+    "additionalCode": null,               // Optional
+    "description": "وصف موقع الوقف"       // Required
+  }
+}
+        </div>
+
+        <h3>8.8 DefendantVM (Response)</h3>
+        <div class="code">
+{
+  "id": 1,
+  "caseRequestId": 100,
+  "defendantTypeId": 1,
+  "defendantTypeName": "فرد",
+  "displayName": "أحمد محمد علي السعيد",  // Computed full name
+  "identityTypeId": 1,
+  "identityTypeName": "هوية وطنية",
+  "identityNumber": "1234567890",
+  "firstName": "أحمد",
+  "fatherName": "محمد",
+  "grandfatherName": "علي",
+  "tribeName": "قحطان",
+  "familyName": "السعيد",
+  "birthDate": "1990-01-15",
+  "genderId": 1,
+  "genderName": "ذكر",
+  "nationalityId": 1,
+  "nationalityName": "سعودي",
+  "mobileNumber": "0501234567",
+  "email": "example@email.com",
+  "employmentStatus": 1,
+  "employmentStatusName": "حكومي",
+  "employer": "وزارة التعليم",
+  "occupation": "موظف",
+  "address": {
+    "regionId": 1,
+    "regionName": "منطقة الرياض",
+    "cityId": 1,
+    "cityName": "الرياض",
+    "districtId": 1,
+    "districtName": "العليا",
+    "street": "شارع الملك فهد",
+    "buildingNumber": "1234",
+    "unitNumber": "10",
+    "postalCode": "12345",
+    "additionalCode": "1234",
+    "fullAddress": "شارع الملك فهد، حي العليا، الرياض"  // Computed
+  },
+  "createdDate": "2026-02-01T10:00:00Z",
+  "modifiedDate": "2026-02-01T10:00:00Z"
+}
+        </div>
+
+        <!-- Section 9: Database Schema -->
+        <h2 id="database"><span class="section-number">9</span> مخطط قاعدة البيانات</h2>
+
+        <h3>9.1 جدول Defendants</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Column</th>
+                    <th>Type</th>
+                    <th>Nullable</th>
+                    <th>Description</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td>Id</td><td>int</td><td>NO</td><td>Primary Key</td></tr>
+                <tr><td>CaseRequestId</td><td>int</td><td>NO</td><td>FK to CaseRequests</td></tr>
+                <tr><td>DefendantTypeId</td><td>int</td><td>NO</td><td>FK to DefendantTypes (1-7)</td></tr>
+                <tr><td>IdentityTypeId</td><td>int</td><td>YES</td><td>FK to IdentityTypes</td></tr>
+                <tr><td>IdentityNumber</td><td>nvarchar(20)</td><td>YES</td><td>10 or 20 chars</td></tr>
+                <tr><td>FirstName</td><td>nvarchar(100)</td><td>YES</td><td>الاسم الأول</td></tr>
+                <tr><td>FatherName</td><td>nvarchar(100)</td><td>YES</td><td>اسم الأب</td></tr>
+                <tr><td>GrandfatherName</td><td>nvarchar(100)</td><td>YES</td><td>اسم الجد</td></tr>
+                <tr><td>TribeName</td><td>nvarchar(100)</td><td>YES</td><td>اسم الفخذ</td></tr>
+                <tr><td>FamilyName</td><td>nvarchar(100)</td><td>YES</td><td>اسم العائلة</td></tr>
+                <tr><td>BirthDate</td><td>date</td><td>YES</td><td>تاريخ الميلاد</td></tr>
+                <tr><td>GenderId</td><td>int</td><td>YES</td><td>FK to Genders</td></tr>
+                <tr><td>NationalityId</td><td>int</td><td>YES</td><td>FK to Nationalities</td></tr>
+                <tr><td>MobileNumber</td><td>nvarchar(10)</td><td>YES</td><td>05xxxxxxxx</td></tr>
+                <tr><td>Email</td><td>nvarchar(255)</td><td>YES</td><td>البريد الإلكتروني</td></tr>
+                <tr><td>EmploymentStatusId</td><td>int</td><td>YES</td><td>FK to EmploymentStatuses</td></tr>
+                <tr><td>Employer</td><td>nvarchar(200)</td><td>YES</td><td>جهة العمل</td></tr>
+                <tr><td>Occupation</td><td>nvarchar(200)</td><td>YES</td><td>المهنة</td></tr>
+                <tr><td>CompanyName</td><td>nvarchar(200)</td><td>YES</td><td>اسم الشركة/المؤسسة</td></tr>
+                <tr><td>CommercialRegNumber</td><td>nvarchar(10)</td><td>YES</td><td>رقم السجل التجاري</td></tr>
+                <tr><td>RegistrationStartDate</td><td>date</td><td>YES</td><td>تاريخ بداية السجل</td></tr>
+                <tr><td>RegistrationEndDate</td><td>date</td><td>YES</td><td>تاريخ نهاية السجل</td></tr>
+                <tr><td>GovernmentAgencyId</td><td>int</td><td>YES</td><td>FK to GovernmentAgencies</td></tr>
+                <tr><td>Headquarters</td><td>nvarchar(200)</td><td>YES</td><td>المقر</td></tr>
+                <tr><td>AdditionalStatement</td><td>nvarchar(4000)</td><td>YES</td><td>بيان إضافي</td></tr>
+                <tr><td>WaqfName</td><td>nvarchar(200)</td><td>YES</td><td>اسم الوقف</td></tr>
+                <tr><td>CourtDeedNumber</td><td>nvarchar(10)</td><td>YES</td><td>رقم صك المحكمة</td></tr>
+                <tr><td>CourtDeedDate</td><td>date</td><td>YES</td><td>تاريخ صك المحكمة</td></tr>
+                <tr><td>DeedSource</td><td>nvarchar(100)</td><td>YES</td><td>مصدر الصك</td></tr>
+                <tr><td>WaqfSupervisoryId</td><td>int</td><td>YES</td><td>FK to WaqfSupervisoryTypes</td></tr>
+                <tr><td>AgencyName</td><td>nvarchar(200)</td><td>YES</td><td>اسم الجهة (وقف حكومي)</td></tr>
+                <tr><td>Description</td><td>nvarchar(1000)</td><td>YES</td><td>وصف تقريبي</td></tr>
+                <tr><td>CreatedDate</td><td>datetime2</td><td>NO</td><td>تاريخ الإنشاء</td></tr>
+                <tr><td>ModifiedDate</td><td>datetime2</td><td>YES</td><td>تاريخ التعديل</td></tr>
+                <tr><td>IsDeleted</td><td>bit</td><td>NO</td><td>Soft delete flag</td></tr>
+            </tbody>
+        </table>
+
+        <h3>9.2 جدول DefendantAddresses</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Column</th>
+                    <th>Type</th>
+                    <th>Nullable</th>
+                    <th>Description</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td>Id</td><td>int</td><td>NO</td><td>Primary Key</td></tr>
+                <tr><td>DefendantId</td><td>int</td><td>NO</td><td>FK to Defendants</td></tr>
+                <tr><td>AddressType</td><td>int</td><td>NO</td><td>1=Personal, 2=Work, 3=Business, 4=Waqf</td></tr>
+                <tr><td>RegionId</td><td>int</td><td>YES</td><td>FK to Regions</td></tr>
+                <tr><td>CityId</td><td>int</td><td>YES</td><td>FK to Cities</td></tr>
+                <tr><td>DistrictId</td><td>int</td><td>YES</td><td>FK to Districts</td></tr>
+                <tr><td>Street</td><td>nvarchar(200)</td><td>YES</td><td>الشارع</td></tr>
+                <tr><td>BuildingNumber</td><td>nvarchar(4)</td><td>YES</td><td>رقم المبنى (4 أرقام)</td></tr>
+                <tr><td>UnitNumber</td><td>nvarchar(10)</td><td>YES</td><td>رقم الوحدة</td></tr>
+                <tr><td>PostalCode</td><td>nvarchar(5)</td><td>YES</td><td>الرمز البريدي (5 أرقام)</td></tr>
+                <tr><td>AdditionalCode</td><td>nvarchar(4)</td><td>YES</td><td>الرمز الإضافي (4 أرقام)</td></tr>
+                <tr><td>Description</td><td>nvarchar(1000)</td><td>YES</td><td>وصف تقريبي</td></tr>
+            </tbody>
+        </table>
+
+        <h3>9.3 جدول DefendantTypes (Lookup)</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Id</th>
+                    <th>Code</th>
+                    <th>NameAr</th>
+                    <th>NameEn</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td>1</td><td>Individual</td><td>فرد</td><td>Individual</td></tr>
+                <tr><td>2</td><td>RegisteredCompany</td><td>شركة مسجلة في المملكة</td><td>Registered Company</td></tr>
+                <tr><td>3</td><td>GovernmentAgency</td><td>جهة حكومية</td><td>Government Agency</td></tr>
+                <tr><td>4</td><td>UnregisteredCompany</td><td>شركة غير مسجلة في المملكة</td><td>Unregistered Company</td></tr>
+                <tr><td>5</td><td>BusinessOwner</td><td>صاحب مؤسسة</td><td>Business Owner</td></tr>
+                <tr><td>6</td><td>NGO</td><td>جمعية/مؤسسة أهلية</td><td>NGO</td></tr>
+                <tr><td>7</td><td>Waqf</td><td>وقف</td><td>Waqf</td></tr>
+            </tbody>
+        </table>
+
+        <h3>9.4 جداول Lookup أخرى</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Table</th>
+                    <th>Values</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td>IdentityTypes</td><td>1=هوية وطنية, 2=هوية مقيم, 3=جواز سفر</td></tr>
+                <tr><td>Genders</td><td>1=ذكر, 2=أنثى</td></tr>
+                <tr><td>EmploymentStatuses</td><td>1=حكومي, 2=خاص, 3=بدون عمل</td></tr>
+                <tr><td>WaqfSupervisoryTypes</td><td>1=أهلية, 2=حكومية</td></tr>
+                <tr><td>Regions</td><td>13 منطقة في المملكة</td></tr>
+                <tr><td>Cities</td><td>المدن (FK to Regions)</td></tr>
+                <tr><td>Districts</td><td>الأحياء (FK to Cities)</td></tr>
+                <tr><td>GovernmentAgencies</td><td>الجهات الحكومية</td></tr>
+                <tr><td>Nationalities</td><td>الجنسيات</td></tr>
+            </tbody>
+        </table>
+
+        <!-- Section 10: Shared Components -->
+        <h2 id="shared"><span class="section-number">10</span> المكونات المشتركة</h2>
+
+        <h3>10.1 مصفوفة استخدام المكونات حسب النوع</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>المكون</th>
+                    <th>فرد</th>
+                    <th>شركة مسجلة</th>
+                    <th>شركة غير مسجلة</th>
+                    <th>جهة حكومية</th>
+                    <th>صاحب مؤسسة</th>
+                    <th>جمعية</th>
+                    <th>وقف</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>PersonalDataComponent</td>
+                    <td>✅</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>✅ (مخصص)</td>
+                    <td>-</td>
+                    <td>-</td>
+                </tr>
+                <tr>
+                    <td>AddressComponent</td>
+                    <td>✅ (اختياري)</td>
+                    <td>✅ (إجباري)</td>
+                    <td>✅ (إجباري)</td>
+                    <td>-</td>
+                    <td>✅ (متعدد)</td>
+                    <td>✅</td>
+                    <td>✅ (جزئي)</td>
+                </tr>
+                <tr>
+                    <td>CommercialRegistryComponent</td>
+                    <td>-</td>
+                    <td>✅</td>
+                    <td>✅</td>
+                    <td>-</td>
+                    <td>✅</td>
+                    <td>-</td>
+                    <td>-</td>
+                </tr>
+                <tr>
+                    <td>EmploymentComponent</td>
+                    <td>✅ (BC01)</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>✅ (BC01+BC02)</td>
+                    <td>-</td>
+                    <td>-</td>
+                </tr>
+                <tr>
+                    <td>GovernmentAgencyComponent</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>✅</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                </tr>
+                <tr>
+                    <td>WaqfDataComponent</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>✅</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h3>10.2 تفاصيل المكونات</h3>
+
+        <h4>PersonalDataComponent</h4>
+        <div class="note">
+            <strong>المدخلات:</strong> defendantType (لتحديد القواعد)<br>
+            <strong>الحقول:</strong> نوع الهوية، رقم الهوية، الاسم الرباعي + الفخذ، تاريخ الميلاد، الجنس، الجنسية، رقم الجوال، البريد الإلكتروني<br>
+            <strong>القواعد:</strong> BC04 (اسم الأب مشروط)، BC05 (الجنسية مشروطة)، BC07 (قفل الحقول من أبشر)
+        </div>
+
+        <h4>AddressComponent</h4>
+        <div class="note">
+            <strong>المدخلات:</strong> addressType, requiredFields[], optionalFields[]<br>
+            <strong>الحقول:</strong> المنطقة، المدينة، الحي، الشارع، رقم المبنى، رقم الوحدة، الرمز البريدي، الرمز الإضافي، وصف تقريبي<br>
+            <strong>التحقق:</strong> رقم المبنى (4 أرقام)، رقم الوحدة (أرقام)، الرمز البريدي (5 أرقام)، الرمز الإضافي (4 أرقام)
+        </div>
+
+        <h4>CommercialRegistryComponent</h4>
+        <div class="note">
+            <strong>الحقول:</strong> رقم السجل التجاري (10 أرقام)، اسم المؤسسة/الشركة (200 حرف)، تاريخ البداية، تاريخ النهاية<br>
+            <strong>التحقق:</strong> تاريخ البداية ≤ اليوم، تاريخ النهاية > تاريخ البداية
+        </div>
+
+        <h4>EmploymentComponent</h4>
+        <div class="note">
+            <strong>الحقول:</strong> حالة العمل، جهة العمل (200 حرف)، المهنة (200 حرف)<br>
+            <strong>القواعد:</strong> BC01 (إظهار/إخفاء بناءً على حالة العمل)
+        </div>
+
+        <!-- Section 11: Implementation -->
+        <h2 id="implementation"><span class="section-number">11</span> خطة التنفيذ</h2>
+
+        <h3>9.1 Backend (الأولوية العالية)</h3>
+
+        <ol class="task-list">
+            <li class="task-priority-high">
+                <strong>Entity:</strong> إنشاء Defendant Entity في BOG.DbModel
+            </li>
+            <li class="task-priority-high">
+                <strong>DefendantType:</strong> إنشاء DefendantType Lookup (7 أنواع)
+            </li>
+            <li class="task-priority-high">
+                <strong>DTOs:</strong> إنشاء DefendantCreateDTO, DefendantUpdateDTO
+            </li>
+            <li class="task-priority-high">
+                <strong>ViewModel:</strong> إنشاء DefendantVM, DefendantListVM
+            </li>
+            <li class="task-priority-high">
+                <strong>Repository:</strong> إنشاء IDefendantRepository, DefendantRepository
+            </li>
+            <li class="task-priority-high">
+                <strong>Business Logic:</strong> إنشاء IDefendantBL, DefendantBL
+            </li>
+            <li class="task-priority-high">
+                <strong>Controller:</strong> إنشاء DefendantsController
+            </li>
+            <li class="task-priority-medium">
+                <strong>Validation:</strong> إنشاء DefendantCreateDTOValidator
+            </li>
+            <li class="task-priority-medium">
+                <strong>Migration:</strong> إضافة جدول Defendants وعلاقاته
+            </li>
+        </ol>
+
+        <h3>9.2 Frontend (الأولوية المتوسطة)</h3>
+
+        <ol class="task-list">
+            <li class="task-priority-medium">
+                <strong>Model:</strong> إنشاء defendant.model.ts
+            </li>
+            <li class="task-priority-medium">
+                <strong>Service:</strong> إنشاء defendant.service.ts
+            </li>
+            <li class="task-priority-medium">
+                <strong>Module:</strong> إنشاء defendants module
+            </li>
+            <li class="task-priority-medium">
+                <strong>List Component:</strong> إنشاء defendant-list.component
+            </li>
+            <li class="task-priority-medium">
+                <strong>Form Component:</strong> إنشاء defendant-form.component
+            </li>
+            <li class="task-priority-low">
+                <strong>Routing:</strong> إعداد routing للمدعى عليهم
+            </li>
+        </ol>
+
+        <!-- Section 12: Tasks -->
+        <h2 id="tasks"><span class="section-number">12</span> المهام التفصيلية</h2>
+
+        <h3>10.1 Backend Tasks</h3>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>المهمة</th>
+                    <th>الملف</th>
+                    <th>الأولوية</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>1</td>
+                    <td>إنشاء DefendantType Entity</td>
+                    <td>BOG.DbModel/Entities/Lookups/DefendantType.cs</td>
+                    <td><span class="badge badge-required">عالية</span></td>
+                </tr>
+                <tr>
+                    <td>2</td>
+                    <td>إنشاء Defendant Entity</td>
+                    <td>BOG.DbModel/Entities/CaseRegistration/Defendant.cs</td>
+                    <td><span class="badge badge-required">عالية</span></td>
+                </tr>
+                <tr>
+                    <td>3</td>
+                    <td>إنشاء CaseRequestDefendant Junction</td>
+                    <td>BOG.DbModel/Entities/CaseRegistration/CaseRequestDefendant.cs</td>
+                    <td><span class="badge badge-required">عالية</span></td>
+                </tr>
+                <tr>
+                    <td>4</td>
+                    <td>تحديث DbContext</td>
+                    <td>BOG.DbModel/ApplicationDbContext.cs</td>
+                    <td><span class="badge badge-required">عالية</span></td>
+                </tr>
+                <tr>
+                    <td>5</td>
+                    <td>إنشاء DefendantCreateDTO</td>
+                    <td>BOG.DTO/Defendant/DefendantCreateDTO.cs</td>
+                    <td><span class="badge badge-required">عالية</span></td>
+                </tr>
+                <tr>
+                    <td>6</td>
+                    <td>إنشاء DefendantUpdateDTO</td>
+                    <td>BOG.DTO/Defendant/DefendantUpdateDTO.cs</td>
+                    <td><span class="badge badge-required">عالية</span></td>
+                </tr>
+                <tr>
+                    <td>7</td>
+                    <td>إنشاء DefendantVM</td>
+                    <td>BOG.VM/Defendant/DefendantVM.cs</td>
+                    <td><span class="badge badge-required">عالية</span></td>
+                </tr>
+                <tr>
+                    <td>8</td>
+                    <td>إنشاء DefendantListVM</td>
+                    <td>BOG.VM/Defendant/DefendantListVM.cs</td>
+                    <td><span class="badge badge-required">عالية</span></td>
+                </tr>
+                <tr>
+                    <td>9</td>
+                    <td>إنشاء IDefendantRepository</td>
+                    <td>BOG.DAL/Interfaces/IDefendantRepository.cs</td>
+                    <td><span class="badge badge-required">عالية</span></td>
+                </tr>
+                <tr>
+                    <td>10</td>
+                    <td>إنشاء DefendantRepository</td>
+                    <td>BOG.DAL/Repositories/DefendantRepository.cs</td>
+                    <td><span class="badge badge-required">عالية</span></td>
+                </tr>
+                <tr>
+                    <td>11</td>
+                    <td>إنشاء IDefendantBL</td>
+                    <td>BOG.BL/Interfaces/IDefendantBL.cs</td>
+                    <td><span class="badge badge-required">عالية</span></td>
+                </tr>
+                <tr>
+                    <td>12</td>
+                    <td>إنشاء DefendantBL</td>
+                    <td>BOG.BL/Services/DefendantBL.cs</td>
+                    <td><span class="badge badge-required">عالية</span></td>
+                </tr>
+                <tr>
+                    <td>13</td>
+                    <td>إنشاء DefendantsController</td>
+                    <td>BOG.API/Controllers/DefendantsController.cs</td>
+                    <td><span class="badge badge-required">عالية</span></td>
+                </tr>
+                <tr>
+                    <td>14</td>
+                    <td>تسجيل الخدمات في DI</td>
+                    <td>BOG.API/Extensions/ServiceCollectionExtensions.cs</td>
+                    <td><span class="badge badge-required">عالية</span></td>
+                </tr>
+                <tr>
+                    <td>15</td>
+                    <td>إنشاء Migration</td>
+                    <td>dotnet ef migrations add AddDefendantEntities</td>
+                    <td><span class="badge badge-required">عالية</span></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h3>10.2 Frontend Tasks</h3>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>المهمة</th>
+                    <th>الملف</th>
+                    <th>الأولوية</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>1</td>
+                    <td>إنشاء Defendant Model</td>
+                    <td>core/models/defendant.model.ts</td>
+                    <td><span class="badge badge-required">عالية</span></td>
+                </tr>
+                <tr>
+                    <td>2</td>
+                    <td>إنشاء Defendant Service</td>
+                    <td>core/services/defendant.service.ts</td>
+                    <td><span class="badge badge-required">عالية</span></td>
+                </tr>
+                <tr>
+                    <td>3</td>
+                    <td>إنشاء Defendants Module</td>
+                    <td>features/case-registration/defendants/defendants.module.ts</td>
+                    <td><span class="badge badge-required">عالية</span></td>
+                </tr>
+                <tr>
+                    <td>4</td>
+                    <td>إنشاء Defendant List Component</td>
+                    <td>defendants/components/defendant-list/</td>
+                    <td><span class="badge badge-required">عالية</span></td>
+                </tr>
+                <tr>
+                    <td>5</td>
+                    <td>إنشاء Defendant Form Component</td>
+                    <td>defendants/components/defendant-form/</td>
+                    <td><span class="badge badge-required">عالية</span></td>
+                </tr>
+                <tr>
+                    <td>6</td>
+                    <td>إعداد Routing</td>
+                    <td>defendants/defendants-routing.module.ts</td>
+                    <td><span class="badge badge-optional">متوسطة</span></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- Section 11: Mock Absher Integration -->
+        <h2>11. تكامل أبشر الوهمي (Mock Absher Integration)</h2>
+
+        <h3>11.1 نظرة عامة</h3>
+        <div class="card">
+            <p>إضافة محاكاة لجلب البيانات من أبشر في نماذج المدعى عليهم (فرد، صاحب مؤسسة) مع قفل الحقول بعد نجاح الجلب.</p>
+            <p><strong>قاعدة العمل:</strong> عند إدخال رقم الهوية ونوع الهوية، النقر على "جلب البيانات من أبشر" سيقوم بـ:</p>
+            <ol>
+                <li>محاكاة جلب البيانات من أبشر (استجابة وهمية)</li>
+                <li>ملء حقول البيانات الشخصية</li>
+                <li>قفل (تعطيل) الحقول المعبأة</li>
+            </ol>
+        </div>
+
+        <h3>11.2 الحقول المقفلة بعد جلب أبشر</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>الحقل</th>
+                    <th>الاسم العربي</th>
+                    <th>الحالة</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>birthDate</td>
+                    <td>تاريخ الميلاد</td>
+                    <td><span class="badge badge-required">مقفل</span></td>
+                </tr>
+                <tr>
+                    <td>firstName</td>
+                    <td>الاسم الأول</td>
+                    <td><span class="badge badge-required">مقفل</span></td>
+                </tr>
+                <tr>
+                    <td>fatherName</td>
+                    <td>اسم الأب</td>
+                    <td><span class="badge badge-required">مقفل</span></td>
+                </tr>
+                <tr>
+                    <td>grandfatherName</td>
+                    <td>اسم الجد</td>
+                    <td><span class="badge badge-required">مقفل</span></td>
+                </tr>
+                <tr>
+                    <td>tribeName</td>
+                    <td>اسم الفخذ</td>
+                    <td><span class="badge badge-required">مقفل</span></td>
+                </tr>
+                <tr>
+                    <td>familyName</td>
+                    <td>اسم العائلة</td>
+                    <td><span class="badge badge-required">مقفل</span></td>
+                </tr>
+                <tr>
+                    <td>identityTypeId</td>
+                    <td>نوع الهوية</td>
+                    <td><span class="badge badge-optional">غير مقفل</span></td>
+                </tr>
+                <tr>
+                    <td>identityNumber</td>
+                    <td>رقم الهوية</td>
+                    <td><span class="badge badge-optional">غير مقفل</span></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h3>11.3 يُطبق على</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>النوع</th>
+                    <th>المكون</th>
+                    <th>الملف</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><span class="badge badge-type">فرد (Type 1)</span></td>
+                    <td>defendant-individual-form</td>
+                    <td>defendants/components/defendant-individual-form/</td>
+                </tr>
+                <tr>
+                    <td><span class="badge badge-type">صاحب مؤسسة (Type 5)</span></td>
+                    <td>defendant-business-owner-form</td>
+                    <td>defendants/components/defendant-business-owner-form/</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h3>11.4 التنفيذ - TypeScript</h3>
+        <div class="card">
+            <div class="card-header">1. إضافة خدمة أبشر الوهمية</div>
+            <pre><code>// Mock Absher response
+getMockAbsherData(identityNumber: string, identityTypeId: number) {
+  return {
+    firstName: 'محمد',
+    fatherName: 'أحمد',
+    grandfatherName: 'علي',
+    tribeName: 'العتيبي',
+    familyName: 'السعود'
+  };
+}</code></pre>
+        </div>
+
+        <div class="card">
+            <div class="card-header">2. تغييرات المكون</div>
+            <pre><code>// إضافة خاصية
+isAbsherLocked = false;
+
+// طريقة الجلب
+onFetchAbsherData(): void {
+  const identityNumber = this.form.get('identityNumber')?.value;
+  const identityTypeId = this.form.get('identityTypeId')?.value;
+
+  if (!identityNumber || !identityTypeId) {
+    this.snackBar.open('يرجى إدخال رقم الهوية ونوع الهوية', 'إغلاق', { duration: 3000 });
+    return;
+  }
+
+  // بيانات وهمية (استبدل بـ API حقيقي لاحقاً)
+  const absherData = this.getMockAbsherData(identityNumber, identityTypeId);
+
+  // ملء الحقول
+  this.form.patchValue({
+    firstName: absherData.firstName,
+    fatherName: absherData.fatherName,
+    grandfatherName: absherData.grandfatherName,
+    tribeName: absherData.tribeName,
+    familyName: absherData.familyName
+  });
+
+  // قفل الحقول
+  this.isAbsherLocked = true;
+  this.snackBar.open('تم جلب البيانات بنجاح', 'إغلاق', { duration: 3000 });
+}</code></pre>
+        </div>
+
+        <h3>11.5 التنفيذ - HTML Template</h3>
+        <div class="card">
+            <div class="card-header">زر جلب البيانات</div>
+            <pre><code>&lt;!-- إضافة زر الجلب بعد حقل تاريخ الميلاد --&gt;
+&lt;button type="button" mat-stroked-button color="primary"
+        (click)="onFetchAbsherData()"
+        [disabled]="!f['identityNumber'].value || !f['identityTypeId'].value"&gt;
+  جلب البيانات من أبشر
+&lt;/button&gt;</code></pre>
+        </div>
+
+        <div class="card">
+            <div class="card-header">إضافة readonly للحقول المقفلة</div>
+            <pre><code>&lt;input matInput formControlName="firstName" [readonly]="isAbsherLocked"&gt;
+&lt;input matInput formControlName="fatherName" [readonly]="isAbsherLocked"&gt;
+&lt;input matInput formControlName="grandfatherName" [readonly]="isAbsherLocked"&gt;
+&lt;input matInput formControlName="tribeName" [readonly]="isAbsherLocked"&gt;
+&lt;input matInput formControlName="familyName" [readonly]="isAbsherLocked"&gt;</code></pre>
+        </div>
+
+        <h3>11.6 معالجة وضع التعديل</h3>
+        <div class="card">
+            <p>عند تحميل مدعى عليه موجود في وضع التعديل:</p>
+            <ul>
+                <li>إذا تم جلب البيانات مسبقاً من أبشر (تخزين علامة)، إبقاء الحقول مقفلة</li>
+                <li>حالياً (وهمي)، السماح بالتعديل دائماً في وضع التعديل حتى التكامل الحقيقي</li>
+            </ul>
+        </div>
+
+        <h3>11.7 التحقق</h3>
+        <div class="card">
+            <ol>
+                <li>فتح نموذج الفرد: <code>http://localhost:4200/case-registration/defendants/add/individual?requestId=1</code></li>
+                <li>إدخال رقم الهوية (مثال: 1234567890)</li>
+                <li>اختيار نوع الهوية</li>
+                <li>النقر على "جلب البيانات من أبشر"</li>
+                <li>التحقق من:
+                    <ul>
+                        <li>ملء الحقول ببيانات وهمية</li>
+                        <li>تصبح الحقول للقراءة فقط (رمادية)</li>
+                        <li>نوع الهوية ورقم الهوية تبقى قابلة للتعديل</li>
+                    </ul>
+                </li>
+                <li>تكرار الاختبار لنموذج صاحب المؤسسة</li>
+            </ol>
+        </div>
+
+        <h3>11.8 المستقبل: التحويل لأبشر الحقيقي</h3>
+        <div class="card">
+            <p>استبدال الطريقة الوهمية باستدعاء API حقيقي:</p>
+            <pre><code>// استبدال getMockAbsherData بـ:
+this.absherService.fetchPersonData(identityNumber, birthDate).subscribe(...)</code></pre>
+        </div>
+
+        <div class="success">
+            <h3>ملخص</h3>
+            <p>وحدة المدعى عليهم أبسط بكثير من وحدة المدعين. يمكن إعادة استخدام الكثير من الكود والمكونات من وحدة المدعين مع تبسيطها وإزالة الميزات غير المطلوبة (الممثلين، المرفقات، العنوان المختار).</p>
+            <p><strong>الوقت المتوقع:</strong> يمكن تنفيذ هذه الوحدة بشكل أسرع من المدعين نظراً لبساطتها.</p>
+        </div>
+    </div>
+</body>
+</html>
