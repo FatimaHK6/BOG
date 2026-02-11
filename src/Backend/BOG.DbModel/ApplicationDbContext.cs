@@ -64,6 +64,10 @@ public class ApplicationDbContext : DbContext
     public DbSet<Region> Regions { get; set; }
     public DbSet<City> Cities { get; set; }
     public DbSet<GovernmentAgency> GovernmentAgencies { get; set; }
+    public DbSet<LicenseSource> LicenseSources { get; set; }
+    public DbSet<Country> Countries { get; set; }
+    public DbSet<District> Districts { get; set; }
+    public DbSet<Nationality> Nationalities { get; set; }
 
     // Additional lookup tables
     public DbSet<Classification> Classifications { get; set; }
@@ -91,6 +95,7 @@ public class ApplicationDbContext : DbContext
     public DbSet<Defendant> Defendants { get; set; }
     public DbSet<CaseRequestDefendant> CaseRequestDefendants { get; set; }
     public DbSet<Representative> Representatives { get; set; }
+    public DbSet<RepresentativeAttachment> RepresentativeAttachments { get; set; }
     public DbSet<RequestAttachment> RequestAttachments { get; set; }
 
     // Additional info tables
@@ -511,6 +516,55 @@ public class ApplicationDbContext : DbContext
             entity.Property(e => e.IsActive).HasDefaultValue(true);
             entity.Property(e => e.IsDeleted).HasDefaultValue(false);
         });
+
+        // LicenseSource
+        modelBuilder.Entity<LicenseSource>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Name).IsRequired().HasMaxLength(200);
+            entity.Property(e => e.NameAr).IsRequired().HasMaxLength(200);
+            entity.Property(e => e.Code).HasMaxLength(50);
+            entity.Property(e => e.IsActive).HasDefaultValue(true);
+            entity.Property(e => e.IsDeleted).HasDefaultValue(false);
+        });
+
+        // Country
+        modelBuilder.Entity<Country>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Name).IsRequired().HasMaxLength(100);
+            entity.Property(e => e.NameAr).IsRequired().HasMaxLength(100);
+            entity.Property(e => e.IsoCode).HasMaxLength(3);
+            entity.Property(e => e.PhoneCode).HasMaxLength(5);
+            entity.Property(e => e.IsActive).HasDefaultValue(true);
+            entity.Property(e => e.IsDeleted).HasDefaultValue(false);
+        });
+
+        // District
+        modelBuilder.Entity<District>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Name).IsRequired().HasMaxLength(100);
+            entity.Property(e => e.NameAr).IsRequired().HasMaxLength(100);
+            entity.Property(e => e.IsActive).HasDefaultValue(true);
+            entity.Property(e => e.IsDeleted).HasDefaultValue(false);
+
+            entity.HasOne(e => e.City)
+                .WithMany()
+                .HasForeignKey(e => e.CityId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        // Nationality
+        modelBuilder.Entity<Nationality>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Name).IsRequired().HasMaxLength(100);
+            entity.Property(e => e.NameAr).IsRequired().HasMaxLength(100);
+            entity.Property(e => e.Code).HasMaxLength(3);
+            entity.Property(e => e.IsActive).HasDefaultValue(true);
+            entity.Property(e => e.IsDeleted).HasDefaultValue(false);
+        });
     }
 
     /// <summary>
@@ -870,6 +924,28 @@ public class ApplicationDbContext : DbContext
             entity.HasOne(e => e.DataSource)
                 .WithMany()
                 .HasForeignKey(e => e.DataSourceId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        // RepresentativeAttachment
+        modelBuilder.Entity<RepresentativeAttachment>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.FileName).IsRequired().HasMaxLength(255);
+            entity.Property(e => e.StoredFileName).IsRequired().HasMaxLength(500);
+            entity.Property(e => e.ContentType).IsRequired().HasMaxLength(100);
+            entity.Property(e => e.Description).HasMaxLength(500);
+            entity.Property(e => e.IsActive).HasDefaultValue(true);
+            entity.Property(e => e.IsDeleted).HasDefaultValue(false);
+
+            entity.HasOne(e => e.Representative)
+                .WithMany(r => r.Attachments)
+                .HasForeignKey(e => e.RepresentativeId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(e => e.AttachmentType)
+                .WithMany()
+                .HasForeignKey(e => e.AttachmentTypeId)
                 .OnDelete(DeleteBehavior.Restrict);
         });
 

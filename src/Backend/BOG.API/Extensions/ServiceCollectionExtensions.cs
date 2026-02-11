@@ -7,6 +7,10 @@ using BOG.BL.Services.FileStorage;
 using BOG.DAL.Interfaces;
 using BOG.DAL.Repositories;
 using BOG.DbModel;
+using BOG.DTO.Plaintiff;
+using BOG.Integration.Interfaces;
+using BOG.Integration.Services;
+using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.InMemory;
 using Microsoft.Extensions.Configuration;
@@ -137,6 +141,34 @@ public static class ServiceCollectionExtensions
     }
 
     /// <summary>
+    /// Registers integration services (external system integrations).
+    /// Follows Dependency Inversion Principle - depends on service interfaces.
+    /// </summary>
+    /// <param name="services">The service collection</param>
+    /// <returns>The service collection for chaining</returns>
+    public static IServiceCollection AddIntegrationServices(this IServiceCollection services)
+    {
+        // Absher integration (using mock for development)
+        services.AddScoped<IAbsherService, AbsherMockService>();
+
+        return services;
+    }
+
+    /// <summary>
+    /// Registers FluentValidation services.
+    /// Registers all validators from the DTO assembly for dependency injection.
+    /// </summary>
+    /// <param name="services">The service collection</param>
+    /// <returns>The service collection for chaining</returns>
+    public static IServiceCollection AddFluentValidation(this IServiceCollection services)
+    {
+        // Register all validators from the DTO assembly
+        services.AddValidatorsFromAssemblyContaining<PlaintiffCreateDTOValidator>();
+
+        return services;
+    }
+
+    /// <summary>
     /// Registers all application services in one convenient method.
     /// Follows Open-Closed Principle - can be extended with new service registrations.
     /// </summary>
@@ -151,7 +183,9 @@ public static class ServiceCollectionExtensions
             .AddApplicationDbContext(configuration)
             .AddUnitOfWork()
             .AddRepositories()
-            .AddBusinessLogicServices(configuration);
+            .AddBusinessLogicServices(configuration)
+            .AddIntegrationServices()
+            .AddFluentValidation();
 
         return services;
     }

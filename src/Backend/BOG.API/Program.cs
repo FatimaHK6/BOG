@@ -1,4 +1,5 @@
 using BOG.API.BackgroundServices;
+using BOG.API.Converters;
 using BOG.API.Extensions;
 using BOG.Integration.Extensions;
 using BOG.DbModel;
@@ -17,7 +18,10 @@ builder.Services.AddControllers()
         // Use camelCase for JSON property names (JavaScript/TypeScript convention)
         options.JsonSerializerOptions.PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase;
         options.JsonSerializerOptions.DictionaryKeyPolicy = null;
+        options.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
         options.JsonSerializerOptions.WriteIndented = builder.Environment.IsDevelopment();
+        options.JsonSerializerOptions.Converters.Add(new DateOnlyJsonConverter());
+        options.JsonSerializerOptions.Converters.Add(new NullableDateOnlyJsonConverter());
     });
 
 // Register background services
@@ -79,8 +83,14 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
 app.UseCors("AllowAll");
+
+// Only use HTTPS redirection in production to avoid issues with HTTP-only development
+if (!app.Environment.IsDevelopment())
+{
+    app.UseHttpsRedirection();
+}
+
 app.MapControllers();
 
 app.Run();
