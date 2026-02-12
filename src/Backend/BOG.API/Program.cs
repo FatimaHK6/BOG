@@ -46,16 +46,32 @@ if (app.Environment.IsDevelopment())
         var services = scope.ServiceProvider;
         var logger = services.GetRequiredService<ILogger<Program>>();
         var dbContext = services.GetRequiredService<ApplicationDbContext>();
+        var configuration = services.GetRequiredService<IConfiguration>();
 
         try
         {
-            logger.LogInformation("Initializing InMemory database with seed data...");
+            var provider = configuration["Database:Provider"] ?? "SqlServer";
 
-            // EnsureCreated applies all HasData() seed data from OnModelCreating
-            dbContext.Database.EnsureCreated();
+            if (provider.Equals("SqlServer", StringComparison.OrdinalIgnoreCase))
+            {
+                logger.LogInformation("Applying pending migrations to SQL Server database...");
 
-            // Log seed data statistics
-            logger.LogInformation("InMemory database initialized successfully:");
+                // Apply all pending migrations (creates database if it doesn't exist)
+                dbContext.Database.Migrate();
+
+                logger.LogInformation("SQL Server database initialized successfully:");
+            }
+            else if (provider.Equals("InMemory", StringComparison.OrdinalIgnoreCase))
+            {
+                logger.LogInformation("Initializing InMemory database with seed data...");
+
+                // EnsureCreated applies all HasData() seed data from OnModelCreating
+                dbContext.Database.EnsureCreated();
+
+                logger.LogInformation("InMemory database initialized successfully:");
+            }
+
+            // Log seed data statistics (works for both providers)
             logger.LogInformation("  - Roles: {Count}", dbContext.Roles.Count());
             logger.LogInformation("  - Courts: {Count}", dbContext.Courts.Count());
             logger.LogInformation("  - Request Statuses: {Count}", dbContext.RequestStatuses.Count());
@@ -70,7 +86,8 @@ if (app.Environment.IsDevelopment())
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Failed to initialize database");
+            logger.LogError(ex, "Failed to initialize database. Provider: {Provider}",
+                configuration["Database:Provider"] ?? "SqlServer");
             throw;
         }
     }

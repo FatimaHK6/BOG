@@ -44,7 +44,9 @@ import { DefendantFormDialogComponent } from '../components/defendants/defendant
   imports: [CaseRegistrationSharedModule, NgxEditorModule],
   exports: [
     CaseDataContainerComponent,
-    CaseDataFormComponent
+    CaseDataFormComponent,
+    DefendantsListComponent,
+    DefendantFormDialogComponent
   ]
 })
 export class CaseDataModule { }

@@ -873,12 +873,16 @@ namespace BOG.DbModel.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("CaseNumber")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                    b.Property<int>("CaseNumber")
+                        .HasColumnType("int");
 
                     b.Property<int>("CaseRegistrationRequestId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("CaseYear")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("CourtId")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("CreatedDate")
@@ -892,13 +896,11 @@ namespace BOG.DbModel.Migrations
                     b.Property<DateTime>("ModifiedDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("Notes")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
                     b.HasKey("Id");
 
                     b.HasIndex("CaseRegistrationRequestId");
+
+                    b.HasIndex("CourtId");
 
                     b.ToTable("RelatedCases");
                 });
@@ -4037,7 +4039,14 @@ namespace BOG.DbModel.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("BOG.DbModel.Entities.Lookups.Court", "Court")
+                        .WithMany()
+                        .HasForeignKey("CourtId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
                     b.Navigation("Request");
+
+                    b.Navigation("Court");
                 });
 
             modelBuilder.Entity("BOG.DbModel.Entities.CaseRegistration.Representative", b =>

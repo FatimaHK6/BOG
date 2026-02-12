@@ -1,6 +1,0 @@
-Total messages: 7 (Errors: 3, Warnings: 2)
-Returning 3 messages for level "error"
-
-[ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:5001/api/case-requests/1:0
-[ERROR] Error loading request: HttpErrorResponse @ http://localhost:4200/src_app_features_case-registration_case-registration_module_ts.js:7665
-[ERROR] Error loading request: HttpErrorResponse @ http://localhost:4200/src_app_features_case-registration_case-registration_module_ts.js:6069

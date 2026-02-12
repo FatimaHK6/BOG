@@ -700,7 +700,6 @@ public class ApplicationDbContext : DbContext
         {
             entity.HasKey(e => e.Id);
             entity.Property(e => e.CaseNumber).IsRequired().HasMaxLength(50);
-            entity.Property(e => e.Notes).HasMaxLength(500);
             entity.Property(e => e.IsDeleted).HasDefaultValue(false);
 
             entity.HasOne(e => e.Request)

@@ -1,6 +1,5 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { DefendantService } from '../../../../../core/services/defendant.service';
 import { LookupService } from '../../../../../core/services/lookup.service';
@@ -23,8 +22,12 @@ interface EmploymentStatus {
 })
 export class DefendantBusinessOwnerFormComponent implements OnInit {
   form!: FormGroup;
-  requestId: number = 0;
-  defendantId: number = 0;
+  @Input() requestId: number = 0;
+  @Input() defendantId: number | null = null;
+  @Input() mode: 'add' | 'edit' | 'view' = 'add';
+
+  @Output() saved = new EventEmitter<void>();
+  @Output() cancelled = new EventEmitter<void>();
   isEditMode = false;
   isViewMode = false;
   isLoading = false;
@@ -67,25 +70,12 @@ export class DefendantBusinessOwnerFormComponent implements OnInit {
     private fb: FormBuilder,
     private defendantService: DefendantService,
     private lookupService: LookupService,
-    private router: Router,
-    private route: ActivatedRoute,
     private snackBar: MatSnackBar
   ) { }
 
   ngOnInit(): void {
-    this.route.queryParams.subscribe(params => {
-      this.requestId = params['requestId'] ? +params['requestId'] : 0;
-    });
-
-    this.route.params.subscribe(params => {
-      if (params['id']) {
-        this.defendantId = +params['id'];
-        const url = this.router.url;
-        this.isViewMode = url.includes('/view/');
-        this.isEditMode = !this.isViewMode;
-      }
-    });
-
+    this.isViewMode = this.mode === 'view';
+    this.isEditMode = this.mode === 'edit';
     this.initForm();
     this.loadLookups();
   }
@@ -174,7 +164,7 @@ export class DefendantBusinessOwnerFormComponent implements OnInit {
     this.lookupService.getRegions().subscribe({
       next: (regions) => {
         this.regions = regions;
-        if ((this.isEditMode || this.isViewMode) && this.defendantId > 0) {
+        if ((this.isEditMode || this.isViewMode) && this.defendantId && this.defendantId > 0) {
           this.loadDefendant();
         } else {
           this.isLoading = false;
@@ -187,7 +177,7 @@ export class DefendantBusinessOwnerFormComponent implements OnInit {
   }
 
   private loadDefendant(): void {
-    this.defendantService.getDefendant(this.defendantId).subscribe({
+    this.defendantService.getDefendant(this.defendantId!).subscribe({
       next: (defendant: any) => {
         if (defendant.indRegionId) {
           this.loadIndCities(defendant.indRegionId);
@@ -504,7 +494,7 @@ export class DefendantBusinessOwnerFormComponent implements OnInit {
     };
 
     const request$ = this.isEditMode
-      ? this.defendantService.updateDefendant(this.defendantId, dto)
+      ? this.defendantService.updateDefendant(this.defendantId!, dto)
       : this.defendantService.createDefendant(this.requestId, dto);
 
     request$.subscribe({
@@ -512,9 +502,7 @@ export class DefendantBusinessOwnerFormComponent implements OnInit {
         this.isSaving = false;
         const message = this.isEditMode ? 'تم تعديل المدعى عليه بنجاح' : 'تم إنشاء المدعى عليه بنجاح';
         this.snackBar.open(message, 'إغلاق', { duration: 3000 });
-        this.router.navigate(['/case-registration/defendants'], {
-          queryParams: { requestId: this.requestId }
-        });
+        this.saved.emit();
       },
       error: (err) => {
         console.error('Error saving defendant:', err);
@@ -526,9 +514,7 @@ export class DefendantBusinessOwnerFormComponent implements OnInit {
   }
 
   onCancel(): void {
-    this.router.navigate(['/case-registration/defendants'], {
-      queryParams: { requestId: this.requestId }
-    });
+    this.cancelled.emit();
   }
 
   hasTab1Errors(): boolean {
@@ -608,3 +594,9 @@ export class DefendantBusinessOwnerFormComponent implements OnInit {
     }, 1000); // 1 second delay to simulate API call
   }
 }
+
+
+
+
+
+

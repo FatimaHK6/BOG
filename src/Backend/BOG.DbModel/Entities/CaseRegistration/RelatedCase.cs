@@ -28,11 +28,6 @@ public class RelatedCase : BaseEntity
     public int? CourtId { get; set; }
 
     /// <summary>
-    /// Notes about the relationship.
-    /// </summary>
-    public string? Notes { get; set; }
-
-    /// <summary>
     /// Navigation property for the request.
     /// </summary>
     public virtual CaseRegistrationRequest Request { get; set; } = null!;

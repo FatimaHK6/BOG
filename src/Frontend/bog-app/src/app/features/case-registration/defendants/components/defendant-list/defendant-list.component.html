@@ -1,97 +1,167 @@
 <div class="defendant-list-container">
-  <!-- Header -->
-  <div class="page-header">
-    <h2 class="page-title">المدعى عليهم</h2>
-    <div class="header-actions">
-      <button mat-stroked-button color="accent" (click)="onSaveAsDraft()" [disabled]="isSaving">
-        <mat-icon>save</mat-icon>
-        حفظ كمسودة
+  <!-- LIST VIEW: Show when not in form mode -->
+  <div *ngIf="!showForm" class="list-view">
+    <!-- Header -->
+    <div class="page-header">
+      <h2 class="page-title">المدعى عليهم</h2>
+      <div class="header-actions">
+        <button mat-stroked-button color="accent" (click)="onSaveAsDraft()" [disabled]="isSaving">
+          <mat-icon>save</mat-icon>
+          حفظ كمسودة
+        </button>
+        <button mat-raised-button class="add-defendant-btn" [matMenuTriggerFor]="defendantTypeMenu">
+          <mat-icon>add</mat-icon>
+          إضافة مدعى عليه جديد
+        </button>
+        <mat-menu #defendantTypeMenu="matMenu" class="defendant-type-menu">
+          <button mat-menu-item *ngFor="let type of defendantTypes" (click)="onSelectDefendantType(type)">
+            {{ type.nameAr }}
+          </button>
+        </mat-menu>
+      </div>
+    </div>
+
+    <!-- Loading Spinner -->
+    <div *ngIf="isLoading" class="loading-container">
+      <mat-spinner diameter="40"></mat-spinner>
+    </div>
+
+    <!-- Empty State -->
+    <div *ngIf="!isLoading && defendants.length === 0" class="empty-state">
+      <mat-icon class="empty-icon">person_off</mat-icon>
+      <p>لا يوجد مدعى عليهم مسجلين</p>
+      <button mat-stroked-button class="add-defendant-btn-outline" [matMenuTriggerFor]="defendantTypeMenuEmpty">
+        إضافة مدعى عليه
       </button>
-      <button mat-raised-button class="add-defendant-btn" [matMenuTriggerFor]="defendantTypeMenu">
-        <mat-icon>add</mat-icon>
-        إضافة مدعى عليه جديد
-      </button>
-      <mat-menu #defendantTypeMenu="matMenu" class="defendant-type-menu">
+      <mat-menu #defendantTypeMenuEmpty="matMenu" class="defendant-type-menu">
         <button mat-menu-item *ngFor="let type of defendantTypes" (click)="onSelectDefendantType(type)">
           {{ type.nameAr }}
         </button>
       </mat-menu>
     </div>
+
+    <!-- Defendants Table -->
+    <mat-card *ngIf="!isLoading && defendants.length > 0">
+      <mat-card-content>
+        <table mat-table [dataSource]="dataSource" class="full-width">
+
+          <!-- Defendant Type Column -->
+          <ng-container matColumnDef="defendantType">
+            <th mat-header-cell *matHeaderCellDef>نوع المدعى عليه</th>
+            <td mat-cell *matCellDef="let defendant">{{ defendant.defendantTypeNameAr }}</td>
+          </ng-container>
+
+          <!-- Display Name Column -->
+          <ng-container matColumnDef="displayName">
+            <th mat-header-cell *matHeaderCellDef>الاسم/المسمى</th>
+            <td mat-cell *matCellDef="let defendant">{{ defendant.displayName }}</td>
+          </ng-container>
+
+          <!-- Actions Column -->
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef>الإجراءات</th>
+            <td mat-cell *matCellDef="let defendant">
+              <button mat-icon-button [matMenuTriggerFor]="actionMenu" matTooltip="الإجراءات">
+                <mat-icon>more_vert</mat-icon>
+              </button>
+              <mat-menu #actionMenu="matMenu">
+                <button mat-menu-item (click)="onViewDefendant(defendant)">
+                  <mat-icon>visibility</mat-icon>
+                  <span>عرض</span>
+                </button>
+                <button mat-menu-item (click)="onEditDefendant(defendant)">
+                  <mat-icon>edit</mat-icon>
+                  <span>تعديل</span>
+                </button>
+                <mat-divider></mat-divider>
+                <button mat-menu-item (click)="onDeleteDefendant(defendant)" class="delete-action">
+                  <mat-icon>delete</mat-icon>
+                  <span>حذف</span>
+                </button>
+              </mat-menu>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+        </table>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Paginator -->
+    <mat-paginator #paginator
+                   *ngIf="!isLoading && defendants.length > 0"
+                   [pageSize]="10"
+                   [pageSizeOptions]="[5, 10, 25, 50]"
+                   showFirstLastButtons
+                   aria-label="اختر صفحة">
+    </mat-paginator>
   </div>
 
-  <!-- Loading Spinner -->
-  <div *ngIf="isLoading" class="loading-container">
-    <mat-spinner diameter="40"></mat-spinner>
+  <!-- FORM VIEW: Show when adding/editing defendant -->
+  <div *ngIf="showForm" class="form-view">
+    <!-- Dynamic form based on defendant type -->
+    <app-defendant-individual-form
+      *ngIf="selectedDefendantType === 1"
+      [requestId]="requestId"
+      [defendantId]="selectedDefendantId"
+      [mode]="formMode"
+      (saved)="onFormSaved()"
+      (cancelled)="onFormCancelled()">
+    </app-defendant-individual-form>
+
+    <app-defendant-registered-company-form
+      *ngIf="selectedDefendantType === 2"
+      [requestId]="requestId"
+      [defendantId]="selectedDefendantId"
+      [mode]="formMode"
+      (saved)="onFormSaved()"
+      (cancelled)="onFormCancelled()">
+    </app-defendant-registered-company-form>
+
+    <app-defendant-gov-form
+      *ngIf="selectedDefendantType === 3"
+      [requestId]="requestId"
+      [defendantId]="selectedDefendantId"
+      [mode]="formMode"
+      (saved)="onFormSaved()"
+      (cancelled)="onFormCancelled()">
+    </app-defendant-gov-form>
+
+    <app-defendant-unregistered-company-form
+      *ngIf="selectedDefendantType === 4"
+      [requestId]="requestId"
+      [defendantId]="selectedDefendantId"
+      [mode]="formMode"
+      (saved)="onFormSaved()"
+      (cancelled)="onFormCancelled()">
+    </app-defendant-unregistered-company-form>
+
+    <app-defendant-business-owner-form
+      *ngIf="selectedDefendantType === 5"
+      [requestId]="requestId"
+      [defendantId]="selectedDefendantId"
+      [mode]="formMode"
+      (saved)="onFormSaved()"
+      (cancelled)="onFormCancelled()">
+    </app-defendant-business-owner-form>
+
+    <app-defendant-ngo-form
+      *ngIf="selectedDefendantType === 6"
+      [requestId]="requestId"
+      [defendantId]="selectedDefendantId"
+      [mode]="formMode"
+      (saved)="onFormSaved()"
+      (cancelled)="onFormCancelled()">
+    </app-defendant-ngo-form>
+
+    <app-defendant-waqf-form
+      *ngIf="selectedDefendantType === 7"
+      [requestId]="requestId"
+      [defendantId]="selectedDefendantId"
+      [mode]="formMode"
+      (saved)="onFormSaved()"
+      (cancelled)="onFormCancelled()">
+    </app-defendant-waqf-form>
   </div>
-
-  <!-- Empty State -->
-  <div *ngIf="!isLoading && defendants.length === 0" class="empty-state">
-    <mat-icon class="empty-icon">person_off</mat-icon>
-    <p>لا يوجد مدعى عليهم مسجلين</p>
-    <button mat-stroked-button class="add-defendant-btn-outline" [matMenuTriggerFor]="defendantTypeMenuEmpty">
-      إضافة مدعى عليه
-    </button>
-    <mat-menu #defendantTypeMenuEmpty="matMenu" class="defendant-type-menu">
-      <button mat-menu-item *ngFor="let type of defendantTypes" (click)="onSelectDefendantType(type)">
-        {{ type.nameAr }}
-      </button>
-    </mat-menu>
-  </div>
-
-  <!-- Defendants Table -->
-  <mat-card *ngIf="!isLoading && defendants.length > 0">
-    <mat-card-content>
-      <table mat-table [dataSource]="dataSource" class="full-width">
-
-        <!-- Defendant Type Column -->
-        <ng-container matColumnDef="defendantType">
-          <th mat-header-cell *matHeaderCellDef>نوع المدعى عليه</th>
-          <td mat-cell *matCellDef="let defendant">{{ defendant.defendantTypeNameAr }}</td>
-        </ng-container>
-
-        <!-- Display Name Column -->
-        <ng-container matColumnDef="displayName">
-          <th mat-header-cell *matHeaderCellDef>الاسم/المسمى</th>
-          <td mat-cell *matCellDef="let defendant">{{ defendant.displayName }}</td>
-        </ng-container>
-
-        <!-- Actions Column -->
-        <ng-container matColumnDef="actions">
-          <th mat-header-cell *matHeaderCellDef>الإجراءات</th>
-          <td mat-cell *matCellDef="let defendant">
-            <button mat-icon-button [matMenuTriggerFor]="actionMenu" matTooltip="الإجراءات">
-              <mat-icon>more_vert</mat-icon>
-            </button>
-            <mat-menu #actionMenu="matMenu">
-              <button mat-menu-item (click)="onViewDefendant(defendant)">
-                <mat-icon>visibility</mat-icon>
-                <span>عرض</span>
-              </button>
-              <button mat-menu-item (click)="onEditDefendant(defendant)">
-                <mat-icon>edit</mat-icon>
-                <span>تعديل</span>
-              </button>
-              <mat-divider></mat-divider>
-              <button mat-menu-item (click)="onDeleteDefendant(defendant)" class="delete-action">
-                <mat-icon>delete</mat-icon>
-                <span>حذف</span>
-              </button>
-            </mat-menu>
-          </td>
-        </ng-container>
-
-        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-      </table>
-    </mat-card-content>
-  </mat-card>
-
-  <!-- Paginator -->
-  <mat-paginator #paginator
-                 *ngIf="!isLoading && defendants.length > 0"
-                 [pageSize]="10"
-                 [pageSizeOptions]="[5, 10, 25, 50]"
-                 showFirstLastButtons
-                 aria-label="اختر صفحة">
-  </mat-paginator>
 </div>

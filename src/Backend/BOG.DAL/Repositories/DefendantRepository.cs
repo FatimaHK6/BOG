@@ -1,3 +1,4 @@
+
 using BOG.DAL.Interfaces;
 using BOG.DbModel;
 using BOG.DbModel.Entities.CaseRegistration;

@@ -1,81 +1,45 @@
 <div dir="rtl" class="case-data-container">
-  <!-- Material Tabs for Case Data Sub-sections -->
-  <mat-tab-group
-    class="case-data-tabs"
-    [(selectedIndex)]="activeTabIndex"
-    (selectedIndexChange)="onTabChange($event)">
+  <!-- Subject & Evidence -->
+  <div *ngIf="activeTabId === 'subject-evidence'" class="tab-content-wrapper">
+    <app-subject-evidence-form [canEdit]="canEdit"></app-subject-evidence-form>
+  </div>
 
-    <!-- Subject & Evidence Tab -->
-    <mat-tab label="موضوع وأسانيد الدعوى" dir="rtl">
-      <ng-template matTabContent>
-        <div class="tab-content-wrapper">
-          <app-subject-evidence-form
-            [canEdit]="canEdit">
-          </app-subject-evidence-form>
-        </div>
-      </ng-template>
-    </mat-tab>
+  <!-- Claims -->
+  <div *ngIf="activeTabId === 'claims'" class="tab-content-wrapper">
+    <app-claims-list
+      [requestId]="requestId"
+      [canEdit]="canEdit"
+      (countChanged)="claimsCount = $event">
+    </app-claims-list>
+  </div>
 
-    <!-- Claims Tab -->
-    <mat-tab label="طلبات الدعوى" dir="rtl">
-      <ng-template matTabContent>
-        <div class="tab-content-wrapper">
-          <app-claims-list
-            [requestId]="requestId"
-            [canEdit]="canEdit"
-            (countChanged)="claimsCount = $event">
-          </app-claims-list>
-        </div>
-      </ng-template>
-    </mat-tab>
+  <!-- Related Cases -->
+  <div *ngIf="activeTabId === 'related-cases'" class="tab-content-wrapper">
+    <app-related-cases-list
+      [requestId]="requestId"
+      [canEdit]="canEdit"
+      (countChanged)="relatedCasesCount = $event">
+    </app-related-cases-list>
+  </div>
 
-    <!-- Related Cases Tab -->
-    <mat-tab label="الدعاوى المرتبطة" dir="rtl">
-      <ng-template matTabContent>
-        <div class="tab-content-wrapper">
-          <app-related-cases-list
-            [requestId]="requestId"
-            [canEdit]="canEdit"
-            (countChanged)="relatedCasesCount = $event">
-          </app-related-cases-list>
-        </div>
-      </ng-template>
-    </mat-tab>
+  <!-- Classifications -->
+  <div *ngIf="activeTabId === 'classifications'" class="tab-content-wrapper">
+    <app-classifications-tab
+      [canEdit]="canEdit"
+      (countChanged)="classificationsCount = $event">
+    </app-classifications-tab>
+  </div>
 
-    <!-- Classifications Tab -->
-    <mat-tab label="تصنيف الدعوى" dir="rtl">
-      <ng-template matTabContent>
-        <div class="tab-content-wrapper">
-          <app-classifications-tab
-            [canEdit]="canEdit"
-            (countChanged)="classificationsCount = $event">
-          </app-classifications-tab>
-        </div>
-      </ng-template>
-    </mat-tab>
+  <!-- Contact Info -->
+  <div *ngIf="activeTabId === 'contact-info'" class="tab-content-wrapper">
+    <app-contact-info-form [canEdit]="canEdit"></app-contact-info-form>
+  </div>
 
-    <!-- Contact Info Tab -->
-    <mat-tab label="بيانات التواصل" dir="rtl">
-      <ng-template matTabContent>
-        <div class="tab-content-wrapper">
-          <app-contact-info-form
-            [canEdit]="canEdit">
-          </app-contact-info-form>
-        </div>
-      </ng-template>
-    </mat-tab>
-
-    <!-- Attachments Tab -->
-    <mat-tab label="المرفقات" dir="rtl">
-      <ng-template matTabContent>
-        <div class="tab-content-wrapper">
-          <app-attachments-list
-            [requestId]="requestId"
-            [canEdit]="canEdit">
-          </app-attachments-list>
-        </div>
-      </ng-template>
-    </mat-tab>
-
-  </mat-tab-group>
+  <!-- Attachments -->
+  <div *ngIf="activeTabId === 'attachments'" class="tab-content-wrapper">
+    <app-attachments-list
+      [requestId]="requestId"
+      [canEdit]="canEdit">
+    </app-attachments-list>
+  </div>
 </div>

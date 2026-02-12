@@ -17,7 +17,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 export class CaseDataContainerComponent implements OnInit, OnDestroy, OnChanges {
   @Input() requestId!: number;
   @Input() canEdit = false;
-  @Input() activeTab: string = 'subject-evidence';
+  @Input() activeTabId: string = 'subject-evidence';
   @Output() saveComplete = new EventEmitter<{ success: boolean; error?: string }>();
 
   // Saving state
@@ -29,19 +29,6 @@ export class CaseDataContainerComponent implements OnInit, OnDestroy, OnChanges 
   claimsCount = 0;
   relatedCasesCount = 0;
   classificationsCount = 0;
-
-  // Material Tab Index (for mat-tab-group binding)
-  activeTabIndex = 0;
-
-  // Tab index mapping
-  private readonly TAB_INDEX_MAP = {
-    'subject-evidence': 0,
-    'claims': 1,
-    'related-cases': 2,
-    'classifications': 3,
-    'contact-info': 4,
-    'attachments': 5
-  };
 
   private destroy$ = new Subject<void>();
 
@@ -60,9 +47,6 @@ export class CaseDataContainerComponent implements OnInit, OnDestroy, OnChanges 
       return;
     }
 
-    // Set initial tab index from activeTab input
-    this.updateTabIndexFromTab(this.activeTab);
-
     // Subscribe to state changes to update counts
     this.caseDataState.state$
       .pipe(takeUntil(this.destroy$))
@@ -74,35 +58,15 @@ export class CaseDataContainerComponent implements OnInit, OnDestroy, OnChanges 
   }
 
   ngOnChanges(changes: SimpleChanges) {
-    // Update tab index when activeTab input changes
-    if (changes['activeTab'] && !changes['activeTab'].firstChange) {
-      this.updateTabIndexFromTab(this.activeTab);
+    // Handle any necessary changes when inputs change
+    if (changes['activeTabId'] && !changes['activeTabId'].firstChange) {
+      // Tab ID has changed, any necessary logic here
     }
   }
 
   ngOnDestroy() {
     this.destroy$.next();
     this.destroy$.complete();
-  }
-
-  /**
-   * Update activeTabIndex based on tab ID string
-   */
-  private updateTabIndexFromTab(tabId: string): void {
-    this.activeTabIndex = (this.TAB_INDEX_MAP as any)[tabId] || 0;
-  }
-
-  /**
-   * Handle tab change event from Material tabs
-   */
-  onTabChange(index: number): void {
-    const tabNames = Object.keys(this.TAB_INDEX_MAP);
-    const tabName = tabNames[index];
-    if (tabName) {
-      this.activeTab = tabName;
-      // Optionally emit or navigate here if needed
-      // (parent component handles URL updates via query params)
-    }
   }
 
   /**
