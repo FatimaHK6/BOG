@@ -1,5 +1,6 @@
 import { NgModule } from '@angular/core';
 import { SharedModule } from '../../../shared/shared.module';
+import { DefendantsRoutingModule } from './defendants-routing.module';
 
 // Components
 import { DefendantListComponent } from './components/defendant-list/defendant-list.component';
@@ -23,7 +24,8 @@ import { DefendantBusinessOwnerFormComponent } from './components/defendant-busi
     DefendantWaqfFormComponent
   ],
   imports: [
-    SharedModule
+    SharedModule,
+    DefendantsRoutingModule
   ],
   exports: [
     DefendantListComponent

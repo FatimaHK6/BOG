@@ -27,6 +27,10 @@ const routes: Routes = [
         path: ':id/view',
         component: RequestDetailsComponent,
         data: { mode: 'view', title: 'عرض طلب تسجيل الدعوى' }
+      },
+      {
+        path: 'defendants',
+        loadChildren: () => import('./defendants/defendants.module').then(m => m.DefendantsModule)
       }
     ]
   }

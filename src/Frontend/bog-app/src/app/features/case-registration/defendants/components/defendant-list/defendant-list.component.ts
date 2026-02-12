@@ -21,6 +21,8 @@ interface DefendantType {
 })
 export class DefendantListComponent implements OnInit, AfterViewInit {
   @Input() requestId: number = 0;
+  @Input() canEdit: boolean = true;
+  @Input() showValidation: boolean = false;
   defendants: DefendantListVM[] = [];
   dataSource = new MatTableDataSource<DefendantListVM>([]);
   isLoading = false;

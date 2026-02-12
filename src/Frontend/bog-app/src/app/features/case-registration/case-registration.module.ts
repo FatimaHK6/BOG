@@ -3,6 +3,7 @@ import { SharedModule } from '../../shared/shared.module';
 import { CaseRegistrationSharedModule } from './shared/case-registration-shared.module';
 import { CaseDataModule } from './case-data/case-data.module';
 import { PlaintiffsModule } from './plaintiffs/plaintiffs.module';
+import { DefendantsModule } from './defendants/defendants.module';
 import { RequestsModule } from './requests/requests.module';
 import { CaseRegistrationRoutingModule } from './case-registration-routing.module';
 
@@ -25,6 +26,7 @@ import { RequestCompletionComponent } from './components/request-completion/requ
     CaseRegistrationSharedModule,
     CaseDataModule,
     PlaintiffsModule,
+    DefendantsModule,
     RequestsModule,
     SharedModule,
     CaseRegistrationRoutingModule

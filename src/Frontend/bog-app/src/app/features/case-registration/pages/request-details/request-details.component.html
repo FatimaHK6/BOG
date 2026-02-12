@@ -196,11 +196,11 @@
 
         <!-- Defendants Tab -->
         <section id="defendants" *ngSwitchCase="'defendants'" class="tab-content">
-          <app-defendants-list
+          <app-defendant-list
             [requestId]="requestId"
             [canEdit]="canEdit"
             [showValidation]="showValidation">
-          </app-defendants-list>
+          </app-defendant-list>
         </section>
 
         <!-- Case Data Tab (Contains 6 Sub-tabs in Sidebar) -->
