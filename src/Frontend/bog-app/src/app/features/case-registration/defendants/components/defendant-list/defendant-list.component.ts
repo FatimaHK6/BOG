@@ -1,5 +1,4 @@
-import { Component, OnInit, ViewChild, AfterViewInit } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { Component, OnInit, ViewChild, AfterViewInit, Input } from '@angular/core';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatDialog } from '@angular/material/dialog';
@@ -20,7 +19,16 @@ interface DefendantType {
   styleUrls: ['./defendant-list.component.scss']
 })
 export class DefendantListComponent implements OnInit, AfterViewInit {
-  requestId: number = 0;
+  @Input() requestId: number = 0;
+  @Input() canEdit: boolean = true;
+  @Input() showValidation: boolean = false;
+
+  // Inline form state management
+  showForm: boolean = false;
+  formMode: 'add' | 'edit' | 'view' = 'add';
+  selectedDefendantType: number | null = null;
+  selectedDefendantId: number | null = null;
+
   defendants: DefendantListVM[] = [];
   dataSource = new MatTableDataSource<DefendantListVM>([]);
   isLoading = false;
@@ -48,25 +56,15 @@ export class DefendantListComponent implements OnInit, AfterViewInit {
   constructor(
     private defendantService: DefendantService,
     private requestService: CaseRegistrationRequestService,
-    private router: Router,
-    private route: ActivatedRoute,
     private dialog: MatDialog,
     private snackBar: MatSnackBar
   ) { }
 
   ngOnInit(): void {
-    this.route.queryParams.subscribe(params => {
-      const newRequestId = params['requestId'] ? +params['requestId'] : 0;
-      if (newRequestId !== this.requestId) {
-        this.requestId = newRequestId;
-        if (this.requestId > 0) {
-          this.loadDefendants();
-        } else {
-          this.defendants = [];
-          this.dataSource.data = [];
-        }
-      }
-    });
+    // Load defendants if requestId is provided
+    if (this.requestId > 0) {
+      this.loadDefendants();
+    }
   }
 
   ngAfterViewInit(): void {
@@ -82,10 +80,8 @@ export class DefendantListComponent implements OnInit, AfterViewInit {
     this.isSaving = true;
     this.requestService.update(this.requestId, { saveAsDraft: true }).subscribe({
       next: () => {
-        this.router.navigate(['/case-registration/requests']).then(() => {
-          this.isSaving = false;
-          this.snackBar.open('تم حفظ الطلب كمسودة', 'إغلاق', { duration: 3000 });
-        });
+        this.isSaving = false;
+        this.snackBar.open('تم حفظ الطلب كمسودة', 'إغلاق', { duration: 3000 });
       },
       error: (error) => {
         console.error('Error saving draft:', error);
@@ -124,69 +120,27 @@ export class DefendantListComponent implements OnInit, AfterViewInit {
   }
 
   onSelectDefendantType(type: DefendantType): void {
-    // Navigate to add defendant form based on type
-    const typeRoutes: { [key: number]: string } = {
-      1: 'individual',             // فرد
-      2: 'registered-company',     // شركة مسجلة في المملكة
-      3: 'government-agency',      // جهة حكومية
-      4: 'unregistered-company',   // شركة غير مسجلة في المملكة
-      5: 'business-owner',         // صاحب مؤسسة
-      6: 'ngo',                    // جمعية/مؤسسة أهلية
-      7: 'waqf'                    // وقف
-    };
-
-    const route = typeRoutes[type.id];
-    if (route) {
-      this.router.navigate(['/case-registration/defendants/add', route], {
-        queryParams: { requestId: this.requestId }
-      });
-    } else {
-      console.log('Form not implemented for type:', type.id, type.nameAr);
-    }
+    // Show form inline
+    this.selectedDefendantType = type.id;
+    this.formMode = 'add';
+    this.selectedDefendantId = null;
+    this.showForm = true;
   }
 
   onViewDefendant(defendant: DefendantListVM): void {
-    // Navigate to view defendant based on type
-    const typeRoutes: { [key: number]: string } = {
-      1: 'individual',             // فرد
-      2: 'registered-company',     // شركة مسجلة في المملكة
-      3: 'government-agency',      // جهة حكومية
-      4: 'unregistered-company',   // شركة غير مسجلة في المملكة
-      5: 'business-owner',         // صاحب مؤسسة
-      6: 'ngo',                    // جمعية/مؤسسة أهلية
-      7: 'waqf'                    // وقف
-    };
-
-    const route = typeRoutes[defendant.defendantTypeId];
-    if (route) {
-      this.router.navigate(['/case-registration/defendants/view', route, defendant.id], {
-        queryParams: { requestId: this.requestId }
-      });
-    } else {
-      this.snackBar.open('عرض هذا النوع غير متاح حالياً', 'إغلاق', { duration: 3000 });
-    }
+    // Show form inline in view mode
+    this.selectedDefendantType = defendant.defendantTypeId;
+    this.formMode = 'view';
+    this.selectedDefendantId = defendant.id;
+    this.showForm = true;
   }
 
   onEditDefendant(defendant: DefendantListVM): void {
-    // Navigate to edit defendant based on type
-    const typeRoutes: { [key: number]: string } = {
-      1: 'individual',             // فرد
-      2: 'registered-company',     // شركة مسجلة في المملكة
-      3: 'government-agency',      // جهة حكومية
-      4: 'unregistered-company',   // شركة غير مسجلة في المملكة
-      5: 'business-owner',         // صاحب مؤسسة
-      6: 'ngo',                    // جمعية/مؤسسة أهلية
-      7: 'waqf'                    // وقف
-    };
-
-    const route = typeRoutes[defendant.defendantTypeId];
-    if (route) {
-      this.router.navigate(['/case-registration/defendants/edit', route, defendant.id], {
-        queryParams: { requestId: this.requestId }
-      });
-    } else {
-      this.snackBar.open('تعديل هذا النوع غير متاح حالياً', 'إغلاق', { duration: 3000 });
-    }
+    // Show form inline in edit mode
+    this.selectedDefendantType = defendant.defendantTypeId;
+    this.formMode = 'edit';
+    this.selectedDefendantId = defendant.id;
+    this.showForm = true;
   }
 
   onDeleteDefendant(defendant: DefendantListVM): void {
@@ -214,5 +168,14 @@ export class DefendantListComponent implements OnInit, AfterViewInit {
         });
       }
     });
+  }
+
+  onFormSaved(): void {
+    this.showForm = false;
+    this.loadDefendants();
+  }
+
+  onFormCancelled(): void {
+    this.showForm = false;
   }
 }

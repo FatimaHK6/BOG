@@ -1,5 +1,5 @@
-import { Component, OnInit, ViewChild, AfterViewInit } from '@angular/core';
-import { Router, ActivatedRoute } from '@angular/router';
+import { Component, OnInit, ViewChild, AfterViewInit, Input } from '@angular/core';
+import { Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatTableDataSource } from '@angular/material/table';
@@ -22,13 +22,18 @@ interface PlaintiffType {
   styleUrls: ['./plaintiff-list.component.scss']
 })
 export class PlaintiffListComponent implements OnInit, AfterViewInit {
-  // Get requestId from route query params
-  requestId: number = 0;
+  @Input() requestId: number = 0;
   isSaving = false;
 
   plaintiffs: PlaintiffListVM[] = [];
   dataSource = new MatTableDataSource<PlaintiffListVM>([]);
   isLoading = false;
+
+  // Inline form state
+  showForm: boolean = false;
+  formMode: 'add' | 'edit' | 'view' = 'add';
+  selectedPlaintiffId: number | null = null;
+  plaintiffTypePreset: number | null = null;
 
   // Plaintiff types matching database PlaintiffTypes table (SRS Section 1.3 - 8 types)
   plaintiffTypes: PlaintiffType[] = [
@@ -65,27 +70,14 @@ export class PlaintiffListComponent implements OnInit, AfterViewInit {
     private requestService: CaseRegistrationRequestService,
     private dialog: MatDialog,
     private notification: NotificationService,
-    private router: Router,
-    private route: ActivatedRoute
+    private router: Router
   ) { }
 
   ngOnInit(): void {
-    // Get requestId from query params
-    this.route.queryParams.subscribe(params => {
-      const newRequestId = params['requestId'] ? +params['requestId'] : 0;
-      if (newRequestId !== this.requestId) {
-        this.requestId = newRequestId;
-        if (this.requestId > 0) {
-          this.loadPlaintiffs();
-        } else {
-          // No request selected, show empty state or redirect
-          this.plaintiffs = [];
-          this.dataSource.data = [];
-          this.allRepresentatives = [];
-          this.representativesDataSource.data = [];
-        }
-      }
-    });
+    // Load plaintiffs if requestId is provided
+    if (this.requestId > 0) {
+      this.loadPlaintiffs();
+    }
   }
 
   onSaveAsDraft(): void {
@@ -273,33 +265,60 @@ export class PlaintiffListComponent implements OnInit, AfterViewInit {
 
   /**
    * Called when user selects a plaintiff type from the dropdown menu.
-   * Navigates to the add form with the selected type pre-set.
+   * Shows the form inline with the selected type pre-set.
    */
   onSelectPlaintiffType(type: PlaintiffType): void {
-    this.router.navigate(['/case-registration/plaintiffs/add'], {
-      queryParams: { requestId: this.requestId, type: type.id }
-    });
+    this.formMode = 'add';
+    this.selectedPlaintiffId = null;
+    this.plaintiffTypePreset = type.id;
+    this.showForm = true;
   }
 
   /**
-   * @deprecated Use onSelectPlaintiffType instead. Kept for backwards compatibility.
+   * Shows the form inline for adding a plaintiff without pre-selected type.
    */
   onAddPlaintiff(): void {
-    this.router.navigate(['/case-registration/plaintiffs/add'], {
-      queryParams: { requestId: this.requestId }
-    });
+    this.formMode = 'add';
+    this.selectedPlaintiffId = null;
+    this.plaintiffTypePreset = null;
+    this.showForm = true;
   }
 
+  /**
+   * Shows the form inline in edit mode.
+   */
   onEditPlaintiff(id: number): void {
-    this.router.navigate(['/case-registration/plaintiffs', id, 'edit'], {
-      queryParams: { requestId: this.requestId }
-    });
+    this.formMode = 'edit';
+    this.selectedPlaintiffId = id;
+    this.plaintiffTypePreset = null;
+    this.showForm = true;
   }
 
+  /**
+   * Shows the form inline in view mode.
+   */
   onViewPlaintiff(id: number): void {
-    this.router.navigate(['/case-registration/plaintiffs', id, 'view'], {
-      queryParams: { requestId: this.requestId }
-    });
+    this.formMode = 'view';
+    this.selectedPlaintiffId = id;
+    this.plaintiffTypePreset = null;
+    this.showForm = true;
+  }
+
+  /**
+   * Called when plaintiff form is saved.
+   * Hides the form and refreshes the plaintiff list.
+   */
+  onFormSaved(): void {
+    this.showForm = false;
+    this.loadPlaintiffs();
+  }
+
+  /**
+   * Called when plaintiff form is cancelled.
+   * Hides the form without saving.
+   */
+  onFormCancelled(): void {
+    this.showForm = false;
   }
 
   onDeletePlaintiff(plaintiff: PlaintiffListVM): void {

@@ -1,6 +1,8 @@
 <div class="plaintiff-list-container">
-  <!-- Header -->
-  <div class="page-header">
+  <!-- LIST VIEW: Show when not in form mode -->
+  <div *ngIf="!showForm" class="list-view">
+    <!-- Header -->
+    <div class="page-header">
     <h2 class="page-title">المدعين</h2>
     <div class="header-actions">
       <button mat-stroked-button color="accent" (click)="onSaveAsDraft()" [disabled]="isSaving">
@@ -232,5 +234,18 @@
         </div>
       </mat-card-content>
     </mat-card>
+  </div>
+  </div>
+
+  <!-- FORM VIEW: Show when adding/editing plaintiff -->
+  <div *ngIf="showForm" class="form-view">
+    <app-plaintiff-form
+      [requestId]="requestId"
+      [plaintiffId]="selectedPlaintiffId"
+      [mode]="formMode"
+      [typePreset]="plaintiffTypePreset"
+      (saved)="onFormSaved()"
+      (cancelled)="onFormCancelled()">
+    </app-plaintiff-form>
   </div>
 </div>

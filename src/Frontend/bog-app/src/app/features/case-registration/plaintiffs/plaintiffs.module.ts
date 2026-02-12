@@ -1,5 +1,4 @@
 import { NgModule } from '@angular/core';
-import { RouterModule, Routes } from '@angular/router';
 import { SharedModule } from '../../../shared/shared.module';
 
 // Components
@@ -9,13 +8,6 @@ import { SetApplicantDialogComponent } from './components/set-applicant-dialog/s
 import { RepresentativeDialogComponent } from './components/representative-dialog/representative-dialog.component';
 import { AttachmentUploadComponent } from './components/attachment-upload/attachment-upload.component';
 import { AttachmentNoteDialogComponent } from './components/attachment-upload/attachment-note-dialog.component';
-
-const routes: Routes = [
-  { path: '', component: PlaintiffListComponent },
-  { path: 'add', component: PlaintiffFormComponent },
-  { path: ':id/edit', component: PlaintiffFormComponent },
-  { path: ':id/view', component: PlaintiffFormComponent }
-];
 
 @NgModule({
   declarations: [
@@ -27,8 +19,7 @@ const routes: Routes = [
     AttachmentNoteDialogComponent
   ],
   imports: [
-    SharedModule,
-    RouterModule.forChild(routes)
+    SharedModule
   ],
   exports: [
     PlaintiffListComponent,

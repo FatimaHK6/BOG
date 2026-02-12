@@ -1,0 +1,164 @@
+<div dir="rtl" class="classification-selection-dialog">
+  <h2 mat-dialog-title>اختيار التصنيفات</h2>
+
+  <mat-dialog-content>
+    <!-- Search and Filter Controls -->
+    <div class="filters-section">
+      <!-- Search Input -->
+      <mat-form-field appearance="outline" class="search-field">
+        <mat-label>بحث في التصنيفات</mat-label>
+        <input matInput [formControl]="searchControl" placeholder="ابحث عن تصنيف...">
+        <mat-icon matSuffix>search</mat-icon>
+      </mat-form-field>
+
+      <!-- Level Filters -->
+      <div class="level-filters">
+        <mat-form-field appearance="outline" class="filter-field">
+          <mat-label>المستوى الأول</mat-label>
+          <mat-select [formControl]="level1Control">
+            <mat-option value="">الكل</mat-option>
+            <mat-option *ngFor="let value of level1Values" [value]="value">
+              {{ value }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="filter-field">
+          <mat-label>المستوى الثاني</mat-label>
+          <mat-select [formControl]="level2Control" [disabled]="!level1Control.value">
+            <mat-option value="">الكل</mat-option>
+            <mat-option *ngFor="let value of level2Values" [value]="value">
+              {{ value }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="filter-field">
+          <mat-label>المستوى الثالث</mat-label>
+          <mat-select [formControl]="level3Control" [disabled]="!level2Control.value">
+            <mat-option value="">الكل</mat-option>
+            <mat-option *ngFor="let value of level3Values" [value]="value">
+              {{ value }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="filter-field">
+          <mat-label>المستوى الرابع</mat-label>
+          <mat-select [formControl]="level4Control" [disabled]="!level3Control.value">
+            <mat-option value="">الكل</mat-option>
+            <mat-option *ngFor="let value of level4Values" [value]="value">
+              {{ value }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="filter-actions">
+        <button mat-stroked-button (click)="clearFilters()" [disabled]="loading">
+          <mat-icon>clear</mat-icon>
+          مسح الفلاتر
+        </button>
+      </div>
+    </div>
+
+    <!-- Classification Table -->
+    <div class="table-container" *ngIf="!loading">
+      <div class="table-header">
+        <button
+          mat-icon-button
+          (click)="selectAll()"
+          [disabled]="filteredClassifications.length === 0"
+          matTooltip="تحديد الكل"
+          matTooltipPosition="above">
+          <mat-icon>done_all</mat-icon>
+        </button>
+        <button
+          mat-icon-button
+          (click)="deselectAll()"
+          [disabled]="selectionCount === 0"
+          matTooltip="إلغاء التحديد"
+          matTooltipPosition="above">
+          <mat-icon>clear_all</mat-icon>
+        </button>
+        <span class="selection-count">{{ selectionCount }} محدد</span>
+      </div>
+
+      <table mat-table [dataSource]="filteredClassifications" class="classifications-table">
+        <!-- Select Column -->
+        <ng-container matColumnDef="select">
+          <th mat-header-cell *matHeaderCellDef></th>
+          <td mat-cell *matCellDef="let element">
+            <mat-checkbox
+              [checked]="isSelected(element.id)"
+              (change)="toggleSelection(element.id)">
+            </mat-checkbox>
+          </td>
+        </ng-container>
+
+        <!-- Level 1 Column -->
+        <ng-container matColumnDef="level1">
+          <th mat-header-cell *matHeaderCellDef>المستوى 1</th>
+          <td mat-cell *matCellDef="let element">
+            {{ element.level1 }}
+          </td>
+        </ng-container>
+
+        <!-- Level 2 Column -->
+        <ng-container matColumnDef="level2">
+          <th mat-header-cell *matHeaderCellDef>المستوى 2</th>
+          <td mat-cell *matCellDef="let element">
+            {{ element.level2 }}
+          </td>
+        </ng-container>
+
+        <!-- Level 3 Column -->
+        <ng-container matColumnDef="level3">
+          <th mat-header-cell *matHeaderCellDef>المستوى 3</th>
+          <td mat-cell *matCellDef="let element">
+            {{ element.level3 }}
+          </td>
+        </ng-container>
+
+        <!-- Level 4 Column -->
+        <ng-container matColumnDef="level4">
+          <th mat-header-cell *matHeaderCellDef>المستوى 4</th>
+          <td mat-cell *matCellDef="let element">
+            {{ element.level4 }}
+          </td>
+        </ng-container>
+
+        <!-- Header and Data Rows -->
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr
+          mat-row
+          *matRowDef="let row; columns: displayedColumns;"
+          [class.selected]="isSelected(row.id)"
+          (click)="toggleSelection(row.id)">
+        </tr>
+      </table>
+
+      <!-- No Results Message -->
+      <div class="no-results" *ngIf="noResults">
+        <mat-icon>search_off</mat-icon>
+        <p>لم يتم العثور على تصنيفات مطابقة</p>
+      </div>
+    </div>
+
+    <!-- Loading State -->
+    <div class="loading-state" *ngIf="loading">
+      <mat-spinner diameter="40"></mat-spinner>
+      <p>جاري تحميل التصنيفات...</p>
+    </div>
+  </mat-dialog-content>
+
+  <!-- Dialog Actions -->
+  <mat-dialog-actions align="end" dir="ltr">
+    <button mat-button (click)="onCancel()">إلغاء</button>
+    <button mat-raised-button color="primary" (click)="onSave()" [disabled]="selectionCount === 0">
+      <mat-icon>check</mat-icon>
+      تأكيد ({{ selectionCount }})
+    </button>
+  </mat-dialog-actions>
+</div>

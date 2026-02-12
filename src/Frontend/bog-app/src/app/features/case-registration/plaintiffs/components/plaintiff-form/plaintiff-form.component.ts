@@ -1,6 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, AbstractControl } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
+import { Router } from '@angular/router';
 import { CustomValidators } from '../../../../../shared/validators/custom-validators';
 import { MatDialog } from '@angular/material/dialog';
 import {
@@ -27,9 +27,15 @@ import { ConfirmDialogComponent, ConfirmDialogData } from '../../../../../shared
   styleUrls: ['./plaintiff-form.component.scss']
 })
 export class PlaintiffFormComponent implements OnInit {
-  // Get requestId from query params
-  requestId: number = 0;
-  plaintiffId?: number;  // For edit mode - from route params
+  // Input properties for inline form mode
+  @Input() requestId: number = 0;
+  @Input() plaintiffId: number | null = null;
+  @Input() mode: 'add' | 'edit' | 'view' = 'add';
+  @Input() typePreset: number | null = null;
+
+  // Output events for inline form mode
+  @Output() saved = new EventEmitter<void>();
+  @Output() cancelled = new EventEmitter<void>();
 
   // Form
   plaintiffForm!: FormGroup;
@@ -84,9 +90,7 @@ export class PlaintiffFormComponent implements OnInit {
 
   // View mode
   isViewMode = false;
-
-  // Type preset from route (when navigating from type menu)
-  typePreset = false;
+  isEditMode = false;
 
   // Submitted flag for validation display (like defendant form)
   submitted = false;
@@ -121,57 +125,30 @@ export class PlaintiffFormComponent implements OnInit {
     private representativeService: RepresentativeService,
     private notification: NotificationService,
     private dialog: MatDialog,
-    private route: ActivatedRoute,
     private router: Router
   ) { }
 
   ngOnInit(): void {
-    // Get plaintiffId from route params if editing
-    const idParam = this.route.snapshot.paramMap.get('id');
-    if (idParam) {
-      this.plaintiffId = +idParam;
-    }
-
-    // Check if view mode
-    this.isViewMode = this.route.snapshot.url.some(segment => segment.path === 'view');
+    // Initialize view mode flags based on mode input
+    this.isViewMode = this.mode === 'view';
+    this.isEditMode = this.mode === 'edit';
 
     this.initForm();
     this.loadLookups();
 
-    // Get requestId and type from query params
-    this.route.queryParams.subscribe(params => {
-      const newRequestId = params['requestId'] ? +params['requestId'] : 0;
-      if (newRequestId > 0) {
-        this.requestId = newRequestId;
-      }
+    // Set type preset if provided (pre-selected from menu)
+    if (this.typePreset && this.typePreset > 0 && this.typePreset <= 8) {
+      // Set isPatching to prevent resetTypeSpecificFields from clearing
+      this.isPatching = true;
+      // Set the type after form is initialized
+      setTimeout(() => {
+        this.plaintiffForm.get('plaintiffTypeId')?.setValue(this.typePreset);
+        this.isPatching = false;
+      });
+    }
 
-      // Check for type parameter (pre-selected from menu)
-      const typeParam = params['type'] ? +params['type'] : 0;
-
-      // For new plaintiff (not edit/view mode), type is required
-      if (!this.plaintiffId && !this.isViewMode) {
-        if (typeParam > 0 && typeParam <= 8) {
-          // Valid type (1-8)
-          this.typePreset = true;
-          // Set isPatching to prevent resetTypeSpecificFields from clearing
-          this.isPatching = true;
-          // Set the type after form is initialized
-          setTimeout(() => {
-            this.plaintiffForm.get('plaintiffTypeId')?.setValue(typeParam);
-            this.isPatching = false;
-          });
-        } else {
-          // No valid type provided - redirect back to list
-          this.notification.validation('الرجاء اختيار نوع المدعي من القائمة');
-          this.router.navigate(['/case-registration/plaintiffs'], {
-            queryParams: { requestId: this.requestId }
-          });
-          return;
-        }
-      }
-    });
-
-    if (this.plaintiffId) {
+    // Load plaintiff data if edit or view mode
+    if ((this.isEditMode || this.isViewMode) && this.plaintiffId && this.plaintiffId > 0) {
       this.loadPlaintiff();
     }
 
@@ -1648,9 +1625,8 @@ export class PlaintiffFormComponent implements OnInit {
           console.log('UPDATE SUCCESS - Response:', response);
           this.isSaving = false;
           this.notification.success('تم تحديث بيانات المدعي بنجاح');
-          this.router.navigate(['/case-registration/plaintiffs'], {
-            queryParams: { requestId: this.requestId }
-          });
+          // Emit saved event for parent component
+          this.saved.emit();
         },
         error: (error) => {
           console.error('Error updating plaintiff:', error);
@@ -1748,9 +1724,8 @@ export class PlaintiffFormComponent implements OnInit {
         next: () => {
           this.isSaving = false;
           this.notification.success('تم إضافة المدعي بنجاح');
-          this.router.navigate(['/case-registration/plaintiffs'], {
-            queryParams: { requestId: this.requestId }
-          });
+          // Emit saved event for parent component
+          this.saved.emit();
         },
         error: (error) => {
           console.error('Error creating plaintiff:', error);
@@ -2145,15 +2120,13 @@ export class PlaintiffFormComponent implements OnInit {
 
       dialogRef.afterClosed().subscribe(result => {
         if (result) {
-          this.router.navigate(['/case-registration/plaintiffs'], {
-            queryParams: { requestId: this.requestId }
-          });
+          // Emit cancelled event for parent component
+          this.cancelled.emit();
         }
       });
     } else {
-      this.router.navigate(['/case-registration/plaintiffs'], {
-        queryParams: { requestId: this.requestId }
-      });
+      // Emit cancelled event for parent component
+      this.cancelled.emit();
     }
   }
 

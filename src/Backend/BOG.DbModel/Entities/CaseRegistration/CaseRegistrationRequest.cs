@@ -14,6 +14,26 @@ public class CaseRegistrationRequest : BaseEntity
     public int RequestStatusId { get; set; }
 
     /// <summary>
+    /// Foreign key to CaseType.
+    /// </summary>
+    public int? CaseTypeId { get; set; }
+
+    /// <summary>
+    /// Primary mobile number.
+    /// </summary>
+    public string? PrimaryMobile { get; set; }
+
+    /// <summary>
+    /// Secondary mobile number.
+    /// </summary>
+    public string? SecondaryMobile { get; set; }
+
+    /// <summary>
+    /// Email address for contact and notifications.
+    /// </summary>
+    public string? Email { get; set; }
+
+    /// <summary>
     /// Subject of the case (الموضوع) - max 4000 characters.
     /// </summary>
     public string? Subject { get; set; }
@@ -79,6 +99,11 @@ public class CaseRegistrationRequest : BaseEntity
     /// Navigation property for status.
     /// </summary>
     public virtual RequestStatus Status { get; set; } = null!;
+
+    /// <summary>
+    /// Navigation property for case type.
+    /// </summary>
+    public virtual CaseType? CaseType { get; set; }
 
     /// <summary>
     /// Navigation property for court.

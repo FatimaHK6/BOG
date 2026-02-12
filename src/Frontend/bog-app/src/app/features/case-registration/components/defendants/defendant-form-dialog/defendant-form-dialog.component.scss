@@ -1,0 +1,54 @@
+.defendant-form {
+  padding: 16px 0;
+
+  .full-width {
+    width: 100%;
+    margin-bottom: 16px;
+  }
+
+  .form-row {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 16px;
+
+    @media (max-width: 600px) {
+      flex-direction: column;
+      gap: 0;
+    }
+
+    .half-width {
+      flex: 1;
+
+      @media (max-width: 600px) {
+        width: 100%;
+        margin-bottom: 16px;
+      }
+    }
+  }
+}
+
+mat-dialog-content {
+  max-height: 70vh;
+  overflow-y: auto;
+  overflow-x: visible;
+  padding: 16px 0;
+
+  // Allow dropdowns to escape overflow
+  mat-select {
+    z-index: 1001;
+  }
+}
+
+// Custom panel styling for dropdowns
+::ng-deep .mat-select-panel {
+  z-index: 9999 !important;
+}
+
+::ng-deep .dropdown-panel {
+  z-index: 9999 !important;
+}
+
+.spinner {
+  display: inline-block;
+  margin-left: 8px;
+}

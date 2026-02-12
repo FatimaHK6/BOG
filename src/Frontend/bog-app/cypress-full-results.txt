@@ -1,0 +1,611 @@
+
+> bog-app@0.0.0 cypress:run
+> cypress run
+
+
+
+DevTools listening on ws://127.0.0.1:63471/devtools/browser/50bdf32f-56b3-45a9-82f7-c1f86500b9b7
+
+====================================================================================================
+
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:        15.9.0                                                                         │
+  │ Browser:        Electron 138 (headless)                                                        │
+  │ Node Version:   v20.9.0 (C:\Program Files\nodejs\node.exe)                                     │
+  │ Specs:          4 found (case-registration.cy.ts, dropdown-fix-test.cy.ts, dropdown-test-simpl │
+  │                 e.cy.ts, full-test-plan.cy.ts)                                                 │
+  │ Searched:       cypress/e2e/**/*.cy.ts                                                         │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running:  case-registration.cy.ts                                                         (1 of 4)
+
+
+  Case Registration Module - E2E Tests
+    Scenario 1: Navigation
+      1) Should navigate to Case Registration when clicking the button
+      √ Should show create new request button (1088ms)
+    Scenario 2: Create New Request
+      2) Should create a new case request
+      √ Should show request ID after creation (718ms)
+    Scenario 3: Add Defendant
+      3) Should open add defendant dialog
+      4) Should add a natural person defendant successfully
+      5) Should display count badge after adding defendant
+      6) Should add a company defendant
+    Scenario 4: Duplicate Detection (ERR013)
+      7) Should show ERR013 when adding duplicate defendant
+    Scenario 5: Case Data Form
+      8) Should fill case data form
+      9) Should enforce character limits
+    Scenario 6: Submit Request
+      10) Should submit a complete request
+    Scenario 7: Request List
+      √ Should display request list (868ms)
+      √ Should have search filters (424ms)
+      √ Should have pagination controls (498ms)
+    Scenario 8: Responsive Design
+      √ Should display correctly on desktop (391ms)
+      √ Should display correctly on tablet (355ms)
+      √ Should display correctly on mobile (377ms)
+    Scenario 9: RTL Layout
+      √ Should have RTL direction (349ms)
+      √ Should display Arabic text correctly (408ms)
+    Scenario 10: Material Theme
+      √ Should use correct primary color (335ms)
+      √ Should render Material icons (415ms)
+
+
+  12 passing (2m)
+  10 failing
+
+  1) Case Registration Module - E2E Tests
+       Scenario 1: Navigation
+         Should navigate to Case Registration when clicking the button:
+     AssertionError: Timed out retrying after 5000ms: Expected to find content: 'قائمة طلبات التسجيل' but never did.
+      at Context.eval (webpack://bog-app/./cypress/e2e/case-registration.cy.ts:34:60)
+
+  2) Case Registration Module - E2E Tests
+       Scenario 2: Create New Request
+         Should create a new case request:
+     AssertionError: Timed out retrying after 10000ms: [object Object]: expected 'http://localhost:4200/case-registration/1368/edit' to include '/create'
+      at Context.eval (webpack://bog-app/./cypress/e2e/case-registration.cy.ts:56:15)
+
+  3) Case Registration Module - E2E Tests
+       Scenario 3: Add Defendant
+         Should open add defendant dialog:
+     AssertionError: Timed out retrying after 3000ms: expected '<h2#mat-dialog-title-0.mat-dialog-title>' to be 'visible'
+
+This element `<h2#mat-dialog-title-0.mat-dialog-title>` is not visible because its ancestor has `position: fixed` CSS property and it is overflowed by other elements. How about scrolling to the element with `cy.scrollIntoView()`?
+      at Context.eval (webpack://bog-app/./cypress/e2e/case-registration.cy.ts:96:54)
+
+  4) Case Registration Module - E2E Tests
+       Scenario 3: Add Defendant
+         Should add a natural person defendant successfully:
+     AssertionError: Timed out retrying after 3000ms: expected '<mat-dialog-container#mat-dialog-0.mat-dialog-container.ng-tns-c134-5.ng-trigger.ng-trigger-dialogContainer.ng-star-inserted>' to be 'visible'
+
+This element `<mat-dialog-container#mat-dialog-0.mat-dialog-container.ng-tns-c134-5.ng-trigger.ng-trigger-dialogContainer.ng-star-inserted>` is not visible because its ancestor has `position: fixed` CSS property and it is overflowed by other elements. How about scrolling to the element with `cy.scrollIntoView()`?
+      at Context.eval (webpack://bog-app/./cypress/e2e/case-registration.cy.ts:104:56)
+
+  5) Case Registration Module - E2E Tests
+       Scenario 3: Add Defendant
+         Should display count badge after adding defendant:
+     CypressError: Timed out retrying after 10050ms: `cy.click()` failed because the center of this element is hidden from view:
+
+`<mat-select _ngcontent-upj-c214="" role="combobox" aria-autocomplete="none" aria-haspopup="true" formcontrolname="defendantTypeId" required="" panelclass="dropdown-panel" class="mat-select ng-tns-c86-7 ng-tns-c70-6 ng-star-inserted mat-select-required ng-untouched ng-pristine ng-valid" ng-reflect-required="" ng-reflect-panel-class="dropdown-panel" ng-reflect-name="defendantTypeId" aria-labelledby="mat-form-field-label-7 mat-select-value-5" id="mat-select-4" tabindex="0" aria-expanded="false" aria-required="true" aria-disabled="false" aria-invalid="false">...</mat-select>`
+
+Fix this problem, or use `{force: true}` to disable error checking.
+
+https://on.cypress.io/element-cannot-be-interacted-with
+      at ensureIsDescendent (http://localhost:4200/__cypress/runner/cypress_runner.js:115061:66)
+      at ensureDescendents (http://localhost:4200/__cypress/runner/cypress_runner.js:115097:5)
+      at ensureDescendentsAndScroll (http://localhost:4200/__cypress/runner/cypress_runner.js:115103:14)
+      at ensureElIsNotCovered (http://localhost:4200/__cypress/runner/cypress_runner.js:115234:5)
+      at runAllChecks (http://localhost:4200/__cypress/runner/cypress_runner.js:115433:52)
+      at retryActionability (http://localhost:4200/__cypress/runner/cypress_runner.js:115470:16)
+      at tryCatcher (http://localhost:4200/__cypress/runner/cypress_runner.js:1777:23)
+      at Promise.attempt.Promise.try (http://localhost:4200/__cypress/runner/cypress_runner.js:4285:29)
+      at whenStable (http://localhost:4200/__cypress/runner/cypress_runner.js:151746:68)
+      at <unknown> (http://localhost:4200/__cypress/runner/cypress_runner.js:151687:14)
+      at tryCatcher (http://localhost:4200/__cypress/runner/cypress_runner.js:1777:23)
+      at Promise._settlePromiseFromHandler (http://localhost:4200/__cypress/runner/cypress_runner.js:1489:31)
+      at Promise._settlePromise (http://localhost:4200/__cypress/runner/cypress_runner.js:1546:18)
+      at Promise._settlePromise0 (http://localhost:4200/__cypress/runner/cypress_runner.js:1591:10)
+      at Promise._settlePromises (http://localhost:4200/__cypress/runner/cypress_runner.js:1671:18)
+      at Promise._fulfill (http://localhost:4200/__cypress/runner/cypress_runner.js:1615:18)
+      at <unknown> (http://localhost:4200/__cypress/runner/cypress_runner.js:5420:46)
+
+  6) Case Registration Module - E2E Tests
+       Scenario 3: Add Defendant
+         Should add a company defendant:
+     CypressError: Timed out retrying after 10050ms: `cy.click()` failed because the center of this element is hidden from view:
+
+`<mat-select _ngcontent-omn-c214="" role="combobox" aria-autocomplete="none" aria-haspopup="true" formcontrolname="defendantTypeId" required="" panelclass="dropdown-panel" class="mat-select ng-tns-c86-7 ng-tns-c70-6 ng-star-inserted mat-select-required ng-untouched ng-pristine ng-valid" ng-reflect-required="" ng-reflect-panel-class="dropdown-panel" ng-reflect-name="defendantTypeId" aria-labelledby="mat-form-field-label-7 mat-select-value-5" id="mat-select-4" tabindex="0" aria-expanded="false" aria-required="true" aria-disabled="false" aria-invalid="false">...</mat-select>`
+
+Fix this problem, or use `{force: true}` to disable error checking.
+
+https://on.cypress.io/element-cannot-be-interacted-with
+      at ensureIsDescendent (http://localhost:4200/__cypress/runner/cypress_runner.js:115061:66)
+      at ensureDescendents (http://localhost:4200/__cypress/runner/cypress_runner.js:115097:5)
+      at ensureDescendentsAndScroll (http://localhost:4200/__cypress/runner/cypress_runner.js:115103:14)
+      at ensureElIsNotCovered (http://localhost:4200/__cypress/runner/cypress_runner.js:115234:5)
+      at runAllChecks (http://localhost:4200/__cypress/runner/cypress_runner.js:115433:52)
+      at retryActionability (http://localhost:4200/__cypress/runner/cypress_runner.js:115470:16)
+      at tryCatcher (http://localhost:4200/__cypress/runner/cypress_runner.js:1777:23)
+      at Promise.attempt.Promise.try (http://localhost:4200/__cypress/runner/cypress_runner.js:4285:29)
+      at whenStable (http://localhost:4200/__cypress/runner/cypress_runner.js:151746:68)
+      at <unknown> (http://localhost:4200/__cypress/runner/cypress_runner.js:151687:14)
+      at tryCatcher (http://localhost:4200/__cypress/runner/cypress_runner.js:1777:23)
+      at Promise._settlePromiseFromHandler (http://localhost:4200/__cypress/runner/cypress_runner.js:1489:31)
+      at Promise._settlePromise (http://localhost:4200/__cypress/runner/cypress_runner.js:1546:18)
+      at Promise._settlePromise0 (http://localhost:4200/__cypress/runner/cypress_runner.js:1591:10)
+      at Promise._settlePromises (http://localhost:4200/__cypress/runner/cypress_runner.js:1671:18)
+      at Promise._fulfill (http://localhost:4200/__cypress/runner/cypress_runner.js:1615:18)
+      at <unknown> (http://localhost:4200/__cypress/runner/cypress_runner.js:5420:46)
+
+  7) Case Registration Module - E2E Tests
+       Scenario 4: Duplicate Detection (ERR013)
+         Should show ERR013 when adding duplicate defendant:
+     CypressError: Timed out retrying after 10050ms: `cy.click()` failed because the center of this element is hidden from view:
+
+`<mat-select _ngcontent-djv-c214="" role="combobox" aria-autocomplete="none" aria-haspopup="true" formcontrolname="defendantTypeId" required="" panelclass="dropdown-panel" class="mat-select ng-tns-c86-7 ng-tns-c70-6 ng-star-inserted mat-select-required ng-untouched ng-pristine ng-valid" ng-reflect-required="" ng-reflect-panel-class="dropdown-panel" ng-reflect-name="defendantTypeId" aria-labelledby="mat-form-field-label-7 mat-select-value-5" id="mat-select-4" tabindex="0" aria-expanded="false" aria-required="true" aria-disabled="false" aria-invalid="false">...</mat-select>`
+
+Fix this problem, or use `{force: true}` to disable error checking.
+
+https://on.cypress.io/element-cannot-be-interacted-with
+      at ensureIsDescendent (http://localhost:4200/__cypress/runner/cypress_runner.js:115061:66)
+      at ensureDescendents (http://localhost:4200/__cypress/runner/cypress_runner.js:115097:5)
+      at ensureDescendentsAndScroll (http://localhost:4200/__cypress/runner/cypress_runner.js:115103:14)
+      at ensureElIsNotCovered (http://localhost:4200/__cypress/runner/cypress_runner.js:115234:5)
+      at runAllChecks (http://localhost:4200/__cypress/runner/cypress_runner.js:115433:52)
+      at retryActionability (http://localhost:4200/__cypress/runner/cypress_runner.js:115470:16)
+      at tryCatcher (http://localhost:4200/__cypress/runner/cypress_runner.js:1777:23)
+      at Promise.attempt.Promise.try (http://localhost:4200/__cypress/runner/cypress_runner.js:4285:29)
+      at whenStable (http://localhost:4200/__cypress/runner/cypress_runner.js:151746:68)
+      at <unknown> (http://localhost:4200/__cypress/runner/cypress_runner.js:151687:14)
+      at tryCatcher (http://localhost:4200/__cypress/runner/cypress_runner.js:1777:23)
+      at Promise._settlePromiseFromHandler (http://localhost:4200/__cypress/runner/cypress_runner.js:1489:31)
+      at Promise._settlePromise (http://localhost:4200/__cypress/runner/cypress_runner.js:1546:18)
+      at Promise._settlePromise0 (http://localhost:4200/__cypress/runner/cypress_runner.js:1591:10)
+      at Promise._settlePromises (http://localhost:4200/__cypress/runner/cypress_runner.js:1671:18)
+      at Promise._fulfill (http://localhost:4200/__cypress/runner/cypress_runner.js:1615:18)
+      at <unknown> (http://localhost:4200/__cypress/runner/cypress_runner.js:5420:46)
+
+  8) Case Registration Module - E2E Tests
+       Scenario 5: Case Data Form
+         Should fill case data form:
+     AssertionError: Timed out retrying after 10000ms: Expected to find element: `textarea[formcontrolname="subject"]`, but never found it.
+      at Context.eval (webpack://bog-app/./cypress/e2e/case-registration.cy.ts:213:9)
+
+  9) Case Registration Module - E2E Tests
+       Scenario 5: Case Data Form
+         Should enforce character limits:
+     AssertionError: Timed out retrying after 10000ms: Expected to find element: `textarea[formcontrolname="subject"]`, but never found it.
+      at Context.eval (webpack://bog-app/./cypress/e2e/case-registration.cy.ts:228:9)
+
+  10) Case Registration Module - E2E Tests
+       Scenario 6: Submit Request
+         Should submit a complete request:
+     CypressError: Timed out retrying after 10050ms: `cy.click()` failed because the center of this element is hidden from view:
+
+`<mat-select _ngcontent-aha-c214="" role="combobox" aria-autocomplete="none" aria-haspopup="true" formcontrolname="defendantTypeId" required="" panelclass="dropdown-panel" class="mat-select ng-tns-c86-5 ng-tns-c70-4 ng-star-inserted mat-select-required ng-untouched ng-pristine ng-valid" ng-reflect-required="" ng-reflect-panel-class="dropdown-panel" ng-reflect-name="defendantTypeId" aria-labelledby="mat-form-field-label-5 mat-select-value-3" id="mat-select-2" tabindex="0" aria-expanded="false" aria-required="true" aria-disabled="false" aria-invalid="false">...</mat-select>`
+
+Fix this problem, or use `{force: true}` to disable error checking.
+
+https://on.cypress.io/element-cannot-be-interacted-with
+      at ensureIsDescendent (http://localhost:4200/__cypress/runner/cypress_runner.js:115061:66)
+      at ensureDescendents (http://localhost:4200/__cypress/runner/cypress_runner.js:115097:5)
+      at ensureDescendentsAndScroll (http://localhost:4200/__cypress/runner/cypress_runner.js:115103:14)
+      at ensureElIsNotCovered (http://localhost:4200/__cypress/runner/cypress_runner.js:115234:5)
+      at runAllChecks (http://localhost:4200/__cypress/runner/cypress_runner.js:115433:52)
+      at retryActionability (http://localhost:4200/__cypress/runner/cypress_runner.js:115470:16)
+      at tryCatcher (http://localhost:4200/__cypress/runner/cypress_runner.js:1777:23)
+      at Promise.attempt.Promise.try (http://localhost:4200/__cypress/runner/cypress_runner.js:4285:29)
+      at whenStable (http://localhost:4200/__cypress/runner/cypress_runner.js:151746:68)
+      at <unknown> (http://localhost:4200/__cypress/runner/cypress_runner.js:151687:14)
+      at tryCatcher (http://localhost:4200/__cypress/runner/cypress_runner.js:1777:23)
+      at Promise._settlePromiseFromHandler (http://localhost:4200/__cypress/runner/cypress_runner.js:1489:31)
+      at Promise._settlePromise (http://localhost:4200/__cypress/runner/cypress_runner.js:1546:18)
+      at Promise._settlePromise0 (http://localhost:4200/__cypress/runner/cypress_runner.js:1591:10)
+      at Promise._settlePromises (http://localhost:4200/__cypress/runner/cypress_runner.js:1671:18)
+      at Promise._fulfill (http://localhost:4200/__cypress/runner/cypress_runner.js:1615:18)
+      at <unknown> (http://localhost:4200/__cypress/runner/cypress_runner.js:5420:46)
+
+
+
+
+  (Results)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        22                                                                               │
+  │ Passing:      12                                                                               │
+  │ Failing:      10                                                                               │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  10                                                                               │
+  │ Video:        true                                                                             │
+  │ Duration:     1 minute, 42 seconds                                                             │
+  │ Spec Ran:     case-registration.cy.ts                                                          │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+  (Screenshots)
+
+  -  C:\Users\Lenovo\Desktop\Claude\BOG\src\Frontend\bog-app\cypress\screenshots\case     (1280x720)
+     -registration.cy.ts\Case Registration Module - E2E Tests -- Scenario 1 Navigatio               
+     n -- Should navigate to Case Registration when clicking the button (failed).png                
+  -  C:\Users\Lenovo\Desktop\Claude\BOG\src\Frontend\bog-app\cypress\screenshots\case     (1280x720)
+     -registration.cy.ts\Case Registration Module - E2E Tests -- Scenario 2 Create Ne               
+     w Request -- Should create a new case request (failed).png                                     
+  -  C:\Users\Lenovo\Desktop\Claude\BOG\src\Frontend\bog-app\cypress\screenshots\case     (1280x720)
+     -registration.cy.ts\Case Registration Module - E2E Tests -- Scenario 3 Add Defen               
+     dant -- Should open add defendant dialog (failed).png                                          
+  -  C:\Users\Lenovo\Desktop\Claude\BOG\src\Frontend\bog-app\cypress\screenshots\case     (1280x720)
+     -registration.cy.ts\Case Registration Module - E2E Tests -- Scenario 3 Add Defen               
+     dant -- Should add a natural person defendant successfully (failed).png                        
+  -  C:\Users\Lenovo\Desktop\Claude\BOG\src\Frontend\bog-app\cypress\screenshots\case     (1280x720)
+     -registration.cy.ts\Case Registration Module - E2E Tests -- Scenario 3 Add Defen               
+     dant -- Should display count badge after adding defendant (failed).png                         
+  -  C:\Users\Lenovo\Desktop\Claude\BOG\src\Frontend\bog-app\cypress\screenshots\case     (1280x720)
+     -registration.cy.ts\Case Registration Module - E2E Tests -- Scenario 3 Add Defen               
+     dant -- Should add a company defendant (failed).png                                            
+  -  C:\Users\Lenovo\Desktop\Claude\BOG\src\Frontend\bog-app\cypress\screenshots\case     (1280x720)
+     -registration.cy.ts\Case Registration Module - E2E Tests -- Scenario 4 Duplicate               
+      Detection (ERR013) -- Should show ERR013 when adding duplicate defendant (faile               
+     d).png                                                                                         
+  -  C:\Users\Lenovo\Desktop\Claude\BOG\src\Frontend\bog-app\cypress\screenshots\case     (1280x720)
+     -registration.cy.ts\Case Registration Module - E2E Tests -- Scenario 5 Case Data               
+      Form -- Should fill case data form (failed).png                                               
+  -  C:\Users\Lenovo\Desktop\Claude\BOG\src\Frontend\bog-app\cypress\screenshots\case     (1280x720)
+     -registration.cy.ts\Case Registration Module - E2E Tests -- Scenario 5 Case Data               
+      Form -- Should enforce character limits (failed).png                                          
+  -  C:\Users\Lenovo\Desktop\Claude\BOG\src\Frontend\bog-app\cypress\screenshots\case     (1280x720)
+     -registration.cy.ts\Case Registration Module - E2E Tests -- Scenario 6 Submit Re               
+     quest -- Should submit a complete request (failed).png                                         
+
+
+  (Video)
+
+  -  Video output: C:\Users\Lenovo\Desktop\Claude\BOG\src\Frontend\bog-app\cypress\videos\case-registration.cy.ts.mp4
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running:  dropdown-fix-test.cy.ts                                                         (2 of 4)
+
+
+  Dropdown Fix Verification
+    1) Should display dropdown correctly in defendant form dialog
+    2) Should display identity type dropdown correctly
+    3) Should allow dropdown selection
+
+
+  0 passing (25s)
+  3 failing
+
+  1) Dropdown Fix Verification
+       Should display dropdown correctly in defendant form dialog:
+     AssertionError: Timed out retrying after 10000ms: [object Object]: expected 'http://localhost:4200/case-registration/1378/edit' to include '/create'
+      at Context.eval (webpack://bog-app/./cypress/e2e/dropdown-fix-test.cy.ts:28:13)
+
+  2) Dropdown Fix Verification
+       Should display identity type dropdown correctly:
+     AssertionError: Timed out retrying after 5000ms: expected '<mat-dialog-container#mat-dialog-0.mat-dialog-container.ng-tns-c134-3.ng-trigger.ng-trigger-dialogContainer.ng-star-inserted>' to be 'visible'
+
+This element `<mat-dialog-container#mat-dialog-0.mat-dialog-container.ng-tns-c134-3.ng-trigger.ng-trigger-dialogContainer.ng-star-inserted>` is not visible because its ancestor has `position: fixed` CSS property and it is overflowed by other elements. How about scrolling to the element with `cy.scrollIntoView()`?
+      at Context.eval (webpack://bog-app/./cypress/e2e/dropdown-fix-test.cy.ts:88:54)
+
+  3) Dropdown Fix Verification
+       Should allow dropdown selection:
+     AssertionError: Timed out retrying after 5000ms: expected '<mat-dialog-container#mat-dialog-0.mat-dialog-container.ng-tns-c134-5.ng-trigger.ng-trigger-dialogContainer.ng-star-inserted>' to be 'visible'
+
+This element `<mat-dialog-container#mat-dialog-0.mat-dialog-container.ng-tns-c134-5.ng-trigger.ng-trigger-dialogContainer.ng-star-inserted>` is not visible because its ancestor has `position: fixed` CSS property and it is overflowed by other elements. How about scrolling to the element with `cy.scrollIntoView()`?
+      at Context.eval (webpack://bog-app/./cypress/e2e/dropdown-fix-test.cy.ts:119:54)
+
+
+
+
+  (Results)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        3                                                                                │
+  │ Passing:      0                                                                                │
+  │ Failing:      3                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  3                                                                                │
+  │ Video:        true                                                                             │
+  │ Duration:     25 seconds                                                                       │
+  │ Spec Ran:     dropdown-fix-test.cy.ts                                                          │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+  (Screenshots)
+
+  -  C:\Users\Lenovo\Desktop\Claude\BOG\src\Frontend\bog-app\cypress\screenshots\drop     (1280x720)
+     down-fix-test.cy.ts\Dropdown Fix Verification -- Should display dropdown correct               
+     ly in defendant form dialog (failed).png                                                       
+  -  C:\Users\Lenovo\Desktop\Claude\BOG\src\Frontend\bog-app\cypress\screenshots\drop     (1280x720)
+     down-fix-test.cy.ts\Dropdown Fix Verification -- Should display identity type dr               
+     opdown correctly (failed).png                                                                  
+  -  C:\Users\Lenovo\Desktop\Claude\BOG\src\Frontend\bog-app\cypress\screenshots\drop     (1280x720)
+     down-fix-test.cy.ts\Dropdown Fix Verification -- Should allow dropdown selection               
+      (failed).png                                                                                  
+
+
+  (Video)
+
+  -  Video output: C:\Users\Lenovo\Desktop\Claude\BOG\src\Frontend\bog-app\cypress\videos\dropdown-fix-test.cy.ts.mp4
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running:  dropdown-test-simple.cy.ts                                                      (3 of 4)
+
+
+  Dropdown Display Test
+    √ Should display dropdown near trigger, not at bottom of page (1290ms)
+    √ Should show Arabic text and app layout properly (303ms)
+    √ Should verify RTL layout is applied (277ms)
+    √ Should verify Material theme colors (228ms)
+    √ Should verify page is responsive (678ms)
+
+
+  5 passing (3s)
+
+
+  (Results)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        5                                                                                │
+  │ Passing:      5                                                                                │
+  │ Failing:      0                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  0                                                                                │
+  │ Video:        true                                                                             │
+  │ Duration:     2 seconds                                                                        │
+  │ Spec Ran:     dropdown-test-simple.cy.ts                                                       │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+  (Video)
+
+  -  Video output: C:\Users\Lenovo\Desktop\Claude\BOG\src\Frontend\bog-app\cypress\videos\dropdown-test-simple.cy.ts.mp4
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running:  full-test-plan.cy.ts                                                            (4 of 4)
+
+
+  Case Registration UI - Full Test Plan Execution
+    Section 1: Request List Page (/case-registration/list)
+      1) TC-1.1: Should load request list page correctly
+      2) TC-1.2: Should create new request
+      3) TC-1.3: Should display requests in table
+      4) TC-1.4: Should have pagination controls
+      5) TC-1.5: Should show status badges with correct colors
+    Section 2: Request Details Page (/case-registration/{id}/edit)
+      √ TC-2.1: Should display request details layout correctly (884ms)
+      √ TC-2.2: Should have sidebar with section navigation (844ms)
+      √ TC-2.3: Should switch tabs when clicking sidebar items (899ms)
+      6) TC-2.4: Should display status badge in header
+    Section 3: Defendants Management (المدعى عليهم)
+      √ TC-3.1: Should show add defendant button in empty state (983ms)
+      7) TC-3.2: Should open defendant form dialog on button click
+      8) TC-3.3: Should display defendant form fields
+      9) TC-3.4: Should validate required fields
+    Section 4: Case Data Form (بيانات الدعوى)
+      √ TC-4.1: Should display case data form (1068ms)
+      √ TC-4.2: Should count characters in subject field (1210ms)
+    Section 5: Material Components & Styling
+      √ TC-5.1: Should apply RTL layout (705ms)
+      √ TC-5.2: Should display Material icons (666ms)
+      √ TC-5.3: Should style buttons correctly (571ms)
+      10) TC-5.4: Should display form fields with Material styling
+    Section 6: Responsive Design
+      √ TC-6.1: Should display sidebar on desktop (815ms)
+      √ TC-6.2: Should be responsive on tablet (513ms)
+      √ TC-6.3: Should be responsive on mobile (622ms)
+    Section 7: Error Handling
+      11) TC-7.1: Should show error on API failure
+    Known Issues
+      √ ❌ TC-ISSUE-1: Dropdown overlaps field label (KNOWN ISSUE - UNFIXED) (840ms)
+      12) ❌ TC-ISSUE-2: Add defendant button click not working (KNOWN ISSUE - UNFIXED)
+
+
+  13 passing (2m)
+  12 failing
+
+  1) Case Registration UI - Full Test Plan Execution
+       Section 1: Request List Page (/case-registration/list)
+         TC-1.1: Should load request list page correctly:
+     AssertionError: Timed out retrying after 10000ms: Expected to find element: `mat-table`, but never found it.
+      at Context.eval (webpack://bog-app/./cypress/e2e/full-test-plan.cy.ts:28:26)
+
+  2) Case Registration UI - Full Test Plan Execution
+       Section 1: Request List Page (/case-registration/list)
+         TC-1.2: Should create new request:
+     AssertionError: Timed out retrying after 10000ms: Expected to find content: 'h1' but never did.
+      at Context.eval (webpack://bog-app/./cypress/e2e/full-test-plan.cy.ts:47:24)
+
+  3) Case Registration UI - Full Test Plan Execution
+       Section 1: Request List Page (/case-registration/list)
+         TC-1.3: Should display requests in table:
+     AssertionError: Timed out retrying after 10000ms: Expected to find element: `mat-table`, but never found it.
+      at Context.eval (webpack://bog-app/./cypress/e2e/full-test-plan.cy.ts:59:26)
+
+  4) Case Registration UI - Full Test Plan Execution
+       Section 1: Request List Page (/case-registration/list)
+         TC-1.4: Should have pagination controls:
+     AssertionError: Timed out retrying after 10000ms: expected '<mat-paginator.mat-paginator>' to contain '25'
+      at Context.eval (webpack://bog-app/./cypress/e2e/full-test-plan.cy.ts:81:30)
+
+  5) Case Registration UI - Full Test Plan Execution
+       Section 1: Request List Page (/case-registration/list)
+         TC-1.5: Should show status badges with correct colors:
+     AssertionError: Timed out retrying after 10000ms: Expected to find element: `.status-3`, but never found it.
+      at Context.eval (webpack://bog-app/./cypress/e2e/full-test-plan.cy.ts:94:26)
+
+  6) Case Registration UI - Full Test Plan Execution
+       Section 2: Request Details Page (/case-registration/{id}/edit)
+         TC-2.4: Should display status badge in header:
+     AssertionError: Timed out retrying after 10000ms: expected '<span.request-status.status-1>' to contain 'مسودة'
+      at Context.eval (webpack://bog-app/./cypress/e2e/full-test-plan.cy.ts:161:32)
+
+  7) Case Registration UI - Full Test Plan Execution
+       Section 3: Defendants Management (المدعى عليهم)
+         TC-3.2: Should open defendant form dialog on button click:
+     AssertionError: Timed out retrying after 10000ms: expected '<mat-dialog-container#mat-dialog-0.mat-dialog-container.ng-tns-c134-5.ng-trigger.ng-trigger-dialogContainer.ng-star-inserted>' to be 'visible'
+
+This element `<mat-dialog-container#mat-dialog-0.mat-dialog-container.ng-tns-c134-5.ng-trigger.ng-trigger-dialogContainer.ng-star-inserted>` is not visible because its ancestor has `position: fixed` CSS property and it is overflowed by other elements. How about scrolling to the element with `cy.scrollIntoView()`?
+      at Context.eval (webpack://bog-app/./cypress/e2e/full-test-plan.cy.ts:200:37)
+
+  8) Case Registration UI - Full Test Plan Execution
+       Section 3: Defendants Management (المدعى عليهم)
+         TC-3.3: Should display defendant form fields:
+     AssertionError: Timed out retrying after 10000ms: expected '<mat-dialog-container#mat-dialog-0.mat-dialog-container.ng-tns-c134-3.ng-trigger.ng-trigger-dialogContainer.ng-star-inserted>' to be 'visible'
+
+This element `<mat-dialog-container#mat-dialog-0.mat-dialog-container.ng-tns-c134-3.ng-trigger.ng-trigger-dialogContainer.ng-star-inserted>` is not visible because its ancestor has `position: fixed` CSS property and it is overflowed by other elements. How about scrolling to the element with `cy.scrollIntoView()`?
+      at Context.eval (webpack://bog-app/./cypress/e2e/full-test-plan.cy.ts:215:37)
+
+  9) Case Registration UI - Full Test Plan Execution
+       Section 3: Defendants Management (المدعى عليهم)
+         TC-3.4: Should validate required fields:
+     AssertionError: Timed out retrying after 10000ms: expected '<mat-dialog-container#mat-dialog-0.mat-dialog-container.ng-tns-c134-5.ng-trigger.ng-trigger-dialogContainer.ng-star-inserted>' to be 'visible'
+
+This element `<mat-dialog-container#mat-dialog-0.mat-dialog-container.ng-tns-c134-5.ng-trigger.ng-trigger-dialogContainer.ng-star-inserted>` is not visible because its ancestor has `position: fixed` CSS property and it is overflowed by other elements. How about scrolling to the element with `cy.scrollIntoView()`?
+      at Context.eval (webpack://bog-app/./cypress/e2e/full-test-plan.cy.ts:235:37)
+
+  10) Case Registration UI - Full Test Plan Execution
+       Section 5: Material Components & Styling
+         TC-5.4: Should display form fields with Material styling:
+     AssertionError: Timed out retrying after 10000ms: expected '<mat-form-field.mat-form-field.full-width.ng-tns-c70-5.mat-primary.mat-form-field-type-mat-input.mat-form-field-appearance-outline.mat-form-field-can-float.mat-form-field-should-float.mat-form-field-has-label.ng-untouched.ng-pristine.ng-valid.ng-star-inserted>' to have class 'mat-form-field-outline'
+      at Context.eval (webpack://bog-app/./cypress/e2e/full-test-plan.cy.ts:332:39)
+
+  11) Case Registration UI - Full Test Plan Execution
+       Section 7: Error Handling
+         TC-7.1: Should show error on API failure:
+     CypressError: Timed out retrying after 10000ms: `cy.wait()` timed out waiting `10000ms` for the 1st request to the route: `getRequestsFail`. No request ever occurred.
+
+https://on.cypress.io/wait
+      at cypressErr (http://localhost:4200/__cypress/runner/cypress_runner.js:78225:18)
+      at Object.errByPath (http://localhost:4200/__cypress/runner/cypress_runner.js:78293:10)
+      at checkForXhr (http://localhost:4200/__cypress/runner/cypress_runner.js:138654:84)
+      at <unknown> (http://localhost:4200/__cypress/runner/cypress_runner.js:138679:28)
+      at tryCatcher (http://localhost:4200/__cypress/runner/cypress_runner.js:1777:23)
+      at Promise.attempt.Promise.try (http://localhost:4200/__cypress/runner/cypress_runner.js:4285:29)
+      at whenStable (http://localhost:4200/__cypress/runner/cypress_runner.js:151746:68)
+      at <unknown> (http://localhost:4200/__cypress/runner/cypress_runner.js:151687:14)
+      at tryCatcher (http://localhost:4200/__cypress/runner/cypress_runner.js:1777:23)
+      at Promise._settlePromiseFromHandler (http://localhost:4200/__cypress/runner/cypress_runner.js:1489:31)
+      at Promise._settlePromise (http://localhost:4200/__cypress/runner/cypress_runner.js:1546:18)
+      at Promise._settlePromise0 (http://localhost:4200/__cypress/runner/cypress_runner.js:1591:10)
+      at Promise._settlePromises (http://localhost:4200/__cypress/runner/cypress_runner.js:1671:18)
+      at Promise._fulfill (http://localhost:4200/__cypress/runner/cypress_runner.js:1615:18)
+      at <unknown> (http://localhost:4200/__cypress/runner/cypress_runner.js:5420:46)
+  From Your Spec Code:
+      at Context.eval (webpack://bog-app/./cypress/e2e/full-test-plan.cy.ts:389:9)
+
+  12) Case Registration UI - Full Test Plan Execution
+       Known Issues
+         ❌ TC-ISSUE-2: Add defendant button click not working (KNOWN ISSUE - UNFIXED):
+     AssertionError: Timed out retrying after 10000ms: Expected to find content: 'طลب جديد' within the selector: 'button' but never did.
+      at Context.eval (webpack://bog-app/./cypress/e2e/full-test-plan.cy.ts:416:9)
+
+
+
+
+  (Results)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        25                                                                               │
+  │ Passing:      13                                                                               │
+  │ Failing:      12                                                                               │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  12                                                                               │
+  │ Video:        true                                                                             │
+  │ Duration:     2 minutes, 28 seconds                                                            │
+  │ Spec Ran:     full-test-plan.cy.ts                                                             │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+  (Screenshots)
+
+  -  C:\Users\Lenovo\Desktop\Claude\BOG\src\Frontend\bog-app\cypress\screenshots\full     (1280x720)
+     -test-plan.cy.ts\Case Registration UI - Full Test Plan Execution -- Section 1 Re               
+     quest List Page (case-registrationlist) -- TC-1.1 Should load request list page                
+     correctly (failed).png                                                                         
+  -  C:\Users\Lenovo\Desktop\Claude\BOG\src\Frontend\bog-app\cypress\screenshots\full     (1280x720)
+     -test-plan.cy.ts\Case Registration UI - Full Test Plan Execution -- Section 1 Re               
+     quest List Page (case-registrationlist) -- TC-1.2 Should create new request (fai               
+     led).png                                                                                       
+  -  C:\Users\Lenovo\Desktop\Claude\BOG\src\Frontend\bog-app\cypress\screenshots\full     (1280x720)
+     -test-plan.cy.ts\Case Registration UI - Full Test Plan Execution -- Section 1 Re               
+     quest List Page (case-registrationlist) -- TC-1.3 Should display requests in tab               
+     le (failed).png                                                                                
+  -  C:\Users\Lenovo\Desktop\Claude\BOG\src\Frontend\bog-app\cypress\screenshots\full     (1280x720)
+     -test-plan.cy.ts\Case Registration UI - Full Test Plan Execution -- Section 1 Re               
+     quest List Page (case-registrationlist) -- TC-1.4 Should have pagination control               
+     s (failed).png                                                                                 
+  -  C:\Users\Lenovo\Desktop\Claude\BOG\src\Frontend\bog-app\cypress\screenshots\full     (1280x720)
+     -test-plan.cy.ts\Case Registration UI - Full Test Plan Execution -- Section 1 Re               
+     quest List Page (case-registrationlist) -- TC-1.5 Should show status badges with               
+      correct colors (failed).png                                                                   
+  -  C:\Users\Lenovo\Desktop\Claude\BOG\src\Frontend\bog-app\cypress\screenshots\full     (1280x720)
+     -test-plan.cy.ts\Case Registration UI - Full Test Plan Execution -- Section 2 Re               
+     quest Details Page (case-registration{id}edit) -- TC-2.4 Should display status b               
+     adge in header (failed).png                                                                    
+  -  C:\Users\Lenovo\Desktop\Claude\BOG\src\Frontend\bog-app\cypress\screenshots\full     (1280x720)
+     -test-plan.cy.ts\Case Registration UI - Full Test Plan Execution -- Section 3 De               
+     fendants Management (المدعى عليهم) -- TC-3.2 Should open defendant form dialog o               
+     n button click (failed).png                                                                    
+  -  C:\Users\Lenovo\Desktop\Claude\BOG\src\Frontend\bog-app\cypress\screenshots\full     (1280x720)
+     -test-plan.cy.ts\Case Registration UI - Full Test Plan Execution -- Section 3 De               
+     fendants Management (المدعى عليهم) -- TC-3.3 Should display defendant form field               
+     s (failed).png                                                                                 
+  -  C:\Users\Lenovo\Desktop\Claude\BOG\src\Frontend\bog-app\cypress\screenshots\full     (1280x720)
+     -test-plan.cy.ts\Case Registration UI - Full Test Plan Execution -- Section 3 De               
+     fendants Management (المدعى عليهم) -- TC-3.4 Should validate required fields (fa               
+     iled).png                                                                                      
+  -  C:\Users\Lenovo\Desktop\Claude\BOG\src\Frontend\bog-app\cypress\screenshots\full     (1280x720)
+     -test-plan.cy.ts\Case Registration UI - Full Test Plan Execution -- Section 5 Ma               
+     terial Components & Styling -- TC-5.4 Should display form fields with Material s               
+     tyling (failed).png                                                                            
+  -  C:\Users\Lenovo\Desktop\Claude\BOG\src\Frontend\bog-app\cypress\screenshots\full     (1280x720)
+     -test-plan.cy.ts\Case Registration UI - Full Test Plan Execution -- Section 7 Er               
+     ror Handling -- TC-7.1 Should show error on API failure (failed).png                           
+  -  C:\Users\Lenovo\Desktop\Claude\BOG\src\Frontend\bog-app\cypress\screenshots\full     (1280x720)
+     -test-plan.cy.ts\Case Registration UI - Full Test Plan Execution -- Known Issues               
+      -- ❌ TC-ISSUE-2 Add defendant button click not working (KNOWN ISSUE - UNFIXED…               
+     (failed).png                                                                                   
+
+
+  (Video)
+
+  -  Video output: C:\Users\Lenovo\Desktop\Claude\BOG\src\Frontend\bog-app\cypress\videos\full-test-plan.cy.ts.mp4
+
+
+====================================================================================================
+
+  (Run Finished)
+
+
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✖  case-registration.cy.ts                  01:42       22       12       10        -        - │
+  ├────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ ✖  dropdown-fix-test.cy.ts                  00:25        3        -        3        -        - │
+  ├────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ ✔  dropdown-test-simple.cy.ts               00:02        5        5        -        -        - │
+  ├────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ ✖  full-test-plan.cy.ts                     02:28       25       13       12        -        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    ✖  3 of 4 failed (75%)                      04:38       55       30       25        -        -  
+

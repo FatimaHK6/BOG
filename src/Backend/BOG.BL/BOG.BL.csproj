@@ -6,6 +6,7 @@
     <ProjectReference Include="..\BOG.DbModel\BOG.DbModel.csproj" />
     <ProjectReference Include="..\BOG.Integration\BOG.Integration.csproj" />
     <ProjectReference Include="..\BOG.VM\BOG.VM.csproj" />
+    <ProjectReference Include="..\BOG.Integration\BOG.Integration.csproj" />
   </ItemGroup>
 
   <PropertyGroup>

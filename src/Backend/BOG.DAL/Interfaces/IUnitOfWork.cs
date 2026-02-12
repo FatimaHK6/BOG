@@ -35,6 +35,11 @@ public interface IUnitOfWork : IAsyncDisposable
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// Clears the change tracker to detach all tracked entities.
+    /// </summary>
+    void ClearChangeTracker();
+
+    /// <summary>
     /// Gets a repository for the specified entity type.
     /// </summary>
     /// <typeparam name="TEntity">The entity type</typeparam>

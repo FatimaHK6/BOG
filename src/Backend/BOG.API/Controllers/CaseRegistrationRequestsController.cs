@@ -103,7 +103,14 @@ public class CaseRegistrationRequestsController : ControllerBase
             _logger.LogInformation("Creating draft case registration request for user {UserId}", userId);
             var request = await _requestBL.CreateDraftAsync(userId, cancellationToken);
             _logger.LogInformation("Created draft request with ID {RequestId}", request.Id);
-            return CreatedAtAction(nameof(GetById), new { id = request.Id }, request);
+            // Return simplified response with request ID and status
+            return CreatedAtAction(nameof(GetById), new { id = request.Id }, new
+            {
+                id = request.Id,
+                requestStatusId = request.RequestStatusId,
+                statusNameAr = request.StatusNameAr,
+                createdDate = request.CreatedDate
+            });
         }
         catch (Exception ex)
         {

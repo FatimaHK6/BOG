@@ -1,12 +1,11 @@
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
-import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
-import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { HttpClientModule } from '@angular/common/http';
+import { NgxEditorModule } from 'ngx-editor';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
-import { CoreModule } from './core/core.module';
-import { SharedModule } from './shared/shared.module';
 
 @NgModule({
   declarations: [
@@ -14,14 +13,12 @@ import { SharedModule } from './shared/shared.module';
   ],
   imports: [
     BrowserModule,
+    BrowserAnimationsModule,
+    HttpClientModule,
     AppRoutingModule,
-    CoreModule,
-    SharedModule
+    NgxEditorModule.forRoot()
   ],
-  providers: [
-    provideAnimationsAsync(),
-    provideHttpClient(withInterceptorsFromDi())
-  ],
+  providers: [],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

@@ -4,13 +4,12 @@ import { RouterModule, Routes } from '@angular/router';
 const routes: Routes = [
   {
     path: '',
-    redirectTo: 'case-registration/plaintiffs',
+    redirectTo: '/case-registration/list',
     pathMatch: 'full'
   },
   {
     path: 'case-registration',
-    loadChildren: () => import('./features/case-registration/case-registration.module')
-      .then(m => m.CaseRegistrationModule)
+    loadChildren: () => import('./features/case-registration/case-registration.module').then(m => m.CaseRegistrationModule)
   }
 ];
 
