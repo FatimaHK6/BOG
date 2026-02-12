@@ -81,9 +81,7 @@ export class RequestListComponent implements OnInit {
   onNewRequest(): void {
     this.requestService.createNewDraft().subscribe({
       next: (draft: CaseRegistrationRequestVM) => {
-        this.router.navigate(['/case-registration/plaintiffs'], {
-          queryParams: { requestId: draft.id }
-        });
+        this.router.navigate(['/case-registration', draft.id, 'edit']);
       },
       error: (error: any) => {
         console.error('Error creating draft:', error);
@@ -92,15 +90,11 @@ export class RequestListComponent implements OnInit {
   }
 
   onEditRequest(request: CaseRegistrationRequestListVM): void {
-    this.router.navigate(['/case-registration/plaintiffs'], {
-      queryParams: { requestId: request.id }
-    });
+    this.router.navigate(['/case-registration', request.id, 'edit']);
   }
 
   onViewRequest(request: CaseRegistrationRequestListVM): void {
-    this.router.navigate(['/case-registration/plaintiffs'], {
-      queryParams: { requestId: request.id, mode: 'view' }
-    });
+    this.router.navigate(['/case-registration', request.id, 'view']);
   }
 
   onDeleteRequest(request: CaseRegistrationRequestListVM): void {

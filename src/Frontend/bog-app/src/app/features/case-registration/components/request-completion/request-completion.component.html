@@ -1,0 +1,67 @@
+<div class="request-completion-container">
+  <form [formGroup]="completionForm" (ngSubmit)="onSubmit()" class="completion-form">
+    <h2>إنهاء الطلب</h2>
+
+    <!-- Decision Type Field -->
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>نوع القرار</mat-label>
+      <mat-select formControlName="decisionType">
+        <mat-option *ngFor="let option of decisionOptions" [value]="option.value">
+          {{ option.label }}
+        </mat-option>
+      </mat-select>
+      <mat-error *ngIf="completionForm.get('decisionType')?.hasError('required')">
+        نوع القرار مطلوب
+      </mat-error>
+    </mat-form-field>
+
+    <!-- Case Type Field -->
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>نوع الدعوى</mat-label>
+      <mat-select formControlName="caseTypeId" [disabled]="isLoadingCaseTypes">
+        <mat-option *ngFor="let type of caseTypes" [value]="type.id">
+          {{ type.nameAr }}
+        </mat-option>
+      </mat-select>
+      <mat-error *ngIf="completionForm.get('caseTypeId')?.hasError('required')">
+        نوع الدعوى مطلوب
+      </mat-error>
+    </mat-form-field>
+
+    <!-- Notes Field -->
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>ملاحظات</mat-label>
+      <textarea
+        matInput
+        formControlName="notes"
+        rows="4"
+        placeholder="أدخل الملاحظات (اختياري)"
+        maxlength="4000">
+      </textarea>
+      <mat-hint align="end">
+        {{ completionForm.get('notes')?.value?.length || 0 }}/4000
+      </mat-hint>
+      <mat-error *ngIf="completionForm.get('notes')?.hasError('maxlength')">
+        الملاحظات لا يمكن أن تتجاوز 4000 حرف
+      </mat-error>
+    </mat-form-field>
+
+    <!-- Action Buttons -->
+    <div class="button-group">
+      <button
+        type="submit"
+        mat-raised-button
+        color="primary"
+        [disabled]="isSubmitting || !canComplete"
+        class="submit-button">
+        <mat-spinner *ngIf="isSubmitting" diameter="20" class="button-spinner"></mat-spinner>
+        {{ isSubmitting ? 'جاري الحفظ...' : 'حفظ' }}
+      </button>
+    </div>
+
+    <!-- Status Message -->
+    <div *ngIf="!canComplete" class="status-message warning">
+      الحالة الحالية لا تسمح بإنهاء الطلب
+    </div>
+  </form>
+</div>

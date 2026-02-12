@@ -1,0 +1,63 @@
+<div dir="rtl">
+  <h2 mat-dialog-title *ngIf="mode === 'create'">إضافة طلب دعوى جديد</h2>
+  <h2 mat-dialog-title *ngIf="mode === 'edit'">تعديل طلب الدعوى</h2>
+  <h2 mat-dialog-title *ngIf="mode === 'view'">عرض طلب الدعوى</h2>
+
+  <mat-dialog-content [formGroup]="claimForm">
+    <!-- Server Error -->
+    <app-validation-message
+      *ngIf="serverError"
+      type="error"
+      [message]="serverError">
+    </app-validation-message>
+
+    <!-- Claim Text Field (Rich Text Editor) -->
+    <div class="editor-container">
+      <label class="editor-label">نص طلب الدعوى</label>
+      <div class="editor-wrapper" [class.disabled]="mode === 'view'">
+        <ngx-editor
+          [editor]="editor"
+          formControlName="claimText"
+          placeholder="أدخل نص طلب الدعوى هنا...">
+        </ngx-editor>
+      </div>
+
+      <!-- Validation Error -->
+      <div class="validation-error" *ngIf="claimForm.get('claimText')?.hasError('required') && claimForm.get('claimText')?.touched">
+        طلب الدعوى مطلوب
+      </div>
+      <div class="validation-error" *ngIf="claimForm.get('claimText')?.hasError('maxlength') && claimForm.get('claimText')?.touched">
+        يتجاوز الحد الأقصى ({{ maxCharacters }} حرف)
+      </div>
+    </div>
+
+    <!-- Character Counter -->
+    <div class="character-counter">
+      <div class="counter-info">
+        <span class="count">{{ claimTextLength }} / {{ maxCharacters }}</span>
+        <span class="text">حرف</span>
+      </div>
+      <mat-progress-bar
+        mode="determinate"
+        [value]="characterPercentage"
+        [class.warning]="characterPercentage > 80"
+        [class.error]="characterPercentage >= 100">
+      </mat-progress-bar>
+    </div>
+  </mat-dialog-content>
+
+  <!-- Dialog Actions -->
+  <mat-dialog-actions align="end" dir="ltr">
+    <button mat-button (click)="onCancel()" [disabled]="saving">إلغاء</button>
+    <button mat-raised-button color="primary"
+      (click)="onSave()"
+      [disabled]="!claimForm.valid || saving"
+      *ngIf="mode !== 'view'">
+      <mat-icon *ngIf="!saving">save</mat-icon>
+      <mat-spinner diameter="20" *ngIf="saving"></mat-spinner>
+      {{ saving ? 'جارٍ الحفظ...' : 'حفظ' }}
+    </button>
+  </mat-dialog-actions>
+</div>
+
+

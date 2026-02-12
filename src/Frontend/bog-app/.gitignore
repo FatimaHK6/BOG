@@ -11,6 +11,10 @@
 npm-debug.log
 yarn-error.log
 
+# Prevent accidental commit of package folders in app root
+/@angular
+/@types
+
 # IDEs and editors
 .idea/
 .project

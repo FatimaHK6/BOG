@@ -1,6 +1,5 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { DefendantService } from '../../../../../core/services/defendant.service';
 import { LookupService } from '../../../../../core/services/lookup.service';
@@ -19,8 +18,12 @@ interface Country {
 })
 export class DefendantUnregisteredCompanyFormComponent implements OnInit {
   form!: FormGroup;
-  requestId: number = 0;
-  defendantId: number = 0;
+  @Input() requestId: number = 0;
+  @Input() defendantId: number | null = null;
+  @Input() mode: 'add' | 'edit' | 'view' = 'add';
+
+  @Output() saved = new EventEmitter<void>();
+  @Output() cancelled = new EventEmitter<void>();
   isEditMode = false;
   isViewMode = false;
   isLoading = false;
@@ -33,28 +36,12 @@ export class DefendantUnregisteredCompanyFormComponent implements OnInit {
     private fb: FormBuilder,
     private defendantService: DefendantService,
     private lookupService: LookupService,
-    private router: Router,
-    private route: ActivatedRoute,
     private snackBar: MatSnackBar
   ) { }
 
   ngOnInit(): void {
-    // Get requestId from query params
-    this.route.queryParams.subscribe(params => {
-      this.requestId = params['requestId'] ? +params['requestId'] : 0;
-    });
-
-    // Check if edit or view mode (id in route params)
-    this.route.params.subscribe(params => {
-      if (params['id']) {
-        this.defendantId = +params['id'];
-        // Check if view mode by URL path
-        const url = this.router.url;
-        this.isViewMode = url.includes('/view/');
-        this.isEditMode = !this.isViewMode;
-      }
-    });
-
+    this.isViewMode = this.mode === 'view';
+    this.isEditMode = this.mode === 'edit';
     this.initForm();
     this.loadLookups();
   }
@@ -75,7 +62,7 @@ export class DefendantUnregisteredCompanyFormComponent implements OnInit {
       next: (countries) => {
         this.countries = countries;
         // Load defendant data if edit or view mode
-        if ((this.isEditMode || this.isViewMode) && this.defendantId > 0) {
+        if ((this.isEditMode || this.isViewMode) && this.defendantId && this.defendantId > 0) {
           this.loadDefendant();
         } else {
           this.isLoading = false;
@@ -88,7 +75,7 @@ export class DefendantUnregisteredCompanyFormComponent implements OnInit {
   }
 
   private loadDefendant(): void {
-    this.defendantService.getDefendant(this.defendantId).subscribe({
+    this.defendantService.getDefendant(this.defendantId!).subscribe({
       next: (defendant) => {
         this.form.patchValue({
           commercialRegNumber: defendant.commercialRegNumber,
@@ -129,7 +116,7 @@ export class DefendantUnregisteredCompanyFormComponent implements OnInit {
     };
 
     const request$ = this.isEditMode
-      ? this.defendantService.updateDefendant(this.defendantId, dto)
+      ? this.defendantService.updateDefendant(this.defendantId!, dto)
       : this.defendantService.createDefendant(this.requestId, dto);
 
     request$.subscribe({
@@ -138,9 +125,7 @@ export class DefendantUnregisteredCompanyFormComponent implements OnInit {
         const message = this.isEditMode ? 'تم تعديل المدعى عليه بنجاح' : 'تم إنشاء المدعى عليه بنجاح';
         this.snackBar.open(message, 'إغلاق', { duration: 3000 });
         // Navigate back to defendants list
-        this.router.navigate(['/case-registration/defendants'], {
-          queryParams: { requestId: this.requestId }
-        });
+        this.saved.emit();
       },
       error: (err) => {
         console.error('Error saving defendant:', err);
@@ -152,11 +137,15 @@ export class DefendantUnregisteredCompanyFormComponent implements OnInit {
   }
 
   onCancel(): void {
-    this.router.navigate(['/case-registration/defendants'], {
-      queryParams: { requestId: this.requestId }
-    });
+    this.cancelled.emit();
   }
 
   // Helper for form field access
   get f() { return this.form.controls; }
 }
+
+
+
+
+
+

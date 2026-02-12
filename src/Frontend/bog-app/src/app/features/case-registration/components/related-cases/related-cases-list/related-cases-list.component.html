@@ -1,0 +1,76 @@
+<div dir="rtl">
+  <!-- Add Button -->
+  <div class="section-actions" *ngIf="canEdit">
+    <button mat-raised-button class="gold-button" (click)="openAddRelatedCase()">
+      <mat-icon>add</mat-icon>
+      إضافة دعوى مرتبطة
+    </button>
+  </div>
+
+  <!-- Validation Error -->
+  <app-validation-message
+    *ngIf="showValidation && relatedCases.length === 0"
+    type="error"
+    message="ERR004: يجب إضافة دعوى مرتبطة واحدة على الأقل">
+  </app-validation-message>
+
+  <!-- Related Cases Table -->
+  <div class="table-container" *ngIf="hasRelatedCases">
+    <table mat-table [dataSource]="relatedCases" class="related-cases-table">
+      <ng-container matColumnDef="court">
+        <th mat-header-cell *matHeaderCellDef>المحكمة</th>
+        <td mat-cell *matCellDef="let relatedCase">
+          {{ relatedCase.courtName || '-' }}
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="caseNumber">
+        <th mat-header-cell *matHeaderCellDef>رقم الدعوى</th>
+        <td mat-cell *matCellDef="let relatedCase">
+          <strong>{{ relatedCase.caseNumber }}</strong>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="caseYear">
+        <th mat-header-cell *matHeaderCellDef>عام الدعوى</th>
+        <td mat-cell *matCellDef="let relatedCase">
+          {{ relatedCase.caseYear }}
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef>الإجراءات</th>
+        <td mat-cell *matCellDef="let relatedCase">
+          <button mat-icon-button [matMenuTriggerFor]="menu" *ngIf="canEdit">
+            <mat-icon>more_vert</mat-icon>
+          </button>
+          <mat-menu #menu="matMenu">
+            <button mat-menu-item (click)="editRelatedCase(relatedCase)">
+              <mat-icon>edit</mat-icon>
+              <span>تعديل</span>
+            </button>
+            <button mat-menu-item (click)="deleteRelatedCase(relatedCase)">
+              <mat-icon>delete</mat-icon>
+              <span>حذف</span>
+            </button>
+          </mat-menu>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+    </table>
+  </div>
+
+  <!-- Empty State -->
+  <div class="empty-state" *ngIf="!hasRelatedCases && !showValidation">
+    <mat-icon>description</mat-icon>
+    <p>لا يوجد اي سجلات</p>
+  </div>
+
+  <!-- Loading State -->
+  <div class="loading-state" *ngIf="loading">
+    <mat-spinner diameter="40"></mat-spinner>
+  </div>
+</div>
+

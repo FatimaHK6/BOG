@@ -16,4 +16,9 @@ public interface ICaseRegistrationRequestRepository : IRepository<CaseRegistrati
     /// Gets a request with all related data.
     /// </summary>
     Task<CaseRegistrationRequest?> GetWithDetailsAsync(int id, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Gets all requests in PendingCompletion status that have expired.
+    /// </summary>
+    Task<IEnumerable<CaseRegistrationRequest>> GetPendingCompletionExpiredAsync(CancellationToken cancellationToken = default);
 }

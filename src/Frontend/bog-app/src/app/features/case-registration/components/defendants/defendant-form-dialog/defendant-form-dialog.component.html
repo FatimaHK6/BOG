@@ -1,0 +1,104 @@
+<h2 mat-dialog-title>
+  <span *ngIf="mode === 'create'">إضافة مدعى عليه</span>
+  <span *ngIf="mode === 'edit'">تعديل مدعى عليه</span>
+  <span *ngIf="mode === 'view'">عرض مدعى عليه</span>
+</h2>
+
+<mat-dialog-content>
+  <form [formGroup]="defendantForm" class="defendant-form">
+    <!-- Defendant Type -->
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>نوع المدعى عليه *</mat-label>
+      <mat-select formControlName="defendantTypeId" required panelClass="dropdown-panel">
+        <mat-option [value]="1">طبيعي</mat-option>
+        <mat-option [value]="2">شركة</mat-option>
+        <mat-option [value]="3">جهة حكومية</mat-option>
+        <mat-option [value]="4">جمعية أهلية</mat-option>
+        <mat-option [value]="5">مجهول</mat-option>
+        <mat-option [value]="6">أخرى</mat-option>
+      </mat-select>
+      <mat-error *ngIf="defendantForm.get('defendantTypeId')?.hasError('required')">
+        نوع المدعى عليه مطلوب
+      </mat-error>
+    </mat-form-field>
+
+    <!-- Full Name (Required) -->
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>الاسم الكامل *</mat-label>
+      <input matInput formControlName="fullName" required maxlength="200">
+      <mat-hint align="end">{{ fullNameLength }}/200</mat-hint>
+      <mat-error *ngIf="defendantForm.get('fullName')?.hasError('required')">
+        الاسم الكامل مطلوب
+      </mat-error>
+      <mat-error *ngIf="defendantForm.get('fullName')?.hasError('maxlength')">
+        لا يزيد الاسم عن 200 أحرف
+      </mat-error>
+    </mat-form-field>
+
+    <!-- Identity Section (for Natural/Unknown types) -->
+    <div class="form-row" *ngIf="showIdentityFields">
+      <mat-form-field appearance="outline" class="half-width">
+        <mat-label>نوع الهوية</mat-label>
+        <mat-select formControlName="identityTypeId" panelClass="dropdown-panel">
+          <mat-option [value]="null">-- اختر --</mat-option>
+          <mat-option [value]="1">هوية وطنية</mat-option>
+          <mat-option [value]="2">إقامة</mat-option>
+          <mat-option [value]="3">جواز سفر</mat-option>
+          <mat-option [value]="4">هوية خليجية</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="half-width">
+        <mat-label>رقم الهوية</mat-label>
+        <input matInput formControlName="identityNumber" maxlength="50">
+      </mat-form-field>
+    </div>
+
+    <!-- Commercial Registration (for Company type) -->
+    <mat-form-field appearance="outline" class="full-width" *ngIf="isCompanyType">
+      <mat-label>رقم السجل التجاري</mat-label>
+      <input matInput formControlName="commercialRegNumber" maxlength="50">
+    </mat-form-field>
+
+    <!-- Government Agency (for Government Entity type) -->
+    <mat-form-field appearance="outline" class="full-width" *ngIf="isGovernmentType">
+      <mat-label>الجهة الحكومية</mat-label>
+      <mat-select formControlName="governmentAgencyId" panelClass="dropdown-panel">
+        <mat-option [value]="null">-- اختر --</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <!-- Address -->
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>العنوان</mat-label>
+      <textarea matInput formControlName="addressText" rows="3" maxlength="2000"></textarea>
+      <mat-hint align="end">{{ addressLength }}/2000</mat-hint>
+    </mat-form-field>
+
+    <!-- Additional Statement -->
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>بيان إضافي</mat-label>
+      <textarea matInput formControlName="additionalStatement" rows="4" maxlength="4000"></textarea>
+      <mat-hint align="end">{{ statementLength }}/4000</mat-hint>
+    </mat-form-field>
+
+    <!-- Server Validation Errors -->
+    <app-validation-message
+      *ngIf="serverError"
+      type="error"
+      [message]="serverError">
+    </app-validation-message>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="onCancel()">
+    {{ mode === 'view' ? 'إغلاق' : 'إلغاء' }}
+  </button>
+  <button mat-raised-button color="primary"
+          (click)="onSave()"
+          [disabled]="defendantForm.invalid || saving || mode === 'view'">
+    <span *ngIf="!saving">{{ mode === 'create' ? 'إضافة' : 'حفظ' }}</span>
+    <mat-spinner diameter="20" *ngIf="saving" class="spinner"></mat-spinner>
+  </button>
+</mat-dialog-actions>

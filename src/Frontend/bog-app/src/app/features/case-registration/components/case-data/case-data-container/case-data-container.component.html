@@ -1,0 +1,45 @@
+<div dir="rtl" class="case-data-container">
+  <!-- Subject & Evidence -->
+  <div *ngIf="activeTabId === 'subject-evidence'" class="tab-content-wrapper">
+    <app-subject-evidence-form [canEdit]="canEdit"></app-subject-evidence-form>
+  </div>
+
+  <!-- Claims -->
+  <div *ngIf="activeTabId === 'claims'" class="tab-content-wrapper">
+    <app-claims-list
+      [requestId]="requestId"
+      [canEdit]="canEdit"
+      (countChanged)="claimsCount = $event">
+    </app-claims-list>
+  </div>
+
+  <!-- Related Cases -->
+  <div *ngIf="activeTabId === 'related-cases'" class="tab-content-wrapper">
+    <app-related-cases-list
+      [requestId]="requestId"
+      [canEdit]="canEdit"
+      (countChanged)="relatedCasesCount = $event">
+    </app-related-cases-list>
+  </div>
+
+  <!-- Classifications -->
+  <div *ngIf="activeTabId === 'classifications'" class="tab-content-wrapper">
+    <app-classifications-tab
+      [canEdit]="canEdit"
+      (countChanged)="classificationsCount = $event">
+    </app-classifications-tab>
+  </div>
+
+  <!-- Contact Info -->
+  <div *ngIf="activeTabId === 'contact-info'" class="tab-content-wrapper">
+    <app-contact-info-form [canEdit]="canEdit"></app-contact-info-form>
+  </div>
+
+  <!-- Attachments -->
+  <div *ngIf="activeTabId === 'attachments'" class="tab-content-wrapper">
+    <app-attachments-list
+      [requestId]="requestId"
+      [canEdit]="canEdit">
+    </app-attachments-list>
+  </div>
+</div>

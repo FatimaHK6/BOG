@@ -1,0 +1,64 @@
+<app-section-container
+  title="بيانات الدعوى"
+  sectionId="case-data"
+  icon="description">
+
+  <form [formGroup]="caseDataForm">
+    <!-- Success Message -->
+    <app-validation-message
+      *ngIf="saveSuccess"
+      type="success"
+      message="تم حفظ بيانات الدعوى بنجاح">
+    </app-validation-message>
+
+    <!-- Subject -->
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>موضوع الدعوى *</mat-label>
+      <textarea matInput formControlName="subject" rows="4" maxlength="4000" [disabled]="!canEdit"></textarea>
+      <mat-hint align="end">{{ subjectLength }}/4000</mat-hint>
+      <mat-error *ngIf="caseDataForm.get('subject')?.hasError('required')">
+        موضوع الدعوى مطلوب (ERR006)
+      </mat-error>
+      <mat-error *ngIf="caseDataForm.get('subject')?.hasError('maxlength')">
+        لا يزيد الموضوع عن 4000 حرف
+      </mat-error>
+    </mat-form-field>
+
+    <!-- Evidence -->
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>الأدلة والمستندات *</mat-label>
+      <textarea matInput formControlName="evidence" rows="4" maxlength="4000" [disabled]="!canEdit"></textarea>
+      <mat-hint align="end">{{ evidenceLength }}/4000</mat-hint>
+      <mat-error *ngIf="caseDataForm.get('evidence')?.hasError('required')">
+        الأدلة مطلوبة (ERR007)
+      </mat-error>
+      <mat-error *ngIf="caseDataForm.get('evidence')?.hasError('maxlength')">
+        لا تزيد الأدلة عن 4000 حرف
+      </mat-error>
+    </mat-form-field>
+
+    <!-- Classifications Multi-Select -->
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>تصنيفات الدعوى *</mat-label>
+      <mat-select
+        formControlName="classifications"
+        [disabled]="!canEdit"
+        panelClass="dropdown-panel"
+        disableOptionCentering
+        multiple>
+        <mat-option *ngFor="let classification of classifications" [value]="classification.id">
+          {{ classification.nameAr }}
+        </mat-option>
+      </mat-select>
+      <mat-error *ngIf="caseDataForm.get('classifications')?.hasError('required')">
+        يجب تحديد تصنيف واحد على الأقل (ERR005)
+      </mat-error>
+    </mat-form-field>
+
+    <!-- Auto-save Indicator -->
+    <div class="auto-save-indicator" *ngIf="saving && canEdit">
+      <mat-spinner diameter="20"></mat-spinner>
+      <span>جاري الحفظ التلقائي...</span>
+    </div>
+  </form>
+</app-section-container>

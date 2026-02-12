@@ -69,6 +69,12 @@ public class ApplicationDbContext : DbContext
     public DbSet<District> Districts { get; set; }
     public DbSet<Nationality> Nationalities { get; set; }
 
+    // Additional lookup tables
+    public DbSet<Classification> Classifications { get; set; }
+    public DbSet<NotificationMethod> NotificationMethods { get; set; }
+    public DbSet<GovernmentEntity> GovernmentEntities { get; set; }
+    public DbSet<CaseType> CaseTypes { get; set; }
+
     #endregion
 
     #region Common DbSets
@@ -92,6 +98,12 @@ public class ApplicationDbContext : DbContext
     public DbSet<RepresentativeAttachment> RepresentativeAttachments { get; set; }
     public DbSet<RequestAttachment> RequestAttachments { get; set; }
 
+    // Additional info tables
+    public DbSet<AdditionalInfo> AdditionalInfos { get; set; }
+    public DbSet<AdditionalInfoManagementDecision> AdditionalInfoManagementDecisions { get; set; }
+    public DbSet<AdditionalInfoServiceRights> AdditionalInfoServiceRights { get; set; }
+    public DbSet<AdditionalInfoTrademark> AdditionalInfoTrademarks { get; set; }
+
     #endregion
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -104,8 +116,10 @@ public class ApplicationDbContext : DbContext
         ConfigureUserEntity(modelBuilder);
         ConfigureIdentityEntities(modelBuilder);
         ConfigureLookupEntities(modelBuilder);
+        ConfigureAdditionalLookupEntities(modelBuilder);
         ConfigureCommonEntities(modelBuilder);
         ConfigureCaseRegistrationEntities(modelBuilder);
+        ConfigureAdditionalInfoEntities(modelBuilder);
         SeedRoles(modelBuilder);
         SeedLookupData(modelBuilder);
     }
@@ -540,6 +554,72 @@ public class ApplicationDbContext : DbContext
                 .HasForeignKey(e => e.CityId)
                 .OnDelete(DeleteBehavior.Restrict);
         });
+
+        // Nationality
+        modelBuilder.Entity<Nationality>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Name).IsRequired().HasMaxLength(100);
+            entity.Property(e => e.NameAr).IsRequired().HasMaxLength(100);
+            entity.Property(e => e.Description).HasMaxLength(500);
+            entity.Property(e => e.IsActive).HasDefaultValue(true);
+            entity.Property(e => e.IsDeleted).HasDefaultValue(false);
+        });
+    }
+
+    /// <summary>
+    /// Configures additional lookup entities (Classification, NotificationMethod, GovernmentEntity, CaseType).
+    /// </summary>
+    private void ConfigureAdditionalLookupEntities(ModelBuilder modelBuilder)
+    {
+        // Classification
+        modelBuilder.Entity<Classification>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Name).IsRequired().HasMaxLength(200);
+            entity.Property(e => e.NameAr).IsRequired().HasMaxLength(200);
+            entity.Property(e => e.Description).HasMaxLength(500);
+            entity.Property(e => e.Level1).HasMaxLength(100);
+            entity.Property(e => e.Level2).HasMaxLength(100);
+            entity.Property(e => e.Level3).HasMaxLength(100);
+            entity.Property(e => e.Level4).HasMaxLength(100);
+            entity.Property(e => e.IsActive).HasDefaultValue(true);
+            entity.Property(e => e.IsDeleted).HasDefaultValue(false);
+        });
+
+        // NotificationMethod
+        modelBuilder.Entity<NotificationMethod>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Name).IsRequired().HasMaxLength(100);
+            entity.Property(e => e.NameAr).IsRequired().HasMaxLength(100);
+            entity.Property(e => e.Description).HasMaxLength(500);
+            entity.Property(e => e.IsActive).HasDefaultValue(true);
+            entity.Property(e => e.IsDeleted).HasDefaultValue(false);
+        });
+
+        // GovernmentEntity
+        modelBuilder.Entity<GovernmentEntity>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Name).IsRequired().HasMaxLength(200);
+            entity.Property(e => e.NameAr).IsRequired().HasMaxLength(200);
+            entity.Property(e => e.Code).HasMaxLength(50);
+            entity.Property(e => e.Description).HasMaxLength(500);
+            entity.Property(e => e.IsActive).HasDefaultValue(true);
+            entity.Property(e => e.IsDeleted).HasDefaultValue(false);
+        });
+
+        // CaseType
+        modelBuilder.Entity<CaseType>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Name).IsRequired().HasMaxLength(100);
+            entity.Property(e => e.NameAr).IsRequired().HasMaxLength(100);
+            entity.Property(e => e.Description).HasMaxLength(500);
+            entity.Property(e => e.IsActive).HasDefaultValue(true);
+            entity.Property(e => e.IsDeleted).HasDefaultValue(false);
+        });
     }
 
     /// <summary>
@@ -561,17 +641,6 @@ public class ApplicationDbContext : DbContext
             entity.Property(e => e.FullAddress).HasMaxLength(500);
             entity.Property(e => e.IsActive).HasDefaultValue(true);
             entity.Property(e => e.IsDeleted).HasDefaultValue(false);
-
-            // Navigation properties for Region and City
-            entity.HasOne(e => e.Region)
-                .WithMany()
-                .HasForeignKey(e => e.RegionId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            entity.HasOne(e => e.City_)
-                .WithMany()
-                .HasForeignKey(e => e.CityId)
-                .OnDelete(DeleteBehavior.Restrict);
         });
     }
 
@@ -631,7 +700,6 @@ public class ApplicationDbContext : DbContext
         {
             entity.HasKey(e => e.Id);
             entity.Property(e => e.CaseNumber).IsRequired().HasMaxLength(50);
-            entity.Property(e => e.Notes).HasMaxLength(500);
             entity.Property(e => e.IsDeleted).HasDefaultValue(false);
 
             entity.HasOne(e => e.Request)
@@ -669,20 +737,12 @@ public class ApplicationDbContext : DbContext
             entity.Property(e => e.CommercialRegNumber).HasMaxLength(20);
             entity.Property(e => e.CompanyName).HasMaxLength(200);
             entity.Property(e => e.AdditionalStatement).HasMaxLength(4000);
-            entity.Property(e => e.Headquarters).HasMaxLength(200);
-            entity.Property(e => e.LicenseNumber).HasMaxLength(10);
-            entity.Property(e => e.NGOName).HasMaxLength(200);
-            entity.Property(e => e.CourtDeedNumber).HasMaxLength(10);
-            entity.Property(e => e.WaqfName).HasMaxLength(200);
-            entity.Property(e => e.DeedSource).HasMaxLength(100);
-            entity.Property(e => e.WaqfOversightType).HasMaxLength(20);
-            entity.Property(e => e.WaqfAgencyName).HasMaxLength(200);
-            entity.Property(e => e.WaqfDescription).HasMaxLength(200);
+            entity.Property(e => e.LicenseNumber).HasMaxLength(50);
+            entity.Property(e => e.CourtDeedNumber).HasMaxLength(50);
+            entity.Property(e => e.DeedSource).HasMaxLength(200);
+            entity.Property(e => e.WaqfOversightType).HasMaxLength(50);
             entity.Property(e => e.Employer).HasMaxLength(200);
-            entity.Property(e => e.Profession).HasMaxLength(200);
-            entity.Property(e => e.UnregisteredCompanyAddress).HasMaxLength(500);
-            entity.Property(e => e.UnregisteredCompanyCity).HasMaxLength(100);
-            entity.Property(e => e.Description).HasMaxLength(1000);
+            entity.Property(e => e.Profession).HasMaxLength(100);
             entity.Property(e => e.IsActive).HasDefaultValue(true);
             entity.Property(e => e.IsDeleted).HasDefaultValue(false);
 
@@ -750,6 +810,10 @@ public class ApplicationDbContext : DbContext
                 .WithMany()
                 .HasForeignKey(e => e.SelectedAddressId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            // Navigation for EmploymentStatus (optional relationship)
+            // Note: EmploymentStatus lookup is referenced by EmploymentStatusId but not explicitly configured
+            // as it's a simple lookup reference without dedicated navigation property in Plaintiff
         });
 
         // CaseRequestPlaintiff (junction table)
@@ -803,56 +867,8 @@ public class ApplicationDbContext : DbContext
             entity.Property(e => e.IdentityNumber).HasMaxLength(20);
             entity.Property(e => e.AddressText).HasMaxLength(500);
             entity.Property(e => e.CommercialRegNumber).HasMaxLength(20);
-            entity.Property(e => e.CompanyName).HasMaxLength(200);
             entity.Property(e => e.Headquarters).HasMaxLength(200);
             entity.Property(e => e.AdditionalStatement).HasMaxLength(4000);
-            // Registered Company (Type 2) fields
-            entity.Property(e => e.RegCompanyDistrict).HasMaxLength(100);
-            entity.Property(e => e.RegCompanyStreet).HasMaxLength(200);
-            entity.Property(e => e.RegCompanyBuildingNumber).HasMaxLength(4);
-            entity.Property(e => e.RegCompanyUnitNumber).HasMaxLength(20);
-            entity.Property(e => e.RegCompanyPostalCode).HasMaxLength(5);
-            entity.Property(e => e.RegCompanyAdditionalCode).HasMaxLength(4);
-            // Unregistered Company (Type 4) fields
-            entity.Property(e => e.City).HasMaxLength(100);
-            entity.Property(e => e.Description).HasMaxLength(1000);
-            // Waqf (Type 7) fields
-            entity.Property(e => e.WaqfName).HasMaxLength(200);
-            entity.Property(e => e.CourtDeedNumber).HasMaxLength(10);
-            entity.Property(e => e.DeedSource).HasMaxLength(100);
-            entity.Property(e => e.WaqfAgencyName).HasMaxLength(200);
-            entity.Property(e => e.WaqfDistrict).HasMaxLength(100);
-            entity.Property(e => e.WaqfStreet).HasMaxLength(200);
-            entity.Property(e => e.WaqfBuildingNumber).HasMaxLength(4);
-            entity.Property(e => e.WaqfUnitNumber).HasMaxLength(20);
-            entity.Property(e => e.WaqfPostalCode).HasMaxLength(5);
-            entity.Property(e => e.WaqfAdditionalCode).HasMaxLength(4);
-            entity.Property(e => e.WaqfAddressDescription).HasMaxLength(500);
-            // NGO (Type 6) fields
-            entity.Property(e => e.LicenseNumber).HasMaxLength(10);
-            entity.Property(e => e.NGOName).HasMaxLength(200);
-            entity.Property(e => e.NGODistrict).HasMaxLength(100);
-            entity.Property(e => e.NGOStreet).HasMaxLength(200);
-            entity.Property(e => e.NGOBuildingNumber).HasMaxLength(4);
-            entity.Property(e => e.NGOUnitNumber).HasMaxLength(20);
-            entity.Property(e => e.NGOPostalCode).HasMaxLength(5);
-            entity.Property(e => e.NGOAdditionalCode).HasMaxLength(4);
-            // Individual (Type 1) fields
-            entity.Property(e => e.FirstName).HasMaxLength(100);
-            entity.Property(e => e.FatherName).HasMaxLength(100);
-            entity.Property(e => e.GrandfatherName).HasMaxLength(100);
-            entity.Property(e => e.TribeName).HasMaxLength(100);
-            entity.Property(e => e.FamilyName).HasMaxLength(100);
-            entity.Property(e => e.MobileNumber).HasMaxLength(20);
-            entity.Property(e => e.Email).HasMaxLength(255);
-            entity.Property(e => e.IndDistrict).HasMaxLength(100);
-            entity.Property(e => e.IndStreet).HasMaxLength(200);
-            entity.Property(e => e.IndBuildingNumber).HasMaxLength(4);
-            entity.Property(e => e.IndUnitNumber).HasMaxLength(4);
-            entity.Property(e => e.IndPostalCode).HasMaxLength(5);
-            entity.Property(e => e.IndAdditionalCode).HasMaxLength(4);
-            entity.Property(e => e.Employer).HasMaxLength(200);
-            entity.Property(e => e.Occupation).HasMaxLength(200);
             entity.Property(e => e.IsActive).HasDefaultValue(true);
             entity.Property(e => e.IsDeleted).HasDefaultValue(false);
 
@@ -879,70 +895,6 @@ public class ApplicationDbContext : DbContext
             entity.HasOne(e => e.GovernmentAgency)
                 .WithMany()
                 .HasForeignKey(e => e.GovernmentAgencyId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            // Registered Company (Type 2) navigation properties
-            entity.HasOne(e => e.RegCompanyRegion)
-                .WithMany()
-                .HasForeignKey(e => e.RegCompanyRegionId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            entity.HasOne(e => e.RegCompanyCity)
-                .WithMany()
-                .HasForeignKey(e => e.RegCompanyCityId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            entity.HasOne(e => e.Country)
-                .WithMany()
-                .HasForeignKey(e => e.CountryId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            // Waqf (Type 7) navigation properties
-            entity.HasOne(e => e.WaqfRegion)
-                .WithMany()
-                .HasForeignKey(e => e.WaqfRegionId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            entity.HasOne(e => e.WaqfCity)
-                .WithMany()
-                .HasForeignKey(e => e.WaqfCityId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            // NGO (Type 6) navigation properties
-            entity.HasOne(e => e.LicenseSource)
-                .WithMany()
-                .HasForeignKey(e => e.LicenseSourceId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            entity.HasOne(e => e.NGORegion)
-                .WithMany()
-                .HasForeignKey(e => e.NGORegionId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            entity.HasOne(e => e.NGOCity)
-                .WithMany()
-                .HasForeignKey(e => e.NGOCityId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            entity.HasOne(e => e.IndRegion)
-                .WithMany()
-                .HasForeignKey(e => e.IndRegionId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            entity.HasOne(e => e.IndCity)
-                .WithMany()
-                .HasForeignKey(e => e.IndCityId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            // Work address (Individual Type 1, Private employment)
-            entity.HasOne(e => e.WorkRegion)
-                .WithMany()
-                .HasForeignKey(e => e.WorkRegionId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            entity.HasOne(e => e.WorkCity)
-                .WithMany()
-                .HasForeignKey(e => e.WorkCityId)
                 .OnDelete(DeleteBehavior.Restrict);
         });
 
@@ -1053,36 +1005,117 @@ public class ApplicationDbContext : DbContext
     }
 
     /// <summary>
+    /// Configures AdditionalInfo and related entities.
+    /// </summary>
+    private void ConfigureAdditionalInfoEntities(ModelBuilder modelBuilder)
+    {
+        // AdditionalInfo
+        modelBuilder.Entity<AdditionalInfo>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.IsDeleted).HasDefaultValue(false);
+
+            entity.HasOne(e => e.CaseRegistrationRequest)
+                .WithMany()
+                .HasForeignKey(e => e.CaseRegistrationRequestId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(e => e.ManagementDecision)
+                .WithOne(m => m.AdditionalInfo)
+                .HasForeignKey<AdditionalInfoManagementDecision>(m => m.AdditionalInfoId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(e => e.ServiceRights)
+                .WithOne(s => s.AdditionalInfo)
+                .HasForeignKey<AdditionalInfoServiceRights>(s => s.AdditionalInfoId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(e => e.Trademark)
+                .WithOne(t => t.AdditionalInfo)
+                .HasForeignKey<AdditionalInfoTrademark>(t => t.AdditionalInfoId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // AdditionalInfoManagementDecision
+        modelBuilder.Entity<AdditionalInfoManagementDecision>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.DecisionNumber).IsRequired().HasMaxLength(50);
+            entity.Property(e => e.DecisionDate).IsRequired();
+            entity.Property(e => e.NotificationDate).IsRequired();
+            entity.Property(e => e.IsDeleted).HasDefaultValue(false);
+
+            entity.HasOne(e => e.AdditionalInfo)
+                .WithOne(a => a.ManagementDecision)
+                .HasForeignKey<AdditionalInfoManagementDecision>(e => e.AdditionalInfoId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(e => e.NotificationMethod)
+                .WithMany()
+                .HasForeignKey(e => e.NotificationMethodId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(e => e.IssuingAuthority)
+                .WithMany()
+                .HasForeignKey(e => e.IssuingAuthorityId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        // AdditionalInfoServiceRights
+        modelBuilder.Entity<AdditionalInfoServiceRights>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.IsDeleted).HasDefaultValue(false);
+
+            entity.HasOne(e => e.AdditionalInfo)
+                .WithOne(a => a.ServiceRights)
+                .HasForeignKey<AdditionalInfoServiceRights>(e => e.AdditionalInfoId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // AdditionalInfoTrademark
+        modelBuilder.Entity<AdditionalInfoTrademark>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.IsDeleted).HasDefaultValue(false);
+
+            entity.HasOne(e => e.AdditionalInfo)
+                .WithOne(a => a.Trademark)
+                .HasForeignKey<AdditionalInfoTrademark>(e => e.AdditionalInfoId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+    }
+
+    /// <summary>
     /// Seeds lookup data.
     /// </summary>
     private void SeedLookupData(ModelBuilder modelBuilder)
     {
         var now = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc);
 
-        // PlaintiffTypes (8 types per SRS Section 1.3)
+        // PlaintiffTypes (8 types)
         modelBuilder.Entity<PlaintiffType>().HasData(
             new PlaintiffType { Id = 1, Name = "Individual", NameAr = "فرد", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
-            new PlaintiffType { Id = 2, Name = "IndividualWithoutId", NameAr = "فرد بدون هوية", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
-            new PlaintiffType { Id = 3, Name = "BusinessOwner", NameAr = "صاحب مؤسسة", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
-            new PlaintiffType { Id = 4, Name = "RegisteredCompany", NameAr = "شركة مسجلة", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
-            new PlaintiffType { Id = 5, Name = "UnregisteredCompany", NameAr = "شركة غير مسجلة", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
-            new PlaintiffType { Id = 6, Name = "GovernmentAgency", NameAr = "جهة حكومية", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
-            new PlaintiffType { Id = 7, Name = "Society", NameAr = "جمعية/مؤسسة أهلية", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
-            new PlaintiffType { Id = 8, Name = "Waqf", NameAr = "وقف", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now }
+            new PlaintiffType { Id = 2, Name = "Company", NameAr = "شركة", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
+            new PlaintiffType { Id = 3, Name = "GovernmentAgency", NameAr = "جهة حكومية", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
+            new PlaintiffType { Id = 4, Name = "Society", NameAr = "جمعية", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
+            new PlaintiffType { Id = 5, Name = "Waqf", NameAr = "وقف", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
+            new PlaintiffType { Id = 6, Name = "MinorOrIncapacitated", NameAr = "قاصر أو محجور عليه", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
+            new PlaintiffType { Id = 7, Name = "Heir", NameAr = "وريث", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
+            new PlaintiffType { Id = 8, Name = "BankruptEstate", NameAr = "تفليسة", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now }
         );
 
-        // DefendantTypes (7 types) - matching defendant-user-stories-plan.html
+        // DefendantTypes (6 types)
         modelBuilder.Entity<DefendantType>().HasData(
             new DefendantType { Id = 1, Name = "Individual", NameAr = "فرد", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
-            new DefendantType { Id = 2, Name = "RegisteredCompany", NameAr = "شركة مسجلة في المملكة", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
+            new DefendantType { Id = 2, Name = "Company", NameAr = "شركة", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
             new DefendantType { Id = 3, Name = "GovernmentAgency", NameAr = "جهة حكومية", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
-            new DefendantType { Id = 4, Name = "UnregisteredCompany", NameAr = "شركة غير مسجلة في المملكة", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
-            new DefendantType { Id = 5, Name = "BusinessOwner", NameAr = "صاحب مؤسسة", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
-            new DefendantType { Id = 6, Name = "NGO", NameAr = "جمعية/مؤسسة أهلية", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
-            new DefendantType { Id = 7, Name = "Waqf", NameAr = "وقف", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now }
+            new DefendantType { Id = 4, Name = "Society", NameAr = "جمعية", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
+            new DefendantType { Id = 5, Name = "Waqf", NameAr = "وقف", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
+            new DefendantType { Id = 6, Name = "Unknown", NameAr = "مجهول", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now }
         );
 
-        // RepresentativeTypes (11 types)
+        // RepresentativeTypes (9 types)
         modelBuilder.Entity<RepresentativeType>().HasData(
             new RepresentativeType { Id = 1, Name = "Agent", NameAr = "وكيل", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
             new RepresentativeType { Id = 2, Name = "Guardian", NameAr = "ولي", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
@@ -1092,9 +1125,7 @@ public class ApplicationDbContext : DbContext
             new RepresentativeType { Id = 6, Name = "CompanyRepresentative", NameAr = "ممثل الشركة", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
             new RepresentativeType { Id = 7, Name = "AgencyRepresentative", NameAr = "ممثل الجهة", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
             new RepresentativeType { Id = 8, Name = "Trustee", NameAr = "أمين التفليسة", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
-            new RepresentativeType { Id = 9, Name = "LegalRepresentative", NameAr = "ممثل نظامي", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
-            new RepresentativeType { Id = 10, Name = "Liquidator", NameAr = "مصفي", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
-            new RepresentativeType { Id = 11, Name = "JudicialCustodian", NameAr = "حارس قضائي", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now }
+            new RepresentativeType { Id = 9, Name = "LegalRepresentative", NameAr = "ممثل نظامي", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now }
         );
 
         // RequestStatus (10 statuses)
@@ -1131,8 +1162,7 @@ public class ApplicationDbContext : DbContext
             new AttachmentType { Id = 3, Name = "CommercialRegistration", NameAr = "السجل التجاري", IsMandatory = false, IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
             new AttachmentType { Id = 4, Name = "License", NameAr = "الترخيص", IsMandatory = false, IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
             new AttachmentType { Id = 5, Name = "Deed", NameAr = "الصك", IsMandatory = false, IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
-            new AttachmentType { Id = 6, Name = "SupportingDocument", NameAr = "مستند داعم", IsMandatory = false, IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
-            new AttachmentType { Id = 10, Name = "RepresentativeDocument", NameAr = "صورة التمثيل", IsMandatory = true, IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now }
+            new AttachmentType { Id = 6, Name = "SupportingDocument", NameAr = "مستند داعم", IsMandatory = false, IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now }
         );
 
         // Regions (13 Saudi regions)
@@ -1169,73 +1199,32 @@ public class ApplicationDbContext : DbContext
             new City { Id = 13, Name = "Najran", NameAr = "نجران", RegionId = 11, IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now }
         );
 
-        // LicenseSources (for NGO - مصدر الترخيص)
-        modelBuilder.Entity<LicenseSource>().HasData(
-            new LicenseSource { Id = 1, Name = "MinistryOfLabor", NameAr = "وزارة العمل والتنمية الاجتماعية", Code = "MOL", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
-            new LicenseSource { Id = 2, Name = "MinistryOfCommerce", NameAr = "وزارة التجارة", Code = "MOC", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
-            new LicenseSource { Id = 3, Name = "GeneralAuthorityForAwqaf", NameAr = "الهيئة العامة للأوقاف", Code = "GAA", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
-            new LicenseSource { Id = 4, Name = "SaudiCentralBank", NameAr = "البنك المركزي السعودي", Code = "SAMA", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
-            new LicenseSource { Id = 5, Name = "CapitalMarketAuthority", NameAr = "هيئة السوق المالية", Code = "CMA", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now }
-        );
-
-        // Countries (for unregistered foreign companies)
-        modelBuilder.Entity<Country>().HasData(
-            new Country { Id = 1, Name = "Saudi Arabia", NameAr = "المملكة العربية السعودية", IsoCode = "SA", PhoneCode = "966", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
-            new Country { Id = 2, Name = "United Arab Emirates", NameAr = "الإمارات العربية المتحدة", IsoCode = "AE", PhoneCode = "971", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
-            new Country { Id = 3, Name = "Kuwait", NameAr = "الكويت", IsoCode = "KW", PhoneCode = "965", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
-            new Country { Id = 4, Name = "Bahrain", NameAr = "البحرين", IsoCode = "BH", PhoneCode = "973", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
-            new Country { Id = 5, Name = "Qatar", NameAr = "قطر", IsoCode = "QA", PhoneCode = "974", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
-            new Country { Id = 6, Name = "Oman", NameAr = "عُمان", IsoCode = "OM", PhoneCode = "968", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
-            new Country { Id = 7, Name = "Egypt", NameAr = "مصر", IsoCode = "EG", PhoneCode = "20", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
-            new Country { Id = 8, Name = "Jordan", NameAr = "الأردن", IsoCode = "JO", PhoneCode = "962", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
-            new Country { Id = 9, Name = "Lebanon", NameAr = "لبنان", IsoCode = "LB", PhoneCode = "961", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
-            new Country { Id = 10, Name = "Syria", NameAr = "سوريا", IsoCode = "SY", PhoneCode = "963", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
-            new Country { Id = 11, Name = "Iraq", NameAr = "العراق", IsoCode = "IQ", PhoneCode = "964", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
-            new Country { Id = 12, Name = "Yemen", NameAr = "اليمن", IsoCode = "YE", PhoneCode = "967", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
-            new Country { Id = 13, Name = "United States", NameAr = "الولايات المتحدة", IsoCode = "US", PhoneCode = "1", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
-            new Country { Id = 14, Name = "United Kingdom", NameAr = "المملكة المتحدة", IsoCode = "GB", PhoneCode = "44", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
-            new Country { Id = 15, Name = "France", NameAr = "فرنسا", IsoCode = "FR", PhoneCode = "33", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
-            new Country { Id = 16, Name = "Germany", NameAr = "ألمانيا", IsoCode = "DE", PhoneCode = "49", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
-            new Country { Id = 17, Name = "India", NameAr = "الهند", IsoCode = "IN", PhoneCode = "91", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
-            new Country { Id = 18, Name = "Pakistan", NameAr = "باكستان", IsoCode = "PK", PhoneCode = "92", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
-            new Country { Id = 19, Name = "China", NameAr = "الصين", IsoCode = "CN", PhoneCode = "86", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
-            new Country { Id = 20, Name = "Japan", NameAr = "اليابان", IsoCode = "JP", PhoneCode = "81", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now }
-        );
-
-        // Districts (sample districts for major cities)
-        modelBuilder.Entity<District>().HasData(
-            // Riyadh districts
-            new District { Id = 1, Name = "Al Olaya", NameAr = "العليا", CityId = 1, IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
-            new District { Id = 2, Name = "Al Malaz", NameAr = "الملز", CityId = 1, IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
-            new District { Id = 3, Name = "Al Naseem", NameAr = "النسيم", CityId = 1, IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
-            new District { Id = 4, Name = "Al Wurud", NameAr = "الورود", CityId = 1, IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
-            new District { Id = 5, Name = "Al Sulimaniyah", NameAr = "السليمانية", CityId = 1, IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
-            // Jeddah districts
-            new District { Id = 6, Name = "Al Rawdah", NameAr = "الروضة", CityId = 2, IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
-            new District { Id = 7, Name = "Al Hamra", NameAr = "الحمراء", CityId = 2, IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
-            new District { Id = 8, Name = "Al Shati", NameAr = "الشاطئ", CityId = 2, IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
-            // Dammam districts
-            new District { Id = 9, Name = "Al Faisaliyah", NameAr = "الفيصلية", CityId = 5, IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
-            new District { Id = 10, Name = "Al Anoud", NameAr = "العنود", CityId = 5, IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now }
-        );
-
-        // GovernmentAgencies (الجهات الحكومية)
-        modelBuilder.Entity<GovernmentAgency>().HasData(
-            new GovernmentAgency { Id = 1, Name = "Ministry of Justice", NameAr = "وزارة العدل", Code = "MOJ", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
-            new GovernmentAgency { Id = 2, Name = "Ministry of Interior", NameAr = "وزارة الداخلية", Code = "MOI", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
-            new GovernmentAgency { Id = 3, Name = "Ministry of Finance", NameAr = "وزارة المالية", Code = "MOF", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
-            new GovernmentAgency { Id = 4, Name = "Ministry of Health", NameAr = "وزارة الصحة", Code = "MOH", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
-            new GovernmentAgency { Id = 5, Name = "Ministry of Education", NameAr = "وزارة التعليم", Code = "MOE", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
-            new GovernmentAgency { Id = 6, Name = "Ministry of Commerce", NameAr = "وزارة التجارة", Code = "MOC", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
-            new GovernmentAgency { Id = 7, Name = "Ministry of Human Resources", NameAr = "وزارة الموارد البشرية والتنمية الاجتماعية", Code = "HRSD", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
-            new GovernmentAgency { Id = 8, Name = "Ministry of Transport", NameAr = "وزارة النقل والخدمات اللوجستية", Code = "MOT", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
-            new GovernmentAgency { Id = 9, Name = "Ministry of Municipal Affairs", NameAr = "وزارة الشؤون البلدية والقروية والإسكان", Code = "MOMRA", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
-            new GovernmentAgency { Id = 10, Name = "Ministry of Environment", NameAr = "وزارة البيئة والمياه والزراعة", Code = "MEWA", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
-            new GovernmentAgency { Id = 11, Name = "General Authority of Zakat and Tax", NameAr = "هيئة الزكاة والضريبة والجمارك", Code = "ZATCA", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
-            new GovernmentAgency { Id = 12, Name = "General Organization for Social Insurance", NameAr = "المؤسسة العامة للتأمينات الاجتماعية", Code = "GOSI", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
-            new GovernmentAgency { Id = 13, Name = "Saudi Central Bank", NameAr = "البنك المركزي السعودي", Code = "SAMA", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
-            new GovernmentAgency { Id = 14, Name = "Capital Market Authority", NameAr = "هيئة السوق المالية", Code = "CMA", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
-            new GovernmentAgency { Id = 15, Name = "Royal Court", NameAr = "الديوان الملكي", Code = "RC", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now }
+        // Classifications (25 hierarchical classifications)
+        modelBuilder.Entity<Classification>().HasData(
+            new Classification { Id = 7, Name = "RealEstateSaleContract", NameAr = "عقد بيع عقار", Description = "Sale contract for real estate", Level1 = "عقود", Level2 = "عقود مدنية", Level3 = "عقود البيع", Level4 = "عقد بيع عقار", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
+            new Classification { Id = 8, Name = "ResidentialLeaseContract", NameAr = "عقد إيجار سكني", Description = "Lease contract for residential property", Level1 = "عقود", Level2 = "عقود مدنية", Level3 = "عقود الإيجار", Level4 = "عقد إيجار سكني", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
+            new Classification { Id = 9, Name = "CompanyFormationContract", NameAr = "عقد تأسيس شركة", Description = "Partnership formation agreement", Level1 = "عقود", Level2 = "عقود تجارية", Level3 = "عقود الشركات", Level4 = "عقد تأسيس شركة", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
+            new Classification { Id = 10, Name = "FixedTermEmploymentContract", NameAr = "عقد عمل محدد المدة", Description = "Fixed term employment agreement", Level1 = "عقود", Level2 = "عقود تجارية", Level3 = "عقود العمل", Level4 = "عقد عمل محدد المدة", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
+            new Classification { Id = 11, Name = "RealEstateOwnershipDispute", NameAr = "نزاع ملكية عقار", Description = "Property ownership dispute", Level1 = "دعاوى مدنية", Level2 = "دعاوى الملكية", Level3 = "النزاعات العقارية", Level4 = "نزاع ملكية عقار", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
+            new Classification { Id = 12, Name = "FinancialCompensation", NameAr = "تعويض عن ضرر مالي", Description = "Claim for financial damages", Level1 = "دعاوى مدنية", Level2 = "دعاوى التعويض", Level3 = "التعويض المالي", Level4 = "تعويض عن ضرر مادي", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
+            new Classification { Id = 13, Name = "CommercialDebtCollection", NameAr = "دعوى تحصيل دين تجاري", Description = "Collection of commercial debt", Level1 = "دعاوى مدنية", Level2 = "دعاوى الديون", Level3 = "تحصيل الديون", Level4 = "دعوى تحصيل دين تجاري", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
+            new Classification { Id = 14, Name = "PartnershipDividendDispute", NameAr = "نزاع توزيع أرباح", Description = "Partnership profit distribution dispute", Level1 = "دعاوى تجارية", Level2 = "منازعات الشركات", Level3 = "النزاعات بين الشركاء", Level4 = "نزاع توزيع أرباح", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
+            new Classification { Id = 15, Name = "BankruptcyDeclaration", NameAr = "طلب إشهار إفلاس", Description = "Bankruptcy filing request", Level1 = "دعاوى تجارية", Level2 = "الإفلاس والتصفية", Level3 = "إجراءات الإفلاس", Level4 = "طلب إشهار إفلاس", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
+            new Classification { Id = 16, Name = "CommercialContractDispute", NameAr = "نزاع عقد تجاري", Description = "Commercial contract dispute", Level1 = "دعاوى تجارية", Level2 = "منازعات العقود", Level3 = "نزاعات التنفيذ", Level4 = "نزاع عقد تجاري", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
+            new Classification { Id = 17, Name = "UnpaidWagesClaim", NameAr = "مطالبة بأجور متأخرة", Description = "Claim for unpaid wages", Level1 = "دعاوى عمالية", Level2 = "حقوق العمال", Level3 = "مستحقات مالية", Level4 = "مطالبة بأجور متأخرة", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
+            new Classification { Id = 18, Name = "UnfairTermination", NameAr = "دعوى فصل تعسفي", Description = "Unfair termination lawsuit", Level1 = "دعاوى عمالية", Level2 = "إنهاء الخدمة", Level3 = "الفصل التعسفي", Level4 = "دعوى فصل تعسفي", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
+            new Classification { Id = 19, Name = "WorkplaceInjury", NameAr = "دعوى إصابة عمل", Description = "Workplace injury claim", Level1 = "دعاوى عمالية", Level2 = "الحقوق والواجبات", Level3 = "الحماية والأمان", Level4 = "دعوى إصابة عمل", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
+            new Classification { Id = 20, Name = "MarriageCase", NameAr = "دعوى زواج", Description = "Marriage-related case", Level1 = "دعاوى أحوال شخصية", Level2 = "دعاوى الزواج", Level3 = "", Level4 = "", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
+            new Classification { Id = 21, Name = "DivorceCase", NameAr = "دعوى طلاق", Description = "Divorce case", Level1 = "دعاوى أحوال شخصية", Level2 = "دعاوى الطلاق", Level3 = "", Level4 = "", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
+            new Classification { Id = 22, Name = "CommercialLeaseContract", NameAr = "عقد إيجار تجاري", Description = "Commercial property lease", Level1 = "عقود", Level2 = "عقود مدنية", Level3 = "عقود الإيجار", Level4 = "عقد إيجار تجاري", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
+            new Classification { Id = 23, Name = "GiftContract", NameAr = "عقد هبة", Description = "Gift agreement", Level1 = "عقود", Level2 = "عقود مدنية", Level3 = "عقود الملكية", Level4 = "عقد هبة", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
+            new Classification { Id = 24, Name = "LoanContract", NameAr = "عقد قرض", Description = "Loan agreement", Level1 = "عقود", Level2 = "عقود مدنية", Level3 = "عقود الالتزام", Level4 = "عقد قرض", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
+            new Classification { Id = 25, Name = "PersonalInjuryCompensation", NameAr = "تعويض عن إصابة شخصية", Description = "Personal injury compensation", Level1 = "دعاوى مدنية", Level2 = "دعاوى التعويض", Level3 = "التعويض الشخصي", Level4 = "تعويض عن إصابة شخصية", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
+            new Classification { Id = 26, Name = "PropertyDamageCompensation", NameAr = "تعويض عن تلف الملكية", Description = "Property damage compensation", Level1 = "دعاوى مدنية", Level2 = "دعاوى التعويض", Level3 = "تعويض عن الأضرار", Level4 = "تعويض عن تلف الملكية", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
+            new Classification { Id = 27, Name = "PaymentDefaultCase", NameAr = "دعوى عدم السداد", Description = "Non-payment default case", Level1 = "دعاوى مدنية", Level2 = "دعاوى الديون", Level3 = "ديون المستهلكين", Level4 = "دعوى عدم السداد", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
+            new Classification { Id = 28, Name = "IntellectualPropertyDispute", NameAr = "نزاع الملكية الفكرية", Description = "Intellectual property dispute", Level1 = "دعاوى تجارية", Level2 = "حقوق الملكية", Level3 = "براءات الاختراع", Level4 = "نزاع براءة اختراع", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
+            new Classification { Id = 29, Name = "CompetitionLawViolation", NameAr = "انتهاك قانون المنافسة", Description = "Competition law violation", Level1 = "دعاوى تجارية", Level2 = "الممارسات غير العادلة", Level3 = "الاحتكار والتنافس", Level4 = "انتهاك قانون المنافسة", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
+            new Classification { Id = 30, Name = "WorkplaceHarassment", NameAr = "دعوى التحرش في العمل", Description = "Workplace harassment claim", Level1 = "دعاوى عمالية", Level2 = "حقوق العمال", Level3 = "الحقوق الشخصية", Level4 = "دعوى التحرش في العمل", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now }
         );
     }
 }
