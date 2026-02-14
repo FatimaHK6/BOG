@@ -47,6 +47,7 @@ public class CaseRegistrationRequestBL : ICaseRegistrationRequestBL
         var request = new CaseRegistrationRequest
         {
             RequestStatusId = StatusDraft,
+            CaseTypeId = 1, // Default to first CaseType
             CreatedByUserId = userId,
             CreatedDate = DateTime.UtcNow,
             ModifiedDate = DateTime.UtcNow

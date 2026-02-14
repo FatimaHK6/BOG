@@ -74,6 +74,8 @@ public class ApplicationDbContext : DbContext
     public DbSet<NotificationMethod> NotificationMethods { get; set; }
     public DbSet<GovernmentEntity> GovernmentEntities { get; set; }
     public DbSet<CaseType> CaseTypes { get; set; }
+    public DbSet<DeficiencyType> DeficiencyTypes { get; set; }
+    public DbSet<DeficiencyDescription> DeficiencyDescriptions { get; set; }
 
     #endregion
 
@@ -89,6 +91,7 @@ public class ApplicationDbContext : DbContext
     public DbSet<Claim> Claims { get; set; }
     public DbSet<RelatedCase> RelatedCases { get; set; }
     public DbSet<RequestClassification> RequestClassifications { get; set; }
+    public DbSet<RequestDeficiency> RequestDeficiencies { get; set; }
     public DbSet<Plaintiff> Plaintiffs { get; set; }
     public DbSet<CaseRequestPlaintiff> CaseRequestPlaintiffs { get; set; }
     public DbSet<PlaintiffAttachment> PlaintiffAttachments { get; set; }
@@ -117,11 +120,13 @@ public class ApplicationDbContext : DbContext
         ConfigureIdentityEntities(modelBuilder);
         ConfigureLookupEntities(modelBuilder);
         ConfigureAdditionalLookupEntities(modelBuilder);
+        ConfigureDeficiencyEntities(modelBuilder);
         ConfigureCommonEntities(modelBuilder);
         ConfigureCaseRegistrationEntities(modelBuilder);
         ConfigureAdditionalInfoEntities(modelBuilder);
         SeedRoles(modelBuilder);
         SeedLookupData(modelBuilder);
+        SeedDeficiencyData(modelBuilder);
     }
 
     /// <summary>
@@ -623,6 +628,47 @@ public class ApplicationDbContext : DbContext
     }
 
     /// <summary>
+    /// Configures Deficiency entities (DeficiencyType, DeficiencyDescription).
+    /// </summary>
+    private void ConfigureDeficiencyEntities(ModelBuilder modelBuilder)
+    {
+        // DeficiencyType
+        modelBuilder.Entity<DeficiencyType>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Name).IsRequired().HasMaxLength(100);
+            entity.Property(e => e.NameAr).IsRequired().HasMaxLength(100);
+            entity.Property(e => e.DisplayOrder).HasDefaultValue(0);
+            entity.Property(e => e.IsDeleted).HasDefaultValue(false);
+
+            entity.HasMany(e => e.Descriptions)
+                .WithOne(d => d.DeficiencyType)
+                .HasForeignKey(d => d.DeficiencyTypeId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // DeficiencyDescription
+        modelBuilder.Entity<DeficiencyDescription>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.DescriptionAr).IsRequired().HasMaxLength(500);
+            entity.Property(e => e.DescriptionEn).HasMaxLength(500);
+            entity.Property(e => e.DisplayOrder).HasDefaultValue(0);
+            entity.Property(e => e.IsDeleted).HasDefaultValue(false);
+
+            entity.HasOne(e => e.DeficiencyType)
+                .WithMany(t => t.Descriptions)
+                .HasForeignKey(e => e.DeficiencyTypeId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasMany(e => e.RequestDeficiencies)
+                .WithOne(r => r.DeficiencyDescription)
+                .HasForeignKey(r => r.DeficiencyDescriptionId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+    }
+
+    /// <summary>
     /// Configures Common entities.
     /// </summary>
     private void ConfigureCommonEntities(ModelBuilder modelBuilder)
@@ -666,6 +712,11 @@ public class ApplicationDbContext : DbContext
                 .HasForeignKey(e => e.RequestStatusId)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            entity.HasOne(e => e.CaseType)
+                .WithMany()
+                .HasForeignKey(e => e.CaseTypeId)
+                .OnDelete(DeleteBehavior.Restrict);
+
             entity.HasOne(e => e.Court)
                 .WithMany()
                 .HasForeignKey(e => e.CourtId)
@@ -699,13 +750,36 @@ public class ApplicationDbContext : DbContext
         modelBuilder.Entity<RelatedCase>(entity =>
         {
             entity.HasKey(e => e.Id);
-            entity.Property(e => e.CaseNumber).IsRequired().HasMaxLength(50);
+            entity.Property(e => e.CaseNumber).IsRequired();
             entity.Property(e => e.IsDeleted).HasDefaultValue(false);
 
             entity.HasOne(e => e.Request)
                 .WithMany(r => r.RelatedCases)
                 .HasForeignKey(e => e.CaseRegistrationRequestId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(e => e.Court)
+                .WithMany()
+                .HasForeignKey(e => e.CourtId)
+                .OnDelete(DeleteBehavior.SetNull);
+        });
+
+        // RequestDeficiency
+        modelBuilder.Entity<RequestDeficiency>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.DisplayOrder).HasDefaultValue(0);
+            entity.Property(e => e.IsDeleted).HasDefaultValue(false);
+
+            entity.HasOne(e => e.Request)
+                .WithMany(r => r.Deficiencies)
+                .HasForeignKey(e => e.CaseRegistrationRequestId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(e => e.DeficiencyDescription)
+                .WithMany(d => d.RequestDeficiencies)
+                .HasForeignKey(e => e.DeficiencyDescriptionId)
+                .OnDelete(DeleteBehavior.Restrict);
         });
 
         // RequestClassification
@@ -1225,6 +1299,269 @@ public class ApplicationDbContext : DbContext
             new Classification { Id = 28, Name = "IntellectualPropertyDispute", NameAr = "نزاع الملكية الفكرية", Description = "Intellectual property dispute", Level1 = "دعاوى تجارية", Level2 = "حقوق الملكية", Level3 = "براءات الاختراع", Level4 = "نزاع براءة اختراع", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
             new Classification { Id = 29, Name = "CompetitionLawViolation", NameAr = "انتهاك قانون المنافسة", Description = "Competition law violation", Level1 = "دعاوى تجارية", Level2 = "الممارسات غير العادلة", Level3 = "الاحتكار والتنافس", Level4 = "انتهاك قانون المنافسة", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
             new Classification { Id = 30, Name = "WorkplaceHarassment", NameAr = "دعوى التحرش في العمل", Description = "Workplace harassment claim", Level1 = "دعاوى عمالية", Level2 = "حقوق العمال", Level3 = "الحقوق الشخصية", Level4 = "دعوى التحرش في العمل", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now }
+        );
+    }
+
+    /// <summary>
+    /// Seeds deficiency types and descriptions.
+    /// </summary>
+    private void SeedDeficiencyData(ModelBuilder modelBuilder)
+    {
+        var now = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+
+        // Seed DeficiencyTypes (6 location types)
+        modelBuilder.Entity<DeficiencyType>().HasData(
+            new DeficiencyType
+            {
+                Id = 1,
+                Name = "CaseSubject",
+                NameAr = "موضوع الدعوى",
+                DisplayOrder = 1,
+                IsDeleted = false,
+                CreatedDate = now,
+                ModifiedDate = now
+            },
+            new DeficiencyType
+            {
+                Id = 2,
+                Name = "CaseClaims",
+                NameAr = "طلبات الدعوى",
+                DisplayOrder = 2,
+                IsDeleted = false,
+                CreatedDate = now,
+                ModifiedDate = now
+            },
+            new DeficiencyType
+            {
+                Id = 3,
+                Name = "CaseGrounds",
+                NameAr = "أسانيد الدعوى",
+                DisplayOrder = 3,
+                IsDeleted = false,
+                CreatedDate = now,
+                ModifiedDate = now
+            },
+            new DeficiencyType
+            {
+                Id = 4,
+                Name = "RelatedCases",
+                NameAr = "الدعاوى المرتبطة",
+                DisplayOrder = 4,
+                IsDeleted = false,
+                CreatedDate = now,
+                ModifiedDate = now
+            },
+            new DeficiencyType
+            {
+                Id = 5,
+                Name = "CaseAttachments",
+                NameAr = "مرفقات الدعوى",
+                DisplayOrder = 5,
+                IsDeleted = false,
+                CreatedDate = now,
+                ModifiedDate = now
+            },
+            new DeficiencyType
+            {
+                Id = 6,
+                Name = "AdditionalCaseInfo",
+                NameAr = "معلومات إضافية للدعوى",
+                DisplayOrder = 6,
+                IsDeleted = false,
+                CreatedDate = now,
+                ModifiedDate = now
+            }
+        );
+
+        // Seed DeficiencyDescriptions (predefined templates per type)
+        modelBuilder.Entity<DeficiencyDescription>().HasData(
+            // Type 1: موضوع الدعوى (Case Subject)
+            new DeficiencyDescription
+            {
+                Id = 1,
+                DeficiencyTypeId = 1,
+                DescriptionAr = "موضوع الدعوى غير واضح",
+                DescriptionEn = "Case subject is unclear",
+                DisplayOrder = 1,
+                IsDeleted = false,
+                CreatedDate = now,
+                ModifiedDate = now
+            },
+            new DeficiencyDescription
+            {
+                Id = 2,
+                DeficiencyTypeId = 1,
+                DescriptionAr = "موضوع الدعوى ناقص ويحتاج إلى تفاصيل إضافية",
+                DescriptionEn = "Case subject is incomplete and needs additional details",
+                DisplayOrder = 2,
+                IsDeleted = false,
+                CreatedDate = now,
+                ModifiedDate = now
+            },
+            new DeficiencyDescription
+            {
+                Id = 3,
+                DeficiencyTypeId = 1,
+                DescriptionAr = "موضوع الدعوى لا يتفق مع الطلبات",
+                DescriptionEn = "Case subject does not match the claims",
+                DisplayOrder = 3,
+                IsDeleted = false,
+                CreatedDate = now,
+                ModifiedDate = now
+            },
+
+            // Type 2: طلبات الدعوى (Case Claims)
+            new DeficiencyDescription
+            {
+                Id = 4,
+                DeficiencyTypeId = 2,
+                DescriptionAr = "طلبات الدعوى غير محددة",
+                DescriptionEn = "Claims are not specified",
+                DisplayOrder = 1,
+                IsDeleted = false,
+                CreatedDate = now,
+                ModifiedDate = now
+            },
+            new DeficiencyDescription
+            {
+                Id = 5,
+                DeficiencyTypeId = 2,
+                DescriptionAr = "طلبات الدعوى غير مكتملة",
+                DescriptionEn = "Claims are incomplete",
+                DisplayOrder = 2,
+                IsDeleted = false,
+                CreatedDate = now,
+                ModifiedDate = now
+            },
+            new DeficiencyDescription
+            {
+                Id = 6,
+                DeficiencyTypeId = 2,
+                DescriptionAr = "طلبات الدعوى غير متوافقة مع الموضوع",
+                DescriptionEn = "Claims are not compatible with the subject",
+                DisplayOrder = 3,
+                IsDeleted = false,
+                CreatedDate = now,
+                ModifiedDate = now
+            },
+
+            // Type 3: أسانيد الدعوى (Case Grounds/Evidence)
+            new DeficiencyDescription
+            {
+                Id = 7,
+                DeficiencyTypeId = 3,
+                DescriptionAr = "أسانيد الدعوى ناقصة",
+                DescriptionEn = "Grounds are incomplete",
+                DisplayOrder = 1,
+                IsDeleted = false,
+                CreatedDate = now,
+                ModifiedDate = now
+            },
+            new DeficiencyDescription
+            {
+                Id = 8,
+                DeficiencyTypeId = 3,
+                DescriptionAr = "أسانيد الدعوى غير كافية",
+                DescriptionEn = "Grounds are insufficient",
+                DisplayOrder = 2,
+                IsDeleted = false,
+                CreatedDate = now,
+                ModifiedDate = now
+            },
+            new DeficiencyDescription
+            {
+                Id = 9,
+                DeficiencyTypeId = 3,
+                DescriptionAr = "أسانيد الدعوى غير مرتبطة بالطلبات",
+                DescriptionEn = "Grounds are not related to the claims",
+                DisplayOrder = 3,
+                IsDeleted = false,
+                CreatedDate = now,
+                ModifiedDate = now
+            },
+
+            // Type 4: الدعاوى المرتبطة (Related Cases)
+            new DeficiencyDescription
+            {
+                Id = 10,
+                DeficiencyTypeId = 4,
+                DescriptionAr = "معلومات الدعوى المرتبطة ناقصة",
+                DescriptionEn = "Related case information is incomplete",
+                DisplayOrder = 1,
+                IsDeleted = false,
+                CreatedDate = now,
+                ModifiedDate = now
+            },
+            new DeficiencyDescription
+            {
+                Id = 11,
+                DeficiencyTypeId = 4,
+                DescriptionAr = "رقم الدعوى المرتبطة غير صحيح",
+                DescriptionEn = "Related case number is incorrect",
+                DisplayOrder = 2,
+                IsDeleted = false,
+                CreatedDate = now,
+                ModifiedDate = now
+            },
+
+            // Type 5: مرفقات الدعوى (Case Attachments)
+            new DeficiencyDescription
+            {
+                Id = 12,
+                DeficiencyTypeId = 5,
+                DescriptionAr = "مرفقات الدعوى ناقصة",
+                DescriptionEn = "Attachments are missing",
+                DisplayOrder = 1,
+                IsDeleted = false,
+                CreatedDate = now,
+                ModifiedDate = now
+            },
+            new DeficiencyDescription
+            {
+                Id = 13,
+                DeficiencyTypeId = 5,
+                DescriptionAr = "مرفقات الدعوى غير واضحة",
+                DescriptionEn = "Attachments are unclear",
+                DisplayOrder = 2,
+                IsDeleted = false,
+                CreatedDate = now,
+                ModifiedDate = now
+            },
+            new DeficiencyDescription
+            {
+                Id = 14,
+                DeficiencyTypeId = 5,
+                DescriptionAr = "مرفقات الدعوى غير مكتملة",
+                DescriptionEn = "Attachments are incomplete",
+                DisplayOrder = 3,
+                IsDeleted = false,
+                CreatedDate = now,
+                ModifiedDate = now
+            },
+
+            // Type 6: معلومات إضافية للدعوى (Additional Case Information)
+            new DeficiencyDescription
+            {
+                Id = 15,
+                DeficiencyTypeId = 6,
+                DescriptionAr = "معلومات إضافية مطلوبة",
+                DescriptionEn = "Additional information required",
+                DisplayOrder = 1,
+                IsDeleted = false,
+                CreatedDate = now,
+                ModifiedDate = now
+            },
+            new DeficiencyDescription
+            {
+                Id = 16,
+                DeficiencyTypeId = 6,
+                DescriptionAr = "بيانات إضافية ناقصة",
+                DescriptionEn = "Additional data is missing",
+                DisplayOrder = 2,
+                IsDeleted = false,
+                CreatedDate = now,
+                ModifiedDate = now
+            }
         );
     }
 }
