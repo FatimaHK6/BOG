@@ -165,7 +165,16 @@
         <div class="tab-name-content">
           <h1>{{ getActiveTabName() }}</h1>
 
-          <!-- Next Button (only for case-data tabs) -->
+          <!-- Next Button for main tabs (also shown on last case-data sub-tab) -->
+          <button mat-raised-button
+                  class="next-tab-button"
+                  (click)="goToNextSection()"
+                  *ngIf="(activeSection !== 'case-data' || !hasNextCaseDataTab()) && hasNextSection()">
+            <span>التالي</span>
+            <mat-icon>arrow_back</mat-icon>
+          </button>
+
+          <!-- Next Button for case-data sub-tabs -->
           <button mat-raised-button
                   class="next-tab-button"
                   (click)="goToNextCaseDataTab()"

@@ -1,12 +1,10 @@
 import { Component, OnInit, ViewChild, AfterViewInit, Input } from '@angular/core';
-import { Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatTableDataSource } from '@angular/material/table';
 import { PlaintiffListVM, RepresentativeVM } from '../../../../../core/models/plaintiff.model';
 import { PlaintiffService } from '../../../../../core/services/plaintiff.service';
 import { RepresentativeService } from '../../../../../core/services/representative.service';
-import { CaseRegistrationRequestService } from '../../../../../core/services/case-registration-request.service';
 import { NotificationService } from '../../../../../core/services/notification.service';
 import { SetApplicantDialogComponent } from '../set-applicant-dialog/set-applicant-dialog.component';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../../../../shared/components/confirm-dialog/confirm-dialog.component';
@@ -23,7 +21,6 @@ interface PlaintiffType {
 })
 export class PlaintiffListComponent implements OnInit, AfterViewInit {
   @Input() requestId: number = 0;
-  isSaving = false;
 
   plaintiffs: PlaintiffListVM[] = [];
   dataSource = new MatTableDataSource<PlaintiffListVM>([]);
@@ -67,10 +64,8 @@ export class PlaintiffListComponent implements OnInit, AfterViewInit {
   constructor(
     private plaintiffService: PlaintiffService,
     private representativeService: RepresentativeService,
-    private requestService: CaseRegistrationRequestService,
     private dialog: MatDialog,
-    private notification: NotificationService,
-    private router: Router
+    private notification: NotificationService
   ) { }
 
   ngOnInit(): void {
@@ -78,29 +73,6 @@ export class PlaintiffListComponent implements OnInit, AfterViewInit {
     if (this.requestId > 0) {
       this.loadPlaintiffs();
     }
-  }
-
-  onSaveAsDraft(): void {
-    if (this.requestId <= 0) {
-      this.notification.validation('لا يوجد طلب محدد');
-      return;
-    }
-
-    this.isSaving = true;
-    // Call API to save as draft (sets status to مسودة)
-    this.requestService.update(this.requestId, { saveAsDraft: true }).subscribe({
-      next: () => {
-        this.router.navigate(['/case-registration/requests']).then(() => {
-          this.isSaving = false;
-          this.notification.success('تم حفظ الطلب كمسودة');
-        });
-      },
-      error: (error) => {
-        console.error('Error saving draft:', error);
-        this.isSaving = false;
-        this.notification.error('حدث خطأ أثناء حفظ المسودة');
-      }
-    });
   }
 
   ngAfterViewInit(): void {

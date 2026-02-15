@@ -372,6 +372,26 @@ export class RequestDetailsComponent implements OnInit, OnDestroy {
   }
 
   /**
+   * Check if there's a next main section
+   */
+  hasNextSection(): boolean {
+    const sectionOrder = ['plaintiffs', 'defendants', 'case-data', 'additional-info', 'deficiencies', 'completion'];
+    const currentIndex = sectionOrder.indexOf(this.activeSection);
+    return currentIndex >= 0 && currentIndex < sectionOrder.length - 1;
+  }
+
+  /**
+   * Navigate to the next main section
+   */
+  goToNextSection(): void {
+    const sectionOrder = ['plaintiffs', 'defendants', 'case-data', 'additional-info', 'deficiencies', 'completion'];
+    const currentIndex = sectionOrder.indexOf(this.activeSection);
+    if (currentIndex >= 0 && currentIndex < sectionOrder.length - 1) {
+      this.scrollToSection(sectionOrder[currentIndex + 1]);
+    }
+  }
+
+  /**
    * Check if there's a next tab in the case data tabs sequence
    */
   hasNextCaseDataTab(): boolean {
@@ -417,9 +437,29 @@ export class RequestDetailsComponent implements OnInit, OnDestroy {
       // Call child component's save method
       this.caseDataContainer.saveAllData();
     } else {
-      // For other sections, you can add save logic here if needed
-      console.log('Save for section:', this.activeSection);
-      this.isSaving = false;
+      // For other tabs (plaintiffs, defendants, etc.), save case data directly
+      this.isSaving = true;
+      this.saveSuccess = false;
+
+      const state = this.caseDataState.getAllData();
+      const requestPayload = {
+        subject: state.subject,
+        evidence: state.evidence,
+        classificationIds: state.classificationIds,
+        primaryMobile: state.primaryMobile,
+        secondaryMobile: state.secondaryMobile,
+        email: state.email
+      };
+
+      this.caseRegistrationApi.update(this.requestId, requestPayload).subscribe({
+        next: () => {
+          this.onSaveComplete({ success: true });
+        },
+        error: (error: any) => {
+          console.error('Save failed:', error);
+          this.onSaveComplete({ success: false, error: 'حدث خطأ أثناء حفظ البيانات' });
+        }
+      });
     }
   }
 

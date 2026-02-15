@@ -11,10 +11,15 @@ namespace BOG.DbModel.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.InsertData(
-                table: "Users",
-                columns: new[] { "Id", "CreatedDate", "Email", "FirstName", "IsActive", "LastName", "ModifiedDate", "PhoneNumber" },
-                values: new object[] { 1, new DateTime(2026, 2, 8, 18, 57, 3, 649, DateTimeKind.Utc).AddTicks(6918), "system@bog.sa", "System", true, "User", new DateTime(2026, 2, 8, 18, 57, 3, 649, DateTimeKind.Utc).AddTicks(6918), null });
+            migrationBuilder.Sql(@"
+                IF NOT EXISTS (SELECT 1 FROM [Users] WHERE [Id] = 1)
+                BEGIN
+                    SET IDENTITY_INSERT [Users] ON;
+                    INSERT INTO [Users] ([Id], [CreatedDate], [Email], [FirstName], [IsActive], [LastName], [ModifiedDate], [PhoneNumber])
+                    VALUES (1, '2026-02-08T18:57:03.6496918Z', 'system@bog.sa', 'System', 1, 'User', '2026-02-08T18:57:03.6496918Z', NULL);
+                    SET IDENTITY_INSERT [Users] OFF;
+                END
+            ");
         }
 
         /// <inheritdoc />

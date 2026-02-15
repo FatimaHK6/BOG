@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
-import { CaseRegistrationRequestService, CaseRegistrationRequestListVM, CaseRegistrationRequestVM } from '../../../../../core/services/case-registration-request.service';
+import { CaseRegistrationRequestService, CaseRegistrationRequestListVM } from '../../../../../core/services/case-registration-request.service';
 import { NotificationService } from '../../../../../core/services/notification.service';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../../../../shared/components/confirm-dialog/confirm-dialog.component';
 
@@ -79,14 +79,7 @@ export class RequestListComponent implements OnInit {
   }
 
   onNewRequest(): void {
-    this.requestService.createNewDraft().subscribe({
-      next: (draft: CaseRegistrationRequestVM) => {
-        this.router.navigate(['/case-registration', draft.id, 'edit']);
-      },
-      error: (error: any) => {
-        console.error('Error creating draft:', error);
-      }
-    });
+    this.router.navigate(['/case-registration', 'create']);
   }
 
   onEditRequest(request: CaseRegistrationRequestListVM): void {

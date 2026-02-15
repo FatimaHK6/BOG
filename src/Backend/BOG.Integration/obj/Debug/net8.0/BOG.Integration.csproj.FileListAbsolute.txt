@@ -1,0 +1,13 @@
+D:\Work\Bog\BOG\src\Backend\BOG.Integration\bin\Debug\net8.0\BOG.Integration.deps.json
+D:\Work\Bog\BOG\src\Backend\BOG.Integration\bin\Debug\net8.0\BOG.Integration.dll
+D:\Work\Bog\BOG\src\Backend\BOG.Integration\bin\Debug\net8.0\BOG.Integration.pdb
+D:\Work\Bog\BOG\src\Backend\BOG.Integration\obj\Debug\net8.0\BOG.Integration.GeneratedMSBuildEditorConfig.editorconfig
+D:\Work\Bog\BOG\src\Backend\BOG.Integration\obj\Debug\net8.0\BOG.Integration.AssemblyInfoInputs.cache
+D:\Work\Bog\BOG\src\Backend\BOG.Integration\obj\Debug\net8.0\BOG.Integration.AssemblyInfo.cs
+D:\Work\Bog\BOG\src\Backend\BOG.Integration\obj\Debug\net8.0\BOG.Integration.csproj.CoreCompileInputs.cache
+D:\Work\Bog\BOG\src\Backend\BOG.Integration\obj\Debug\net8.0\BOG.Integration.sourcelink.json
+D:\Work\Bog\BOG\src\Backend\BOG.Integration\obj\Debug\net8.0\BOG.Integration.dll
+D:\Work\Bog\BOG\src\Backend\BOG.Integration\obj\Debug\net8.0\refint\BOG.Integration.dll
+D:\Work\Bog\BOG\src\Backend\BOG.Integration\obj\Debug\net8.0\BOG.Integration.pdb
+D:\Work\Bog\BOG\src\Backend\BOG.Integration\obj\Debug\net8.0\ref\BOG.Integration.dll
+D:\Work\Bog\BOG\src\Backend\BOG.Integration\obj\Debug\net8.0\BOG.Integration.csproj.AssemblyReference.cache

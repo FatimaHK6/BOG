@@ -10,18 +10,21 @@ namespace BOG.DbModel.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.InsertData(
-                table: "Courts",
-                columns: new[] { "Id", "Name", "NameAr", "RegionId", "CityId", "IsActive", "IsDeleted", "CreatedDate", "ModifiedDate" },
-                values: new object[,]
-                {
-                    { 1, "Riyadh General Court", "المحكمة العامة بالرياض", 1, 1, true, false, new DateTime(2026, 2, 8, 0, 0, 0, 0, DateTimeKind.Utc), new DateTime(2026, 2, 8, 0, 0, 0, 0, DateTimeKind.Utc) },
-                    { 2, "Riyadh Commercial Court", "المحكمة التجارية بالرياض", 1, 1, true, false, new DateTime(2026, 2, 8, 0, 0, 0, 0, DateTimeKind.Utc), new DateTime(2026, 2, 8, 0, 0, 0, 0, DateTimeKind.Utc) },
-                    { 3, "Jeddah General Court", "المحكمة العامة بجدة", 2, 2, true, false, new DateTime(2026, 2, 8, 0, 0, 0, 0, DateTimeKind.Utc), new DateTime(2026, 2, 8, 0, 0, 0, 0, DateTimeKind.Utc) },
-                    { 4, "Jeddah Commercial Court", "المحكمة التجارية بجدة", 2, 2, true, false, new DateTime(2026, 2, 8, 0, 0, 0, 0, DateTimeKind.Utc), new DateTime(2026, 2, 8, 0, 0, 0, 0, DateTimeKind.Utc) },
-                    { 5, "Dammam General Court", "المحكمة العامة بالدمام", 5, 5, true, false, new DateTime(2026, 2, 8, 0, 0, 0, 0, DateTimeKind.Utc), new DateTime(2026, 2, 8, 0, 0, 0, 0, DateTimeKind.Utc) },
-                    { 6, "Dammam Commercial Court", "المحكمة التجارية بالدمام", 5, 5, true, false, new DateTime(2026, 2, 8, 0, 0, 0, 0, DateTimeKind.Utc), new DateTime(2026, 2, 8, 0, 0, 0, 0, DateTimeKind.Utc) }
-                });
+            migrationBuilder.Sql(@"
+                IF NOT EXISTS (SELECT 1 FROM [Courts] WHERE [Id] = 1)
+                BEGIN
+                    SET IDENTITY_INSERT [Courts] ON;
+                    INSERT INTO [Courts] ([Id], [Name], [NameAr], [RegionId], [CityId], [IsActive], [IsDeleted], [CreatedDate], [ModifiedDate])
+                    VALUES
+                        (1, N'Riyadh General Court', N'المحكمة العامة بالرياض', 1, 1, 1, 0, '2026-02-08', '2026-02-08'),
+                        (2, N'Riyadh Commercial Court', N'المحكمة التجارية بالرياض', 1, 1, 1, 0, '2026-02-08', '2026-02-08'),
+                        (3, N'Jeddah General Court', N'المحكمة العامة بجدة', 2, 2, 1, 0, '2026-02-08', '2026-02-08'),
+                        (4, N'Jeddah Commercial Court', N'المحكمة التجارية بجدة', 2, 2, 1, 0, '2026-02-08', '2026-02-08'),
+                        (5, N'Dammam General Court', N'المحكمة العامة بالدمام', 5, 5, 1, 0, '2026-02-08', '2026-02-08'),
+                        (6, N'Dammam Commercial Court', N'المحكمة التجارية بالدمام', 5, 5, 1, 0, '2026-02-08', '2026-02-08');
+                    SET IDENTITY_INSERT [Courts] OFF;
+                END
+            ");
         }
 
         /// <inheritdoc />
