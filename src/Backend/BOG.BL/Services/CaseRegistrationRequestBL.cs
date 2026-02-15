@@ -17,9 +17,17 @@ public class CaseRegistrationRequestBL : ICaseRegistrationRequestBL
     private readonly IUnitOfWork _unitOfWork;
     private readonly ApplicationDbContext _context;
 
-    // Status constants
+    // Status constants (matching database seed in ApplicationDbContext.cs)
     private const int StatusDraft = 1;
+    private const int StatusNew = 2;
+    private const int StatusUnderReview = 3;
+    private const int StatusRegistered = 4;
+    private const int StatusRejected = 5;
     private const int StatusPendingCompletion = 6;
+    private const int StatusOnJudgeDesk = 7;
+    private const int StatusCompleted = 8;
+    private const int StatusAutoRejected = 9;
+    private const int StatusCancelled = 10;
 
     public CaseRegistrationRequestBL(
         ICaseRegistrationRequestRepository repository,
@@ -106,11 +114,11 @@ public class CaseRegistrationRequestBL : ICaseRegistrationRequestBL
         if (request == null || request.IsDeleted)
             return null;
 
-        // Only allow updates to Draft or PendingCompletion requests
-        if (request.RequestStatusId != StatusDraft && request.RequestStatusId != StatusPendingCompletion)
+        // Only allow updates to Draft, New, or PendingCompletion requests
+        if (request.RequestStatusId != StatusDraft && request.RequestStatusId != StatusNew && request.RequestStatusId != StatusPendingCompletion)
         {
             throw new InvalidOperationException(
-                "لا يمكن تعديل الطلب إلا إذا كان في حالة مسودة أو بانتظار الاستكمال"
+                "لا يمكن تعديل الطلب إلا إذا كان في حالة مسودة أو طلب جديد أو بانتظار الاستكمال"
             );
         }
 

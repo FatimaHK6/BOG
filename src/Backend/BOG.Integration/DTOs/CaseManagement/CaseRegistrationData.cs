@@ -16,6 +16,11 @@ public class CaseRegistrationData
     public int? CourtId { get; set; }
 
     /// <summary>
+    /// Court name in Arabic (for case number generation).
+    /// </summary>
+    public string? CourtName { get; set; }
+
+    /// <summary>
     /// Subject of the case.
     /// </summary>
     public string? Subject { get; set; }

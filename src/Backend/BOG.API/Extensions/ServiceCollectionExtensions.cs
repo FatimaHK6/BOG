@@ -165,6 +165,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IClaimBL, ClaimBL>();
         services.AddScoped<IRelatedCaseBL, RelatedCaseBL>();
         services.AddScoped<IRepresentativeBL, RepresentativeBL>();
+        services.AddScoped<IDeficiencyBL, DeficiencyBL>();
 
         // File storage service
         services.AddScoped<IFileStorageService, FileStorageService>();

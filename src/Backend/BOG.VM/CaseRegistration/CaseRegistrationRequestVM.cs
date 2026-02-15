@@ -112,6 +112,16 @@ public class CaseRegistrationRequestVM
     public List<RelatedCaseVM> RelatedCases { get; set; } = new();
 
     /// <summary>
+    /// Submission method ID
+    /// </summary>
+    public int? ApplyingMethodId { get; set; }
+
+    /// <summary>
+    /// Submission method name in Arabic (e.g., "من خلال المحكمة")
+    /// </summary>
+    public string? ApplyingMethodNameAr { get; set; }
+
+    /// <summary>
     /// Date the request was created
     /// </summary>
     public DateTime CreatedDate { get; set; }
