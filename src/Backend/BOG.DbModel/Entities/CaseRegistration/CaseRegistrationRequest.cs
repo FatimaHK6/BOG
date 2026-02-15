@@ -93,6 +93,11 @@ public class CaseRegistrationRequest : BaseEntity
     /// </summary>
     public int? LastModifiedByUserId { get; set; }
 
+    /// <summary>
+    /// Foreign key to ApplyingMethod.
+    /// </summary>
+    public int? ApplyingMethodId { get; set; }
+
     #region Navigation Properties
 
     /// <summary>
@@ -104,6 +109,11 @@ public class CaseRegistrationRequest : BaseEntity
     /// Navigation property for case type.
     /// </summary>
     public virtual CaseType? CaseType { get; set; }
+
+    /// <summary>
+    /// Navigation property for applying method.
+    /// </summary>
+    public virtual ApplyingMethod? ApplyingMethod { get; set; }
 
     /// <summary>
     /// Navigation property for court.

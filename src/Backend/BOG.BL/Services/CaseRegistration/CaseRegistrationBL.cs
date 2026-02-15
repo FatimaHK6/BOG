@@ -1,6 +1,7 @@
 using BOG.BL.Interfaces.CaseRegistration;
 using BOG.DAL.Interfaces;
 using BOG.DbModel;
+using BOG.DbModel.Constants;
 using BOG.DbModel.Entities.CaseRegistration;
 using BOG.DbModel.Entities.Lookups;
 using BOG.DTO.CaseRegistration;
@@ -81,6 +82,7 @@ public class CaseRegistrationBL : ICaseRegistrationBL
             Evidence = dto.Evidence,
             RequestStatusId = 1, // Draft
             CaseTypeId = 1, // Default to Administrative (إداري) - user changes via edit page
+            ApplyingMethodId = dto.ApplyingMethodId ?? ApplyingMethodIds.ThroughCourt, // Default to "Through Court"
             CreatedByUserId = 1, // TODO: Get from HttpContext.User in production
             CreatedDate = DateTime.UtcNow,
             ModifiedDate = DateTime.UtcNow
@@ -163,6 +165,7 @@ public class CaseRegistrationBL : ICaseRegistrationBL
             requestDict["evidence"] = updateDto.Evidence;
             requestDict["courtId"] = updateDto.CourtId;
             requestDict["caseTypeId"] = updateDto.CaseTypeId;
+            requestDict["applyingMethodId"] = updateDto.ApplyingMethodId;
             requestDict["notes"] = updateDto.Notes;
             requestDict["classificationIds"] = updateDto.ClassificationIds ?? new List<int>();
             // Add contact information fields
@@ -220,6 +223,15 @@ public class CaseRegistrationBL : ICaseRegistrationBL
                 if (caseTypeId < 1 || caseTypeId > 2)
                     throw new ArgumentException("نوع الدعوى غير صحيح (يجب أن يكون 1 أو 2)");
                 request.CaseTypeId = caseTypeId;
+            }
+        }
+
+        // ApplyingMethodId - optional field
+        if (requestDict.ContainsKey("applyingMethodId"))
+        {
+            if (requestDict["applyingMethodId"] != null && int.TryParse(requestDict["applyingMethodId"]?.ToString(), out int applyingMethodId) && applyingMethodId > 0)
+            {
+                request.ApplyingMethodId = applyingMethodId;
             }
         }
 
@@ -399,8 +411,8 @@ public class CaseRegistrationBL : ICaseRegistrationBL
         if (request == null)
             throw new InvalidOperationException($"الطلب {requestId} غير موجود");
 
-        // Change status from Draft (1) to New (3)
-        request.RequestStatusId = 3;
+        // Change status from Draft (1) to New (2)
+        request.RequestStatusId = 2;
         request.SubmissionDate = DateTime.UtcNow;
         request.ModifiedDate = DateTime.UtcNow;
 
@@ -682,6 +694,8 @@ public class CaseRegistrationBL : ICaseRegistrationBL
                     ModifiedDate = rc.ModifiedDate
                 })
                 .ToList() ?? new List<RelatedCaseVM>(),
+            ApplyingMethodId = request.ApplyingMethodId,
+            ApplyingMethodNameAr = request.ApplyingMethod?.NameAr,
             CreatedDate = request.CreatedDate,
             ModifiedDate = request.ModifiedDate
         };
@@ -722,6 +736,8 @@ public class CaseRegistrationBL : ICaseRegistrationBL
                     Level4 = rc.Classification.Level4 ?? string.Empty
                 })
                 .ToList() ?? new List<CaseClassificationVM>(),
+            ApplyingMethodId = request.ApplyingMethodId,
+            ApplyingMethodNameAr = request.ApplyingMethod?.NameAr,
             CreatedDate = request.CreatedDate,
             ModifiedDate = request.ModifiedDate
         };

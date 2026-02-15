@@ -112,6 +112,16 @@ public class CaseRegistrationRequestDetailsVM
     public string? CaseTypeName { get; set; }
 
     /// <summary>
+    /// Submission method ID
+    /// </summary>
+    public int? ApplyingMethodId { get; set; }
+
+    /// <summary>
+    /// Submission method name in Arabic
+    /// </summary>
+    public string? ApplyingMethodNameAr { get; set; }
+
+    /// <summary>
     /// Date created
     /// </summary>
     public DateTime CreatedDate { get; set; }

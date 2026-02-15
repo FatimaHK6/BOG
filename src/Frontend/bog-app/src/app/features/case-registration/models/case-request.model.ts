@@ -6,7 +6,7 @@ export interface CaseRequestVM {
   courtId: number;
   requestNumber?: string;
   requestStatusId: number;
-  requestStatusName: string;
+  statusNameAr: string;
   subject: string;
   evidence: string;
   createdDate: Date;
@@ -21,6 +21,12 @@ export interface CaseRequestVM {
   primaryMobile?: string;
   secondaryMobile?: string;
   email?: string;
+  caseNumber?: string;
+  registrationDate?: Date;
+  caseTypeId?: number;
+  caseTypeName?: string;
+  applyingMethodId?: number;
+  applyingMethodNameAr?: string;
 }
 
 export interface CaseRequestCreateDTO {

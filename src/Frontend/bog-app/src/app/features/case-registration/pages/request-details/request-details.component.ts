@@ -8,7 +8,7 @@ import { CaseDataStateService } from '../../services/case-data-state.service';
 import { ClaimsApiService } from '../../services/claims-api.service';
 import { RelatedCaseApiService } from '../../services/related-case-api.service';
 import { CaseRequestVM, CaseRequestCreateDTO } from '../../models/case-request.model';
-import { RequestStatusLabels, RequestStatus } from '../../models/enums';
+import { STATUS_DRAFT, STATUS_NEW, STATUS_PENDING_COMPLETION } from '../../models/status-constants';
 import { CaseDataContainerComponent } from '../../components/case-data/case-data-container/case-data-container.component';
 
 @Component({
@@ -32,6 +32,7 @@ export class RequestDetailsComponent implements OnInit, OnDestroy {
   // Metadata bar properties
   courtName: string = '';
   registrationMethod: string = '';
+  applyingMethod: string = '';
   caseType: string = '';
   caseRegistrationNumber: string = '';
   caseRegistrationDate: Date | null = null;
@@ -259,18 +260,20 @@ export class RequestDetailsComponent implements OnInit, OnDestroy {
 
   updateFromRequest(request: CaseRequestVM) {
     this.currentStatus = request.requestStatusId;
-    this.currentStatusName = request.requestStatusName;
+    this.currentStatusName = request.statusNameAr;
     this.plaintiffsCount = request.plaintiffsCount || 0;
     this.defendantsCount = request.defendantsCount || 0;
     this.attachmentsCount = request.attachmentsCount || 0;
-    this.hasDeficiencies = request.requestStatusId === 8;
+    this.hasDeficiencies = request.requestStatusId === STATUS_PENDING_COMPLETION;
 
     // Populate metadata bar properties
     this.createdDate = request.createdDate ? new Date(request.createdDate) : null;
-    // courtName, registrationMethod, caseType, caseRegistrationNumber, caseRegistrationDate
-    // will be populated when backend provides this data
+    this.caseRegistrationNumber = request.caseNumber || '';
+    this.caseRegistrationDate = request.registrationDate ? new Date(request.registrationDate) : null;
+    this.caseType = request.caseTypeName || '';
+    this.applyingMethod = request.applyingMethodNameAr || 'من خلال المحكمة';
 
-    this.canEdit = this.mode !== 'view' && [1, 8].includes(request.requestStatusId);
+    this.canEdit = this.mode !== 'view' && [STATUS_DRAFT, STATUS_NEW, STATUS_PENDING_COMPLETION].includes(request.requestStatusId);
     this.canSave = this.canEdit;
 
     // Initialize CaseDataStateService with request data
@@ -487,9 +490,9 @@ export class RequestDetailsComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Get Arabic status label from enum
+   * Get Arabic status label from currentStatusName property
    */
   get arabicStatusName(): string {
-    return RequestStatusLabels[this.currentStatus as RequestStatus] || 'غير معروف';
+    return this.currentStatusName || 'غير معروف';
   }
 }
