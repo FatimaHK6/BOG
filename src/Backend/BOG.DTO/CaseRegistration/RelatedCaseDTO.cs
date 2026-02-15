@@ -10,7 +10,7 @@ public class RelatedCaseDTO
     public int? CourtId { get; set; }
 
     [Required(ErrorMessage = "رقم الدعوى مطلوب")]
-    [Range(1, 99999999999, ErrorMessage = "رقم الدعوى يجب أن يكون بين 1 و 99999999999 (11 رقم كحد أقصى)")]
+    [Range(1, int.MaxValue, ErrorMessage = "رقم الدعوى يجب أن يكون رقماً صحيحاً صالحاً")]
     public int CaseNumber { get; set; }
 
     [Required(ErrorMessage = "عام الدعوى مطلوب")]

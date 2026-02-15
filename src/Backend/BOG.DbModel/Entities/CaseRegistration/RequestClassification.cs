@@ -1,4 +1,5 @@
 using BOG.DbModel.Entities.Lookups;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace BOG.DbModel.Entities.CaseRegistration;
 
@@ -18,9 +19,10 @@ public class RequestClassification : BaseEntity
     public int ClassificationId { get; set; }
 
     /// <summary>
-    /// Classification text (نص التصنيف) - max 500 characters.
+    /// Classification text (نص التصنيف) - DEPRECATED: No longer used.
     /// </summary>
-    public string ClassificationText { get; set; } = null!;
+    [NotMapped]
+    public string? ClassificationText { get; set; }
 
     /// <summary>
     /// Display order for sorting classifications.

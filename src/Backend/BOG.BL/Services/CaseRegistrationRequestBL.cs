@@ -170,7 +170,6 @@ public class CaseRegistrationRequestBL : ICaseRegistrationRequestBL
                 {
                     CaseRegistrationRequestId = id,
                     ClassificationId = cid,
-                    ClassificationText = "",
                     DisplayOrder = 0
                 })
                 .ToList();
@@ -243,6 +242,16 @@ public class CaseRegistrationRequestBL : ICaseRegistrationRequestBL
 
     private static CaseRegistrationRequestVM MapToVM(CaseRegistrationRequest request)
     {
+        // Extract active classifications (not soft-deleted)
+        var activeClassifications = request.Classifications?
+            .Where(rc => !rc.IsDeleted)
+            .ToList() ?? new List<RequestClassification>();
+
+        // Extract active related cases
+        var activeRelatedCases = request.RelatedCases?
+            .Where(rc => !rc.IsDeleted)
+            .ToList() ?? new List<RelatedCase>();
+
         return new CaseRegistrationRequestVM
         {
             Id = request.Id,
@@ -267,7 +276,16 @@ public class CaseRegistrationRequestBL : ICaseRegistrationRequestBL
             PlaintiffsCount = request.CaseRequestPlaintiffs?.Count(p => !p.IsDeleted) ?? 0,
             DefendantsCount = request.CaseRequestDefendants?.Count(d => !d.IsDeleted) ?? 0,
             ClaimsCount = request.Claims?.Count(c => !c.IsDeleted) ?? 0,
-            AttachmentsCount = request.Attachments?.Count(a => !a.IsDeleted) ?? 0
+            AttachmentsCount = request.Attachments?.Count(a => !a.IsDeleted) ?? 0,
+            ClassificationIds = activeClassifications
+                .Select(rc => rc.ClassificationId)
+                .ToList(),
+            RelatedCaseIds = activeRelatedCases
+                .Select(rc => rc.Id)
+                .ToList(),
+            PrimaryMobile = request.PrimaryMobile,
+            SecondaryMobile = request.SecondaryMobile,
+            Email = request.Email
         };
     }
 }

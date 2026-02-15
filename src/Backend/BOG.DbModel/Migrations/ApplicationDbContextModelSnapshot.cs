@@ -22,6 +22,176 @@ namespace BOG.DbModel.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("BOG.DbModel.Entities.CaseRegistration.AdditionalInfo", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("CaseRegistrationRequestId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsDeleted")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
+                    b.Property<DateTime>("ModifiedDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CaseRegistrationRequestId");
+
+                    b.ToTable("AdditionalInfos", (string)null);
+                });
+
+            modelBuilder.Entity("BOG.DbModel.Entities.CaseRegistration.AdditionalInfoManagementDecision", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("AdditionalInfoId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("DecisionDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("DecisionNumber")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<bool>("IsDeleted")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
+                    b.Property<int?>("IssuingAuthorityId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("ModifiedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("NotificationDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("NotificationMethodId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AdditionalInfoId")
+                        .IsUnique();
+
+                    b.HasIndex("IssuingAuthorityId");
+
+                    b.HasIndex("NotificationMethodId");
+
+                    b.ToTable("AdditionalInfoManagementDecisions", (string)null);
+                });
+
+            modelBuilder.Entity("BOG.DbModel.Entities.CaseRegistration.AdditionalInfoServiceRights", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("AdditionalInfoId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("ComplaintAuthorityId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("ComplaintDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("ComplaintDecisionDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ComplaintNumber")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool?>("HasComplaint")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsDeleted")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
+                    b.Property<DateTime>("ModifiedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("SystemResult")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AdditionalInfoId")
+                        .IsUnique();
+
+                    b.HasIndex("ComplaintAuthorityId");
+
+                    b.ToTable("AdditionalInfoServiceRights", (string)null);
+                });
+
+            modelBuilder.Entity("BOG.DbModel.Entities.CaseRegistration.AdditionalInfoTrademark", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("AdditionalInfoId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsDeleted")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
+                    b.Property<DateTime>("ModifiedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("RequestDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("RequestNumber")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AdditionalInfoId")
+                        .IsUnique();
+
+                    b.ToTable("AdditionalInfoTrademarks", (string)null);
+                });
+
             modelBuilder.Entity("BOG.DbModel.Entities.CaseRegistration.CaseRegistrationRequest", b =>
                 {
                     b.Property<int>("Id")
@@ -34,6 +204,9 @@ namespace BOG.DbModel.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
+                    b.Property<int?>("CaseTypeId")
+                        .HasColumnType("int");
+
                     b.Property<DateTime?>("CompletionDeadline")
                         .HasColumnType("datetime2");
 
@@ -45,6 +218,9 @@ namespace BOG.DbModel.Migrations
 
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2");
+
+                    b.Property<string>("Email")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Evidence")
                         .HasMaxLength(4000)
@@ -65,6 +241,9 @@ namespace BOG.DbModel.Migrations
                         .HasMaxLength(2000)
                         .HasColumnType("nvarchar(2000)");
 
+                    b.Property<string>("PrimaryMobile")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<DateTime?>("RegistrationDate")
                         .HasColumnType("datetime2");
 
@@ -79,6 +258,9 @@ namespace BOG.DbModel.Migrations
                     b.Property<int>("RequestStatusId")
                         .HasColumnType("int");
 
+                    b.Property<string>("SecondaryMobile")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Subject")
                         .HasMaxLength(4000)
                         .HasColumnType("nvarchar(4000)");
@@ -88,6 +270,8 @@ namespace BOG.DbModel.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("CaseTypeId");
+
                     b.HasIndex("CourtId");
 
                     b.HasIndex("CreatedByUserId");
@@ -96,7 +280,7 @@ namespace BOG.DbModel.Migrations
 
                     b.HasIndex("RequestStatusId");
 
-                    b.ToTable("CaseRegistrationRequests");
+                    b.ToTable("CaseRegistrationRequests", (string)null);
                 });
 
             modelBuilder.Entity("BOG.DbModel.Entities.CaseRegistration.CaseRequestDefendant", b =>
@@ -132,7 +316,7 @@ namespace BOG.DbModel.Migrations
                         .IsUnique()
                         .HasFilter("[IsDeleted] = 0");
 
-                    b.ToTable("CaseRequestDefendants");
+                    b.ToTable("CaseRequestDefendants", (string)null);
                 });
 
             modelBuilder.Entity("BOG.DbModel.Entities.CaseRegistration.CaseRequestPlaintiff", b =>
@@ -168,7 +352,7 @@ namespace BOG.DbModel.Migrations
                         .IsUnique()
                         .HasFilter("[IsDeleted] = 0");
 
-                    b.ToTable("CaseRequestPlaintiffs");
+                    b.ToTable("CaseRequestPlaintiffs", (string)null);
                 });
 
             modelBuilder.Entity("BOG.DbModel.Entities.CaseRegistration.Claim", b =>
@@ -205,7 +389,7 @@ namespace BOG.DbModel.Migrations
 
                     b.HasIndex("CaseRegistrationRequestId");
 
-                    b.ToTable("Claims");
+                    b.ToTable("Claims", (string)null);
                 });
 
             modelBuilder.Entity("BOG.DbModel.Entities.CaseRegistration.Defendant", b =>
@@ -231,16 +415,14 @@ namespace BOG.DbModel.Migrations
                         .HasColumnType("date");
 
                     b.Property<string>("City")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("CommercialRegNumber")
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
 
                     b.Property<string>("CompanyName")
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int?>("CountryId")
                         .HasColumnType("int");
@@ -249,8 +431,7 @@ namespace BOG.DbModel.Migrations
                         .HasColumnType("date");
 
                     b.Property<string>("CourtDeedNumber")
-                        .HasMaxLength(10)
-                        .HasColumnType("nvarchar(10)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2");
@@ -259,38 +440,31 @@ namespace BOG.DbModel.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("DeedSource")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("DefendantTypeId")
                         .HasColumnType("int");
 
                     b.Property<string>("Description")
-                        .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Email")
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Employer")
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int?>("EmploymentStatusId")
                         .HasColumnType("int");
 
                     b.Property<string>("FamilyName")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("FatherName")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("FirstName")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("FullName")
                         .IsRequired()
@@ -304,8 +478,7 @@ namespace BOG.DbModel.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("GrandfatherName")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Headquarters")
                         .HasMaxLength(200)
@@ -325,34 +498,28 @@ namespace BOG.DbModel.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("IndAdditionalCode")
-                        .HasMaxLength(4)
-                        .HasColumnType("nvarchar(4)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("IndBuildingNumber")
-                        .HasMaxLength(4)
-                        .HasColumnType("nvarchar(4)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int?>("IndCityId")
                         .HasColumnType("int");
 
                     b.Property<string>("IndDistrict")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("IndPostalCode")
-                        .HasMaxLength(5)
-                        .HasColumnType("nvarchar(5)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int?>("IndRegionId")
                         .HasColumnType("int");
 
                     b.Property<string>("IndStreet")
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("IndUnitNumber")
-                        .HasMaxLength(4)
-                        .HasColumnType("nvarchar(4)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("IsActive")
                         .ValueGeneratedOnAdd()
@@ -368,89 +535,73 @@ namespace BOG.DbModel.Migrations
                         .HasColumnType("date");
 
                     b.Property<string>("LicenseNumber")
-                        .HasMaxLength(10)
-                        .HasColumnType("nvarchar(10)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int?>("LicenseSourceId")
                         .HasColumnType("int");
 
                     b.Property<string>("MobileNumber")
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("ModifiedDate")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("NGOAdditionalCode")
-                        .HasMaxLength(4)
-                        .HasColumnType("nvarchar(4)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("NGOBuildingNumber")
-                        .HasMaxLength(4)
-                        .HasColumnType("nvarchar(4)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int?>("NGOCityId")
                         .HasColumnType("int");
 
                     b.Property<string>("NGODistrict")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("NGOName")
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("NGOPostalCode")
-                        .HasMaxLength(5)
-                        .HasColumnType("nvarchar(5)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int?>("NGORegionId")
                         .HasColumnType("int");
 
                     b.Property<string>("NGOStreet")
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("NGOUnitNumber")
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int?>("NationalityId")
                         .HasColumnType("int");
 
                     b.Property<string>("Occupation")
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("RegCompanyAdditionalCode")
-                        .HasMaxLength(4)
-                        .HasColumnType("nvarchar(4)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("RegCompanyBuildingNumber")
-                        .HasMaxLength(4)
-                        .HasColumnType("nvarchar(4)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int?>("RegCompanyCityId")
                         .HasColumnType("int");
 
                     b.Property<string>("RegCompanyDistrict")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("RegCompanyPostalCode")
-                        .HasMaxLength(5)
-                        .HasColumnType("nvarchar(5)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int?>("RegCompanyRegionId")
                         .HasColumnType("int");
 
                     b.Property<string>("RegCompanyStreet")
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("RegCompanyUnitNumber")
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateOnly?>("RegistrationEndDate")
                         .HasColumnType("date");
@@ -459,53 +610,43 @@ namespace BOG.DbModel.Migrations
                         .HasColumnType("date");
 
                     b.Property<string>("TribeName")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("WaqfAdditionalCode")
-                        .HasMaxLength(4)
-                        .HasColumnType("nvarchar(4)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("WaqfAddressDescription")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("WaqfAgencyName")
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("WaqfBuildingNumber")
-                        .HasMaxLength(4)
-                        .HasColumnType("nvarchar(4)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int?>("WaqfCityId")
                         .HasColumnType("int");
 
                     b.Property<string>("WaqfDistrict")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("WaqfName")
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("WaqfPostalCode")
-                        .HasMaxLength(5)
-                        .HasColumnType("nvarchar(5)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int?>("WaqfRegionId")
                         .HasColumnType("int");
 
                     b.Property<string>("WaqfStreet")
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int?>("WaqfSupervisoryTypeId")
                         .HasColumnType("int");
 
                     b.Property<string>("WaqfUnitNumber")
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("WorkAdditionalCode")
                         .HasColumnType("nvarchar(max)");
@@ -567,7 +708,7 @@ namespace BOG.DbModel.Migrations
 
                     b.HasIndex("WorkRegionId");
 
-                    b.ToTable("Defendants");
+                    b.ToTable("Defendants", (string)null);
                 });
 
             modelBuilder.Entity("BOG.DbModel.Entities.CaseRegistration.Plaintiff", b =>
@@ -613,8 +754,8 @@ namespace BOG.DbModel.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("CourtDeedNumber")
-                        .HasMaxLength(10)
-                        .HasColumnType("nvarchar(10)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2");
@@ -626,12 +767,11 @@ namespace BOG.DbModel.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("DeedSource")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
 
                     b.Property<string>("Description")
-                        .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("DocumentNumber")
                         .HasColumnType("nvarchar(max)");
@@ -671,8 +811,7 @@ namespace BOG.DbModel.Migrations
                         .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("Headquarters")
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime?>("IdentityExpiryDate")
                         .HasColumnType("datetime2");
@@ -704,8 +843,8 @@ namespace BOG.DbModel.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("LicenseNumber")
-                        .HasMaxLength(10)
-                        .HasColumnType("nvarchar(10)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<int?>("LicenseSourceId")
                         .HasColumnType("int");
@@ -721,8 +860,7 @@ namespace BOG.DbModel.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("NGOName")
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int?>("NationalityId")
                         .HasColumnType("int");
@@ -731,8 +869,8 @@ namespace BOG.DbModel.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("Profession")
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<int?>("ResidenceAddressId")
                         .HasColumnType("int");
@@ -741,31 +879,26 @@ namespace BOG.DbModel.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("UnregisteredCompanyAddress")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("UnregisteredCompanyCity")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int?>("WaqfAddressId")
                         .HasColumnType("int");
 
                     b.Property<string>("WaqfAgencyName")
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("WaqfDescription")
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("WaqfName")
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("WaqfOversightType")
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<int?>("WorkAddressId")
                         .HasColumnType("int");
@@ -798,7 +931,7 @@ namespace BOG.DbModel.Migrations
 
                     b.HasIndex("WorkAddressId");
 
-                    b.ToTable("Plaintiffs");
+                    b.ToTable("Plaintiffs", (string)null);
                 });
 
             modelBuilder.Entity("BOG.DbModel.Entities.CaseRegistration.PlaintiffAttachment", b =>
@@ -862,7 +995,7 @@ namespace BOG.DbModel.Migrations
 
                     b.HasIndex("PlaintiffId");
 
-                    b.ToTable("PlaintiffAttachments");
+                    b.ToTable("PlaintiffAttachments", (string)null);
                 });
 
             modelBuilder.Entity("BOG.DbModel.Entities.CaseRegistration.RelatedCase", b =>
@@ -874,6 +1007,7 @@ namespace BOG.DbModel.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<int>("CaseNumber")
+                        .HasMaxLength(50)
                         .HasColumnType("int");
 
                     b.Property<int>("CaseRegistrationRequestId")
@@ -902,7 +1036,7 @@ namespace BOG.DbModel.Migrations
 
                     b.HasIndex("CourtId");
 
-                    b.ToTable("RelatedCases");
+                    b.ToTable("RelatedCases", (string)null);
                 });
 
             modelBuilder.Entity("BOG.DbModel.Entities.CaseRegistration.Representative", b =>
@@ -1125,7 +1259,7 @@ namespace BOG.DbModel.Migrations
 
                     b.HasIndex("RepresentativeTypeId");
 
-                    b.ToTable("Representatives");
+                    b.ToTable("Representatives", (string)null);
                 });
 
             modelBuilder.Entity("BOG.DbModel.Entities.CaseRegistration.RepresentativeAttachment", b =>
@@ -1189,7 +1323,7 @@ namespace BOG.DbModel.Migrations
 
                     b.HasIndex("RepresentativeId");
 
-                    b.ToTable("RepresentativeAttachments");
+                    b.ToTable("RepresentativeAttachments", (string)null);
                 });
 
             modelBuilder.Entity("BOG.DbModel.Entities.CaseRegistration.RequestAttachment", b =>
@@ -1253,7 +1387,7 @@ namespace BOG.DbModel.Migrations
 
                     b.HasIndex("CaseRegistrationRequestId");
 
-                    b.ToTable("RequestAttachments");
+                    b.ToTable("RequestAttachments", (string)null);
                 });
 
             modelBuilder.Entity("BOG.DbModel.Entities.CaseRegistration.RequestClassification", b =>
@@ -1265,6 +1399,9 @@ namespace BOG.DbModel.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<int>("CaseRegistrationRequestId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ClassificationId")
                         .HasColumnType("int");
 
                     b.Property<string>("ClassificationText")
@@ -1290,7 +1427,48 @@ namespace BOG.DbModel.Migrations
 
                     b.HasIndex("CaseRegistrationRequestId");
 
-                    b.ToTable("RequestClassifications");
+                    b.HasIndex("ClassificationId");
+
+                    b.ToTable("RequestClassifications", (string)null);
+                });
+
+            modelBuilder.Entity("BOG.DbModel.Entities.CaseRegistration.RequestDeficiency", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("CaseRegistrationRequestId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("DeficiencyDescriptionId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("DisplayOrder")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(0);
+
+                    b.Property<bool>("IsDeleted")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
+                    b.Property<DateTime>("ModifiedDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CaseRegistrationRequestId");
+
+                    b.HasIndex("DeficiencyDescriptionId");
+
+                    b.ToTable("RequestDeficiencies", (string)null);
                 });
 
             modelBuilder.Entity("BOG.DbModel.Entities.Common.Address", b =>
@@ -1368,7 +1546,7 @@ namespace BOG.DbModel.Migrations
 
                     b.HasIndex("RegionId");
 
-                    b.ToTable("Addresses");
+                    b.ToTable("Addresses", (string)null);
                 });
 
             modelBuilder.Entity("BOG.DbModel.Entities.Identity.Court", b =>
@@ -1413,7 +1591,7 @@ namespace BOG.DbModel.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Courts");
+                    b.ToTable("Courts", (string)null);
                 });
 
             modelBuilder.Entity("BOG.DbModel.Entities.Identity.Department", b =>
@@ -1457,7 +1635,7 @@ namespace BOG.DbModel.Migrations
 
                     b.HasIndex("CourtId");
 
-                    b.ToTable("Departments");
+                    b.ToTable("Departments", (string)null);
                 });
 
             modelBuilder.Entity("BOG.DbModel.Entities.Identity.Role", b =>
@@ -1504,7 +1682,7 @@ namespace BOG.DbModel.Migrations
                         .IsUnique()
                         .HasFilter("[IsDeleted] = 0");
 
-                    b.ToTable("Roles");
+                    b.ToTable("Roles", (string)null);
 
                     b.HasData(
                         new
@@ -1608,7 +1786,7 @@ namespace BOG.DbModel.Migrations
                         .IsUnique()
                         .HasFilter("[IsDeleted] = 0");
 
-                    b.ToTable("UserDepartments");
+                    b.ToTable("UserDepartments", (string)null);
                 });
 
             modelBuilder.Entity("BOG.DbModel.Entities.Identity.UserRole", b =>
@@ -1644,7 +1822,7 @@ namespace BOG.DbModel.Migrations
                         .IsUnique()
                         .HasFilter("[IsDeleted] = 0");
 
-                    b.ToTable("UserRoles");
+                    b.ToTable("UserRoles", (string)null);
                 });
 
             modelBuilder.Entity("BOG.DbModel.Entities.Lookups.AttachmentType", b =>
@@ -1698,7 +1876,7 @@ namespace BOG.DbModel.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("AttachmentTypes");
+                    b.ToTable("AttachmentTypes", (string)null);
 
                     b.HasData(
                         new
@@ -1778,20 +1956,50 @@ namespace BOG.DbModel.Migrations
                             ModifiedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             Name = "SupportingDocument",
                             NameAr = "مستند داعم"
-                        },
-                        new
-                        {
-                            Id = 10,
-                            AllowedExtensions = ".pdf",
-                            CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            IsActive = true,
-                            IsDeleted = false,
-                            IsMandatory = true,
-                            MaxFileSizeBytes = 4194304,
-                            ModifiedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Name = "RepresentativeDocument",
-                            NameAr = "صورة التمثيل"
                         });
+                });
+
+            modelBuilder.Entity("BOG.DbModel.Entities.Lookups.CaseType", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
+
+                    b.Property<bool>("IsDeleted")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
+                    b.Property<DateTime>("ModifiedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("NameAr")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("CaseTypes", (string)null);
                 });
 
             modelBuilder.Entity("BOG.DbModel.Entities.Lookups.City", b =>
@@ -1839,7 +2047,7 @@ namespace BOG.DbModel.Migrations
 
                     b.HasIndex("RegionId");
 
-                    b.ToTable("Cities");
+                    b.ToTable("Cities", (string)null);
 
                     b.HasData(
                         new
@@ -1987,6 +2195,427 @@ namespace BOG.DbModel.Migrations
                         });
                 });
 
+            modelBuilder.Entity("BOG.DbModel.Entities.Lookups.Classification", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
+
+                    b.Property<bool>("IsDeleted")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
+                    b.Property<string>("Level1")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("Level2")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("Level3")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("Level4")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<DateTime>("ModifiedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("NameAr")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Classifications", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 7,
+                            CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Description = "Sale contract for real estate",
+                            IsActive = true,
+                            IsDeleted = false,
+                            Level1 = "عقود",
+                            Level2 = "عقود مدنية",
+                            Level3 = "عقود البيع",
+                            Level4 = "عقد بيع عقار",
+                            ModifiedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Name = "RealEstateSaleContract",
+                            NameAr = "عقد بيع عقار"
+                        },
+                        new
+                        {
+                            Id = 8,
+                            CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Description = "Lease contract for residential property",
+                            IsActive = true,
+                            IsDeleted = false,
+                            Level1 = "عقود",
+                            Level2 = "عقود مدنية",
+                            Level3 = "عقود الإيجار",
+                            Level4 = "عقد إيجار سكني",
+                            ModifiedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Name = "ResidentialLeaseContract",
+                            NameAr = "عقد إيجار سكني"
+                        },
+                        new
+                        {
+                            Id = 9,
+                            CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Description = "Partnership formation agreement",
+                            IsActive = true,
+                            IsDeleted = false,
+                            Level1 = "عقود",
+                            Level2 = "عقود تجارية",
+                            Level3 = "عقود الشركات",
+                            Level4 = "عقد تأسيس شركة",
+                            ModifiedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Name = "CompanyFormationContract",
+                            NameAr = "عقد تأسيس شركة"
+                        },
+                        new
+                        {
+                            Id = 10,
+                            CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Description = "Fixed term employment agreement",
+                            IsActive = true,
+                            IsDeleted = false,
+                            Level1 = "عقود",
+                            Level2 = "عقود تجارية",
+                            Level3 = "عقود العمل",
+                            Level4 = "عقد عمل محدد المدة",
+                            ModifiedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Name = "FixedTermEmploymentContract",
+                            NameAr = "عقد عمل محدد المدة"
+                        },
+                        new
+                        {
+                            Id = 11,
+                            CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Description = "Property ownership dispute",
+                            IsActive = true,
+                            IsDeleted = false,
+                            Level1 = "دعاوى مدنية",
+                            Level2 = "دعاوى الملكية",
+                            Level3 = "النزاعات العقارية",
+                            Level4 = "نزاع ملكية عقار",
+                            ModifiedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Name = "RealEstateOwnershipDispute",
+                            NameAr = "نزاع ملكية عقار"
+                        },
+                        new
+                        {
+                            Id = 12,
+                            CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Description = "Claim for financial damages",
+                            IsActive = true,
+                            IsDeleted = false,
+                            Level1 = "دعاوى مدنية",
+                            Level2 = "دعاوى التعويض",
+                            Level3 = "التعويض المالي",
+                            Level4 = "تعويض عن ضرر مادي",
+                            ModifiedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Name = "FinancialCompensation",
+                            NameAr = "تعويض عن ضرر مالي"
+                        },
+                        new
+                        {
+                            Id = 13,
+                            CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Description = "Collection of commercial debt",
+                            IsActive = true,
+                            IsDeleted = false,
+                            Level1 = "دعاوى مدنية",
+                            Level2 = "دعاوى الديون",
+                            Level3 = "تحصيل الديون",
+                            Level4 = "دعوى تحصيل دين تجاري",
+                            ModifiedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Name = "CommercialDebtCollection",
+                            NameAr = "دعوى تحصيل دين تجاري"
+                        },
+                        new
+                        {
+                            Id = 14,
+                            CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Description = "Partnership profit distribution dispute",
+                            IsActive = true,
+                            IsDeleted = false,
+                            Level1 = "دعاوى تجارية",
+                            Level2 = "منازعات الشركات",
+                            Level3 = "النزاعات بين الشركاء",
+                            Level4 = "نزاع توزيع أرباح",
+                            ModifiedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Name = "PartnershipDividendDispute",
+                            NameAr = "نزاع توزيع أرباح"
+                        },
+                        new
+                        {
+                            Id = 15,
+                            CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Description = "Bankruptcy filing request",
+                            IsActive = true,
+                            IsDeleted = false,
+                            Level1 = "دعاوى تجارية",
+                            Level2 = "الإفلاس والتصفية",
+                            Level3 = "إجراءات الإفلاس",
+                            Level4 = "طلب إشهار إفلاس",
+                            ModifiedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Name = "BankruptcyDeclaration",
+                            NameAr = "طلب إشهار إفلاس"
+                        },
+                        new
+                        {
+                            Id = 16,
+                            CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Description = "Commercial contract dispute",
+                            IsActive = true,
+                            IsDeleted = false,
+                            Level1 = "دعاوى تجارية",
+                            Level2 = "منازعات العقود",
+                            Level3 = "نزاعات التنفيذ",
+                            Level4 = "نزاع عقد تجاري",
+                            ModifiedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Name = "CommercialContractDispute",
+                            NameAr = "نزاع عقد تجاري"
+                        },
+                        new
+                        {
+                            Id = 17,
+                            CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Description = "Claim for unpaid wages",
+                            IsActive = true,
+                            IsDeleted = false,
+                            Level1 = "دعاوى عمالية",
+                            Level2 = "حقوق العمال",
+                            Level3 = "مستحقات مالية",
+                            Level4 = "مطالبة بأجور متأخرة",
+                            ModifiedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Name = "UnpaidWagesClaim",
+                            NameAr = "مطالبة بأجور متأخرة"
+                        },
+                        new
+                        {
+                            Id = 18,
+                            CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Description = "Unfair termination lawsuit",
+                            IsActive = true,
+                            IsDeleted = false,
+                            Level1 = "دعاوى عمالية",
+                            Level2 = "إنهاء الخدمة",
+                            Level3 = "الفصل التعسفي",
+                            Level4 = "دعوى فصل تعسفي",
+                            ModifiedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Name = "UnfairTermination",
+                            NameAr = "دعوى فصل تعسفي"
+                        },
+                        new
+                        {
+                            Id = 19,
+                            CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Description = "Workplace injury claim",
+                            IsActive = true,
+                            IsDeleted = false,
+                            Level1 = "دعاوى عمالية",
+                            Level2 = "الحقوق والواجبات",
+                            Level3 = "الحماية والأمان",
+                            Level4 = "دعوى إصابة عمل",
+                            ModifiedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Name = "WorkplaceInjury",
+                            NameAr = "دعوى إصابة عمل"
+                        },
+                        new
+                        {
+                            Id = 20,
+                            CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Description = "Marriage-related case",
+                            IsActive = true,
+                            IsDeleted = false,
+                            Level1 = "دعاوى أحوال شخصية",
+                            Level2 = "دعاوى الزواج",
+                            Level3 = "",
+                            Level4 = "",
+                            ModifiedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Name = "MarriageCase",
+                            NameAr = "دعوى زواج"
+                        },
+                        new
+                        {
+                            Id = 21,
+                            CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Description = "Divorce case",
+                            IsActive = true,
+                            IsDeleted = false,
+                            Level1 = "دعاوى أحوال شخصية",
+                            Level2 = "دعاوى الطلاق",
+                            Level3 = "",
+                            Level4 = "",
+                            ModifiedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Name = "DivorceCase",
+                            NameAr = "دعوى طلاق"
+                        },
+                        new
+                        {
+                            Id = 22,
+                            CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Description = "Commercial property lease",
+                            IsActive = true,
+                            IsDeleted = false,
+                            Level1 = "عقود",
+                            Level2 = "عقود مدنية",
+                            Level3 = "عقود الإيجار",
+                            Level4 = "عقد إيجار تجاري",
+                            ModifiedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Name = "CommercialLeaseContract",
+                            NameAr = "عقد إيجار تجاري"
+                        },
+                        new
+                        {
+                            Id = 23,
+                            CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Description = "Gift agreement",
+                            IsActive = true,
+                            IsDeleted = false,
+                            Level1 = "عقود",
+                            Level2 = "عقود مدنية",
+                            Level3 = "عقود الملكية",
+                            Level4 = "عقد هبة",
+                            ModifiedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Name = "GiftContract",
+                            NameAr = "عقد هبة"
+                        },
+                        new
+                        {
+                            Id = 24,
+                            CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Description = "Loan agreement",
+                            IsActive = true,
+                            IsDeleted = false,
+                            Level1 = "عقود",
+                            Level2 = "عقود مدنية",
+                            Level3 = "عقود الالتزام",
+                            Level4 = "عقد قرض",
+                            ModifiedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Name = "LoanContract",
+                            NameAr = "عقد قرض"
+                        },
+                        new
+                        {
+                            Id = 25,
+                            CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Description = "Personal injury compensation",
+                            IsActive = true,
+                            IsDeleted = false,
+                            Level1 = "دعاوى مدنية",
+                            Level2 = "دعاوى التعويض",
+                            Level3 = "التعويض الشخصي",
+                            Level4 = "تعويض عن إصابة شخصية",
+                            ModifiedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Name = "PersonalInjuryCompensation",
+                            NameAr = "تعويض عن إصابة شخصية"
+                        },
+                        new
+                        {
+                            Id = 26,
+                            CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Description = "Property damage compensation",
+                            IsActive = true,
+                            IsDeleted = false,
+                            Level1 = "دعاوى مدنية",
+                            Level2 = "دعاوى التعويض",
+                            Level3 = "تعويض عن الأضرار",
+                            Level4 = "تعويض عن تلف الملكية",
+                            ModifiedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Name = "PropertyDamageCompensation",
+                            NameAr = "تعويض عن تلف الملكية"
+                        },
+                        new
+                        {
+                            Id = 27,
+                            CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Description = "Non-payment default case",
+                            IsActive = true,
+                            IsDeleted = false,
+                            Level1 = "دعاوى مدنية",
+                            Level2 = "دعاوى الديون",
+                            Level3 = "ديون المستهلكين",
+                            Level4 = "دعوى عدم السداد",
+                            ModifiedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Name = "PaymentDefaultCase",
+                            NameAr = "دعوى عدم السداد"
+                        },
+                        new
+                        {
+                            Id = 28,
+                            CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Description = "Intellectual property dispute",
+                            IsActive = true,
+                            IsDeleted = false,
+                            Level1 = "دعاوى تجارية",
+                            Level2 = "حقوق الملكية",
+                            Level3 = "براءات الاختراع",
+                            Level4 = "نزاع براءة اختراع",
+                            ModifiedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Name = "IntellectualPropertyDispute",
+                            NameAr = "نزاع الملكية الفكرية"
+                        },
+                        new
+                        {
+                            Id = 29,
+                            CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Description = "Competition law violation",
+                            IsActive = true,
+                            IsDeleted = false,
+                            Level1 = "دعاوى تجارية",
+                            Level2 = "الممارسات غير العادلة",
+                            Level3 = "الاحتكار والتنافس",
+                            Level4 = "انتهاك قانون المنافسة",
+                            ModifiedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Name = "CompetitionLawViolation",
+                            NameAr = "انتهاك قانون المنافسة"
+                        },
+                        new
+                        {
+                            Id = 30,
+                            CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Description = "Workplace harassment claim",
+                            IsActive = true,
+                            IsDeleted = false,
+                            Level1 = "دعاوى عمالية",
+                            Level2 = "حقوق العمال",
+                            Level3 = "الحقوق الشخصية",
+                            Level4 = "دعوى التحرش في العمل",
+                            ModifiedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Name = "WorkplaceHarassment",
+                            NameAr = "دعوى التحرش في العمل"
+                        });
+                });
+
             modelBuilder.Entity("BOG.DbModel.Entities.Lookups.Country", b =>
                 {
                     b.Property<int>("Id")
@@ -2031,249 +2660,7 @@ namespace BOG.DbModel.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Countries");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            IsActive = true,
-                            IsDeleted = false,
-                            IsoCode = "SA",
-                            ModifiedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Name = "Saudi Arabia",
-                            NameAr = "المملكة العربية السعودية",
-                            PhoneCode = "966"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            IsActive = true,
-                            IsDeleted = false,
-                            IsoCode = "AE",
-                            ModifiedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Name = "United Arab Emirates",
-                            NameAr = "الإمارات العربية المتحدة",
-                            PhoneCode = "971"
-                        },
-                        new
-                        {
-                            Id = 3,
-                            CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            IsActive = true,
-                            IsDeleted = false,
-                            IsoCode = "KW",
-                            ModifiedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Name = "Kuwait",
-                            NameAr = "الكويت",
-                            PhoneCode = "965"
-                        },
-                        new
-                        {
-                            Id = 4,
-                            CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            IsActive = true,
-                            IsDeleted = false,
-                            IsoCode = "BH",
-                            ModifiedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Name = "Bahrain",
-                            NameAr = "البحرين",
-                            PhoneCode = "973"
-                        },
-                        new
-                        {
-                            Id = 5,
-                            CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            IsActive = true,
-                            IsDeleted = false,
-                            IsoCode = "QA",
-                            ModifiedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Name = "Qatar",
-                            NameAr = "قطر",
-                            PhoneCode = "974"
-                        },
-                        new
-                        {
-                            Id = 6,
-                            CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            IsActive = true,
-                            IsDeleted = false,
-                            IsoCode = "OM",
-                            ModifiedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Name = "Oman",
-                            NameAr = "عُمان",
-                            PhoneCode = "968"
-                        },
-                        new
-                        {
-                            Id = 7,
-                            CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            IsActive = true,
-                            IsDeleted = false,
-                            IsoCode = "EG",
-                            ModifiedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Name = "Egypt",
-                            NameAr = "مصر",
-                            PhoneCode = "20"
-                        },
-                        new
-                        {
-                            Id = 8,
-                            CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            IsActive = true,
-                            IsDeleted = false,
-                            IsoCode = "JO",
-                            ModifiedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Name = "Jordan",
-                            NameAr = "الأردن",
-                            PhoneCode = "962"
-                        },
-                        new
-                        {
-                            Id = 9,
-                            CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            IsActive = true,
-                            IsDeleted = false,
-                            IsoCode = "LB",
-                            ModifiedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Name = "Lebanon",
-                            NameAr = "لبنان",
-                            PhoneCode = "961"
-                        },
-                        new
-                        {
-                            Id = 10,
-                            CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            IsActive = true,
-                            IsDeleted = false,
-                            IsoCode = "SY",
-                            ModifiedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Name = "Syria",
-                            NameAr = "سوريا",
-                            PhoneCode = "963"
-                        },
-                        new
-                        {
-                            Id = 11,
-                            CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            IsActive = true,
-                            IsDeleted = false,
-                            IsoCode = "IQ",
-                            ModifiedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Name = "Iraq",
-                            NameAr = "العراق",
-                            PhoneCode = "964"
-                        },
-                        new
-                        {
-                            Id = 12,
-                            CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            IsActive = true,
-                            IsDeleted = false,
-                            IsoCode = "YE",
-                            ModifiedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Name = "Yemen",
-                            NameAr = "اليمن",
-                            PhoneCode = "967"
-                        },
-                        new
-                        {
-                            Id = 13,
-                            CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            IsActive = true,
-                            IsDeleted = false,
-                            IsoCode = "US",
-                            ModifiedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Name = "United States",
-                            NameAr = "الولايات المتحدة",
-                            PhoneCode = "1"
-                        },
-                        new
-                        {
-                            Id = 14,
-                            CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            IsActive = true,
-                            IsDeleted = false,
-                            IsoCode = "GB",
-                            ModifiedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Name = "United Kingdom",
-                            NameAr = "المملكة المتحدة",
-                            PhoneCode = "44"
-                        },
-                        new
-                        {
-                            Id = 15,
-                            CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            IsActive = true,
-                            IsDeleted = false,
-                            IsoCode = "FR",
-                            ModifiedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Name = "France",
-                            NameAr = "فرنسا",
-                            PhoneCode = "33"
-                        },
-                        new
-                        {
-                            Id = 16,
-                            CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            IsActive = true,
-                            IsDeleted = false,
-                            IsoCode = "DE",
-                            ModifiedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Name = "Germany",
-                            NameAr = "ألمانيا",
-                            PhoneCode = "49"
-                        },
-                        new
-                        {
-                            Id = 17,
-                            CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            IsActive = true,
-                            IsDeleted = false,
-                            IsoCode = "IN",
-                            ModifiedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Name = "India",
-                            NameAr = "الهند",
-                            PhoneCode = "91"
-                        },
-                        new
-                        {
-                            Id = 18,
-                            CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            IsActive = true,
-                            IsDeleted = false,
-                            IsoCode = "PK",
-                            ModifiedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Name = "Pakistan",
-                            NameAr = "باكستان",
-                            PhoneCode = "92"
-                        },
-                        new
-                        {
-                            Id = 19,
-                            CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            IsActive = true,
-                            IsDeleted = false,
-                            IsoCode = "CN",
-                            ModifiedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Name = "China",
-                            NameAr = "الصين",
-                            PhoneCode = "86"
-                        },
-                        new
-                        {
-                            Id = 20,
-                            CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            IsActive = true,
-                            IsDeleted = false,
-                            IsoCode = "JP",
-                            ModifiedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Name = "Japan",
-                            NameAr = "اليابان",
-                            PhoneCode = "81"
-                        });
+                    b.ToTable("Countries", (string)null);
                 });
 
             modelBuilder.Entity("BOG.DbModel.Entities.Lookups.DataSource", b =>
@@ -2316,7 +2703,7 @@ namespace BOG.DbModel.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("DataSources");
+                    b.ToTable("DataSources", (string)null);
 
                     b.HasData(
                         new
@@ -2381,7 +2768,7 @@ namespace BOG.DbModel.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("DefendantTypes");
+                    b.ToTable("DefendantTypes", (string)null);
 
                     b.HasData(
                         new
@@ -2401,8 +2788,8 @@ namespace BOG.DbModel.Migrations
                             IsActive = true,
                             IsDeleted = false,
                             ModifiedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Name = "RegisteredCompany",
-                            NameAr = "شركة مسجلة في المملكة"
+                            Name = "Company",
+                            NameAr = "شركة"
                         },
                         new
                         {
@@ -2421,8 +2808,8 @@ namespace BOG.DbModel.Migrations
                             IsActive = true,
                             IsDeleted = false,
                             ModifiedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Name = "UnregisteredCompany",
-                            NameAr = "شركة غير مسجلة في المملكة"
+                            Name = "Society",
+                            NameAr = "جمعية"
                         },
                         new
                         {
@@ -2431,8 +2818,8 @@ namespace BOG.DbModel.Migrations
                             IsActive = true,
                             IsDeleted = false,
                             ModifiedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Name = "BusinessOwner",
-                            NameAr = "صاحب مؤسسة"
+                            Name = "Waqf",
+                            NameAr = "وقف"
                         },
                         new
                         {
@@ -2441,18 +2828,330 @@ namespace BOG.DbModel.Migrations
                             IsActive = true,
                             IsDeleted = false,
                             ModifiedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Name = "NGO",
-                            NameAr = "جمعية/مؤسسة أهلية"
+                            Name = "Unknown",
+                            NameAr = "مجهول"
+                        });
+                });
+
+            modelBuilder.Entity("BOG.DbModel.Entities.Lookups.DeficiencyDescription", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("DeficiencyTypeId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("DescriptionAr")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("DescriptionEn")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<int>("DisplayOrder")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(0);
+
+                    b.Property<bool>("IsDeleted")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
+                    b.Property<DateTime>("ModifiedDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DeficiencyTypeId");
+
+                    b.ToTable("DeficiencyDescriptions", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            DeficiencyTypeId = 1,
+                            DescriptionAr = "موضوع الدعوى غير واضح",
+                            DescriptionEn = "Case subject is unclear",
+                            DisplayOrder = 1,
+                            IsDeleted = false,
+                            ModifiedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = 2,
+                            CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            DeficiencyTypeId = 1,
+                            DescriptionAr = "موضوع الدعوى ناقص ويحتاج إلى تفاصيل إضافية",
+                            DescriptionEn = "Case subject is incomplete and needs additional details",
+                            DisplayOrder = 2,
+                            IsDeleted = false,
+                            ModifiedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = 3,
+                            CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            DeficiencyTypeId = 1,
+                            DescriptionAr = "موضوع الدعوى لا يتفق مع الطلبات",
+                            DescriptionEn = "Case subject does not match the claims",
+                            DisplayOrder = 3,
+                            IsDeleted = false,
+                            ModifiedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = 4,
+                            CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            DeficiencyTypeId = 2,
+                            DescriptionAr = "طلبات الدعوى غير محددة",
+                            DescriptionEn = "Claims are not specified",
+                            DisplayOrder = 1,
+                            IsDeleted = false,
+                            ModifiedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = 5,
+                            CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            DeficiencyTypeId = 2,
+                            DescriptionAr = "طلبات الدعوى غير مكتملة",
+                            DescriptionEn = "Claims are incomplete",
+                            DisplayOrder = 2,
+                            IsDeleted = false,
+                            ModifiedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = 6,
+                            CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            DeficiencyTypeId = 2,
+                            DescriptionAr = "طلبات الدعوى غير متوافقة مع الموضوع",
+                            DescriptionEn = "Claims are not compatible with the subject",
+                            DisplayOrder = 3,
+                            IsDeleted = false,
+                            ModifiedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
                         },
                         new
                         {
                             Id = 7,
                             CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            IsActive = true,
+                            DeficiencyTypeId = 3,
+                            DescriptionAr = "أسانيد الدعوى ناقصة",
+                            DescriptionEn = "Grounds are incomplete",
+                            DisplayOrder = 1,
+                            IsDeleted = false,
+                            ModifiedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = 8,
+                            CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            DeficiencyTypeId = 3,
+                            DescriptionAr = "أسانيد الدعوى غير كافية",
+                            DescriptionEn = "Grounds are insufficient",
+                            DisplayOrder = 2,
+                            IsDeleted = false,
+                            ModifiedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = 9,
+                            CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            DeficiencyTypeId = 3,
+                            DescriptionAr = "أسانيد الدعوى غير مرتبطة بالطلبات",
+                            DescriptionEn = "Grounds are not related to the claims",
+                            DisplayOrder = 3,
+                            IsDeleted = false,
+                            ModifiedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = 10,
+                            CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            DeficiencyTypeId = 4,
+                            DescriptionAr = "معلومات الدعوى المرتبطة ناقصة",
+                            DescriptionEn = "Related case information is incomplete",
+                            DisplayOrder = 1,
+                            IsDeleted = false,
+                            ModifiedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = 11,
+                            CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            DeficiencyTypeId = 4,
+                            DescriptionAr = "رقم الدعوى المرتبطة غير صحيح",
+                            DescriptionEn = "Related case number is incorrect",
+                            DisplayOrder = 2,
+                            IsDeleted = false,
+                            ModifiedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = 12,
+                            CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            DeficiencyTypeId = 5,
+                            DescriptionAr = "مرفقات الدعوى ناقصة",
+                            DescriptionEn = "Attachments are missing",
+                            DisplayOrder = 1,
+                            IsDeleted = false,
+                            ModifiedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = 13,
+                            CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            DeficiencyTypeId = 5,
+                            DescriptionAr = "مرفقات الدعوى غير واضحة",
+                            DescriptionEn = "Attachments are unclear",
+                            DisplayOrder = 2,
+                            IsDeleted = false,
+                            ModifiedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = 14,
+                            CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            DeficiencyTypeId = 5,
+                            DescriptionAr = "مرفقات الدعوى غير مكتملة",
+                            DescriptionEn = "Attachments are incomplete",
+                            DisplayOrder = 3,
+                            IsDeleted = false,
+                            ModifiedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = 15,
+                            CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            DeficiencyTypeId = 6,
+                            DescriptionAr = "معلومات إضافية مطلوبة",
+                            DescriptionEn = "Additional information required",
+                            DisplayOrder = 1,
+                            IsDeleted = false,
+                            ModifiedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = 16,
+                            CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            DeficiencyTypeId = 6,
+                            DescriptionAr = "بيانات إضافية ناقصة",
+                            DescriptionEn = "Additional data is missing",
+                            DisplayOrder = 2,
+                            IsDeleted = false,
+                            ModifiedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
+                        });
+                });
+
+            modelBuilder.Entity("BOG.DbModel.Entities.Lookups.DeficiencyType", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("DisplayOrder")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(0);
+
+                    b.Property<bool>("IsDeleted")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
+                    b.Property<DateTime>("ModifiedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("NameAr")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("DeficiencyTypes", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            DisplayOrder = 1,
                             IsDeleted = false,
                             ModifiedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Name = "Waqf",
-                            NameAr = "وقف"
+                            Name = "CaseSubject",
+                            NameAr = "موضوع الدعوى"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            DisplayOrder = 2,
+                            IsDeleted = false,
+                            ModifiedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Name = "CaseClaims",
+                            NameAr = "طلبات الدعوى"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            DisplayOrder = 3,
+                            IsDeleted = false,
+                            ModifiedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Name = "CaseGrounds",
+                            NameAr = "أسانيد الدعوى"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            DisplayOrder = 4,
+                            IsDeleted = false,
+                            ModifiedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Name = "RelatedCases",
+                            NameAr = "الدعاوى المرتبطة"
+                        },
+                        new
+                        {
+                            Id = 5,
+                            CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            DisplayOrder = 5,
+                            IsDeleted = false,
+                            ModifiedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Name = "CaseAttachments",
+                            NameAr = "مرفقات الدعوى"
+                        },
+                        new
+                        {
+                            Id = 6,
+                            CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            DisplayOrder = 6,
+                            IsDeleted = false,
+                            ModifiedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Name = "AdditionalCaseInfo",
+                            NameAr = "معلومات إضافية للدعوى"
                         });
                 });
 
@@ -2497,119 +3196,7 @@ namespace BOG.DbModel.Migrations
 
                     b.HasIndex("CityId");
 
-                    b.ToTable("Districts");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            CityId = 1,
-                            CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            IsActive = true,
-                            IsDeleted = false,
-                            ModifiedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Name = "Al Olaya",
-                            NameAr = "العليا"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            CityId = 1,
-                            CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            IsActive = true,
-                            IsDeleted = false,
-                            ModifiedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Name = "Al Malaz",
-                            NameAr = "الملز"
-                        },
-                        new
-                        {
-                            Id = 3,
-                            CityId = 1,
-                            CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            IsActive = true,
-                            IsDeleted = false,
-                            ModifiedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Name = "Al Naseem",
-                            NameAr = "النسيم"
-                        },
-                        new
-                        {
-                            Id = 4,
-                            CityId = 1,
-                            CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            IsActive = true,
-                            IsDeleted = false,
-                            ModifiedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Name = "Al Wurud",
-                            NameAr = "الورود"
-                        },
-                        new
-                        {
-                            Id = 5,
-                            CityId = 1,
-                            CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            IsActive = true,
-                            IsDeleted = false,
-                            ModifiedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Name = "Al Sulimaniyah",
-                            NameAr = "السليمانية"
-                        },
-                        new
-                        {
-                            Id = 6,
-                            CityId = 2,
-                            CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            IsActive = true,
-                            IsDeleted = false,
-                            ModifiedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Name = "Al Rawdah",
-                            NameAr = "الروضة"
-                        },
-                        new
-                        {
-                            Id = 7,
-                            CityId = 2,
-                            CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            IsActive = true,
-                            IsDeleted = false,
-                            ModifiedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Name = "Al Hamra",
-                            NameAr = "الحمراء"
-                        },
-                        new
-                        {
-                            Id = 8,
-                            CityId = 2,
-                            CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            IsActive = true,
-                            IsDeleted = false,
-                            ModifiedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Name = "Al Shati",
-                            NameAr = "الشاطئ"
-                        },
-                        new
-                        {
-                            Id = 9,
-                            CityId = 5,
-                            CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            IsActive = true,
-                            IsDeleted = false,
-                            ModifiedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Name = "Al Faisaliyah",
-                            NameAr = "الفيصلية"
-                        },
-                        new
-                        {
-                            Id = 10,
-                            CityId = 5,
-                            CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            IsActive = true,
-                            IsDeleted = false,
-                            ModifiedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Name = "Al Anoud",
-                            NameAr = "العنود"
-                        });
+                    b.ToTable("Districts", (string)null);
                 });
 
             modelBuilder.Entity("BOG.DbModel.Entities.Lookups.GovernmentAgency", b =>
@@ -2656,174 +3243,54 @@ namespace BOG.DbModel.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("GovernmentAgencies");
+                    b.ToTable("GovernmentAgencies", (string)null);
+                });
 
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Code = "MOJ",
-                            CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            IsActive = true,
-                            IsDeleted = false,
-                            ModifiedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Name = "Ministry of Justice",
-                            NameAr = "وزارة العدل"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            Code = "MOI",
-                            CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            IsActive = true,
-                            IsDeleted = false,
-                            ModifiedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Name = "Ministry of Interior",
-                            NameAr = "وزارة الداخلية"
-                        },
-                        new
-                        {
-                            Id = 3,
-                            Code = "MOF",
-                            CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            IsActive = true,
-                            IsDeleted = false,
-                            ModifiedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Name = "Ministry of Finance",
-                            NameAr = "وزارة المالية"
-                        },
-                        new
-                        {
-                            Id = 4,
-                            Code = "MOH",
-                            CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            IsActive = true,
-                            IsDeleted = false,
-                            ModifiedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Name = "Ministry of Health",
-                            NameAr = "وزارة الصحة"
-                        },
-                        new
-                        {
-                            Id = 5,
-                            Code = "MOE",
-                            CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            IsActive = true,
-                            IsDeleted = false,
-                            ModifiedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Name = "Ministry of Education",
-                            NameAr = "وزارة التعليم"
-                        },
-                        new
-                        {
-                            Id = 6,
-                            Code = "MOC",
-                            CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            IsActive = true,
-                            IsDeleted = false,
-                            ModifiedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Name = "Ministry of Commerce",
-                            NameAr = "وزارة التجارة"
-                        },
-                        new
-                        {
-                            Id = 7,
-                            Code = "HRSD",
-                            CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            IsActive = true,
-                            IsDeleted = false,
-                            ModifiedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Name = "Ministry of Human Resources",
-                            NameAr = "وزارة الموارد البشرية والتنمية الاجتماعية"
-                        },
-                        new
-                        {
-                            Id = 8,
-                            Code = "MOT",
-                            CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            IsActive = true,
-                            IsDeleted = false,
-                            ModifiedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Name = "Ministry of Transport",
-                            NameAr = "وزارة النقل والخدمات اللوجستية"
-                        },
-                        new
-                        {
-                            Id = 9,
-                            Code = "MOMRA",
-                            CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            IsActive = true,
-                            IsDeleted = false,
-                            ModifiedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Name = "Ministry of Municipal Affairs",
-                            NameAr = "وزارة الشؤون البلدية والقروية والإسكان"
-                        },
-                        new
-                        {
-                            Id = 10,
-                            Code = "MEWA",
-                            CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            IsActive = true,
-                            IsDeleted = false,
-                            ModifiedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Name = "Ministry of Environment",
-                            NameAr = "وزارة البيئة والمياه والزراعة"
-                        },
-                        new
-                        {
-                            Id = 11,
-                            Code = "ZATCA",
-                            CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            IsActive = true,
-                            IsDeleted = false,
-                            ModifiedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Name = "General Authority of Zakat and Tax",
-                            NameAr = "هيئة الزكاة والضريبة والجمارك"
-                        },
-                        new
-                        {
-                            Id = 12,
-                            Code = "GOSI",
-                            CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            IsActive = true,
-                            IsDeleted = false,
-                            ModifiedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Name = "General Organization for Social Insurance",
-                            NameAr = "المؤسسة العامة للتأمينات الاجتماعية"
-                        },
-                        new
-                        {
-                            Id = 13,
-                            Code = "SAMA",
-                            CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            IsActive = true,
-                            IsDeleted = false,
-                            ModifiedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Name = "Saudi Central Bank",
-                            NameAr = "البنك المركزي السعودي"
-                        },
-                        new
-                        {
-                            Id = 14,
-                            Code = "CMA",
-                            CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            IsActive = true,
-                            IsDeleted = false,
-                            ModifiedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Name = "Capital Market Authority",
-                            NameAr = "هيئة السوق المالية"
-                        },
-                        new
-                        {
-                            Id = 15,
-                            Code = "RC",
-                            CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            IsActive = true,
-                            IsDeleted = false,
-                            ModifiedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Name = "Royal Court",
-                            NameAr = "الديوان الملكي"
-                        });
+            modelBuilder.Entity("BOG.DbModel.Entities.Lookups.GovernmentEntity", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Code")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
+
+                    b.Property<bool>("IsDeleted")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
+                    b.Property<DateTime>("ModifiedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("NameAr")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("GovernmentEntities", (string)null);
                 });
 
             modelBuilder.Entity("BOG.DbModel.Entities.Lookups.IdentityType", b =>
@@ -2866,7 +3333,7 @@ namespace BOG.DbModel.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("IdentityTypes");
+                    b.ToTable("IdentityTypes", (string)null);
 
                     b.HasData(
                         new
@@ -2941,64 +3408,7 @@ namespace BOG.DbModel.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("LicenseSources");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Code = "MOL",
-                            CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            IsActive = true,
-                            IsDeleted = false,
-                            ModifiedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Name = "MinistryOfLabor",
-                            NameAr = "وزارة العمل والتنمية الاجتماعية"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            Code = "MOC",
-                            CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            IsActive = true,
-                            IsDeleted = false,
-                            ModifiedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Name = "MinistryOfCommerce",
-                            NameAr = "وزارة التجارة"
-                        },
-                        new
-                        {
-                            Id = 3,
-                            Code = "GAA",
-                            CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            IsActive = true,
-                            IsDeleted = false,
-                            ModifiedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Name = "GeneralAuthorityForAwqaf",
-                            NameAr = "الهيئة العامة للأوقاف"
-                        },
-                        new
-                        {
-                            Id = 4,
-                            Code = "SAMA",
-                            CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            IsActive = true,
-                            IsDeleted = false,
-                            ModifiedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Name = "SaudiCentralBank",
-                            NameAr = "البنك المركزي السعودي"
-                        },
-                        new
-                        {
-                            Id = 5,
-                            Code = "CMA",
-                            CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            IsActive = true,
-                            IsDeleted = false,
-                            ModifiedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Name = "CapitalMarketAuthority",
-                            NameAr = "هيئة السوق المالية"
-                        });
+                    b.ToTable("LicenseSources", (string)null);
                 });
 
             modelBuilder.Entity("BOG.DbModel.Entities.Lookups.Nationality", b =>
@@ -3013,28 +3423,78 @@ namespace BOG.DbModel.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Description")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
 
                     b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
 
                     b.Property<DateTime>("ModifiedDate")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("NameAr")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.HasKey("Id");
 
-                    b.ToTable("Nationalities");
+                    b.ToTable("Nationalities", (string)null);
+                });
+
+            modelBuilder.Entity("BOG.DbModel.Entities.Lookups.NotificationMethod", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
+
+                    b.Property<bool>("IsDeleted")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
+                    b.Property<DateTime>("ModifiedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("NameAr")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("NotificationMethods", (string)null);
                 });
 
             modelBuilder.Entity("BOG.DbModel.Entities.Lookups.PlaintiffType", b =>
@@ -3077,7 +3537,7 @@ namespace BOG.DbModel.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("PlaintiffTypes");
+                    b.ToTable("PlaintiffTypes", (string)null);
 
                     b.HasData(
                         new
@@ -3097,42 +3557,12 @@ namespace BOG.DbModel.Migrations
                             IsActive = true,
                             IsDeleted = false,
                             ModifiedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Name = "IndividualWithoutId",
-                            NameAr = "فرد بدون هوية"
+                            Name = "Company",
+                            NameAr = "شركة"
                         },
                         new
                         {
                             Id = 3,
-                            CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            IsActive = true,
-                            IsDeleted = false,
-                            ModifiedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Name = "BusinessOwner",
-                            NameAr = "صاحب مؤسسة"
-                        },
-                        new
-                        {
-                            Id = 4,
-                            CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            IsActive = true,
-                            IsDeleted = false,
-                            ModifiedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Name = "RegisteredCompany",
-                            NameAr = "شركة مسجلة"
-                        },
-                        new
-                        {
-                            Id = 5,
-                            CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            IsActive = true,
-                            IsDeleted = false,
-                            ModifiedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Name = "UnregisteredCompany",
-                            NameAr = "شركة غير مسجلة"
-                        },
-                        new
-                        {
-                            Id = 6,
                             CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             IsActive = true,
                             IsDeleted = false,
@@ -3142,13 +3572,43 @@ namespace BOG.DbModel.Migrations
                         },
                         new
                         {
-                            Id = 7,
+                            Id = 4,
                             CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             IsActive = true,
                             IsDeleted = false,
                             ModifiedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             Name = "Society",
-                            NameAr = "جمعية/مؤسسة أهلية"
+                            NameAr = "جمعية"
+                        },
+                        new
+                        {
+                            Id = 5,
+                            CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            IsActive = true,
+                            IsDeleted = false,
+                            ModifiedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Name = "Waqf",
+                            NameAr = "وقف"
+                        },
+                        new
+                        {
+                            Id = 6,
+                            CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            IsActive = true,
+                            IsDeleted = false,
+                            ModifiedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Name = "MinorOrIncapacitated",
+                            NameAr = "قاصر أو محجور عليه"
+                        },
+                        new
+                        {
+                            Id = 7,
+                            CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            IsActive = true,
+                            IsDeleted = false,
+                            ModifiedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Name = "Heir",
+                            NameAr = "وريث"
                         },
                         new
                         {
@@ -3157,8 +3617,8 @@ namespace BOG.DbModel.Migrations
                             IsActive = true,
                             IsDeleted = false,
                             ModifiedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Name = "Waqf",
-                            NameAr = "وقف"
+                            Name = "BankruptEstate",
+                            NameAr = "تفليسة"
                         });
                 });
 
@@ -3202,7 +3662,7 @@ namespace BOG.DbModel.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Regions");
+                    b.ToTable("Regions", (string)null);
 
                     b.HasData(
                         new
@@ -3390,7 +3850,7 @@ namespace BOG.DbModel.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("RepresentativeTypes");
+                    b.ToTable("RepresentativeTypes", (string)null);
 
                     b.HasData(
                         new
@@ -3482,26 +3942,6 @@ namespace BOG.DbModel.Migrations
                             ModifiedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             Name = "LegalRepresentative",
                             NameAr = "ممثل نظامي"
-                        },
-                        new
-                        {
-                            Id = 10,
-                            CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            IsActive = true,
-                            IsDeleted = false,
-                            ModifiedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Name = "Liquidator",
-                            NameAr = "مصفي"
-                        },
-                        new
-                        {
-                            Id = 11,
-                            CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            IsActive = true,
-                            IsDeleted = false,
-                            ModifiedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Name = "JudicialCustodian",
-                            NameAr = "حارس قضائي"
                         });
                 });
 
@@ -3548,7 +3988,7 @@ namespace BOG.DbModel.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("RequestStatuses");
+                    b.ToTable("RequestStatuses", (string)null);
 
                     b.HasData(
                         new
@@ -3709,11 +4149,79 @@ namespace BOG.DbModel.Migrations
                         .IsUnique()
                         .HasFilter("[IsDeleted] = 0");
 
-                    b.ToTable("Users");
+                    b.ToTable("Users", (string)null);
+                });
+
+            modelBuilder.Entity("BOG.DbModel.Entities.CaseRegistration.AdditionalInfo", b =>
+                {
+                    b.HasOne("BOG.DbModel.Entities.CaseRegistration.CaseRegistrationRequest", "CaseRegistrationRequest")
+                        .WithMany()
+                        .HasForeignKey("CaseRegistrationRequestId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("CaseRegistrationRequest");
+                });
+
+            modelBuilder.Entity("BOG.DbModel.Entities.CaseRegistration.AdditionalInfoManagementDecision", b =>
+                {
+                    b.HasOne("BOG.DbModel.Entities.CaseRegistration.AdditionalInfo", "AdditionalInfo")
+                        .WithOne("ManagementDecision")
+                        .HasForeignKey("BOG.DbModel.Entities.CaseRegistration.AdditionalInfoManagementDecision", "AdditionalInfoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("BOG.DbModel.Entities.Lookups.GovernmentEntity", "IssuingAuthority")
+                        .WithMany()
+                        .HasForeignKey("IssuingAuthorityId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("BOG.DbModel.Entities.Lookups.NotificationMethod", "NotificationMethod")
+                        .WithMany()
+                        .HasForeignKey("NotificationMethodId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("AdditionalInfo");
+
+                    b.Navigation("IssuingAuthority");
+
+                    b.Navigation("NotificationMethod");
+                });
+
+            modelBuilder.Entity("BOG.DbModel.Entities.CaseRegistration.AdditionalInfoServiceRights", b =>
+                {
+                    b.HasOne("BOG.DbModel.Entities.CaseRegistration.AdditionalInfo", "AdditionalInfo")
+                        .WithOne("ServiceRights")
+                        .HasForeignKey("BOG.DbModel.Entities.CaseRegistration.AdditionalInfoServiceRights", "AdditionalInfoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("BOG.DbModel.Entities.Lookups.GovernmentEntity", "ComplaintAuthority")
+                        .WithMany()
+                        .HasForeignKey("ComplaintAuthorityId");
+
+                    b.Navigation("AdditionalInfo");
+
+                    b.Navigation("ComplaintAuthority");
+                });
+
+            modelBuilder.Entity("BOG.DbModel.Entities.CaseRegistration.AdditionalInfoTrademark", b =>
+                {
+                    b.HasOne("BOG.DbModel.Entities.CaseRegistration.AdditionalInfo", "AdditionalInfo")
+                        .WithOne("Trademark")
+                        .HasForeignKey("BOG.DbModel.Entities.CaseRegistration.AdditionalInfoTrademark", "AdditionalInfoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("AdditionalInfo");
                 });
 
             modelBuilder.Entity("BOG.DbModel.Entities.CaseRegistration.CaseRegistrationRequest", b =>
                 {
+                    b.HasOne("BOG.DbModel.Entities.Lookups.CaseType", "CaseType")
+                        .WithMany()
+                        .HasForeignKey("CaseTypeId");
+
                     b.HasOne("BOG.DbModel.Entities.Identity.Court", "Court")
                         .WithMany()
                         .HasForeignKey("CourtId")
@@ -3735,6 +4243,8 @@ namespace BOG.DbModel.Migrations
                         .HasForeignKey("RequestStatusId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+
+                    b.Navigation("CaseType");
 
                     b.Navigation("Court");
 
@@ -3803,8 +4313,7 @@ namespace BOG.DbModel.Migrations
 
                     b.HasOne("BOG.DbModel.Entities.Lookups.Country", "Country")
                         .WithMany()
-                        .HasForeignKey("CountryId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .HasForeignKey("CountryId");
 
                     b.HasOne("BOG.DbModel.Entities.Lookups.DataSource", "DataSource")
                         .WithMany()
@@ -3829,58 +4338,47 @@ namespace BOG.DbModel.Migrations
 
                     b.HasOne("BOG.DbModel.Entities.Lookups.City", "IndCity")
                         .WithMany()
-                        .HasForeignKey("IndCityId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .HasForeignKey("IndCityId");
 
                     b.HasOne("BOG.DbModel.Entities.Lookups.Region", "IndRegion")
                         .WithMany()
-                        .HasForeignKey("IndRegionId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .HasForeignKey("IndRegionId");
 
                     b.HasOne("BOG.DbModel.Entities.Lookups.LicenseSource", "LicenseSource")
                         .WithMany()
-                        .HasForeignKey("LicenseSourceId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .HasForeignKey("LicenseSourceId");
 
                     b.HasOne("BOG.DbModel.Entities.Lookups.City", "NGOCity")
                         .WithMany()
-                        .HasForeignKey("NGOCityId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .HasForeignKey("NGOCityId");
 
                     b.HasOne("BOG.DbModel.Entities.Lookups.Region", "NGORegion")
                         .WithMany()
-                        .HasForeignKey("NGORegionId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .HasForeignKey("NGORegionId");
 
                     b.HasOne("BOG.DbModel.Entities.Lookups.City", "RegCompanyCity")
                         .WithMany()
-                        .HasForeignKey("RegCompanyCityId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .HasForeignKey("RegCompanyCityId");
 
                     b.HasOne("BOG.DbModel.Entities.Lookups.Region", "RegCompanyRegion")
                         .WithMany()
-                        .HasForeignKey("RegCompanyRegionId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .HasForeignKey("RegCompanyRegionId");
 
                     b.HasOne("BOG.DbModel.Entities.Lookups.City", "WaqfCity")
                         .WithMany()
-                        .HasForeignKey("WaqfCityId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .HasForeignKey("WaqfCityId");
 
                     b.HasOne("BOG.DbModel.Entities.Lookups.Region", "WaqfRegion")
                         .WithMany()
-                        .HasForeignKey("WaqfRegionId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .HasForeignKey("WaqfRegionId");
 
                     b.HasOne("BOG.DbModel.Entities.Lookups.City", "WorkCity")
                         .WithMany()
-                        .HasForeignKey("WorkCityId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .HasForeignKey("WorkCityId");
 
                     b.HasOne("BOG.DbModel.Entities.Lookups.Region", "WorkRegion")
                         .WithMany()
-                        .HasForeignKey("WorkRegionId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .HasForeignKey("WorkRegionId");
 
                     b.Navigation("Address");
 
@@ -4039,14 +4537,13 @@ namespace BOG.DbModel.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("BOG.DbModel.Entities.Lookups.Court", "Court")
+                    b.HasOne("BOG.DbModel.Entities.Identity.Court", "Court")
                         .WithMany()
-                        .HasForeignKey("CourtId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
-                    b.Navigation("Request");
+                        .HasForeignKey("CourtId");
 
                     b.Navigation("Court");
+
+                    b.Navigation("Request");
                 });
 
             modelBuilder.Entity("BOG.DbModel.Entities.CaseRegistration.Representative", b =>
@@ -4129,6 +4626,33 @@ namespace BOG.DbModel.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("BOG.DbModel.Entities.Lookups.Classification", "Classification")
+                        .WithMany()
+                        .HasForeignKey("ClassificationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Classification");
+
+                    b.Navigation("Request");
+                });
+
+            modelBuilder.Entity("BOG.DbModel.Entities.CaseRegistration.RequestDeficiency", b =>
+                {
+                    b.HasOne("BOG.DbModel.Entities.CaseRegistration.CaseRegistrationRequest", "Request")
+                        .WithMany("Deficiencies")
+                        .HasForeignKey("CaseRegistrationRequestId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("BOG.DbModel.Entities.Lookups.DeficiencyDescription", "DeficiencyDescription")
+                        .WithMany("RequestDeficiencies")
+                        .HasForeignKey("DeficiencyDescriptionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("DeficiencyDescription");
+
                     b.Navigation("Request");
                 });
 
@@ -4136,13 +4660,11 @@ namespace BOG.DbModel.Migrations
                 {
                     b.HasOne("BOG.DbModel.Entities.Lookups.City", "City_")
                         .WithMany()
-                        .HasForeignKey("CityId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .HasForeignKey("CityId");
 
                     b.HasOne("BOG.DbModel.Entities.Lookups.Region", "Region")
                         .WithMany()
-                        .HasForeignKey("RegionId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .HasForeignKey("RegionId");
 
                     b.Navigation("City_");
 
@@ -4209,6 +4731,17 @@ namespace BOG.DbModel.Migrations
                     b.Navigation("Region");
                 });
 
+            modelBuilder.Entity("BOG.DbModel.Entities.Lookups.DeficiencyDescription", b =>
+                {
+                    b.HasOne("BOG.DbModel.Entities.Lookups.DeficiencyType", "DeficiencyType")
+                        .WithMany("Descriptions")
+                        .HasForeignKey("DeficiencyTypeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("DeficiencyType");
+                });
+
             modelBuilder.Entity("BOG.DbModel.Entities.Lookups.District", b =>
                 {
                     b.HasOne("BOG.DbModel.Entities.Lookups.City", "City")
@@ -4218,6 +4751,15 @@ namespace BOG.DbModel.Migrations
                         .IsRequired();
 
                     b.Navigation("City");
+                });
+
+            modelBuilder.Entity("BOG.DbModel.Entities.CaseRegistration.AdditionalInfo", b =>
+                {
+                    b.Navigation("ManagementDecision");
+
+                    b.Navigation("ServiceRights");
+
+                    b.Navigation("Trademark");
                 });
 
             modelBuilder.Entity("BOG.DbModel.Entities.CaseRegistration.CaseRegistrationRequest", b =>
@@ -4231,6 +4773,8 @@ namespace BOG.DbModel.Migrations
                     b.Navigation("Claims");
 
                     b.Navigation("Classifications");
+
+                    b.Navigation("Deficiencies");
 
                     b.Navigation("RelatedCases");
                 });
@@ -4267,6 +4811,16 @@ namespace BOG.DbModel.Migrations
             modelBuilder.Entity("BOG.DbModel.Entities.Identity.Role", b =>
                 {
                     b.Navigation("UserRoles");
+                });
+
+            modelBuilder.Entity("BOG.DbModel.Entities.Lookups.DeficiencyDescription", b =>
+                {
+                    b.Navigation("RequestDeficiencies");
+                });
+
+            modelBuilder.Entity("BOG.DbModel.Entities.Lookups.DeficiencyType", b =>
+                {
+                    b.Navigation("Descriptions");
                 });
 
             modelBuilder.Entity("BOG.DbModel.Entities.Lookups.Region", b =>

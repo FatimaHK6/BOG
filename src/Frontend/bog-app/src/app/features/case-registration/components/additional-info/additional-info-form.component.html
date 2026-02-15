@@ -1,4 +1,17 @@
-<app-section-container title="معلومات إضافية" sectionId="additional-info" icon="info">
+<app-section-container
+  title="معلومات إضافية"
+  sectionId="additional-info"
+  [showActions]="canEdit && !loading">
+
+  <!-- استكمال النواقص button in header -->
+  <button slot="header-actions"
+          mat-raised-button
+          class="deficiency-button"
+          (click)="openDeficiencyDialog()"
+          *ngIf="canEdit && !loading">
+    استكمال النواقص
+  </button>
+
   <div *ngIf="loading" class="loading-spinner">
     <mat-spinner diameter="30"></mat-spinner>
     <span>جاري التحميل...</span>

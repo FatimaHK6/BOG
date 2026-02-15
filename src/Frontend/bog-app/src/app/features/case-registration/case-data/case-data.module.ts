@@ -25,6 +25,10 @@ import { AttachmentsListComponent } from '../components/attachments/attachments-
 import { DefendantsListComponent } from '../components/defendants/defendants-list/defendants-list.component';
 import { DefendantFormDialogComponent } from '../components/defendants/defendant-form-dialog/defendant-form-dialog.component';
 
+// Deficiencies components
+import { DeficienciesListComponent } from '../components/deficiencies/deficiencies-list.component';
+import { DeficiencyFormDialogComponent } from '../components/deficiencies/deficiency-form-dialog.component';
+
 @NgModule({
   declarations: [
     CaseDataFormComponent,
@@ -39,14 +43,18 @@ import { DefendantFormDialogComponent } from '../components/defendants/defendant
     RelatedCaseFormDialogComponent,
     AttachmentsListComponent,
     DefendantsListComponent,
-    DefendantFormDialogComponent
+    DefendantFormDialogComponent,
+    DeficienciesListComponent,
+    DeficiencyFormDialogComponent
   ],
   imports: [CaseRegistrationSharedModule, NgxEditorModule],
   exports: [
     CaseDataContainerComponent,
     CaseDataFormComponent,
     DefendantsListComponent,
-    DefendantFormDialogComponent
+    DefendantFormDialogComponent,
+    DeficienciesListComponent,
+    DeficiencyFormDialogComponent
   ]
 })
 export class CaseDataModule { }

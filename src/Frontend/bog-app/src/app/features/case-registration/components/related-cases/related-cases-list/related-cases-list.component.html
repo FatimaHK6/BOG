@@ -1,11 +1,29 @@
-<div dir="rtl">
-  <!-- Add Button -->
-  <div class="section-actions" *ngIf="canEdit">
-    <button mat-raised-button class="gold-button" (click)="openAddRelatedCase()">
-      <mat-icon>add</mat-icon>
-      إضافة دعوى مرتبطة
-    </button>
-  </div>
+<app-section-container
+  title="قائمة الدعاوي المرتبطة"
+  sectionId="related-cases"
+  [showActions]="canEdit">
+
+  <!-- استكمال النواقص button in header -->
+  <button slot="header-actions"
+          mat-raised-button
+          class="deficiency-button"
+          (click)="openDeficiencyDialog()"
+          *ngIf="canEdit">
+    استكمال النواقص
+  </button>
+
+  <!-- Add button in header -->
+  <button slot="header-actions"
+          mat-raised-button
+          class="gold-button"
+          (click)="openAddRelatedCase()"
+          *ngIf="canEdit">
+    <mat-icon>add</mat-icon>
+    إضافة دعوى مرتبطة
+  </button>
+
+  <!-- Content area -->
+  <div dir="rtl">
 
   <!-- Validation Error -->
   <app-validation-message
@@ -72,5 +90,6 @@
   <div class="loading-state" *ngIf="loading">
     <mat-spinner diameter="40"></mat-spinner>
   </div>
-</div>
+  </div>
+</app-section-container>
 

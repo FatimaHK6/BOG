@@ -1,10 +1,12 @@
 using BOG.BL.Interfaces.CaseRegistration;
 using BOG.DAL.Interfaces;
+using BOG.DbModel;
 using BOG.DbModel.Entities.CaseRegistration;
 using BOG.DbModel.Entities.Lookups;
 using BOG.DTO.CaseRegistration;
 using BOG.VM.CaseRegistration;
 using BOG.VM.Shared;
+using Microsoft.EntityFrameworkCore;
 
 namespace BOG.BL.Services.CaseRegistration;
 
@@ -19,17 +21,20 @@ public class CaseRegistrationBL : ICaseRegistrationBL
     private readonly IRepository<AttachmentType> _attachmentTypeRepository;
     private readonly IRepository<Classification> _classificationRepository;
     private readonly IUnitOfWork _unitOfWork;
+    private readonly ApplicationDbContext _context;
 
     public CaseRegistrationBL(
         ICaseRegistrationRequestRepository requestRepository,
         IRepository<AttachmentType> attachmentTypeRepository,
         IRepository<Classification> classificationRepository,
-        IUnitOfWork unitOfWork)
+        IUnitOfWork unitOfWork,
+        ApplicationDbContext context)
     {
         _requestRepository = requestRepository ?? throw new ArgumentNullException(nameof(requestRepository));
         _attachmentTypeRepository = attachmentTypeRepository ?? throw new ArgumentNullException(nameof(attachmentTypeRepository));
         _classificationRepository = classificationRepository ?? throw new ArgumentNullException(nameof(classificationRepository));
         _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
+        _context = context ?? throw new ArgumentNullException(nameof(context));
     }
 
     /// <summary>
@@ -232,7 +237,8 @@ public class CaseRegistrationBL : ICaseRegistrationBL
             }
         }
 
-        // Handle classifications update
+        // Handle classifications update with differential logic
+        List<int> newClassificationIds = new List<int>();
         if (requestDict.ContainsKey("classificationIds"))
         {
             var classificationIds = requestDict["classificationIds"] as System.Collections.IEnumerable;
@@ -247,67 +253,60 @@ public class CaseRegistrationBL : ICaseRegistrationBL
                     }
                 }
 
-                if (idList.Any())
+                // VALIDATE: Ensure all classification IDs exist and are active
+                var validClassifications = await _classificationRepository.FindAsync(
+                    c => idList.Contains(c.Id) && c.IsActive && !c.IsDeleted,
+                    cancellationToken);
+
+                var validIds = validClassifications.Select(c => c.Id).ToHashSet();
+                var invalidIds = idList.Where(id => !validIds.Contains(id)).ToList();
+
+                if (invalidIds.Any())
                 {
-                    // VALIDATE: Ensure all classification IDs exist and are active
-                    var validClassifications = await _classificationRepository.FindAsync(
-                        c => idList.Contains(c.Id) && c.IsActive && !c.IsDeleted,
-                        cancellationToken);
-
-                    var validIds = validClassifications.Select(c => c.Id).ToHashSet();
-                    var invalidIds = idList.Where(id => !validIds.Contains(id)).ToList();
-
-                    if (invalidIds.Any())
-                    {
-                        throw new InvalidOperationException(
-                            $"معرفات التصنيف غير صالحة: {string.Join(", ", invalidIds)}");
-                    }
-
-                    // Ensure Classifications collection exists
-                    if (request.Classifications == null)
-                    {
-                        request.Classifications = new List<RequestClassification>();
-                    }
-
-                    // Soft delete all existing classifications
-                    foreach (var classification in request.Classifications)
-                    {
-                        classification.IsDeleted = true;
-                    }
-
-                    // Add new classifications with proper foreign keys
-                    int displayOrder = 0;
-                    foreach (var classificationId in idList)
-                    {
-                        var newClassification = new RequestClassification
-                        {
-                            CaseRegistrationRequestId = request.Id,
-                            ClassificationId = classificationId,
-                            DisplayOrder = displayOrder++,
-                            CreatedDate = DateTime.UtcNow,
-                            ModifiedDate = DateTime.UtcNow,
-                            IsDeleted = false
-                        };
-                        request.Classifications.Add(newClassification);
-                    }
+                    throw new InvalidOperationException(
+                        $"معرفات التصنيف غير صالحة: {string.Join(", ", invalidIds)}");
                 }
-                else
-                {
-                    // Empty list: soft delete all classifications
-                    if (request.Classifications != null)
-                    {
-                        foreach (var classification in request.Classifications)
-                        {
-                            classification.IsDeleted = true;
-                        }
-                    }
-                    else
-                    {
-                        // Ensure collection exists even if empty
-                        request.Classifications = new List<RequestClassification>();
-                    }
-                }
+
+                newClassificationIds = idList.Distinct().ToList();
             }
+        }
+
+        // Apply differential update to classifications
+        // Load existing classifications (only non-deleted)
+        var existingClassifications = await _context.RequestClassifications
+            .Where(rc => rc.CaseRegistrationRequestId == requestId && !rc.IsDeleted)
+            .ToListAsync(cancellationToken);
+
+        var existingClassificationIds = existingClassifications
+            .Select(rc => rc.ClassificationId)
+            .ToHashSet();
+
+        var newClassificationIdSet = newClassificationIds.ToHashSet();
+
+        // Remove classifications that are no longer selected
+        var classificationsToRemove = existingClassifications
+            .Where(rc => !newClassificationIdSet.Contains(rc.ClassificationId))
+            .ToList();
+
+        if (classificationsToRemove.Any())
+        {
+            _context.RequestClassifications.RemoveRange(classificationsToRemove);
+        }
+
+        // Add new classifications that don't already exist
+        var classificationsToAdd = newClassificationIdSet
+            .Where(cid => !existingClassificationIds.Contains(cid))
+            .Select(cid => new RequestClassification
+            {
+                CaseRegistrationRequestId = requestId,
+                ClassificationId = cid,
+                DisplayOrder = 0
+            })
+            .ToList();
+
+        if (classificationsToAdd.Any())
+        {
+            await _context.RequestClassifications.AddRangeAsync(classificationsToAdd, cancellationToken);
         }
 
         // Update contact information if provided

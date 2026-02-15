@@ -1,3 +1,4 @@
+using BOG.DTO.CaseRegistration;
 using BOG.VM.CaseRegistrationRequest;
 
 namespace BOG.BL.Interfaces;
@@ -33,7 +34,15 @@ public interface ICaseRegistrationRequestBL
     Task DeleteAsync(int id, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Updates a request (saves as draft).
+    /// Updates a case registration request.
     /// </summary>
-    Task<CaseRegistrationRequestVM?> UpdateAsync(int id, bool saveAsDraft, CancellationToken cancellationToken = default);
+    /// <param name="id">Request ID</param>
+    /// <param name="dto">Update data</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>Updated request or null if not found</returns>
+    /// <exception cref="InvalidOperationException">If request cannot be updated (wrong status)</exception>
+    Task<CaseRegistrationRequestVM?> UpdateAsync(
+        int id,
+        CaseRegistrationUpdateDTO dto,
+        CancellationToken cancellationToken = default);
 }

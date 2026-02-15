@@ -1,15 +1,23 @@
-<div dir="rtl" class="classifications-tab-container">
+<app-section-container
+  title="قائمة التصنيف"
+  sectionId="classifications"
+  [showActions]="canEdit">
 
-  <!-- Add Button -->
-  <div class="section-actions" *ngIf="canEdit">
-    <button mat-raised-button class="gold-button" (click)="openSelectionDialog()">
-      <mat-icon>add</mat-icon>
-      إضافة تصنيف
-    </button>
-  </div>
+  <!-- Add button in header -->
+  <button slot="header-actions"
+          mat-raised-button
+          class="gold-button"
+          (click)="openSelectionDialog()"
+          *ngIf="canEdit">
+    <mat-icon>add</mat-icon>
+    إضافة تصنيف
+  </button>
 
-  <!-- Selected Classifications Table -->
-  <div class="table-container" *ngIf="selectedClassifications.length > 0">
+  <!-- Content area -->
+  <div class="classifications-tab-container">
+
+    <!-- Selected Classifications Table -->
+    <div class="table-container" *ngIf="selectedClassifications.length > 0">
     <table mat-table [dataSource]="selectedClassifications" class="classifications-table">
 
       <!-- Level 1 Column -->
@@ -77,10 +85,5 @@
     <p>جاري تحميل التصنيفات...</p>
   </div>
 
-  <!-- Info Box -->
-  <div class="info-box" *ngIf="canEdit">
-    <mat-icon>info</mat-icon>
-    <span>يمكنك اختيار عدة تصنيفات للدعوى من مستويات هرمية مختلفة</span>
   </div>
-
-</div>
+</app-section-container>

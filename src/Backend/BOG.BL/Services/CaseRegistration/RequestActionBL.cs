@@ -101,7 +101,7 @@ public class RequestActionBL : IRequestActionBL
         if (requestId <= 0)
             throw new ArgumentException("Invalid request ID.", nameof(requestId));
 
-        var request = await _requestRepository.GetWithDetailsAsync(requestId, cancellationToken);
+        var request = await _requestRepository.GetWithDetailsForUpdateAsync(requestId, cancellationToken);
         if (request == null)
             throw new InvalidOperationException($"Request {requestId} not found.");
 
@@ -177,7 +177,7 @@ public class RequestActionBL : IRequestActionBL
         if (string.IsNullOrWhiteSpace(rejectionReason))
             throw new ArgumentException("Rejection reason is required.", nameof(rejectionReason));
 
-        var request = await _requestRepository.GetWithDetailsAsync(requestId, cancellationToken);
+        var request = await _requestRepository.GetWithDetailsForUpdateAsync(requestId, cancellationToken);
         if (request == null)
             throw new InvalidOperationException($"Request {requestId} not found.");
 
@@ -204,7 +204,7 @@ public class RequestActionBL : IRequestActionBL
         if (requestId <= 0)
             throw new ArgumentException("Invalid request ID.", nameof(requestId));
 
-        var request = await _requestRepository.GetWithDetailsAsync(requestId, cancellationToken);
+        var request = await _requestRepository.GetWithDetailsForUpdateAsync(requestId, cancellationToken);
         if (request == null)
             throw new InvalidOperationException($"Request {requestId} not found.");
 
@@ -232,7 +232,7 @@ public class RequestActionBL : IRequestActionBL
         if (requestId <= 0)
             throw new ArgumentException("Invalid request ID.", nameof(requestId));
 
-        var request = await _requestRepository.GetByIdAsync(requestId, cancellationToken);
+        var request = await _requestRepository.GetWithDetailsForUpdateAsync(requestId, cancellationToken);
         if (request == null)
             throw new InvalidOperationException($"Request {requestId} not found.");
 
@@ -255,7 +255,7 @@ public class RequestActionBL : IRequestActionBL
         if (requestId <= 0)
             throw new ArgumentException("Invalid request ID.", nameof(requestId));
 
-        var request = await _requestRepository.GetByIdAsync(requestId, cancellationToken);
+        var request = await _requestRepository.GetWithDetailsForUpdateAsync(requestId, cancellationToken);
         if (request == null)
             throw new InvalidOperationException($"Request {requestId} not found.");
 

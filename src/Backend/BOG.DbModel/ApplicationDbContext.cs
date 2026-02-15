@@ -786,7 +786,6 @@ public class ApplicationDbContext : DbContext
         modelBuilder.Entity<RequestClassification>(entity =>
         {
             entity.HasKey(e => e.Id);
-            entity.Property(e => e.ClassificationText).IsRequired().HasMaxLength(500);
             entity.Property(e => e.IsDeleted).HasDefaultValue(false);
 
             entity.HasOne(e => e.Request)
@@ -1139,12 +1138,18 @@ public class ApplicationDbContext : DbContext
         modelBuilder.Entity<AdditionalInfoServiceRights>(entity =>
         {
             entity.HasKey(e => e.Id);
+            entity.ToTable("AdditionalInfoServiceRightses");
             entity.Property(e => e.IsDeleted).HasDefaultValue(false);
 
             entity.HasOne(e => e.AdditionalInfo)
                 .WithOne(a => a.ServiceRights)
                 .HasForeignKey<AdditionalInfoServiceRights>(e => e.AdditionalInfoId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(e => e.ComplaintAuthority)
+                .WithMany()
+                .HasForeignKey(e => e.ComplaintAuthorityId)
+                .OnDelete(DeleteBehavior.Restrict);
         });
 
         // AdditionalInfoTrademark

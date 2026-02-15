@@ -2,20 +2,20 @@
   padding: 24px;
   background: #fafafa;
 
-  .se-form { display: flex; flex-direction: column; gap: 32px; }
-
-  .form-section {
+  app-section-container {
     display: flex;
     flex-direction: column;
     gap: 12px;
-    .section-label {
-      font-weight: 600;
-      font-size: 1rem;
-      color: #333;
-      margin-bottom: 8px;
-      text-align: right;
-      padding-bottom: 8px;
-      border-bottom: 2px solid #e0e0e0;
+  }
+
+  .deficiency-button {
+    background-color: #C4A35A !important;
+    color: white !important;
+    white-space: nowrap;
+    flex-shrink: 0;
+
+    &:hover {
+      background-color: #B8963E !important;
     }
   }
 
@@ -97,8 +97,7 @@
 @media (max-width: 767px) {
   .subject-evidence-container {
     padding: 16px;
-    .se-form { gap: 24px; }
-    .form-section { gap: 10px; .section-label { font-size: 0.95rem; margin-bottom: 6px; } }
+    app-section-container { gap: 10px; }
     .editor-wrapper ::ng-deep {
       .NgxEditor__Toolbar { padding: 6px; button { margin: 1px; font-size: 12px; } }
       .ProseMirror { padding: 12px; min-height: 180px; font-size: 13px; }

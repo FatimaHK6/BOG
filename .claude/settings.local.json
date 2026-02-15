@@ -20,7 +20,16 @@
       "Bash(find:*)",
       "Bash(powershell:*)",
       "Bash(/c/WINDOWS/System32/WindowsPowerShell/v1.0/powershell << 'PSCRIPT'\n# File 3: defendant-gov-form.component.ts\n$file3 = \"C:\\\\Users\\\\Lenovo\\\\Desktop\\\\Claude\\\\BOG - Copy\\\\src\\\\Frontend\\\\bog-app\\\\src\\\\app\\\\features\\\\case-registration\\\\defendants\\\\components\\\\defendant-gov-form\\\\defendant-gov-form.component.ts\"\n$content = Get-Content $file3 -Raw\n\n$content = $content -replace 'import \\\\{ Component, OnInit \\\\}', 'import { Component, OnInit, Input, Output, EventEmitter }'\n$content = $content -replace \"import \\\\{ ActivatedRoute, Router \\\\} from '@angular/router';\\\\s*\", \"\"\n\n$content = $content -replace 'requestId: number = 0;', \"@Input\\(\\) requestId: number = 0;\"\n$content = $content -replace 'defendantId: number = 0;', \"@Input\\(\\) defendantId: number | null = null;\"\n\n$content = $content -replace \"\\(@Input\\\\\\(\\\\\\) defendantId: number \\\\| null = null;\\)\", \n    \"`$1`n  @Input\\(\\) mode: 'add' | 'edit' | 'view' = 'add';`n`n  @Output\\(\\) saved = new EventEmitter<void>\\(\\);`n  @Output\\(\\) cancelled = new EventEmitter<void>\\(\\);\"\n\n$content = $content -replace \"private router: Router,\\\\s+private route: ActivatedRoute,\\\\s+\", \"\"\n\n$pattern = \"this\\\\.route\\\\.queryParams\\\\.subscribe\\\\\\(.*?\\\\}\\\\\\);\\\\s+this\\\\.route\\\\.params\\\\.subscribe\\\\\\(.*?\\\\}\\\\\\);\\\\s+\"\n$replacement = \"this.isViewMode = this.mode === 'view';`n    this.isEditMode = this.mode === 'edit';`n    \"\n$content = $content -replace $pattern, $replacement\n\n$content = $content -replace \"this\\\\.router\\\\.navigate\\\\\\(\\\\['/case-registration/defendants'\\\\], \\\\{\\\\s+queryParams: \\\\{ requestId: this\\\\.requestId \\\\}\\\\s+\\\\}\\\\\\);\", \"this.saved.emit\\(\\);\"\n\n$content = $content -replace \"onCancel\\\\\\(\\\\\\): void \\\\{\\\\s+this\\\\.router\\\\.navigate\\\\\\(\\\\['/case-registration/defendants'\\\\], \\\\{\\\\s+queryParams: \\\\{ requestId: this\\\\.requestId \\\\}\\\\s+\\\\}\\\\\\);\\\\s+\\\\}\", \"onCancel\\(\\): void {`n    this.cancelled.emit\\(\\);`n  }\"\n\nSet-Content $file3 $content\nWrite-Host \"Updated: defendant-gov-form.component.ts\"\nPSCRIPT)",
-      "Bash(pkill:*)"
+      "Bash(pkill:*)",
+      "Bash(curl:*)",
+      "Bash(dotnet run:*)",
+      "Bash(sqllocaldb stop:*)",
+      "Bash(wmic process where processid=28552 delete)",
+      "Bash(Stop-Process -Id 14948 -Force -ErrorAction SilentlyContinue)",
+      "Bash(Start-Sleep -Seconds 2)",
+      "Bash(Write-Host \"Process stopped\")",
+      "Bash(wmic process where \"ProcessId=14948\" delete /nointeractive)",
+      "Bash(kill:*)"
     ]
   }
 }

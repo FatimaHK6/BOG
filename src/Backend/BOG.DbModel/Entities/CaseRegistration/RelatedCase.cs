@@ -15,7 +15,7 @@ public class RelatedCase : BaseEntity
     /// <summary>
     /// Related case number (رقم القضية المرتبطة).
     /// </summary>
-    public long CaseNumber { get; set; }
+    public int CaseNumber { get; set; }
 
     /// <summary>
     /// Case year for the related case.

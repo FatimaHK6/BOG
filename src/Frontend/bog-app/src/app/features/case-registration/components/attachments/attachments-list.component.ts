@@ -1,7 +1,13 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnInit, OnDestroy } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatDialog } from '@angular/material/dialog';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 import { AttachmentApiService, RequestAttachmentVM, RequestAttachmentCreateDTO, AttachmentTypeVM } from '../../services/attachment-api.service';
 import { RequestStateService } from '../../services/request-state.service';
+import { DeficienciesApiService } from '../../services/deficiencies-api.service';
+import { RequestDeficiencyDTO, DeficienciesBatchUpdateDTO } from '../../models/deficiency.model';
+import { DeficiencyFormDialogComponent } from '../deficiencies/deficiency-form-dialog.component';
 
 @Component({
   selector: 'app-attachments-list',
@@ -9,7 +15,35 @@ import { RequestStateService } from '../../services/request-state.service';
     <app-section-container
       title="المرفقات"
       sectionId="attachments"
-      icon="attach_file">
+      [showActions]="canEdit">
+
+      <!-- Action buttons in header -->
+      <!-- استكمال النواقص FIRST (appears on RIGHT in RTL) -->
+      <button slot="header-actions"
+              mat-raised-button
+              class="deficiency-button"
+              (click)="openDeficiencyDialog()"
+              *ngIf="canEdit">
+        استكمال النواقص
+      </button>
+
+      <!-- Add/Cancel buttons AFTER (appear on LEFT in RTL) -->
+      <button slot="header-actions"
+              mat-raised-button
+              class="gold-button"
+              (click)="toggleUploadForm()"
+              *ngIf="canEdit && !showUploadForm">
+        <mat-icon>add</mat-icon>
+        إضافة مرفق
+      </button>
+
+      <button slot="header-actions"
+              mat-button
+              (click)="toggleUploadForm()"
+              *ngIf="canEdit && showUploadForm">
+        <mat-icon>close</mat-icon>
+        إلغاء
+      </button>
 
       <div class="attachments-section">
         <!-- Validation Message -->
@@ -18,18 +52,6 @@ import { RequestStateService } from '../../services/request-state.service';
           type="error"
           message="ERR003: المرفقات الإلزامية مفقودة">
         </app-validation-message>
-
-        <!-- Add Attachment Button -->
-        <div class="add-attachment-section" *ngIf="canEdit">
-          <button mat-raised-button color="primary" (click)="toggleUploadForm()" *ngIf="!showUploadForm">
-            <mat-icon>add</mat-icon>
-            إضافة مرفق
-          </button>
-          <button mat-button (click)="toggleUploadForm()" *ngIf="showUploadForm">
-            <mat-icon>close</mat-icon>
-            إلغاء
-          </button>
-        </div>
 
         <!-- File Upload (BR04: PDF only, max 4MB) -->
         <div class="upload-section" *ngIf="canEdit && showUploadForm">
@@ -51,7 +73,7 @@ import { RequestStateService } from '../../services/request-state.service';
           </mat-form-field>
 
           <input #fileInput type="file" accept=".pdf" (change)="onFileSelected($event)" style="display:none">
-          <button mat-raised-button color="primary" (click)="fileInput.click()" [disabled]="uploading">
+          <button mat-raised-button class="gold-button" (click)="fileInput.click()" [disabled]="uploading">
             <mat-icon *ngIf="!uploading">upload_file</mat-icon>
             <mat-spinner *ngIf="uploading" diameter="20" style="display:inline-block;"></mat-spinner>
             {{ uploading ? 'جاري الرفع...' : 'رفع ملف' }}
@@ -118,6 +140,10 @@ import { RequestStateService } from '../../services/request-state.service';
   `,
   styles: [`
     .attachments-section { padding: 16px 0; }
+    .gold-button { background-color: #C4A35A !important; color: white !important; }
+    .gold-button:hover { background-color: #B8963E !important; }
+    .deficiency-button { background-color: #C4A35A !important; color: white !important; }
+    .deficiency-button:hover { background-color: #B8963E !important; }
     .add-attachment-section { margin: 16px 0; }
     .upload-section { margin: 16px 0; }
     .full-width { width: 100%; margin-bottom: 16px; }
@@ -154,7 +180,7 @@ import { RequestStateService } from '../../services/request-state.service';
     }
   `]
 })
-export class AttachmentsListComponent implements OnInit {
+export class AttachmentsListComponent implements OnInit, OnDestroy {
   @Input() requestId!: number;
   @Input() canEdit = false;
   @Input() showValidation = false;
@@ -169,15 +195,82 @@ export class AttachmentsListComponent implements OnInit {
   showUploadForm = false;
   displayedColumns: string[] = ['type', 'notes', 'attachment'];
 
+  private destroy$ = new Subject<void>();
+
   constructor(
     private snackBar: MatSnackBar,
     private attachmentApi: AttachmentApiService,
-    private requestState: RequestStateService
+    private requestState: RequestStateService,
+    private dialog: MatDialog,
+    private deficienciesApi: DeficienciesApiService
   ) { }
 
   ngOnInit() {
     this.loadAttachmentTypes();
     this.loadAttachments();
+  }
+
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  openDeficiencyDialog() {
+    this.openDeficiencyDialogForType(5); // Type 5 = CaseAttachments
+  }
+
+  private openDeficiencyDialogForType(typeId: number) {
+    const dialogRef = this.dialog.open(DeficiencyFormDialogComponent, {
+      width: '600px',
+      maxWidth: '95vw',
+      direction: 'rtl',
+      data: {
+        mode: 'create',
+        preSelectedTypeId: typeId
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.addDeficiency(result);
+      }
+    });
+  }
+
+  private addDeficiency(newDeficiency: RequestDeficiencyDTO) {
+    // Get current deficiencies
+    this.deficienciesApi.getDeficiencies(this.requestId)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (currentDeficiencies) => {
+          // Add new deficiency to existing ones
+          const existingDescriptionIds = currentDeficiencies.map(d => ({
+            deficiencyDescriptionId: d.deficiencyDescriptionId
+          }));
+
+          const updatedDeficiencies = [...existingDescriptionIds, newDeficiency];
+
+          const dto: DeficienciesBatchUpdateDTO = {
+            deficiencies: updatedDeficiencies
+          };
+
+          this.deficienciesApi.updateDeficiencies(this.requestId, dto)
+            .pipe(takeUntil(this.destroy$))
+            .subscribe({
+              next: () => {
+                this.snackBar.open('تم إضافة النقص بنجاح', 'إغلاق', { duration: 3000 });
+              },
+              error: (error) => {
+                console.error('Error adding deficiency:', error);
+                this.snackBar.open('فشل في إضافة النقص', 'إغلاق', { duration: 3000 });
+              }
+            });
+        },
+        error: (error) => {
+          console.error('Error fetching deficiencies:', error);
+          this.snackBar.open('فشل في جلب النواقص الحالية', 'إغلاق', { duration: 3000 });
+        }
+      });
   }
 
   toggleUploadForm() {
@@ -251,8 +344,8 @@ export class AttachmentsListComponent implements OnInit {
 
       this.attachmentApi.uploadAttachment(this.requestId, dto).subscribe({
         next: (attachment) => {
-          this.attachments.push(attachment);
-          this.updateAttachmentsCount();
+          // Reload attachments to ensure proper display with navigation properties
+          this.loadAttachments();
           this.uploading = false;
           this.snackBar.open('تم رفع الملف بنجاح', 'إغلاق', { duration: 3000 });
           this.resetForm();
