@@ -43,6 +43,30 @@ export interface CaseRegistrationRequestVM {
   createdByUserName: string;
 }
 
+export interface SearchRequestDTO {
+  requestId?: number | null;
+  statusId?: number | null;
+  courtId?: number | null;
+  subject?: string | null;
+  caseNumber?: string | null;
+  createdDateFrom?: string | null;
+  createdDateTo?: string | null;
+  submissionDateFrom?: string | null;
+  submissionDateTo?: string | null;
+  pageNumber: number;
+  pageSize: number;
+  sortBy: string;
+  sortDirection: string;
+}
+
+export interface PagedResult<T> {
+  items: T[];
+  totalCount: number;
+  pageNumber: number;
+  pageSize: number;
+  totalPages: number;
+}
+
 export interface CaseRegistrationRequestCreateDTO {
   subject?: string;
   evidence?: string;
@@ -68,6 +92,7 @@ export interface CaseRegistrationRequestUpdateDTO {
 })
 export class CaseRegistrationRequestService {
   private readonly apiUrl = `${environment.apiUrl}/api/case-registration-requests`;
+  private readonly searchApiUrl = `${environment.apiUrl}/api/case-requests`;
 
   constructor(private http: HttpClient) { }
 
@@ -114,5 +139,10 @@ export class CaseRegistrationRequestService {
   // Submit request
   submit(id: number): Observable<CaseRegistrationRequestVM> {
     return this.http.post<CaseRegistrationRequestVM>(`${this.apiUrl}/${id}/submit`, {});
+  }
+
+  // Search requests with filters and pagination
+  search(dto: SearchRequestDTO): Observable<PagedResult<CaseRegistrationRequestListVM>> {
+    return this.http.post<PagedResult<CaseRegistrationRequestListVM>>(`${this.searchApiUrl}/search`, dto);
   }
 }

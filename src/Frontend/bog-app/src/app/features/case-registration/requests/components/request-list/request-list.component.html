@@ -18,6 +18,8 @@
       <mat-form-field appearance="outline">
         <mat-select [(value)]="filters.submissionMethod" placeholder="اختر">
           <mat-option [value]="null">الكل</mat-option>
+          <mat-option [value]="1">من داخل المحكمة</mat-option>
+          <mat-option [value]="2">من خارج المحكمة</mat-option>
         </mat-select>
       </mat-form-field>
     </div>

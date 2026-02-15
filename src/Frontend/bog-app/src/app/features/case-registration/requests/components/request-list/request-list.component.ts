@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
-import { CaseRegistrationRequestService, CaseRegistrationRequestListVM } from '../../../../../core/services/case-registration-request.service';
+import { CaseRegistrationRequestService, CaseRegistrationRequestListVM, SearchRequestDTO, PagedResult } from '../../../../../core/services/case-registration-request.service';
 import { NotificationService } from '../../../../../core/services/notification.service';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../../../../shared/components/confirm-dialog/confirm-dialog.component';
 
@@ -58,11 +58,33 @@ export class RequestListComponent implements OnInit {
 
   loadRequests(): void {
     this.isLoading = true;
-    this.requestService.getAll().subscribe({
-      next: (requests: CaseRegistrationRequestListVM[]) => {
-        this.requests = requests;
+
+    const requestId = this.filters.requestNumber ? parseInt(this.filters.requestNumber, 10) : null;
+
+    const dto: SearchRequestDTO = {
+      requestId: requestId && !isNaN(requestId) ? requestId : null,
+      statusId: this.filters.statusIds.length > 0 ? this.filters.statusIds[0] : null,
+      courtId: this.filters.courtId,
+      subject: null,
+      caseNumber: null,
+      createdDateFrom: this.filters.requestDate ? this.filters.requestDate.toISOString() : null,
+      createdDateTo: this.filters.requestDate
+        ? new Date(new Date(this.filters.requestDate).setHours(23, 59, 59, 999)).toISOString()
+        : null,
+      submissionDateFrom: null,
+      submissionDateTo: null,
+      pageNumber: this.currentPage,
+      pageSize: this.pageSize,
+      sortBy: 'CreatedDate',
+      sortDirection: 'desc'
+    };
+
+    this.requestService.search(dto).subscribe({
+      next: (result: PagedResult<CaseRegistrationRequestListVM>) => {
+        this.requests = result.items;
+        this.totalRequests = result.totalCount;
+        this.totalPages = result.totalPages || 1;
         this.calculateStatistics();
-        this.totalPages = Math.ceil(this.requests.length / this.pageSize) || 1;
         this.isLoading = false;
       },
       error: (error: any) => {
@@ -73,7 +95,6 @@ export class RequestListComponent implements OnInit {
   }
 
   calculateStatistics(): void {
-    this.totalRequests = this.requests.length;
     this.administrativeCount = this.requests.filter(r => r.caseTypeId === 1).length;
     this.disciplinaryCount = this.requests.filter(r => r.caseTypeId === 2).length;
   }
@@ -148,8 +169,7 @@ export class RequestListComponent implements OnInit {
   }
 
   onSearch(): void {
-    // TODO: Implement API search with filters
-    console.log('Searching with filters:', this.filters);
+    this.currentPage = 1;
     this.loadRequests();
   }
 
@@ -162,6 +182,8 @@ export class RequestListComponent implements OnInit {
       requestNumber: '',
       requestDate: null
     };
+    this.currentPage = 1;
+    this.loadRequests();
   }
 
   // Pagination methods
@@ -183,18 +205,20 @@ export class RequestListComponent implements OnInit {
 
   onPageChange(page: number): void {
     this.currentPage = page;
-    // TODO: Implement pagination API call
+    this.loadRequests();
   }
 
   onPreviousPage(): void {
     if (this.currentPage > 1) {
       this.currentPage--;
+      this.loadRequests();
     }
   }
 
   onNextPage(): void {
     if (this.currentPage < this.totalPages) {
       this.currentPage++;
+      this.loadRequests();
     }
   }
 

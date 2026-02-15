@@ -52,10 +52,26 @@ public class SearchRequestDTO
     public string? DefendantName { get; set; }
 
     /// <summary>
+    /// Filter by request ID (رقم الطلب)
+    /// </summary>
+    [Range(1, int.MaxValue, ErrorMessage = "Invalid request ID")]
+    public int? RequestId { get; set; }
+
+    /// <summary>
     /// Filter by case number (if already registered)
     /// </summary>
     [StringLength(50, ErrorMessage = "Case number cannot exceed 50 characters")]
     public string? CaseNumber { get; set; }
+
+    /// <summary>
+    /// Filter by created date - from (تاريخ الطلب)
+    /// </summary>
+    public DateTime? CreatedDateFrom { get; set; }
+
+    /// <summary>
+    /// Filter by created date - to (تاريخ الطلب)
+    /// </summary>
+    public DateTime? CreatedDateTo { get; set; }
 
     /// <summary>
     /// Filter by submission date (from)
