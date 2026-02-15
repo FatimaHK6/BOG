@@ -1,4 +1,5 @@
 import { RelatedCaseVM } from './related-case.model';
+import { RequestDeficiencyDTO } from './deficiency.model';
 
 export interface CaseRequestVM {
   id: number;
@@ -74,4 +75,5 @@ export interface RequestDecisionDTO {
   decisionType: string | number;
   caseTypeId: number;
   notes?: string;
+  deficiencies?: RequestDeficiencyDTO[];
 }

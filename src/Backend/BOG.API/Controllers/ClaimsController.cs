@@ -10,7 +10,7 @@ namespace BOG.API.Controllers;
 /// Provides endpoints for retrieving and batch updating claims.
 /// </summary>
 [ApiController]
-[Route("api/case-requests/{requestId}/claims")]
+[Route("api/case-registration-requests/{requestId}/claims")]
 public class ClaimsController : ControllerBase
 {
     private readonly IClaimBL _claimBL;

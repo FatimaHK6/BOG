@@ -119,25 +119,48 @@ export class RequestCompletionComponent implements OnInit {
           // Update request state
           this.requestState.updateRequest(result);
 
-          // Show success message based on decision
-          const messages: Record<string, string> = {
-            [DecisionType.Register]: 'تم قيد الدعوى بنجاح',
-            [DecisionType.SendToJudge]: 'تم العرض على رئيس المحكمة بنجاح',
-            [DecisionType.Reject]: 'تم حفظ الطلب بنجاح',
-            [DecisionType.RequestCompletion]: 'تم طلب استكمال النواقص'
-          };
+          // Reload full request details to ensure all tabs reflect the updated status
+          this.apiService.getById(this.requestId).subscribe({
+            next: (updatedRequest: any) => {
+              this.requestState.updateRequest(updatedRequest);
 
-          this.snackBar.open(
-            messages[decision.decisionType] || 'تمت العملية بنجاح',
-            'إغلاق',
-            { duration: 5000 }
-          );
+              // Show success message based on decision
+              const messages: Record<string, string> = {
+                [DecisionType.Register]: 'تم قيد الدعوى بنجاح',
+                [DecisionType.SendToJudge]: 'تم العرض على رئيس المحكمة بنجاح',
+                [DecisionType.Reject]: 'تم حفظ الطلب بنجاح',
+                [DecisionType.RequestCompletion]: 'تم طلب استكمال النواقص'
+              };
 
-          // Reset form
-          this.completionForm.reset({
-            decisionType: '',
-            caseTypeId: 1,
-            notes: ''
+              this.snackBar.open(
+                messages[decision.decisionType] || 'تمت العملية بنجاح',
+                'إغلاق',
+                { duration: 5000 }
+              );
+
+              // Reset form
+              this.completionForm.reset({
+                decisionType: '',
+                caseTypeId: 1,
+                notes: ''
+              });
+            },
+            error: (reloadError: any) => {
+              console.error('Error reloading request:', reloadError);
+              // Still show success even if reload fails
+              const messages: Record<string, string> = {
+                [DecisionType.Register]: 'تم قيد الدعوى بنجاح',
+                [DecisionType.SendToJudge]: 'تم العرض على رئيس المحكمة بنجاح',
+                [DecisionType.Reject]: 'تم حفظ الطلب بنجاح',
+                [DecisionType.RequestCompletion]: 'تم طلب استكمال النواقص'
+              };
+
+              this.snackBar.open(
+                messages[decision.decisionType] || 'تمت العملية بنجاح',
+                'إغلاق',
+                { duration: 5000 }
+              );
+            }
           });
         },
         error: (error) => {

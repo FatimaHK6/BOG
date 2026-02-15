@@ -5,6 +5,7 @@ import { environment } from 'src/environments/environment';
 import { ClassificationVM } from '../models/case-request.model';
 import { NotificationMethodVM, GovernmentEntityVM } from '../models/additional-info.model';
 import { CourtLookup } from '../models/related-case.model';
+import { DeficiencyTypeVM, DeficiencyDescriptionVM } from '../models/deficiency.model';
 
 /**
  * API Service for Lookup Data Management
@@ -69,5 +70,30 @@ export class LookupsApiService {
    */
   getCourts(): Observable<CourtLookup[]> {
     return this.http.get<CourtLookup[]>(`${this.baseUrl}/courts`);
+  }
+
+  /**
+   * Gets all active deficiency types
+   * Used in the Deficiencies section for the type dropdown
+   * نواقص الدعوى - الأنواع
+   * @returns Observable array of DeficiencyTypeVM
+   */
+  getDeficiencyTypes(): Observable<DeficiencyTypeVM[]> {
+    return this.http.get<DeficiencyTypeVM[]>(`${this.baseUrl}/deficiency-types`);
+  }
+
+  /**
+   * Gets all active deficiency descriptions, optionally filtered by type
+   * Used in the Deficiencies section for selection
+   * نواقص الدعوى - التوصيفات
+   * @param typeId Optional filter by deficiency type ID
+   * @returns Observable array of DeficiencyDescriptionVM
+   */
+  getDeficiencyDescriptions(typeId?: number): Observable<DeficiencyDescriptionVM[]> {
+    let url = `${this.baseUrl}/deficiency-descriptions`;
+    if (typeId) {
+      url += `?typeId=${typeId}`;
+    }
+    return this.http.get<DeficiencyDescriptionVM[]>(url);
   }
 }

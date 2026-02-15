@@ -1,0 +1,66 @@
+<div class="deficiencies-dialog" dir="rtl">
+  <h2 mat-dialog-title>اختيار النواقص (نواقص الدعوى)</h2>
+
+  <mat-dialog-content>
+    <!-- Loading State -->
+    <mat-progress-bar *ngIf="loading" mode="indeterminate"></mat-progress-bar>
+
+    <!-- Empty State -->
+    <div *ngIf="!loading && deficiencyTypes.length === 0" class="empty-state">
+      <mat-icon>warning</mat-icon>
+      <p>لا توجد نواقص متاحة</p>
+    </div>
+
+    <!-- Deficiencies List -->
+    <div *ngIf="!loading && deficiencyTypes.length > 0" class="deficiencies-list">
+      <mat-accordion>
+        <mat-expansion-panel
+          *ngFor="let type of deficiencyTypes"
+          [expanded]="isTypeExpanded(type.id)"
+          (opened)="toggleType(type.id)"
+          (closed)="toggleType(type.id)">
+
+          <!-- Type Header -->
+          <mat-expansion-panel-header>
+            <mat-panel-title class="type-header">
+              <span class="type-name">{{ type.nameAr }}</span>
+              <span *ngIf="getCountForType(type.id) > 0" class="count-badge">
+                {{ getCountForType(type.id) }} مختار
+              </span>
+            </mat-panel-title>
+          </mat-expansion-panel-header>
+
+          <!-- Descriptions for this type -->
+          <div class="descriptions-list">
+            <mat-checkbox
+              *ngFor="let description of getDescriptionsForType(type.id)"
+              [checked]="isDescriptionSelected(description.id)"
+              (change)="toggleDescription(description.id)"
+              class="description-checkbox">
+              <span class="description-text">{{ getDescriptionText(description) }}</span>
+            </mat-checkbox>
+
+            <!-- Empty descriptions for type -->
+            <div *ngIf="getDescriptionsForType(type.id).length === 0" class="no-descriptions">
+              <p>لا توجد نواقص لهذا النوع</p>
+            </div>
+          </div>
+        </mat-expansion-panel>
+      </mat-accordion>
+    </div>
+
+    <!-- Summary -->
+    <div *ngIf="!loading && hasSelections" class="summary">
+      <mat-icon>check_circle</mat-icon>
+      <p>تم اختيار {{ selectedDescriptionIds.length }} نقص</p>
+    </div>
+  </mat-dialog-content>
+
+  <!-- Dialog Actions -->
+  <mat-dialog-actions align="end">
+    <button mat-button (click)="cancel()">إلغاء</button>
+    <button mat-raised-button color="primary" (click)="confirm()" [disabled]="loading || !hasSelections">
+      تأكيد
+    </button>
+  </mat-dialog-actions>
+</div>

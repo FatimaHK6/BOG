@@ -330,4 +330,280 @@ public class LookupsController : ControllerBase
                 new { message = "حدث خطأ أثناء استرجاع الدول" });
         }
     }
+
+    /// <summary>
+    /// Gets all active classifications.
+    /// </summary>
+    [HttpGet("classifications")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public async Task<ActionResult> GetClassifications(CancellationToken cancellationToken)
+    {
+        try
+        {
+            var classifications = await _context.Classifications
+                .AsNoTracking()
+                .Where(c => c.IsActive && !c.IsDeleted)
+                .OrderBy(c => c.NameAr)
+                .Select(c => new
+                {
+                    c.Id,
+                    c.Name,
+                    c.NameAr,
+                    c.Description,
+                    c.Level1,
+                    c.Level2,
+                    c.Level3,
+                    c.Level4,
+                    c.IsActive
+                })
+                .ToListAsync(cancellationToken);
+
+            return Ok(classifications);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error retrieving classifications");
+            return StatusCode(StatusCodes.Status500InternalServerError,
+                new { message = "حدث خطأ أثناء استرجاع التصنيفات" });
+        }
+    }
+
+    /// <summary>
+    /// Gets all active deficiency types.
+    /// </summary>
+    [HttpGet("deficiency-types")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public async Task<ActionResult> GetDeficiencyTypes(CancellationToken cancellationToken)
+    {
+        try
+        {
+            var types = await _context.DeficiencyTypes
+                .AsNoTracking()
+                .Where(t => !t.IsDeleted)
+                .OrderBy(t => t.DisplayOrder)
+                .Select(t => new
+                {
+                    t.Id,
+                    t.Name,
+                    t.NameAr,
+                    t.DisplayOrder
+                })
+                .ToListAsync(cancellationToken);
+
+            return Ok(types);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error retrieving deficiency types");
+            return StatusCode(StatusCodes.Status500InternalServerError,
+                new { message = "حدث خطأ أثناء استرجاع أنواع النواقص" });
+        }
+    }
+
+    /// <summary>
+    /// Gets all active deficiency descriptions, optionally filtered by deficiency type.
+    /// </summary>
+    [HttpGet("deficiency-descriptions")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public async Task<ActionResult> GetDeficiencyDescriptions([FromQuery] int? typeId, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var query = _context.DeficiencyDescriptions
+                .AsNoTracking()
+                .Where(d => !d.IsDeleted);
+
+            if (typeId.HasValue)
+            {
+                query = query.Where(d => d.DeficiencyTypeId == typeId.Value);
+            }
+
+            var descriptions = await query
+                .OrderBy(d => d.DeficiencyTypeId)
+                .ThenBy(d => d.DisplayOrder)
+                .Select(d => new
+                {
+                    d.Id,
+                    d.DeficiencyTypeId,
+                    d.DescriptionAr,
+                    d.DescriptionEn,
+                    d.DisplayOrder
+                })
+                .ToListAsync(cancellationToken);
+
+            return Ok(descriptions);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error retrieving deficiency descriptions");
+            return StatusCode(StatusCodes.Status500InternalServerError,
+                new { message = "حدث خطأ أثناء استرجاع تفاصيل النواقص" });
+        }
+    }
+
+    /// <summary>
+    /// Gets all active case types.
+    /// </summary>
+    /// <returns>List of active case types</returns>
+    [HttpGet("case-types")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public async Task<ActionResult> GetCaseTypes(CancellationToken cancellationToken)
+    {
+        try
+        {
+            var types = await _context.CaseTypes
+                .AsNoTracking()
+                .Where(t => t.IsActive && !t.IsDeleted)
+                .OrderBy(t => t.Id)
+                .Select(t => new
+                {
+                    t.Id,
+                    t.Name,
+                    t.NameAr,
+                    t.Description
+                })
+                .ToListAsync(cancellationToken);
+
+            return Ok(types);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error retrieving case types");
+            return StatusCode(StatusCodes.Status500InternalServerError,
+                new { message = "حدث خطأ أثناء استرجاع أنواع الدعاوى" });
+        }
+    }
+
+    /// <summary>
+    /// Gets all active courts.
+    /// </summary>
+    [HttpGet("courts")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public async Task<ActionResult> GetCourts(CancellationToken cancellationToken)
+    {
+        try
+        {
+            var courts = await _context.Courts
+                .AsNoTracking()
+                .Where(c => c.IsActive && !c.IsDeleted)
+                .OrderBy(c => c.NameAr)
+                .Select(c => new
+                {
+                    c.Id,
+                    c.Name,
+                    c.NameAr,
+                    c.RegionId,
+                    c.CityId
+                })
+                .ToListAsync(cancellationToken);
+
+            return Ok(courts);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error retrieving courts");
+            return StatusCode(StatusCodes.Status500InternalServerError,
+                new { message = "حدث خطأ أثناء استرجاع المحاكم" });
+        }
+    }
+
+    /// <summary>
+    /// Gets all active attachment types.
+    /// </summary>
+    [HttpGet("attachment-types")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public async Task<ActionResult> GetAttachmentTypes(CancellationToken cancellationToken)
+    {
+        try
+        {
+            var attachmentTypes = await _context.AttachmentTypes
+                .AsNoTracking()
+                .Where(t => t.IsActive && !t.IsDeleted)
+                .OrderBy(t => t.NameAr)
+                .Select(t => new
+                {
+                    t.Id,
+                    t.Name,
+                    t.NameAr,
+                    t.Description,
+                    t.IsMandatory,
+                    t.MaxFileSizeBytes,
+                    t.AllowedExtensions
+                })
+                .ToListAsync(cancellationToken);
+
+            return Ok(attachmentTypes);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error retrieving attachment types");
+            return StatusCode(StatusCodes.Status500InternalServerError,
+                new { message = "حدث خطأ أثناء استرجاع أنواع المرفقات" });
+        }
+    }
+
+    /// <summary>
+    /// Gets all active notification methods.
+    /// </summary>
+    [HttpGet("notification-methods")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public async Task<ActionResult> GetNotificationMethods(CancellationToken cancellationToken)
+    {
+        try
+        {
+            var methods = await _context.NotificationMethods
+                .AsNoTracking()
+                .Where(m => m.IsActive && !m.IsDeleted)
+                .OrderBy(m => m.NameAr)
+                .Select(m => new
+                {
+                    m.Id,
+                    m.Name,
+                    m.NameAr,
+                    m.Description
+                })
+                .ToListAsync(cancellationToken);
+
+            return Ok(methods);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error retrieving notification methods");
+            return StatusCode(StatusCodes.Status500InternalServerError,
+                new { message = "حدث خطأ أثناء استرجاع طرق الإعلام" });
+        }
+    }
+
+    /// <summary>
+    /// Gets all active government entities.
+    /// </summary>
+    [HttpGet("government-entities")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public async Task<ActionResult> GetGovernmentEntities(CancellationToken cancellationToken)
+    {
+        try
+        {
+            var entities = await _context.GovernmentEntities
+                .AsNoTracking()
+                .Where(e => e.IsActive && !e.IsDeleted)
+                .OrderBy(e => e.NameAr)
+                .Select(e => new
+                {
+                    e.Id,
+                    e.Name,
+                    e.NameAr,
+                    e.Code,
+                    e.Description
+                })
+                .ToListAsync(cancellationToken);
+
+            return Ok(entities);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error retrieving government entities");
+            return StatusCode(StatusCodes.Status500InternalServerError,
+                new { message = "حدث خطأ أثناء استرجاع الجهات الحكومية" });
+        }
+    }
 }

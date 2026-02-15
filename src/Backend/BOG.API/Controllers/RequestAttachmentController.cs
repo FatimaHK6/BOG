@@ -12,7 +12,7 @@ namespace BOG.API.Controllers;
 /// Follows Single Responsibility Principle and Dependency Inversion Principle.
 /// </summary>
 [ApiController]
-[Route("api/case-requests")]
+[Route("api/case-registration-requests")]
 public class RequestAttachmentController : ControllerBase
 {
     private readonly IRequestAttachmentBL _attachmentBL;

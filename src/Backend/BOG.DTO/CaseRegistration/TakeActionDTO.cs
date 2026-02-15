@@ -37,21 +37,3 @@ public class TakeActionDTO
     public string? RejectionReason { get; set; }
 }
 
-/// <summary>
-/// Represents a deficiency in document/information submission
-/// </summary>
-public class RequestDeficiencyDTO
-{
-    /// <summary>
-    /// Deficiency type ID
-    /// </summary>
-    [Required(ErrorMessage = "Deficiency type ID is required")]
-    [Range(1, int.MaxValue, ErrorMessage = "Invalid deficiency type")]
-    public int DeficiencyTypeId { get; set; }
-
-    /// <summary>
-    /// Description of the deficiency (optional)
-    /// </summary>
-    [StringLength(1000, ErrorMessage = "Description cannot exceed 1000 characters")]
-    public string? Description { get; set; }
-}

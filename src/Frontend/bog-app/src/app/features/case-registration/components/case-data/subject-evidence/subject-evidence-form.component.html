@@ -1,10 +1,19 @@
 <div dir="rtl" class="subject-evidence-container">
-  <form [formGroup]="subjectEvidenceForm" class="se-form">
+  <!-- Container 1: Case Subject -->
+  <app-section-container
+    title="موضوع الدعوى"
+    sectionId="case-subject"
+    [showActions]="canEdit">
 
-    <!-- Subject (موضوع الدعوى) -->
-    <div class="form-section">
-      <label class="section-label">موضوع الدعوى</label>
+    <button slot="header-actions"
+            mat-raised-button
+            class="deficiency-button"
+            (click)="openSubjectDeficiencyDialog()"
+            *ngIf="canEdit">
+      استكمال النواقص
+    </button>
 
+    <form [formGroup]="subjectEvidenceForm">
       <div class="editor-wrapper" [class.disabled]="!canEdit">
         <ngx-editor
           [editor]="subjectEditor"
@@ -13,7 +22,6 @@
         </ngx-editor>
       </div>
 
-      <!-- Validation Error -->
       <div class="validation-error" *ngIf="hasError('subject', 'required')">
         موضوع الدعوى مطلوب
       </div>
@@ -21,7 +29,6 @@
         يجب ألا يتجاوز {{ getMaxCharacters('subject') }} حرف
       </div>
 
-      <!-- Character Counter -->
       <div class="character-counter">
         <span class="count">
           {{ getCharacterCount('subject') }} / {{ getMaxCharacters('subject') }}
@@ -33,12 +40,24 @@
           [class.error]="getCharacterPercentage('subject') >= 100">
         </mat-progress-bar>
       </div>
-    </div>
+    </form>
+  </app-section-container>
 
-    <!-- Evidence (أسانيد الدعوى) -->
-    <div class="form-section">
-      <label class="section-label">أسانيد الدعوى</label>
+  <!-- Container 2: Case Evidence/Grounds -->
+  <app-section-container
+    title="أسانيد الدعوى"
+    sectionId="case-grounds"
+    [showActions]="canEdit">
 
+    <button slot="header-actions"
+            mat-raised-button
+            class="deficiency-button"
+            (click)="openGroundsDeficiencyDialog()"
+            *ngIf="canEdit">
+      استكمال النواقص
+    </button>
+
+    <form [formGroup]="subjectEvidenceForm">
       <div class="editor-wrapper" [class.disabled]="!canEdit">
         <ngx-editor
           [editor]="evidenceEditor"
@@ -47,7 +66,6 @@
         </ngx-editor>
       </div>
 
-      <!-- Validation Error -->
       <div class="validation-error" *ngIf="hasError('evidence', 'required')">
         أسانيد الدعوى مطلوبة
       </div>
@@ -55,7 +73,6 @@
         يجب ألا يتجاوز {{ getMaxCharacters('evidence') }} حرف
       </div>
 
-      <!-- Character Counter -->
       <div class="character-counter">
         <span class="count">
           {{ getCharacterCount('evidence') }} / {{ getMaxCharacters('evidence') }}
@@ -67,7 +84,6 @@
           [class.error]="getCharacterPercentage('evidence') >= 100">
         </mat-progress-bar>
       </div>
-    </div>
-
-  </form>
+    </form>
+  </app-section-container>
 </div>

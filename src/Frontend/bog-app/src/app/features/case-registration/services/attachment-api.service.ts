@@ -38,7 +38,7 @@ export interface AttachmentTypeVM {
   providedIn: 'root'
 })
 export class AttachmentApiService {
-  private apiUrl = `${environment.apiUrl}/api/case-requests`;
+  private apiUrl = `${environment.apiUrl}/api/case-registration-requests`;
   private lookupsUrl = `${environment.apiUrl}/api/lookups`;
 
   constructor(private http: HttpClient) { }

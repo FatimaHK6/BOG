@@ -48,10 +48,35 @@ public static class ServiceCollectionExtensions
             }
             else
             {
-                options.UseSqlServer(connectionString,
-                    sqlOptions => sqlOptions
-                        .MigrationsAssembly("BOG.DbModel")
-                        .EnableRetryOnFailure(maxRetryCount: 5, maxRetryDelay: TimeSpan.FromSeconds(10), errorNumbersToAdd: null));
+                options.UseSqlServer(connectionString, sqlOptions =>
+                {
+                    sqlOptions.MigrationsAssembly("BOG.DbModel");
+
+                    // Enhanced retry logic for transient failures including named pipe errors
+                    sqlOptions.EnableRetryOnFailure(
+                        maxRetryCount: 10,
+                        maxRetryDelay: TimeSpan.FromSeconds(30),
+                        errorNumbersToAdd: new[] { -2, -1, 2, 53, 64, 233, 10053, 10054, 10060, 40613 }
+                    );
+
+                    // Increased command timeout for complex queries
+                    sqlOptions.CommandTimeout(120);
+
+                    // Use split queries by default to prevent cartesian explosion
+                    sqlOptions.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
+                });
+
+                // Enable sensitive data logging in development
+                if (configuration.GetValue<bool>("Logging:EnableSensitiveDataLogging", false))
+                {
+                    options.EnableSensitiveDataLogging();
+                }
+
+                // Enable detailed errors in development
+                if (configuration.GetValue<bool>("Logging:EnableDetailedErrors", false))
+                {
+                    options.EnableDetailedErrors();
+                }
             }
         });
 
@@ -100,6 +125,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IAdditionalInfoRepository, AdditionalInfoRepository>();
         services.AddScoped<IClaimRepository, ClaimRepository>();
         services.AddScoped<IRelatedCaseRepository, RelatedCaseRepository>();
+        services.AddScoped<IDeficiencyRepository, DeficiencyRepository>();
 
         // Identity repositories
         services.AddScoped<IRoleRepository, RoleRepository>();

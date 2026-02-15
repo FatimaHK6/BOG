@@ -1,4 +1,6 @@
 using BOG.BL.Interfaces;
+using BOG.BL.Interfaces.CaseRegistration;
+using BOG.DTO.CaseRegistration;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BOG.API.Controllers;
@@ -12,13 +14,16 @@ namespace BOG.API.Controllers;
 public class CaseRegistrationRequestsController : ControllerBase
 {
     private readonly ICaseRegistrationRequestBL _requestBL;
+    private readonly IRequestActionBL _requestActionBL;
     private readonly ILogger<CaseRegistrationRequestsController> _logger;
 
     public CaseRegistrationRequestsController(
         ICaseRegistrationRequestBL requestBL,
+        IRequestActionBL requestActionBL,
         ILogger<CaseRegistrationRequestsController> logger)
     {
         _requestBL = requestBL ?? throw new ArgumentNullException(nameof(requestBL));
+        _requestActionBL = requestActionBL ?? throw new ArgumentNullException(nameof(requestActionBL));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
@@ -116,26 +121,54 @@ public class CaseRegistrationRequestsController : ControllerBase
         {
             _logger.LogError(ex, "Error creating draft request for user {UserId}", userId);
             return StatusCode(StatusCodes.Status500InternalServerError,
-                new { message = "حدث خطأ أثناء إنشاء الطلب" });
+                new {
+                    message = "حدث خطأ أثناء إنشاء الطلب",
+                    error = ex.Message,
+                    innerError = ex.InnerException?.Message,
+                    stackTrace = ex.StackTrace
+                });
         }
     }
 
     /// <summary>
-    /// Updates a case registration request (save as draft).
+    /// Updates a case registration request.
     /// </summary>
     [HttpPut("{id}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<ActionResult> Update([FromRoute] int id, [FromBody] UpdateRequestDTO dto, CancellationToken cancellationToken)
+    public async Task<ActionResult> Update(
+        [FromRoute] int id,
+        [FromBody] CaseRegistrationUpdateDTO dto,
+        CancellationToken cancellationToken)
     {
         try
         {
             _logger.LogInformation("Updating case registration request {RequestId}", id);
-            var result = await _requestBL.UpdateAsync(id, dto?.SaveAsDraft ?? true, cancellationToken);
+
+            // Validate DTO
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(new {
+                    message = "بيانات التحديث غير صالحة",
+                    errors = ModelState.Values
+                        .SelectMany(v => v.Errors)
+                        .Select(e => e.ErrorMessage)
+                        .ToList()
+                });
+            }
+
+            var result = await _requestBL.UpdateAsync(id, dto, cancellationToken);
+
             if (result == null)
                 return NotFound(new { message = $"الطلب رقم {id} غير موجود" });
 
             return Ok(result);
+        }
+        catch (InvalidOperationException ex)
+        {
+            _logger.LogWarning(ex, "Invalid update operation for request {RequestId}", id);
+            return BadRequest(new { message = ex.Message });
         }
         catch (Exception ex)
         {
@@ -170,12 +203,48 @@ public class CaseRegistrationRequestsController : ControllerBase
                 new { message = "حدث خطأ أثناء حذف الطلب" });
         }
     }
-}
 
-/// <summary>
-/// DTO for updating a case registration request.
-/// </summary>
-public class UpdateRequestDTO
-{
-    public bool SaveAsDraft { get; set; } = true;
+    /// <summary>
+    /// Complete request processing with final decision.
+    /// POST /api/case-registration-requests/{id}/complete
+    /// Unified endpoint for Register, SendToJudge, Reject, RequestCompletion decisions
+    /// ALWAYS requires Case Type (نوع الدعوى) for all decision types
+    /// </summary>
+    [HttpPost("{id}/complete")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult> CompleteRequest(
+        [FromRoute] int id,
+        [FromBody] RequestDecisionDTO decision,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            if (id <= 0)
+                return BadRequest(new { message = "Invalid request ID." });
+
+            var result = await _requestActionBL.CompleteRequestAsync(id, decision, cancellationToken);
+
+            _logger.LogInformation("Request {RequestId} completed with decision: {Decision}",
+                id, decision.DecisionType);
+
+            return Ok(result);
+        }
+        catch (InvalidOperationException ex)
+        {
+            _logger.LogWarning(ex, "Cannot complete request {RequestId}", id);
+            return BadRequest(new { message = ex.Message });
+        }
+        catch (ArgumentException ex)
+        {
+            _logger.LogWarning("Invalid argument: {Message}", ex.Message);
+            return BadRequest(new { message = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error completing request {RequestId}", id);
+            return StatusCode(500, new { message = "حدث خطأ أثناء معالجة الطلب" });
+        }
+    }
 }

@@ -150,5 +150,10 @@ public class CaseRegistrationRequest : BaseEntity
     /// </summary>
     public virtual ICollection<RequestAttachment> Attachments { get; set; } = new List<RequestAttachment>();
 
+    /// <summary>
+    /// Collection of deficiencies (one-to-many).
+    /// </summary>
+    public virtual ICollection<RequestDeficiency> Deficiencies { get; set; } = new List<RequestDeficiency>();
+
     #endregion
 }

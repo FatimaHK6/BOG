@@ -1,9 +1,14 @@
 import { Component, Input, OnInit, OnDestroy } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Editor, Toolbar } from 'ngx-editor';
+import { MatDialog } from '@angular/material/dialog';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { Subject } from 'rxjs';
 import { takeUntil, debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { CaseDataStateService } from '../../../services/case-data-state.service';
+import { DeficiencyFormDialogComponent } from '../../deficiencies/deficiency-form-dialog.component';
+import { DeficienciesApiService } from '../../../services/deficiencies-api.service';
+import { RequestDeficiencyDTO, DeficienciesBatchUpdateDTO } from '../../../models/deficiency.model';
 
 @Component({
   selector: 'app-subject-evidence-form',
@@ -12,6 +17,7 @@ import { CaseDataStateService } from '../../../services/case-data-state.service'
 })
 export class SubjectEvidenceFormComponent implements OnInit, OnDestroy {
   @Input() canEdit = false;
+  @Input() requestId!: number;
 
   subjectEvidenceForm!: FormGroup;
 
@@ -38,7 +44,10 @@ export class SubjectEvidenceFormComponent implements OnInit, OnDestroy {
 
   constructor(
     private fb: FormBuilder,
-    private caseDataState: CaseDataStateService
+    private caseDataState: CaseDataStateService,
+    private dialog: MatDialog,
+    private snackBar: MatSnackBar,
+    private deficienciesApi: DeficienciesApiService
   ) { }
 
   ngOnInit() {
@@ -130,5 +139,65 @@ export class SubjectEvidenceFormComponent implements OnInit, OnDestroy {
     }
 
     return '';
+  }
+
+  openSubjectDeficiencyDialog() {
+    this.openDeficiencyDialogForType(1); // Type 1 = CaseSubject
+  }
+
+  openGroundsDeficiencyDialog() {
+    this.openDeficiencyDialogForType(3); // Type 3 = CaseGrounds
+  }
+
+  private openDeficiencyDialogForType(typeId: number) {
+    const dialogRef = this.dialog.open(DeficiencyFormDialogComponent, {
+      width: '600px',
+      maxWidth: '95vw',
+      direction: 'rtl',
+      data: {
+        mode: 'create',
+        preSelectedTypeId: typeId
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.addDeficiency(result);
+      }
+    });
+  }
+
+  private addDeficiency(newDeficiency: RequestDeficiencyDTO) {
+    this.deficienciesApi.getDeficiencies(this.requestId)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (currentDeficiencies) => {
+          const existingDescriptionIds = currentDeficiencies.map(d => ({
+            deficiencyDescriptionId: d.deficiencyDescriptionId
+          }));
+
+          const updatedDeficiencies = [...existingDescriptionIds, newDeficiency];
+
+          const dto: DeficienciesBatchUpdateDTO = {
+            deficiencies: updatedDeficiencies
+          };
+
+          this.deficienciesApi.updateDeficiencies(this.requestId, dto)
+            .pipe(takeUntil(this.destroy$))
+            .subscribe({
+              next: () => {
+                this.snackBar.open('تم إضافة النقص بنجاح', 'إغلاق', { duration: 3000 });
+              },
+              error: (error) => {
+                console.error('Error adding deficiency:', error);
+                this.snackBar.open('فشل في إضافة النقص', 'إغلاق', { duration: 3000 });
+              }
+            });
+        },
+        error: (error) => {
+          console.error('Error fetching deficiencies:', error);
+          this.snackBar.open('فشل في جلب النواقص الحالية', 'إغلاق', { duration: 3000 });
+        }
+      });
   }
 }

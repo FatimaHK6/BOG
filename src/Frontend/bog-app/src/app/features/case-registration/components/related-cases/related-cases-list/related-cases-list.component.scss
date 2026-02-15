@@ -1,8 +1,18 @@
-.section-actions {
-  margin-bottom: 24px;
+.gold-button {
+  background-color: #C4A35A !important;
+  color: white !important;
 
-  button {
-    gap: 8px;
+  &:hover {
+    background-color: #B8963E !important;
+  }
+}
+
+.deficiency-button {
+  background-color: #C4A35A !important;
+  color: white !important;
+
+  &:hover {
+    background-color: #B8963E !important;
   }
 }
 

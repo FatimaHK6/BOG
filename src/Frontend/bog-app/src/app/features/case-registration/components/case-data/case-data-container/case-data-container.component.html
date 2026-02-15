@@ -1,7 +1,7 @@
 <div dir="rtl" class="case-data-container">
   <!-- Subject & Evidence -->
   <div *ngIf="activeTabId === 'subject-evidence'" class="tab-content-wrapper">
-    <app-subject-evidence-form [canEdit]="canEdit"></app-subject-evidence-form>
+    <app-subject-evidence-form [canEdit]="canEdit" [requestId]="requestId"></app-subject-evidence-form>
   </div>
 
   <!-- Claims -->
@@ -42,4 +42,5 @@
       [canEdit]="canEdit">
     </app-attachments-list>
   </div>
+
 </div>

@@ -36,6 +36,11 @@ public class CompletionDeadlineCheckerService : BackgroundService
     {
         _logger.LogInformation("CompletionDeadlineCheckerService started");
 
+        // Wait for application to fully start up before first database query
+        _logger.LogInformation("Waiting 10 seconds for database initialization...");
+        await Task.Delay(TimeSpan.FromSeconds(10), stoppingToken);
+        _logger.LogInformation("Starting CompletionDeadlineCheckerService processing loop");
+
         while (!stoppingToken.IsCancellationRequested)
         {
             try

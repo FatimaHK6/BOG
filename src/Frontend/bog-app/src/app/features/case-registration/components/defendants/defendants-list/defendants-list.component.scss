@@ -1,5 +1,18 @@
 .section-actions {
   margin-bottom: 16px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  align-items: center;
+}
+
+.gold-button {
+  background-color: #C4A35A !important;
+  color: white !important;
+
+  &:hover {
+    background-color: #B8963E !important;
+  }
 }
 
 .table-container {
