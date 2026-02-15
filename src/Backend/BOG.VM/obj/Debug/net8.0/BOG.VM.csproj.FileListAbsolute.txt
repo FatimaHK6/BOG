@@ -1,0 +1,12 @@
+D:\Work\Bog\BOG\src\Backend\BOG.VM\bin\Debug\net8.0\BOG.VM.deps.json
+D:\Work\Bog\BOG\src\Backend\BOG.VM\bin\Debug\net8.0\BOG.VM.dll
+D:\Work\Bog\BOG\src\Backend\BOG.VM\bin\Debug\net8.0\BOG.VM.pdb
+D:\Work\Bog\BOG\src\Backend\BOG.VM\obj\Debug\net8.0\BOG.VM.GeneratedMSBuildEditorConfig.editorconfig
+D:\Work\Bog\BOG\src\Backend\BOG.VM\obj\Debug\net8.0\BOG.VM.AssemblyInfoInputs.cache
+D:\Work\Bog\BOG\src\Backend\BOG.VM\obj\Debug\net8.0\BOG.VM.AssemblyInfo.cs
+D:\Work\Bog\BOG\src\Backend\BOG.VM\obj\Debug\net8.0\BOG.VM.csproj.CoreCompileInputs.cache
+D:\Work\Bog\BOG\src\Backend\BOG.VM\obj\Debug\net8.0\BOG.VM.sourcelink.json
+D:\Work\Bog\BOG\src\Backend\BOG.VM\obj\Debug\net8.0\BOG.VM.dll
+D:\Work\Bog\BOG\src\Backend\BOG.VM\obj\Debug\net8.0\refint\BOG.VM.dll
+D:\Work\Bog\BOG\src\Backend\BOG.VM\obj\Debug\net8.0\BOG.VM.pdb
+D:\Work\Bog\BOG\src\Backend\BOG.VM\obj\Debug\net8.0\ref\BOG.VM.dll

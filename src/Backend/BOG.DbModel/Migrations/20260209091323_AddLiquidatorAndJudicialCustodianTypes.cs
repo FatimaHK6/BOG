@@ -3,8 +3,6 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-#pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
-
 namespace BOG.DbModel.Migrations
 {
     /// <inheritdoc />
@@ -13,14 +11,17 @@ namespace BOG.DbModel.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.InsertData(
-                table: "RepresentativeTypes",
-                columns: new[] { "Id", "CreatedDate", "Description", "IsActive", "ModifiedDate", "Name", "NameAr" },
-                values: new object[,]
-                {
-                    { 10, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), null, true, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), "Liquidator", "مصفي" },
-                    { 11, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), null, true, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), "JudicialCustodian", "حارس قضائي" }
-                });
+            migrationBuilder.Sql(@"
+                IF NOT EXISTS (SELECT 1 FROM [RepresentativeTypes] WHERE [Id] = 10)
+                BEGIN
+                    SET IDENTITY_INSERT [RepresentativeTypes] ON;
+                    INSERT INTO [RepresentativeTypes] ([Id], [CreatedDate], [Description], [IsActive], [ModifiedDate], [Name], [NameAr])
+                    VALUES
+                        (10, '2024-01-01', NULL, 1, '2024-01-01', N'Liquidator', N'مصفي'),
+                        (11, '2024-01-01', NULL, 1, '2024-01-01', N'JudicialCustodian', N'حارس قضائي');
+                    SET IDENTITY_INSERT [RepresentativeTypes] OFF;
+                END
+            ");
         }
 
         /// <inheritdoc />

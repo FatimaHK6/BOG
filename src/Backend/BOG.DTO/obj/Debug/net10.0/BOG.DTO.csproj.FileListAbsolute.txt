@@ -1,0 +1,13 @@
+D:\Work\Bog\BOG\src\Backend\BOG.DTO\bin\Debug\net10.0\BOG.DTO.deps.json
+D:\Work\Bog\BOG\src\Backend\BOG.DTO\bin\Debug\net10.0\BOG.DTO.dll
+D:\Work\Bog\BOG\src\Backend\BOG.DTO\bin\Debug\net10.0\BOG.DTO.pdb
+D:\Work\Bog\BOG\src\Backend\BOG.DTO\obj\Debug\net10.0\BOG.DTO.GeneratedMSBuildEditorConfig.editorconfig
+D:\Work\Bog\BOG\src\Backend\BOG.DTO\obj\Debug\net10.0\BOG.DTO.AssemblyInfoInputs.cache
+D:\Work\Bog\BOG\src\Backend\BOG.DTO\obj\Debug\net10.0\BOG.DTO.AssemblyInfo.cs
+D:\Work\Bog\BOG\src\Backend\BOG.DTO\obj\Debug\net10.0\BOG.DTO.csproj.CoreCompileInputs.cache
+D:\Work\Bog\BOG\src\Backend\BOG.DTO\obj\Debug\net10.0\BOG.DTO.sourcelink.json
+D:\Work\Bog\BOG\src\Backend\BOG.DTO\obj\Debug\net10.0\BOG.DTO.dll
+D:\Work\Bog\BOG\src\Backend\BOG.DTO\obj\Debug\net10.0\refint\BOG.DTO.dll
+D:\Work\Bog\BOG\src\Backend\BOG.DTO\obj\Debug\net10.0\BOG.DTO.pdb
+D:\Work\Bog\BOG\src\Backend\BOG.DTO\obj\Debug\net10.0\ref\BOG.DTO.dll
+D:\Work\Bog\BOG\src\Backend\BOG.DTO\obj\Debug\net10.0\BOG.DTO.csproj.AssemblyReference.cache

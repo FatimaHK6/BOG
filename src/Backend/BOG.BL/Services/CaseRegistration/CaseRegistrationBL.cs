@@ -74,6 +74,7 @@ public class CaseRegistrationBL : ICaseRegistrationBL
             Subject = dto.Subject,
             Evidence = dto.Evidence,
             RequestStatusId = 1, // Draft
+            CaseTypeId = 1, // Default to Administrative (إداري) - user changes via edit page
             CreatedByUserId = 1, // TODO: Get from HttpContext.User in production
             CreatedDate = DateTime.UtcNow,
             ModifiedDate = DateTime.UtcNow
