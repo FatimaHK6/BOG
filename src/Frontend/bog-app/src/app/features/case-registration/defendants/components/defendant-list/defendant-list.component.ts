@@ -5,7 +5,6 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { DefendantListVM } from '../../../../../core/models/defendant.model';
 import { DefendantService } from '../../../../../core/services/defendant.service';
-import { CaseRegistrationRequestService } from '../../../../../core/services/case-registration-request.service';
 import { ConfirmDialogComponent } from '../../../../../shared/components/confirm-dialog/confirm-dialog.component';
 
 interface DefendantType {
@@ -32,7 +31,6 @@ export class DefendantListComponent implements OnInit, AfterViewInit {
   defendants: DefendantListVM[] = [];
   dataSource = new MatTableDataSource<DefendantListVM>([]);
   isLoading = false;
-  isSaving = false;
 
   // Defendant types matching database DefendantTypes table
   defendantTypes: DefendantType[] = [
@@ -55,7 +53,6 @@ export class DefendantListComponent implements OnInit, AfterViewInit {
 
   constructor(
     private defendantService: DefendantService,
-    private requestService: CaseRegistrationRequestService,
     private dialog: MatDialog,
     private snackBar: MatSnackBar
   ) { }
@@ -69,26 +66,6 @@ export class DefendantListComponent implements OnInit, AfterViewInit {
 
   ngAfterViewInit(): void {
     // Paginator is set after data loads due to *ngIf
-  }
-
-  onSaveAsDraft(): void {
-    if (this.requestId <= 0) {
-      this.snackBar.open('لا يوجد طلب محدد', 'إغلاق', { duration: 3000 });
-      return;
-    }
-
-    this.isSaving = true;
-    this.requestService.update(this.requestId, { saveAsDraft: true }).subscribe({
-      next: () => {
-        this.isSaving = false;
-        this.snackBar.open('تم حفظ الطلب كمسودة', 'إغلاق', { duration: 3000 });
-      },
-      error: (error) => {
-        console.error('Error saving draft:', error);
-        this.isSaving = false;
-        this.snackBar.open('حدث خطأ أثناء حفظ المسودة', 'إغلاق', { duration: 3000 });
-      }
-    });
   }
 
   private setPaginator(): void {
