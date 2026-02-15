@@ -12,15 +12,15 @@ import { RequestDetailsComponent } from './pages/request-details/request-details
 
 // Remaining components
 import { AdditionalInfoFormComponent } from './components/additional-info/additional-info-form.component';
-import { DeficienciesListComponent } from './components/deficiencies/deficiencies-list.component';
 import { RequestCompletionComponent } from './components/request-completion/request-completion.component';
+import { DeficienciesSelectionDialogComponent } from './components/request-completion/deficiencies-selection-dialog.component';
 
 @NgModule({
   declarations: [
     RequestDetailsComponent,
     AdditionalInfoFormComponent,
-    DeficienciesListComponent,
-    RequestCompletionComponent
+    RequestCompletionComponent,
+    DeficienciesSelectionDialogComponent
   ],
   imports: [
     CaseRegistrationSharedModule,

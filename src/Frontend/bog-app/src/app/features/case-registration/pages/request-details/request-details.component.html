@@ -232,7 +232,11 @@
 
         <!-- Deficiencies Tab -->
         <section id="deficiencies" *ngSwitchCase="'deficiencies'" class="tab-content">
-          <app-deficiencies-list [requestId]="requestId"></app-deficiencies-list>
+          <app-deficiencies-list
+            [requestId]="requestId"
+            [canEdit]="canEdit"
+            (countChanged)="deficienciesCount = $event">
+          </app-deficiencies-list>
         </section>
 
         <!-- Request Completion Tab -->

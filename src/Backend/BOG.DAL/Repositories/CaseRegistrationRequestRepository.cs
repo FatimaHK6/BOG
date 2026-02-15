@@ -21,6 +21,7 @@ public class CaseRegistrationRequestRepository : Repository<CaseRegistrationRequ
     {
         return await _dbSet
             .AsNoTracking()
+            .AsSplitQuery()
             .Where(r => !r.IsDeleted)
             .Include(r => r.Status)
             .Include(r => r.Court)
@@ -37,6 +38,7 @@ public class CaseRegistrationRequestRepository : Repository<CaseRegistrationRequ
     {
         return await _dbSet
             .AsNoTracking()
+            .AsSplitQuery()
             .Where(r => r.CreatedByUserId == userId && !r.IsDeleted)
             .Include(r => r.Status)
             .Include(r => r.Court)
@@ -53,6 +55,7 @@ public class CaseRegistrationRequestRepository : Repository<CaseRegistrationRequ
     {
         return await _dbSet
             .AsNoTracking()
+            .AsSplitQuery()
             .Where(r => r.Id == id && !r.IsDeleted)
             .Include(r => r.Status)
             .Include(r => r.Court)
@@ -64,6 +67,26 @@ public class CaseRegistrationRequestRepository : Repository<CaseRegistrationRequ
                 .ThenInclude(crd => crd.Defendant)
             .Include(r => r.Claims.Where(c => !c.IsDeleted))
             .Include(r => r.Attachments.Where(a => !a.IsDeleted))
+            .Include(r => r.Classifications.Where(rc => !rc.IsDeleted))
+            .FirstOrDefaultAsync(cancellationToken);
+    }
+
+    public async Task<CaseRegistrationRequest?> GetWithDetailsForUpdateAsync(int id, CancellationToken cancellationToken = default)
+    {
+        return await _dbSet
+            .AsSplitQuery()
+            .Where(r => r.Id == id && !r.IsDeleted)
+            .Include(r => r.Status)
+            .Include(r => r.Court)
+            .Include(r => r.CreatedByUser)
+            .Include(r => r.CaseRequestPlaintiffs.Where(p => !p.IsDeleted))
+                .ThenInclude(crp => crp.Plaintiff)
+                    .ThenInclude(p => p.PlaintiffType)
+            .Include(r => r.CaseRequestDefendants.Where(d => !d.IsDeleted))
+                .ThenInclude(crd => crd.Defendant)
+            .Include(r => r.Claims.Where(c => !c.IsDeleted))
+            .Include(r => r.Attachments.Where(a => !a.IsDeleted))
+            .Include(r => r.Classifications.Where(rc => !rc.IsDeleted))
             .FirstOrDefaultAsync(cancellationToken);
     }
 

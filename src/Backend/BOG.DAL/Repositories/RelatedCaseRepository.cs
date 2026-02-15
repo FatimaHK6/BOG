@@ -22,6 +22,7 @@ public class RelatedCaseRepository : Repository<RelatedCase>, IRelatedCaseReposi
     public async Task<IEnumerable<RelatedCase>> GetByRequestIdAsync(int requestId, CancellationToken ct = default)
     {
         return await _dbSet
+            .Include(rc => rc.Court)
             .Where(rc => rc.CaseRegistrationRequestId == requestId && !rc.IsDeleted)
             .OrderByDescending(rc => rc.CreatedDate)
             .ToListAsync(ct);

@@ -28,4 +28,9 @@ public class CaseRegistrationRequestVM
     public int DefendantsCount { get; set; }
     public int ClaimsCount { get; set; }
     public int AttachmentsCount { get; set; }
+    public List<int> ClassificationIds { get; set; } = new();
+    public List<int> RelatedCaseIds { get; set; } = new();
+    public string? PrimaryMobile { get; set; }
+    public string? SecondaryMobile { get; set; }
+    public string? Email { get; set; }
 }

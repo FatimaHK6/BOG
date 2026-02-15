@@ -9,7 +9,7 @@ namespace BOG.API.Controllers;
 /// Defendant management API controller.
 /// </summary>
 [ApiController]
-[Route("api")]
+[Route("api/case-registration-requests")]
 public class DefendantsController : ControllerBase
 {
     private readonly IDefendantBL _defendantBL;

@@ -5,6 +5,9 @@ import { RelatedCaseVM } from '../../../models/related-case.model';
 import { CaseDataStateService } from '../../../services/case-data-state.service';
 import { ConfirmationDialogComponent } from '../../shared/confirmation-dialog/confirmation-dialog.component';
 import { RelatedCaseFormDialogComponent } from '../related-case-form-dialog/related-case-form-dialog.component';
+import { DeficiencyFormDialogComponent } from '../../deficiencies/deficiency-form-dialog.component';
+import { DeficienciesApiService } from '../../../services/deficiencies-api.service';
+import { RequestDeficiencyDTO, DeficienciesBatchUpdateDTO } from '../../../models/deficiency.model';
 import { Subject } from 'rxjs';
 import { takeUntil, map, distinctUntilChanged } from 'rxjs/operators';
 
@@ -32,7 +35,8 @@ export class RelatedCasesListComponent implements OnInit, OnDestroy {
   constructor(
     private caseDataState: CaseDataStateService,
     private dialog: MatDialog,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
+    private deficienciesApi: DeficienciesApiService
   ) { }
 
   ngOnInit() {
@@ -110,5 +114,61 @@ export class RelatedCasesListComponent implements OnInit, OnDestroy {
         this.snackBar.open('سيتم حذف الدعوى المرتبطة عند الحفظ', 'إغلاق', { duration: 3000 });
       }
     });
+  }
+
+  openDeficiencyDialog() {
+    this.openDeficiencyDialogForType(4); // Type 4 = RelatedCases
+  }
+
+  private openDeficiencyDialogForType(typeId: number) {
+    const dialogRef = this.dialog.open(DeficiencyFormDialogComponent, {
+      width: '600px',
+      maxWidth: '95vw',
+      direction: 'rtl',
+      data: {
+        mode: 'create',
+        preSelectedTypeId: typeId
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.addDeficiency(result);
+      }
+    });
+  }
+
+  private addDeficiency(newDeficiency: RequestDeficiencyDTO) {
+    this.deficienciesApi.getDeficiencies(this.requestId)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (currentDeficiencies) => {
+          const existingDescriptionIds = currentDeficiencies.map(d => ({
+            deficiencyDescriptionId: d.deficiencyDescriptionId
+          }));
+
+          const updatedDeficiencies = [...existingDescriptionIds, newDeficiency];
+
+          const dto: DeficienciesBatchUpdateDTO = {
+            deficiencies: updatedDeficiencies
+          };
+
+          this.deficienciesApi.updateDeficiencies(this.requestId, dto)
+            .pipe(takeUntil(this.destroy$))
+            .subscribe({
+              next: () => {
+                this.snackBar.open('تم إضافة النقص بنجاح', 'إغلاق', { duration: 3000 });
+              },
+              error: (error) => {
+                console.error('Error adding deficiency:', error);
+                this.snackBar.open('فشل في إضافة النقص', 'إغلاق', { duration: 3000 });
+              }
+            });
+        },
+        error: (error) => {
+          console.error('Error fetching deficiencies:', error);
+          this.snackBar.open('فشل في جلب النواقص الحالية', 'إغلاق', { duration: 3000 });
+        }
+      });
   }
 }

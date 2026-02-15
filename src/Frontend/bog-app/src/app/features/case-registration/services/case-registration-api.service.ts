@@ -8,7 +8,7 @@ import { CaseRequestVM, CaseRequestCreateDTO, CaseRequestUpdateDTO, PagedResult,
   providedIn: 'root'
 })
 export class CaseRegistrationApiService {
-  private baseUrl = `${environment.apiUrl}/api/case-requests`;
+  private baseUrl = `${environment.apiUrl}/api/case-registration-requests`;
 
   constructor(private http: HttpClient) { }
 

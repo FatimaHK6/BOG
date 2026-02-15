@@ -11,7 +11,7 @@ namespace BOG.API.Controllers;
 /// Supports three types of additional information based on case type.
 /// </summary>
 [ApiController]
-[Route("api/case-requests/{requestId}/additional-info")]
+[Route("api/case-registration-requests/{requestId}/additional-info")]
 public class AdditionalInfoController : ControllerBase
 {
     private readonly IAdditionalInfoBL _additionalInfoBL;

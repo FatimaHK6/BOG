@@ -19,7 +19,7 @@ public class RequestAttachmentBL : IRequestAttachmentBL
     private const long MaxFileSizeBytes = 4 * 1024 * 1024; // 4MB
     private const string PdfContentType = "application/pdf";
 
-    private readonly IRepository<RequestAttachment> _attachmentRepository;
+    private readonly IRequestAttachmentRepository _attachmentRepository;
     private readonly ICaseRegistrationRequestRepository _requestRepository;
     private readonly IRepository<AttachmentType> _attachmentTypeRepository;
     private readonly IUnitOfWork _unitOfWork;
@@ -27,7 +27,7 @@ public class RequestAttachmentBL : IRequestAttachmentBL
     private readonly ILogger<RequestAttachmentBL> _logger;
 
     public RequestAttachmentBL(
-        IRepository<RequestAttachment> attachmentRepository,
+        IRequestAttachmentRepository attachmentRepository,
         ICaseRegistrationRequestRepository requestRepository,
         IRepository<AttachmentType> attachmentTypeRepository,
         IUnitOfWork unitOfWork,
@@ -127,6 +127,7 @@ public class RequestAttachmentBL : IRequestAttachmentBL
             StoredFileName = storedFileName,
             ContentType = attachmentDto.ContentType,
             FileSizeBytes = attachmentDto.FileContent.Length,
+            Description = attachmentDto.Description,
             UploadDate = DateTime.UtcNow,
             IsActive = true,
             CreatedDate = DateTime.UtcNow,
@@ -155,12 +156,10 @@ public class RequestAttachmentBL : IRequestAttachmentBL
             throw;
         }
 
-        // Reload attachment with navigation properties for mapping
-        var savedAttachment = await _attachmentRepository.GetByIdAsync(attachment.Id, cancellationToken);
-        if (savedAttachment == null)
-            throw new InvalidOperationException($"Failed to retrieve created attachment with ID {attachment.Id}");
+        // Set navigation property for mapping (already loaded earlier)
+        attachment.AttachmentType = attachmentType;
 
-        return MapToViewModel(savedAttachment);
+        return MapToViewModel(attachment);
     }
 
     /// <summary>
@@ -171,9 +170,7 @@ public class RequestAttachmentBL : IRequestAttachmentBL
         if (requestId <= 0)
             throw new ArgumentException("Invalid request ID.", nameof(requestId));
 
-        var attachments = await _attachmentRepository.FindAsync(
-            a => a.CaseRegistrationRequestId == requestId && !a.IsDeleted,
-            cancellationToken);
+        var attachments = await _attachmentRepository.GetByRequestIdAsync(requestId, cancellationToken);
 
         return attachments.Select(MapToViewModel).ToList();
     }

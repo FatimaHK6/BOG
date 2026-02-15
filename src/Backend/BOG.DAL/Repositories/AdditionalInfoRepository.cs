@@ -29,6 +29,7 @@ public class AdditionalInfoRepository : Repository<AdditionalInfo>, IAdditionalI
             throw new ArgumentException("Request ID must be greater than 0.", nameof(requestId));
 
         return await _dbSet
+            .Where(ai => ai.CaseRegistrationRequestId == requestId && !ai.IsDeleted)
             .Include(ai => ai.ManagementDecision)
                 .ThenInclude(md => md.NotificationMethod)
             .Include(ai => ai.ManagementDecision)
@@ -37,9 +38,8 @@ public class AdditionalInfoRepository : Repository<AdditionalInfo>, IAdditionalI
                 .ThenInclude(sr => sr.ComplaintAuthority)
             .Include(ai => ai.Trademark)
             .AsNoTracking()
-            .FirstOrDefaultAsync(
-                ai => ai.CaseRegistrationRequestId == requestId && !ai.IsDeleted,
-                cancellationToken);
+            .AsSplitQuery()
+            .FirstOrDefaultAsync(cancellationToken);
     }
 
     /// <summary>

@@ -8,7 +8,7 @@ import { DefendantVM, DefendantCreateDTO, DefendantUpdateDTO } from '../models/d
   providedIn: 'root'
 })
 export class DefendantApiService {
-  private baseUrl = `${environment.apiUrl}/api/case-requests`;
+  private baseUrl = `${environment.apiUrl}/api/case-registration-requests`;
 
   constructor(private http: HttpClient) { }
 

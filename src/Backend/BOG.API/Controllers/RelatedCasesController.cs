@@ -10,7 +10,7 @@ namespace BOG.API.Controllers;
 /// Provides endpoints for retrieving and batch updating related cases.
 /// </summary>
 [ApiController]
-[Route("api/case-requests/{requestId}/related-cases")]
+[Route("api/case-registration-requests/{requestId}/related-cases")]
 public class RelatedCasesController : ControllerBase
 {
     private readonly IRelatedCaseBL _relatedCaseBL;

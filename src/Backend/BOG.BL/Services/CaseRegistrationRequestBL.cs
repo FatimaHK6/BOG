@@ -1,7 +1,10 @@
 using BOG.BL.Interfaces;
 using BOG.DAL.Interfaces;
+using BOG.DbModel;
 using BOG.DbModel.Entities.CaseRegistration;
+using BOG.DTO.CaseRegistration;
 using BOG.VM.CaseRegistrationRequest;
+using Microsoft.EntityFrameworkCore;
 
 namespace BOG.BL.Services;
 
@@ -12,16 +15,20 @@ public class CaseRegistrationRequestBL : ICaseRegistrationRequestBL
 {
     private readonly ICaseRegistrationRequestRepository _repository;
     private readonly IUnitOfWork _unitOfWork;
+    private readonly ApplicationDbContext _context;
 
     // Status constants
     private const int StatusDraft = 1;
+    private const int StatusPendingCompletion = 6;
 
     public CaseRegistrationRequestBL(
         ICaseRegistrationRequestRepository repository,
-        IUnitOfWork unitOfWork)
+        IUnitOfWork unitOfWork,
+        ApplicationDbContext context)
     {
         _repository = repository ?? throw new ArgumentNullException(nameof(repository));
         _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
+        _context = context ?? throw new ArgumentNullException(nameof(context));
     }
 
     public async Task<IEnumerable<CaseRegistrationRequestListVM>> GetAllAsync(CancellationToken cancellationToken = default)
@@ -47,6 +54,7 @@ public class CaseRegistrationRequestBL : ICaseRegistrationRequestBL
         var request = new CaseRegistrationRequest
         {
             RequestStatusId = StatusDraft,
+            CaseTypeId = 1, // Default to first CaseType
             CreatedByUserId = userId,
             CreatedDate = DateTime.UtcNow,
             ModifiedDate = DateTime.UtcNow
@@ -88,17 +96,97 @@ public class CaseRegistrationRequestBL : ICaseRegistrationRequestBL
         await _unitOfWork.SaveChangesAsync(cancellationToken);
     }
 
-    public async Task<CaseRegistrationRequestVM?> UpdateAsync(int id, bool saveAsDraft, CancellationToken cancellationToken = default)
+    public async Task<CaseRegistrationRequestVM?> UpdateAsync(
+        int id,
+        CaseRegistrationUpdateDTO dto,
+        CancellationToken cancellationToken = default)
     {
         var request = await _repository.GetByIdAsync(id, cancellationToken) as CaseRegistrationRequest;
+
         if (request == null || request.IsDeleted)
             return null;
 
-        // If saving as draft, ensure status is draft
-        if (saveAsDraft)
+        // Only allow updates to Draft or PendingCompletion requests
+        if (request.RequestStatusId != StatusDraft && request.RequestStatusId != StatusPendingCompletion)
+        {
+            throw new InvalidOperationException(
+                "لا يمكن تعديل الطلب إلا إذا كان في حالة مسودة أو بانتظار الاستكمال"
+            );
+        }
+
+        // Update fields if provided
+        if (dto.Subject != null)
+            request.Subject = dto.Subject;
+
+        if (dto.Evidence != null)
+            request.Evidence = dto.Evidence;
+
+        if (dto.CourtId.HasValue)
+            request.CourtId = dto.CourtId.Value;
+
+        if (dto.CaseTypeId.HasValue)
+            request.CaseTypeId = dto.CaseTypeId.Value;
+
+        if (dto.Notes != null)
+            request.Notes = dto.Notes;
+
+        if (dto.PrimaryMobile != null)
+            request.PrimaryMobile = string.IsNullOrWhiteSpace(dto.PrimaryMobile) ? null : dto.PrimaryMobile.Trim();
+
+        if (dto.SecondaryMobile != null)
+            request.SecondaryMobile = string.IsNullOrWhiteSpace(dto.SecondaryMobile) ? null : dto.SecondaryMobile.Trim();
+
+        if (dto.Email != null)
+            request.Email = string.IsNullOrWhiteSpace(dto.Email) ? null : dto.Email.Trim();
+
+        // Update classifications if provided
+        if (dto.ClassificationIds != null)
+        {
+            // Load existing classifications (only non-deleted)
+            var existingClassifications = await _context.RequestClassifications
+                .Where(rc => rc.CaseRegistrationRequestId == id && !rc.IsDeleted)
+                .ToListAsync(cancellationToken);
+
+            var existingClassificationIds = existingClassifications
+                .Select(rc => rc.ClassificationId)
+                .ToHashSet();
+
+            var newClassificationIds = dto.ClassificationIds.Distinct().ToHashSet();
+
+            // Remove classifications that are no longer selected
+            var classificationsToRemove = existingClassifications
+                .Where(rc => !newClassificationIds.Contains(rc.ClassificationId))
+                .ToList();
+
+            if (classificationsToRemove.Any())
+            {
+                _context.RequestClassifications.RemoveRange(classificationsToRemove);
+            }
+
+            // Add new classifications that don't already exist
+            var classificationsToAdd = newClassificationIds
+                .Where(cid => !existingClassificationIds.Contains(cid))
+                .Select(cid => new RequestClassification
+                {
+                    CaseRegistrationRequestId = id,
+                    ClassificationId = cid,
+                    DisplayOrder = 0
+                })
+                .ToList();
+
+            if (classificationsToAdd.Any())
+            {
+                await _context.RequestClassifications.AddRangeAsync(classificationsToAdd, cancellationToken);
+            }
+        }
+
+        // Handle draft status
+        if (dto.SaveAsDraft)
         {
             request.RequestStatusId = StatusDraft;
         }
+        // If not saving as draft and currently in PendingCompletion, keep existing status
+        // Business rules may vary for status transitions
 
         request.ModifiedDate = DateTime.UtcNow;
 
@@ -154,6 +242,16 @@ public class CaseRegistrationRequestBL : ICaseRegistrationRequestBL
 
     private static CaseRegistrationRequestVM MapToVM(CaseRegistrationRequest request)
     {
+        // Extract active classifications (not soft-deleted)
+        var activeClassifications = request.Classifications?
+            .Where(rc => !rc.IsDeleted)
+            .ToList() ?? new List<RequestClassification>();
+
+        // Extract active related cases
+        var activeRelatedCases = request.RelatedCases?
+            .Where(rc => !rc.IsDeleted)
+            .ToList() ?? new List<RelatedCase>();
+
         return new CaseRegistrationRequestVM
         {
             Id = request.Id,
@@ -178,7 +276,16 @@ public class CaseRegistrationRequestBL : ICaseRegistrationRequestBL
             PlaintiffsCount = request.CaseRequestPlaintiffs?.Count(p => !p.IsDeleted) ?? 0,
             DefendantsCount = request.CaseRequestDefendants?.Count(d => !d.IsDeleted) ?? 0,
             ClaimsCount = request.Claims?.Count(c => !c.IsDeleted) ?? 0,
-            AttachmentsCount = request.Attachments?.Count(a => !a.IsDeleted) ?? 0
+            AttachmentsCount = request.Attachments?.Count(a => !a.IsDeleted) ?? 0,
+            ClassificationIds = activeClassifications
+                .Select(rc => rc.ClassificationId)
+                .ToList(),
+            RelatedCaseIds = activeRelatedCases
+                .Select(rc => rc.Id)
+                .ToList(),
+            PrimaryMobile = request.PrimaryMobile,
+            SecondaryMobile = request.SecondaryMobile,
+            Email = request.Email
         };
     }
 }

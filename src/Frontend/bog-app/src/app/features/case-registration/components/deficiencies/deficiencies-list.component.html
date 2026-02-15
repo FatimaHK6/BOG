@@ -1,0 +1,60 @@
+<app-section-container title="قائمة النواقص" sectionId="deficiencies" dir="rtl" [showActions]="canEdit">
+  <!-- Header Action Button -->
+  <button *ngIf="canEdit" slot="header-actions" mat-raised-button class="gold-button" (click)="openAddDeficiency()">
+    <mat-icon>add</mat-icon>
+    إضافة النواقص
+  </button>
+
+  <div class="deficiencies-section">
+
+    <!-- Loading state -->
+    <mat-progress-bar *ngIf="loading" mode="indeterminate"></mat-progress-bar>
+
+    <!-- Empty state -->
+    <div *ngIf="!loading && deficiencies.length === 0" class="empty-state">
+      <mat-icon>check_circle_outline</mat-icon>
+      <p>لا توجد نواقص</p>
+    </div>
+
+    <!-- Deficiencies Table -->
+    <div *ngIf="!loading && deficiencies.length > 0" class="deficiencies-table-container">
+      <table mat-table [dataSource]="deficiencies" class="mat-elevation-z2">
+
+        <!-- Type Column -->
+        <ng-container matColumnDef="type">
+          <th mat-header-cell *matHeaderCellDef>نوع النقص</th>
+          <td mat-cell *matCellDef="let deficiency">
+            <span class="type-badge">
+              {{ deficiency.deficiencyTypeNameAr }}
+            </span>
+          </td>
+        </ng-container>
+
+        <!-- Description Column -->
+        <ng-container matColumnDef="description">
+          <th mat-header-cell *matHeaderCellDef>وصف النقص</th>
+          <td mat-cell *matCellDef="let deficiency">
+            {{ deficiency.descriptionAr }}
+          </td>
+        </ng-container>
+
+        <!-- Actions Column -->
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef>الإجراءات</th>
+          <td mat-cell *matCellDef="let deficiency">
+            <button *ngIf="canEdit"
+                    mat-icon-button
+                    color="warn"
+                    (click)="deleteDeficiency(deficiency)"
+                    matTooltip="حذف">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+      </table>
+    </div>
+  </div>
+</app-section-container>

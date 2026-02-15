@@ -1,0 +1,55 @@
+<div class="dialog-container" dir="rtl">
+  <h2 mat-dialog-title>{{ dialogTitle }}</h2>
+
+  <mat-dialog-content>
+    <form [formGroup]="form" class="deficiency-form">
+
+      <!-- Deficiency Type Dropdown -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>نوع النقص</mat-label>
+        <mat-select formControlName="deficiencyTypeId" [disabled]="loading || !!data?.preSelectedTypeId">
+          <mat-option *ngFor="let type of deficiencyTypes" [value]="type.id">
+            {{ type.nameAr }}
+          </mat-option>
+        </mat-select>
+        <mat-error *ngIf="form.get('deficiencyTypeId')?.hasError('required')">
+          نوع النقص مطلوب
+        </mat-error>
+      </mat-form-field>
+
+      <!-- Deficiency Description Dropdown (Cascading) -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>وصف النقص</mat-label>
+        <mat-select formControlName="deficiencyDescriptionId"
+                    [disabled]="loading || !form.value.deficiencyTypeId">
+          <mat-option *ngFor="let desc of filteredDescriptions" [value]="desc.id">
+            {{ desc.descriptionAr }}
+          </mat-option>
+        </mat-select>
+        <mat-hint *ngIf="!form.value.deficiencyTypeId">
+          يرجى اختيار نوع النقص أولاً
+        </mat-hint>
+        <mat-error *ngIf="form.get('deficiencyDescriptionId')?.hasError('required')">
+          وصف النقص مطلوب
+        </mat-error>
+      </mat-form-field>
+
+      <!-- Loading Indicator -->
+      <div *ngIf="loading" class="loading-indicator">
+        <mat-spinner diameter="40"></mat-spinner>
+        <p>جاري التحميل...</p>
+      </div>
+
+    </form>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-button (click)="cancel()">إلغاء</button>
+    <button mat-raised-button
+            color="primary"
+            (click)="save()"
+            [disabled]="!form.valid || loading || isViewMode">
+      {{ saveButtonText }}
+    </button>
+  </mat-dialog-actions>
+</div>

@@ -10,7 +10,7 @@ public class RelatedCaseVM
     public int CaseRegistrationRequestId { get; set; }
     public int? CourtId { get; set; }
     public string? CourtName { get; set; } // For display purposes (from Court.NameAr)
-    public long CaseNumber { get; set; }
+    public int CaseNumber { get; set; }
     public int CaseYear { get; set; }
     public DateTime CreatedDate { get; set; }
     public DateTime ModifiedDate { get; set; }

@@ -6,6 +6,7 @@ import { CaseDataStateService } from '../../../services/case-data-state.service'
 import { CaseRegistrationApiService } from '../../../services/case-registration-api.service';
 import { ClaimsApiService } from '../../../services/claims-api.service';
 import { RelatedCaseApiService } from '../../../services/related-case-api.service';
+import { DeficienciesApiService } from '../../../services/deficiencies-api.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 
 
@@ -29,6 +30,7 @@ export class CaseDataContainerComponent implements OnInit, OnDestroy, OnChanges 
   claimsCount = 0;
   relatedCasesCount = 0;
   classificationsCount = 0;
+  deficienciesCount = 0;
 
   private destroy$ = new Subject<void>();
 
@@ -37,6 +39,7 @@ export class CaseDataContainerComponent implements OnInit, OnDestroy, OnChanges 
     private caseRegistrationApi: CaseRegistrationApiService,
     private claimsApi: ClaimsApiService,
     private relatedCaseApi: RelatedCaseApiService,
+    private deficienciesApi: DeficienciesApiService,
     private router: Router,
     private snackBar: MatSnackBar
   ) { }

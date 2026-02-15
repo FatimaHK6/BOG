@@ -16,7 +16,7 @@ import { AdditionalInfoVM, AdditionalInfoDTO } from '../models/additional-info.m
   providedIn: 'root'
 })
 export class AdditionalInfoApiService {
-  private baseUrl = `${environment.apiUrl}/api/case-requests`;
+  private baseUrl = `${environment.apiUrl}/api/case-registration-requests`;
 
   constructor(private http: HttpClient) { }
 

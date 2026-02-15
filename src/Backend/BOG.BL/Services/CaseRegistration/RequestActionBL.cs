@@ -1,5 +1,6 @@
 using BOG.BL.Interfaces.CaseRegistration;
 using BOG.DAL.Interfaces;
+using BOG.DbModel.Constants;
 using BOG.DbModel.Entities.CaseRegistration;
 using BOG.DbModel.Entities.Lookups;
 using BOG.DTO.CaseRegistration;
@@ -101,13 +102,15 @@ public class RequestActionBL : IRequestActionBL
         if (requestId <= 0)
             throw new ArgumentException("Invalid request ID.", nameof(requestId));
 
-        var request = await _requestRepository.GetWithDetailsAsync(requestId, cancellationToken);
+        var request = await _requestRepository.GetWithDetailsForUpdateAsync(requestId, cancellationToken);
         if (request == null)
             throw new InvalidOperationException($"Request {requestId} not found.");
 
-        // Validate status is New (3) or OnJudgeDesk (5)
-        if (request.RequestStatusId != 3 && request.RequestStatusId != 5)
-            throw new InvalidOperationException("Request not in valid status for registration.");
+        // Validate status is editable (Draft, New, or PendingCompletion)
+        if (request.RequestStatusId != RequestStatusIds.Draft &&
+            request.RequestStatusId != RequestStatusIds.New &&
+            request.RequestStatusId != RequestStatusIds.PendingCompletion)
+            throw new InvalidOperationException("Request not in valid status for registration. Only Draft, New, or PendingCompletion requests can be registered.");
 
         try
         {
@@ -146,7 +149,7 @@ public class RequestActionBL : IRequestActionBL
             request.CaseNumber = result.CaseNumber;
             request.RegistrationNumber = result.RegistrationNumber;
             request.RegistrationDate = result.RegistrationDate;
-            request.RequestStatusId = 6; // Registered
+            request.RequestStatusId = RequestStatusIds.Registered;
             request.ModifiedDate = DateTime.UtcNow;
 
             await _requestRepository.UpdateAsync(request, cancellationToken);
@@ -177,11 +180,11 @@ public class RequestActionBL : IRequestActionBL
         if (string.IsNullOrWhiteSpace(rejectionReason))
             throw new ArgumentException("Rejection reason is required.", nameof(rejectionReason));
 
-        var request = await _requestRepository.GetWithDetailsAsync(requestId, cancellationToken);
+        var request = await _requestRepository.GetWithDetailsForUpdateAsync(requestId, cancellationToken);
         if (request == null)
             throw new InvalidOperationException($"Request {requestId} not found.");
 
-        request.RequestStatusId = 10; // Rejected
+        request.RequestStatusId = RequestStatusIds.Rejected;
         request.RejectionReason = rejectionReason;
         request.ModifiedDate = DateTime.UtcNow;
 
@@ -204,13 +207,13 @@ public class RequestActionBL : IRequestActionBL
         if (requestId <= 0)
             throw new ArgumentException("Invalid request ID.", nameof(requestId));
 
-        var request = await _requestRepository.GetWithDetailsAsync(requestId, cancellationToken);
+        var request = await _requestRepository.GetWithDetailsForUpdateAsync(requestId, cancellationToken);
         if (request == null)
             throw new InvalidOperationException($"Request {requestId} not found.");
 
         // Set deadline to 30 days from now (BR05)
         request.CompletionDeadline = DateTime.UtcNow.AddDays(30);
-        request.RequestStatusId = 8; // PendingCompletion
+        request.RequestStatusId = RequestStatusIds.PendingCompletion;
         request.ModifiedDate = DateTime.UtcNow;
 
         await _requestRepository.UpdateAsync(request, cancellationToken);
@@ -232,11 +235,11 @@ public class RequestActionBL : IRequestActionBL
         if (requestId <= 0)
             throw new ArgumentException("Invalid request ID.", nameof(requestId));
 
-        var request = await _requestRepository.GetByIdAsync(requestId, cancellationToken);
+        var request = await _requestRepository.GetWithDetailsForUpdateAsync(requestId, cancellationToken);
         if (request == null)
             throw new InvalidOperationException($"Request {requestId} not found.");
 
-        request.RequestStatusId = 5; // OnJudgeDesk
+        request.RequestStatusId = RequestStatusIds.OnJudgeDesk;
         request.ModifiedDate = DateTime.UtcNow;
 
         await _requestRepository.UpdateAsync(request, cancellationToken);
@@ -255,14 +258,14 @@ public class RequestActionBL : IRequestActionBL
         if (requestId <= 0)
             throw new ArgumentException("Invalid request ID.", nameof(requestId));
 
-        var request = await _requestRepository.GetByIdAsync(requestId, cancellationToken);
+        var request = await _requestRepository.GetWithDetailsForUpdateAsync(requestId, cancellationToken);
         if (request == null)
             throw new InvalidOperationException($"Request {requestId} not found.");
 
-        if (request.RequestStatusId != 8) // PendingCompletion
+        if (request.RequestStatusId != RequestStatusIds.PendingCompletion)
             throw new InvalidOperationException("Request not in PendingCompletion state.");
 
-        request.RequestStatusId = 9; // UnderReview
+        request.RequestStatusId = RequestStatusIds.UnderReview;
         request.ModifiedDate = DateTime.UtcNow;
 
         await _requestRepository.UpdateAsync(request, cancellationToken);
@@ -295,7 +298,7 @@ public class RequestActionBL : IRequestActionBL
             {
                 try
                 {
-                    request.RequestStatusId = 10; // Rejected
+                    request.RequestStatusId = RequestStatusIds.Rejected;
                     request.RejectionReason = "انتهت مهلة الاستكمال (30 يوم) - تم الرفض تلقائياً";
                     request.ModifiedDate = DateTime.UtcNow;
 
@@ -339,7 +342,9 @@ public class RequestActionBL : IRequestActionBL
             throw new InvalidOperationException($"الطلب {requestId} غير موجود");
 
         // Validate request is in valid state for completion (Draft, New, or PendingCompletion)
-        if (request.RequestStatusId != 1 && request.RequestStatusId != 3 && request.RequestStatusId != 8)
+        if (request.RequestStatusId != RequestStatusIds.Draft &&
+            request.RequestStatusId != RequestStatusIds.New &&
+            request.RequestStatusId != RequestStatusIds.PendingCompletion)
             throw new InvalidOperationException(
                 "لا يمكن إنهاء الطلب. الحالة الحالية لا تسمح بهذا الإجراء");
 
@@ -468,13 +473,14 @@ public class RequestActionBL : IRequestActionBL
     /// </summary>
     public async Task<bool> ValidateStateTransitionAsync(int currentStatusId, string action)
     {
+        // Final statuses (OnJudgeDesk-7, Registered-4, Rejected-5) are intentionally NOT included
+        // Requests in final statuses cannot transition to other statuses
         var validTransitions = new Dictionary<int, List<string>>
         {
-            { 1, new List<string> { "Submit" } }, // Draft
-            { 3, new List<string> { "Register", "SendToJudge", "Reject", "RequestCompletion" } }, // New
-            { 5, new List<string> { "Register", "Reject", "RequestCompletion" } }, // OnJudgeDesk
-            { 8, new List<string> { "Complete", "Reject" } }, // PendingCompletion
-            { 9, new List<string> { "Accept", "Reject" } } // UnderReview
+            { RequestStatusIds.Draft, new List<string> { "Submit", "Register", "SendToJudge", "Reject" } },
+            { RequestStatusIds.New, new List<string> { "Register", "SendToJudge", "Reject", "RequestCompletion" } },
+            { RequestStatusIds.PendingCompletion, new List<string> { "Register", "SendToJudge", "Reject" } },
+            { RequestStatusIds.UnderReview, new List<string> { "Accept", "Reject" } }
         };
 
         if (!validTransitions.ContainsKey(currentStatusId))
@@ -747,12 +753,15 @@ public class RequestActionBL : IRequestActionBL
     private static string GetStatusName(int statusId) => statusId switch
     {
         1 => "Draft",
-        3 => "New",
-        5 => "OnJudgeDesk",
-        6 => "Registered",
-        8 => "PendingCompletion",
-        9 => "UnderReview",
-        10 => "Rejected",
+        2 => "New",
+        3 => "UnderReview",
+        4 => "Registered",
+        5 => "Rejected",
+        6 => "PendingCompletion",
+        7 => "OnJudgeDesk",
+        8 => "Completed",
+        9 => "AutoRejected",
+        10 => "Cancelled",
         _ => "Unknown"
     };
 
