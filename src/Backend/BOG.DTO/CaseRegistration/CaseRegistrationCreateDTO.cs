@@ -37,6 +37,13 @@ public class CaseRegistrationCreateDTO
     public int CaseTypeId { get; set; } = 1;
 
     /// <summary>
+    /// Submission method ID (Through Court or Through Portal)
+    /// Optional - defaults to "Through Court" if not provided
+    /// </summary>
+    [Range(1, int.MaxValue, ErrorMessage = "Invalid applying method")]
+    public int? ApplyingMethodId { get; set; }
+
+    /// <summary>
     /// Additional case notes (optional)
     /// </summary>
     [StringLength(4000, ErrorMessage = "Notes cannot exceed 4000 characters")]

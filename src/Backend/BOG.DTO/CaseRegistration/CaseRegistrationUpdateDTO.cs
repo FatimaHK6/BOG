@@ -36,6 +36,12 @@ public class CaseRegistrationUpdateDTO
     public int? CaseTypeId { get; set; }
 
     /// <summary>
+    /// Submission method ID (optional)
+    /// </summary>
+    [Range(1, int.MaxValue, ErrorMessage = "طريقة التقديم غير صالحة")]
+    public int? ApplyingMethodId { get; set; }
+
+    /// <summary>
     /// Additional case notes (optional)
     /// </summary>
     [StringLength(4000, ErrorMessage = "الملاحظات لا يمكن أن تتجاوز 4000 حرف")]

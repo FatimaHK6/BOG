@@ -1,3 +1,4 @@
+using System.Globalization;
 using BOG.Integration.Configuration;
 using BOG.Integration.DTOs.CaseManagement;
 using BOG.Integration.Interfaces;
@@ -56,16 +57,41 @@ public class MockCaseManagementService : ICaseManagementService
         // Simulate network delay
         await Task.Delay(500, cancellationToken);
 
-        // Generate case and registration numbers
+        // Generate case number using Hijri calendar: {counter}/{courtArabicName}/{hijri_year}
         string caseNumber;
         string registrationNumber;
 
+        // Get Hijri date using Islamic (Hijri) calendar
+        // Note: Using HijriCalendar for Hijri dates. In production, integrate with official Umm al-Qura calendar service
+        var hijriCalendar = new System.Globalization.HijriCalendar();
+        var now = DateTime.Now;
+        int hijriYear = hijriCalendar.GetYear(now);
+        int hijriMonth = hijriCalendar.GetMonth(now);
+        int hijriDay = hijriCalendar.GetDayOfMonth(now);
+
+        // Get court name (in production, fetch from database)
+        int courtId = registrationData.CourtId ?? 1;
+        string courtName = registrationData.CourtName ?? GetCourtNameById(courtId);
+
+        // Get counter for this court and year
+        int counter;
         lock (_lock)
         {
+            // In production, this should query database:
+            // SELECT ISNULL(MAX(CaseCounter), 0) + 1 FROM CaseRegistrationRequests
+            // WHERE CourtId = @CourtId AND HijriYear = @HijriYear
             _caseCounter++;
-            caseNumber = $"{_settings.MockCaseNumberPrefix}{_caseCounter}";
-            registrationNumber = $"{_settings.MockRegistrationNumberPrefix}{_caseCounter}";
+            counter = _caseCounter % 1000; // Mock: reset every 1000 for demo
         }
+
+        // Format: {counter}/{courtArabicName}/{hijri_year}
+        caseNumber = $"{counter}/{courtName}/{hijriYear}";
+
+        // Registration number format: {court_id}-{year}-{counter}
+        registrationNumber = $"{courtId}-{hijriYear}-{counter}";
+
+        _logger.LogInformation("[MOCK CASE] Generated case number: {CaseNumber} (Hijri: {Day}/{Month}/{Year})",
+            caseNumber, hijriDay, hijriMonth, hijriYear);
 
         _logger.LogInformation("[MOCK CASE] Registered Case | CaseNumber: {CaseNumber} | Subject: {Subject} | Plaintiffs: {PlaintiffCount} | Defendants: {DefendantCount}",
             caseNumber, registrationData.Subject, registrationData.Plaintiffs.Count, registrationData.Defendants.Count);
@@ -104,6 +130,20 @@ public class MockCaseManagementService : ICaseManagementService
             Status = "تحت النظر",
             NextHearingDate = DateTime.UtcNow.AddDays(30),
             JudgeName = "القاضي / محمد علي"
+        };
+    }
+
+    private string GetCourtNameById(int courtId)
+    {
+        // Mock court names - in production, fetch from database
+        return courtId switch
+        {
+            1 => "المحكمة الإدارية بالرياض",
+            2 => "المحكمة الإدارية بجدة",
+            3 => "المحكمة الإدارية بمكة المكرمة",
+            4 => "المحكمة الإدارية بالدمام",
+            5 => "المحكمة الإدارية بالمدينة المنورة",
+            _ => $"المحكمة الإدارية {courtId}"
         };
     }
 }

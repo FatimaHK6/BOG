@@ -119,6 +119,7 @@ public class RequestActionBL : IRequestActionBL
             {
                 RequestId = requestId,
                 CourtId = request.CourtId,
+                CourtName = request.Court?.NameAr ?? GetCourtNameById(request.CourtId ?? 1),
                 Subject = request.Subject,
                 Evidence = request.Evidence,
                 Plaintiffs = request.CaseRequestPlaintiffs?
@@ -763,6 +764,20 @@ public class RequestActionBL : IRequestActionBL
         9 => "AutoRejected",
         10 => "Cancelled",
         _ => "Unknown"
+    };
+
+    /// <summary>
+    /// Gets court Arabic name by court ID.
+    /// In production, this should fetch from database.
+    /// </summary>
+    private static string GetCourtNameById(int courtId) => courtId switch
+    {
+        1 => "المحكمة الإدارية بالرياض",
+        2 => "المحكمة الإدارية بجدة",
+        3 => "المحكمة الإدارية بمكة المكرمة",
+        4 => "المحكمة الإدارية بالدمام",
+        5 => "المحكمة الإدارية بالمدينة المنورة",
+        _ => $"المحكمة الإدارية {courtId}"
     };
 
     #endregion

@@ -74,6 +74,7 @@ public class ApplicationDbContext : DbContext
     public DbSet<NotificationMethod> NotificationMethods { get; set; }
     public DbSet<GovernmentEntity> GovernmentEntities { get; set; }
     public DbSet<CaseType> CaseTypes { get; set; }
+    public DbSet<ApplyingMethod> ApplyingMethods { get; set; }
     public DbSet<DeficiencyType> DeficiencyTypes { get; set; }
     public DbSet<DeficiencyDescription> DeficiencyDescriptions { get; set; }
 
@@ -625,6 +626,17 @@ public class ApplicationDbContext : DbContext
             entity.Property(e => e.IsActive).HasDefaultValue(true);
             entity.Property(e => e.IsDeleted).HasDefaultValue(false);
         });
+
+        // ApplyingMethod
+        modelBuilder.Entity<ApplyingMethod>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Name).IsRequired().HasMaxLength(100);
+            entity.Property(e => e.NameAr).IsRequired().HasMaxLength(100);
+            entity.Property(e => e.Description).HasMaxLength(500);
+            entity.Property(e => e.IsActive).HasDefaultValue(true);
+            entity.Property(e => e.IsDeleted).HasDefaultValue(false);
+        });
     }
 
     /// <summary>
@@ -715,6 +727,11 @@ public class ApplicationDbContext : DbContext
             entity.HasOne(e => e.CaseType)
                 .WithMany()
                 .HasForeignKey(e => e.CaseTypeId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(e => e.ApplyingMethod)
+                .WithMany()
+                .HasForeignKey(e => e.ApplyingMethodId)
                 .OnDelete(DeleteBehavior.Restrict);
 
             entity.HasOne(e => e.Court)
@@ -1210,12 +1227,12 @@ public class ApplicationDbContext : DbContext
         // RequestStatus (10 statuses)
         modelBuilder.Entity<RequestStatus>().HasData(
             new RequestStatus { Id = 1, Name = "Draft", NameAr = "مسودة", DisplayOrder = 1, IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
-            new RequestStatus { Id = 2, Name = "New", NameAr = "جديد", DisplayOrder = 2, IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
+            new RequestStatus { Id = 2, Name = "New", NameAr = "طلب جديد", DisplayOrder = 2, IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
             new RequestStatus { Id = 3, Name = "UnderReview", NameAr = "قيد المراجعة", DisplayOrder = 3, IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
-            new RequestStatus { Id = 4, Name = "Registered", NameAr = "مقيد", DisplayOrder = 4, IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
-            new RequestStatus { Id = 5, Name = "Rejected", NameAr = "مرفوض", DisplayOrder = 5, IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
-            new RequestStatus { Id = 6, Name = "PendingCompletion", NameAr = "بانتظار الاستكمال", DisplayOrder = 6, IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
-            new RequestStatus { Id = 7, Name = "OnJudgeDesk", NameAr = "على مكتب القاضي", DisplayOrder = 7, IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
+            new RequestStatus { Id = 4, Name = "Registered", NameAr = "مقيد حديثًا", DisplayOrder = 4, IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
+            new RequestStatus { Id = 5, Name = "Rejected", NameAr = "تم حفظ الطلب", DisplayOrder = 5, IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
+            new RequestStatus { Id = 6, Name = "PendingCompletion", NameAr = "استكمال النواقص", DisplayOrder = 6, IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
+            new RequestStatus { Id = 7, Name = "OnJudgeDesk", NameAr = "عرض على رئيس المحكمة", DisplayOrder = 7, IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
             new RequestStatus { Id = 8, Name = "Completed", NameAr = "مكتمل", DisplayOrder = 8, IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
             new RequestStatus { Id = 9, Name = "AutoRejected", NameAr = "مرفوض تلقائياً", DisplayOrder = 9, IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
             new RequestStatus { Id = 10, Name = "Cancelled", NameAr = "ملغي", DisplayOrder = 10, IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now }
@@ -1276,6 +1293,12 @@ public class ApplicationDbContext : DbContext
             new City { Id = 11, Name = "Abha", NameAr = "أبها", RegionId = 6, IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
             new City { Id = 12, Name = "Hail", NameAr = "حائل", RegionId = 8, IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
             new City { Id = 13, Name = "Najran", NameAr = "نجران", RegionId = 11, IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now }
+        );
+
+        // ApplyingMethods (2 submission methods)
+        modelBuilder.Entity<ApplyingMethod>().HasData(
+            new ApplyingMethod { Id = 1, Name = "Through Court", NameAr = "من خلال المحكمة", Description = "Request submitted in person at the court", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now },
+            new ApplyingMethod { Id = 2, Name = "Through Portal", NameAr = "من خلال البوابة", Description = "Request submitted through the online portal", IsActive = true, IsDeleted = false, CreatedDate = now, ModifiedDate = now }
         );
 
         // Classifications (25 hierarchical classifications)
