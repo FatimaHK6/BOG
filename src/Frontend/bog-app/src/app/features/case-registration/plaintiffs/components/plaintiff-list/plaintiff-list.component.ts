@@ -21,6 +21,7 @@ interface PlaintiffType {
 })
 export class PlaintiffListComponent implements OnInit, AfterViewInit {
   @Input() requestId: number = 0;
+  @Input() canEdit: boolean = true;
 
   plaintiffs: PlaintiffListVM[] = [];
   dataSource = new MatTableDataSource<PlaintiffListVM>([]);

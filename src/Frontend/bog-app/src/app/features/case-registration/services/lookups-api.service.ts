@@ -64,6 +64,18 @@ export class LookupsApiService {
   }
 
   /**
+   * Gets all active applying methods
+   * Used in the request list filter for the submission method dropdown
+   * طريقة تقديم الطلب
+   * @returns Observable array of applying method objects
+   */
+  getApplyingMethods(): Observable<{ id: number; name: string; nameAr: string }[]> {
+    return this.http.get<{ id: number; name: string; nameAr: string }[]>(
+      `${this.baseUrl}/applying-methods`
+    );
+  }
+
+  /**
    * Gets all active courts
    * Used in the Related Cases section for the court dropdown
    * @returns Observable array of CourtLookup

@@ -47,6 +47,8 @@ export interface SearchRequestDTO {
   requestId?: number | null;
   statusId?: number | null;
   courtId?: number | null;
+  applyingMethodId?: number | null;
+  caseTypeId?: number | null;
   subject?: string | null;
   caseNumber?: string | null;
   createdDateFrom?: string | null;

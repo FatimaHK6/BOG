@@ -22,6 +22,18 @@ public class SearchRequestDTO
     public int? CourtId { get; set; }
 
     /// <summary>
+    /// Filter by applying method ID (طريقة تقديم الطلب)
+    /// </summary>
+    [Range(1, int.MaxValue, ErrorMessage = "Invalid applying method ID")]
+    public int? ApplyingMethodId { get; set; }
+
+    /// <summary>
+    /// Filter by case type ID (نوع الدعوى)
+    /// </summary>
+    [Range(1, 2, ErrorMessage = "Invalid case type ID (must be 1 or 2)")]
+    public int? CaseTypeId { get; set; }
+
+    /// <summary>
     /// Filter by case subject (partial match, case-insensitive)
     /// </summary>
     [StringLength(4000, ErrorMessage = "Subject cannot exceed 4000 characters")]

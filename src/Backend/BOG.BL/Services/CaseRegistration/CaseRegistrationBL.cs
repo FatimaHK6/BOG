@@ -525,6 +525,12 @@ public class CaseRegistrationBL : ICaseRegistrationBL
             if (searchCriteria.CourtId.HasValue)
                 query = query.Where(r => r.CourtId == searchCriteria.CourtId.Value);
 
+            if (searchCriteria.ApplyingMethodId.HasValue)
+                query = query.Where(r => r.ApplyingMethodId == searchCriteria.ApplyingMethodId.Value);
+
+            if (searchCriteria.CaseTypeId.HasValue)
+                query = query.Where(r => r.CaseTypeId == searchCriteria.CaseTypeId.Value);
+
             if (!string.IsNullOrWhiteSpace(searchCriteria.Subject))
                 query = query.Where(r => r.Subject != null && r.Subject.Contains(searchCriteria.Subject));
 
@@ -638,7 +644,7 @@ public class CaseRegistrationBL : ICaseRegistrationBL
             PlaintiffsCount = request.CaseRequestPlaintiffs?.Count(p => !p.IsDeleted) ?? 0,
             DefendantsCount = request.CaseRequestDefendants?.Count(d => !d.IsDeleted) ?? 0,
             IsDraft = request.RequestStatusId == 1,
-            CaseTypeId = null,
+            CaseTypeId = request.CaseTypeId,
             SubjectPreview = !string.IsNullOrEmpty(request.Subject)
                 ? (request.Subject.Length > 50 ? request.Subject.Substring(0, 50) + "..." : request.Subject)
                 : null,

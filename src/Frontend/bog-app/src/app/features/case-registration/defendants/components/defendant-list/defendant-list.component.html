@@ -4,7 +4,7 @@
     <!-- Header -->
     <div class="page-header">
       <h2 class="page-title">المدعى عليهم</h2>
-      <div class="header-actions">
+      <div class="header-actions" *ngIf="canEdit">
         <button mat-raised-button class="add-defendant-btn" [matMenuTriggerFor]="defendantTypeMenu">
           <mat-icon>add</mat-icon>
           إضافة مدعى عليه جديد
@@ -26,14 +26,16 @@
     <div *ngIf="!isLoading && defendants.length === 0" class="empty-state">
       <mat-icon class="empty-icon">person_off</mat-icon>
       <p>لا يوجد مدعى عليهم مسجلين</p>
-      <button mat-stroked-button class="add-defendant-btn-outline" [matMenuTriggerFor]="defendantTypeMenuEmpty">
-        إضافة مدعى عليه
-      </button>
-      <mat-menu #defendantTypeMenuEmpty="matMenu" class="defendant-type-menu">
-        <button mat-menu-item *ngFor="let type of defendantTypes" (click)="onSelectDefendantType(type)">
-          {{ type.nameAr }}
+      <ng-container *ngIf="canEdit">
+        <button mat-stroked-button class="add-defendant-btn-outline" [matMenuTriggerFor]="defendantTypeMenuEmpty">
+          إضافة مدعى عليه
         </button>
-      </mat-menu>
+        <mat-menu #defendantTypeMenuEmpty="matMenu" class="defendant-type-menu">
+          <button mat-menu-item *ngFor="let type of defendantTypes" (click)="onSelectDefendantType(type)">
+            {{ type.nameAr }}
+          </button>
+        </mat-menu>
+      </ng-container>
     </div>
 
     <!-- Defendants Table -->
@@ -65,12 +67,12 @@
                   <mat-icon>visibility</mat-icon>
                   <span>عرض</span>
                 </button>
-                <button mat-menu-item (click)="onEditDefendant(defendant)">
+                <button mat-menu-item (click)="onEditDefendant(defendant)" *ngIf="canEdit">
                   <mat-icon>edit</mat-icon>
                   <span>تعديل</span>
                 </button>
-                <mat-divider></mat-divider>
-                <button mat-menu-item (click)="onDeleteDefendant(defendant)" class="delete-action">
+                <mat-divider *ngIf="canEdit"></mat-divider>
+                <button mat-menu-item (click)="onDeleteDefendant(defendant)" class="delete-action" *ngIf="canEdit">
                   <mat-icon>delete</mat-icon>
                   <span>حذف</span>
                 </button>

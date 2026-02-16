@@ -4,6 +4,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { CaseRegistrationRequestService, CaseRegistrationRequestListVM, SearchRequestDTO, PagedResult } from '../../../../../core/services/case-registration-request.service';
 import { NotificationService } from '../../../../../core/services/notification.service';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../../../../shared/components/confirm-dialog/confirm-dialog.component';
+import { LookupsApiService } from '../../../services/lookups-api.service';
 
 interface RequestFilters {
   courtId: number | null;
@@ -24,6 +25,7 @@ export class RequestListComponent implements OnInit {
   isLoading = true;
   displayedColumns = ['id', 'statusNameAr', 'subjectPreview', 'plaintiffsCount', 'defendantsCount', 'createdDate', 'actions'];
   viewMode: 'table' | 'card' = 'card';
+  applyingMethods: { id: number; name: string; nameAr: string }[] = [];
 
   // Statistics
   totalRequests = 0;
@@ -49,11 +51,16 @@ export class RequestListComponent implements OnInit {
     private requestService: CaseRegistrationRequestService,
     private router: Router,
     private dialog: MatDialog,
-    private notification: NotificationService
+    private notification: NotificationService,
+    private lookupsService: LookupsApiService
   ) {}
 
   ngOnInit(): void {
     this.loadRequests();
+    this.lookupsService.getApplyingMethods().subscribe({
+      next: (methods) => this.applyingMethods = methods,
+      error: (err) => console.error('Error loading applying methods:', err)
+    });
   }
 
   loadRequests(): void {
@@ -65,6 +72,8 @@ export class RequestListComponent implements OnInit {
       requestId: requestId && !isNaN(requestId) ? requestId : null,
       statusId: this.filters.statusIds.length > 0 ? this.filters.statusIds[0] : null,
       courtId: this.filters.courtId,
+      applyingMethodId: this.filters.submissionMethod,
+      caseTypeId: this.filters.caseTypeId,
       subject: null,
       caseNumber: null,
       createdDateFrom: this.filters.requestDate ? this.filters.requestDate.toISOString() : null,
@@ -78,6 +87,8 @@ export class RequestListComponent implements OnInit {
       sortBy: 'CreatedDate',
       sortDirection: 'desc'
     };
+
+    console.log('[Search DTO] applyingMethodId:', dto.applyingMethodId);
 
     this.requestService.search(dto).subscribe({
       next: (result: PagedResult<CaseRegistrationRequestListVM>) => {
