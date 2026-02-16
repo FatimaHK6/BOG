@@ -2,6 +2,7 @@ using BOG.BL.Interfaces.CaseRegistration;
 using BOG.DTO.CaseRegistration;
 using BOG.VM.CaseRegistration;
 using BOG.VM.Shared;
+using CaseRegistrationRequestListVM = BOG.VM.CaseRegistrationRequest.CaseRegistrationRequestListVM;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -335,7 +336,7 @@ public class CaseRegistrationController : ControllerBase
     [HttpGet]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<ActionResult<PagedResult<CaseRegistrationRequestVM>>> GetRequests(
+    public async Task<ActionResult<PagedResult<CaseRegistrationRequestListVM>>> GetRequests(
         [FromQuery] int pageNumber = 1,
         [FromQuery] int pageSize = 10,
         [FromQuery] string? requestNumber = null,
@@ -352,11 +353,16 @@ public class CaseRegistrationController : ControllerBase
                 return BadRequest(new { message = "Page size must be between 1 and 100." });
 
             // Create search criteria from query parameters
-            var searchDto = new
+            var searchDto = new SearchRequestDTO
             {
-                RequestNumber = requestNumber,
-                Status = status
+                CaseNumber = requestNumber,
+                PageNumber = pageNumber,
+                PageSize = pageSize
             };
+
+            // Parse status filter if provided
+            if (!string.IsNullOrWhiteSpace(status) && int.TryParse(status, out int statusId))
+                searchDto.StatusId = statusId;
 
             var result = await _caseRegistrationBL.SearchRequestsAsync(searchDto, pageNumber, pageSize, cancellationToken);
             _logger.LogInformation("Retrieved requests: PageNumber={PageNumber}, PageSize={PageSize}", pageNumber, pageSize);
@@ -385,7 +391,7 @@ public class CaseRegistrationController : ControllerBase
     [HttpPost("search")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<ActionResult<PagedResult<CaseRegistrationRequestVM>>> SearchRequests(
+    public async Task<ActionResult<PagedResult<CaseRegistrationRequestListVM>>> SearchRequests(
         [FromBody] SearchRequestDTO searchDto,
         CancellationToken cancellationToken)
     {

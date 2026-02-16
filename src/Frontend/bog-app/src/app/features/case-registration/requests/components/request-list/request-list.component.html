@@ -18,6 +18,9 @@
       <mat-form-field appearance="outline">
         <mat-select [(value)]="filters.submissionMethod" placeholder="اختر">
           <mat-option [value]="null">الكل</mat-option>
+          <mat-option *ngFor="let method of applyingMethods" [value]="method.id">
+            {{ method.nameAr }}
+          </mat-option>
         </mat-select>
       </mat-form-field>
     </div>
