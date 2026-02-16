@@ -27,8 +27,9 @@ public interface IRequestActionBL
     /// </summary>
     /// <param name="requestId">Case registration request ID</param>
     /// <param name="cancellationToken">Cancellation token</param>
+    /// <param name="decision">Optional decision data to preserve CaseTypeId (used by CompleteRequestAsync flow)</param>
     /// <returns>Registered case registration request view model with CaseNumber and RegistrationNumber</returns>
-    Task<object> RegisterCaseAsync(int requestId, CancellationToken cancellationToken = default);
+    Task<object> RegisterCaseAsync(int requestId, CancellationToken cancellationToken = default, RequestDecisionDTO? decision = null);
 
     /// <summary>
     /// Rejects a case registration request with reason.
@@ -38,8 +39,9 @@ public interface IRequestActionBL
     /// <param name="requestId">Case registration request ID</param>
     /// <param name="rejectionReason">Reason for rejection</param>
     /// <param name="cancellationToken">Cancellation token</param>
+    /// <param name="decision">Optional decision data to preserve CaseTypeId (used by CompleteRequestAsync flow)</param>
     /// <returns>Rejected case registration request view model</returns>
-    Task<object> RejectRequestAsync(int requestId, string rejectionReason, CancellationToken cancellationToken = default);
+    Task<object> RejectRequestAsync(int requestId, string rejectionReason, CancellationToken cancellationToken = default, RequestDecisionDTO? decision = null);
 
     /// <summary>
     /// Requests completion of missing documents for a case registration request.
@@ -51,8 +53,9 @@ public interface IRequestActionBL
     /// <param name="requestId">Case registration request ID</param>
     /// <param name="deficiencies">List of deficiency types required</param>
     /// <param name="cancellationToken">Cancellation token</param>
+    /// <param name="decision">Optional decision data to preserve CaseTypeId (used by CompleteRequestAsync flow)</param>
     /// <returns>Case registration request in PendingCompletion state</returns>
-    Task<object> RequestCompletionAsync(int requestId, object deficiencies, CancellationToken cancellationToken = default);
+    Task<object> RequestCompletionAsync(int requestId, object deficiencies, CancellationToken cancellationToken = default, RequestDecisionDTO? decision = null);
 
     /// <summary>
     /// Sends case registration request to judge desk for review.
@@ -60,8 +63,9 @@ public interface IRequestActionBL
     /// </summary>
     /// <param name="requestId">Case registration request ID</param>
     /// <param name="cancellationToken">Cancellation token</param>
+    /// <param name="decision">Optional decision data to preserve CaseTypeId (used by CompleteRequestAsync flow)</param>
     /// <returns>Case registration request on judge desk</returns>
-    Task<object> SendToJudgeDeskAsync(int requestId, CancellationToken cancellationToken = default);
+    Task<object> SendToJudgeDeskAsync(int requestId, CancellationToken cancellationToken = default, RequestDecisionDTO? decision = null);
 
     /// <summary>
     /// Completes a pending completion request.

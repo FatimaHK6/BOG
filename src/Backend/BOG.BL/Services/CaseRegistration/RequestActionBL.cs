@@ -97,7 +97,7 @@ public class RequestActionBL : IRequestActionBL
     /// <summary>
     /// Registers a case with the external case management system.
     /// </summary>
-    public async Task<object> RegisterCaseAsync(int requestId, CancellationToken cancellationToken = default)
+    public async Task<object> RegisterCaseAsync(int requestId, CancellationToken cancellationToken = default, RequestDecisionDTO? decision = null)
     {
         if (requestId <= 0)
             throw new ArgumentException("Invalid request ID.", nameof(requestId));
@@ -105,6 +105,10 @@ public class RequestActionBL : IRequestActionBL
         var request = await _requestRepository.GetWithDetailsForUpdateAsync(requestId, cancellationToken);
         if (request == null)
             throw new InvalidOperationException($"Request {requestId} not found.");
+
+        // Preserve CaseTypeId from decision if provided (for CompleteRequestAsync flow)
+        if (decision != null && decision.CaseTypeId > 0)
+            request.CaseTypeId = decision.CaseTypeId;
 
         // Validate status is editable (Draft, New, or PendingCompletion)
         if (request.RequestStatusId != RequestStatusIds.Draft &&
@@ -173,7 +177,7 @@ public class RequestActionBL : IRequestActionBL
     /// <summary>
     /// Rejects a case registration request.
     /// </summary>
-    public async Task<object> RejectRequestAsync(int requestId, string rejectionReason, CancellationToken cancellationToken = default)
+    public async Task<object> RejectRequestAsync(int requestId, string rejectionReason, CancellationToken cancellationToken = default, RequestDecisionDTO? decision = null)
     {
         if (requestId <= 0)
             throw new ArgumentException("Invalid request ID.", nameof(requestId));
@@ -184,6 +188,10 @@ public class RequestActionBL : IRequestActionBL
         var request = await _requestRepository.GetWithDetailsForUpdateAsync(requestId, cancellationToken);
         if (request == null)
             throw new InvalidOperationException($"Request {requestId} not found.");
+
+        // Preserve CaseTypeId from decision if provided (for CompleteRequestAsync flow)
+        if (decision != null && decision.CaseTypeId > 0)
+            request.CaseTypeId = decision.CaseTypeId;
 
         request.RequestStatusId = RequestStatusIds.Rejected;
         request.RejectionReason = rejectionReason;
@@ -203,7 +211,7 @@ public class RequestActionBL : IRequestActionBL
     /// <summary>
     /// Requests completion of missing documents.
     /// </summary>
-    public async Task<object> RequestCompletionAsync(int requestId, object? deficiencies, CancellationToken cancellationToken = default)
+    public async Task<object> RequestCompletionAsync(int requestId, object? deficiencies, CancellationToken cancellationToken = default, RequestDecisionDTO? decision = null)
     {
         if (requestId <= 0)
             throw new ArgumentException("Invalid request ID.", nameof(requestId));
@@ -211,6 +219,10 @@ public class RequestActionBL : IRequestActionBL
         var request = await _requestRepository.GetWithDetailsForUpdateAsync(requestId, cancellationToken);
         if (request == null)
             throw new InvalidOperationException($"Request {requestId} not found.");
+
+        // Preserve CaseTypeId from decision if provided (for CompleteRequestAsync flow)
+        if (decision != null && decision.CaseTypeId > 0)
+            request.CaseTypeId = decision.CaseTypeId;
 
         // Set deadline to 30 days from now (BR05)
         request.CompletionDeadline = DateTime.UtcNow.AddDays(30);
@@ -231,7 +243,7 @@ public class RequestActionBL : IRequestActionBL
     /// <summary>
     /// Sends case registration request to judge desk.
     /// </summary>
-    public async Task<object> SendToJudgeDeskAsync(int requestId, CancellationToken cancellationToken = default)
+    public async Task<object> SendToJudgeDeskAsync(int requestId, CancellationToken cancellationToken = default, RequestDecisionDTO? decision = null)
     {
         if (requestId <= 0)
             throw new ArgumentException("Invalid request ID.", nameof(requestId));
@@ -239,6 +251,10 @@ public class RequestActionBL : IRequestActionBL
         var request = await _requestRepository.GetWithDetailsForUpdateAsync(requestId, cancellationToken);
         if (request == null)
             throw new InvalidOperationException($"Request {requestId} not found.");
+
+        // Preserve CaseTypeId from decision if provided (for CompleteRequestAsync flow)
+        if (decision != null && decision.CaseTypeId > 0)
+            request.CaseTypeId = decision.CaseTypeId;
 
         request.RequestStatusId = RequestStatusIds.OnJudgeDesk;
         request.ModifiedDate = DateTime.UtcNow;
@@ -370,6 +386,10 @@ public class RequestActionBL : IRequestActionBL
         // Validate for Register and SendToJudge decisions
         if (decision.DecisionType == "Register" || decision.DecisionType == "SendToJudge")
         {
+            // Check at least one plaintiff exists
+            if (!request.CaseRequestPlaintiffs?.Any(p => !p.IsDeleted) ?? true)
+                throw new InvalidOperationException("يجب إدخال مدعى واحد على الأقل");
+
             // ERR005: Check at least one classification
             if (!request.Classifications?.Any(c => !c.IsDeleted) ?? true)
                 throw new InvalidOperationException("يجب تحديد تصنيف واحد على الأقل للدعوى");
@@ -378,9 +398,84 @@ public class RequestActionBL : IRequestActionBL
             if (!request.CaseRequestDefendants?.Any(d => !d.IsDeleted) ?? true)
                 throw new InvalidOperationException("يجب تحديد مدعى عليه واحد على الأقل");
 
-            // ERR010: Check at least one attachment
+            // ERR006: Check at least one request attachment
             if (!request.Attachments?.Any(a => !a.IsDeleted) ?? true)
                 throw new InvalidOperationException("يجب إضافة مرفق واحد على الأقل");
+
+            // ERR010: Check that all plaintiffs have required attachments
+            var plaintiffsWithoutAttachments = request.CaseRequestPlaintiffs
+                .Where(crp => !crp.IsDeleted && crp.Plaintiff != null)
+                .Where(crp => !crp.Plaintiff!.Attachments?.Any(a => !a.IsDeleted) ?? true)
+                .ToList();
+
+            if (plaintiffsWithoutAttachments.Any())
+            {
+                throw new InvalidOperationException("يجب إدخال المرفقات بشكل صحيح");
+            }
+
+            // Corporate Plaintiff Rule: Check corporate plaintiffs have representatives
+            // Corporate types: 3, 4, 5, 6, 7, 8 (Business, Company, Gov Agency, NGO, Waqf)
+            var corporatePlaintiffsWithoutReps = request.CaseRequestPlaintiffs
+                .Where(crp => !crp.IsDeleted && crp.Plaintiff != null)
+                .Where(crp => PlaintiffTypeIds.IsCorporate(crp.Plaintiff!.PlaintiffTypeId))
+                .Where(crp => !crp.Plaintiff!.Representatives?.Any(r => !r.IsDeleted) ?? true)
+                .Select(crp => new
+                {
+                    PlaintiffId = crp.Plaintiff!.Id,
+                    TypeName = crp.Plaintiff.PlaintiffType?.NameAr ?? "غير محدد"
+                })
+                .ToList();
+
+            if (corporatePlaintiffsWithoutReps.Any())
+            {
+                throw new InvalidOperationException("يجب إدخال ممثّل للجهات الاعتبارية");
+            }
+
+            // Check same person is not both plaintiff and defendant
+            // Compare by IdentityNumber and IdentityTypeId
+            var plaintiffIdentities = request.CaseRequestPlaintiffs
+                .Where(crp => !crp.IsDeleted && crp.Plaintiff != null)
+                .Where(crp => !string.IsNullOrWhiteSpace(crp.Plaintiff!.IdentityNumber))
+                .Select(crp => new
+                {
+                    IdentityNumber = crp.Plaintiff!.IdentityNumber,
+                    IdentityTypeId = crp.Plaintiff.IdentityTypeId
+                })
+                .Distinct()
+                .ToList();
+
+            var defendantIdentities = request.CaseRequestDefendants
+                .Where(crd => !crd.IsDeleted && crd.Defendant != null)
+                .Where(crd => !string.IsNullOrWhiteSpace(crd.Defendant!.IdentityNumber))
+                .Select(crd => new
+                {
+                    IdentityNumber = crd.Defendant!.IdentityNumber,
+                    IdentityTypeId = crd.Defendant.IdentityTypeId
+                })
+                .Distinct()
+                .ToList();
+
+            var duplicateIdentities = plaintiffIdentities
+                .Where(p => defendantIdentities.Any(d =>
+                    d.IdentityNumber == p.IdentityNumber &&
+                    d.IdentityTypeId == p.IdentityTypeId))
+                .ToList();
+
+            if (duplicateIdentities.Any())
+            {
+                throw new InvalidOperationException("يوجد مدّعي و مدّعى عليه بنفس البيانات");
+            }
+
+            // Check at least one plaintiff is marked as applicant (request submitter)
+            // Per BC07: Only Individual plaintiffs (types 1-2) can be applicants
+            var hasApplicant = request.CaseRequestPlaintiffs
+                .Where(crp => !crp.IsDeleted && crp.Plaintiff != null)
+                .Any(crp => crp.Plaintiff!.IsApplicant == true);
+
+            if (!hasApplicant)
+            {
+                throw new InvalidOperationException("يجب اختيار مقدم الطلب");
+            }
         }
 
         // Route to appropriate action method based on decision type
@@ -388,19 +483,19 @@ public class RequestActionBL : IRequestActionBL
         switch (decision.DecisionType)
         {
             case "Register":
-                result = await RegisterCaseAsync(requestId, cancellationToken);
+                result = await RegisterCaseAsync(requestId, cancellationToken, decision);
                 break;
 
             case "SendToJudge":
-                result = await SendToJudgeDeskAsync(requestId, cancellationToken);
+                result = await SendToJudgeDeskAsync(requestId, cancellationToken, decision);
                 break;
 
             case "Reject":
-                result = await RejectRequestAsync(requestId, decision.Notes ?? "تم الرفض", cancellationToken);
+                result = await RejectRequestAsync(requestId, decision.Notes ?? "تم الرفض", cancellationToken, decision);
                 break;
 
             case "RequestCompletion":
-                result = await RequestCompletionAsync(requestId, decision.Deficiencies, cancellationToken);
+                result = await RequestCompletionAsync(requestId, decision.Deficiencies, cancellationToken, decision);
                 break;
 
             default:
@@ -711,7 +806,9 @@ public class RequestActionBL : IRequestActionBL
             registrationNumber = request.RegistrationNumber,
             registrationDate = request.RegistrationDate,
             createdDate = request.CreatedDate,
-            modifiedDate = request.ModifiedDate
+            modifiedDate = request.ModifiedDate,
+            caseTypeId = request.CaseTypeId,
+            caseTypeName = request.CaseType?.NameAr
         };
     }
 
