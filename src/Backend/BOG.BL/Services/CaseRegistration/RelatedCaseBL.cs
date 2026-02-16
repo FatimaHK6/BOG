@@ -58,8 +58,8 @@ public class RelatedCaseBL : IRelatedCaseBL
         if (request == null || request.IsDeleted)
             throw new KeyNotFoundException($"Case registration request {requestId} not found");
 
-        // Check if request is in editable status (1=Draft, 8=Deficiencies)
-        if (request.RequestStatusId != 1 && request.RequestStatusId != 8)
+        // Check if request is in editable status (1=Draft, 6=PendingCompletion)
+        if (request.RequestStatusId != 1 && request.RequestStatusId != 6)
             throw new InvalidOperationException("Request cannot be edited in current status");
 
         // Soft delete existing related cases
