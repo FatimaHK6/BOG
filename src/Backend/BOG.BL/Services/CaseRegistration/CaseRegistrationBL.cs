@@ -136,7 +136,7 @@ public class CaseRegistrationBL : ICaseRegistrationBL
 
     /// <summary>
     /// Updates a case registration request.
-    /// Only allowed in Draft (1) and PendingCompletion (8) states.
+    /// Only allowed in Draft (1) and PendingCompletion (6) states.
     /// </summary>
     public async Task<CaseRegistrationRequestVM> UpdateRequestAsync(int requestId, object requestData, CancellationToken cancellationToken = default)
     {
@@ -152,7 +152,7 @@ public class CaseRegistrationBL : ICaseRegistrationBL
             throw new InvalidOperationException($"الطلب {requestId} غير موجود");
 
         // Can only update in Draft or PendingCompletion states
-        if (request.RequestStatusId != 1 && request.RequestStatusId != 8)
+        if (request.RequestStatusId != 1 && request.RequestStatusId != 6)
             throw new InvalidOperationException("يمكن تحديث الطلبات فقط في حالة المسودة أو في الانتظار للاستكمال");
 
         // Handle both strongly-typed DTO and object types

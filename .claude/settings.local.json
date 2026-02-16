@@ -23,6 +23,15 @@
       "Bash(pkill:*)",
       "Bash(tasklist:*)",
       "Bash(curl:*)",
+      "Bash(dotnet run:*)",
+      "Bash(sqllocaldb stop:*)",
+      "Bash(wmic process where processid=28552 delete)",
+      "Bash(Stop-Process -Id 14948 -Force -ErrorAction SilentlyContinue)",
+      "Bash(Start-Sleep -Seconds 2)",
+      "Bash(Write-Host \"Process stopped\")",
+      "Bash(wmic process where \"ProcessId=14948\" delete /nointeractive)",
+      "Bash(kill:*)",
+      "Bash(dotnet clean:*)",
       "Bash(git add:*)"
     ]
   }

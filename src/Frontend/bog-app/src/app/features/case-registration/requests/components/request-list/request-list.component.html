@@ -31,9 +31,14 @@
         <mat-select [(value)]="filters.statusIds" multiple placeholder="اختر">
           <mat-option [value]="1">مسودة</mat-option>
           <mat-option [value]="2">جديد</mat-option>
-          <mat-option [value]="3">استكمال نواقص</mat-option>
-          <mat-option [value]="4">مقيدة</mat-option>
-          <mat-option [value]="5">مرفوضة</mat-option>
+          <mat-option [value]="3">قيد المراجعة</mat-option>
+          <mat-option [value]="4">مقيد</mat-option>
+          <mat-option [value]="5">مرفوض</mat-option>
+          <mat-option [value]="6">بانتظار الاستكمال</mat-option>
+          <mat-option [value]="7">على مكتب القاضي</mat-option>
+          <mat-option [value]="8">مكتمل</mat-option>
+          <mat-option [value]="9">مرفوض تلقائياً</mat-option>
+          <mat-option [value]="10">ملغي</mat-option>
         </mat-select>
       </mat-form-field>
       <div class="selected-chips" *ngIf="filters.statusIds && filters.statusIds.length > 0">
@@ -151,11 +156,11 @@
           <mat-icon>more_vert</mat-icon>
         </button>
         <mat-menu #cardMenu="matMenu">
-          <button mat-menu-item (click)="onEditRequest(request)" *ngIf="request.isDraft">
+          <button mat-menu-item (click)="onEditRequest(request)" *ngIf="isEditable(request)">
             <mat-icon>edit</mat-icon>
             <span>تعديل</span>
           </button>
-          <button mat-menu-item (click)="onViewRequest(request)" *ngIf="!request.isDraft">
+          <button mat-menu-item (click)="onViewRequest(request)" *ngIf="!isEditable(request)">
             <mat-icon>visibility</mat-icon>
             <span>عرض</span>
           </button>
@@ -259,10 +264,10 @@
       <ng-container matColumnDef="actions">
         <th mat-header-cell *matHeaderCellDef>إجراءات</th>
         <td mat-cell *matCellDef="let request">
-          <button mat-icon-button matTooltip="تعديل" (click)="onEditRequest(request)" *ngIf="request.isDraft">
+          <button mat-icon-button matTooltip="تعديل" (click)="onEditRequest(request)" *ngIf="isEditable(request)">
             <mat-icon>edit</mat-icon>
           </button>
-          <button mat-icon-button matTooltip="عرض" (click)="onViewRequest(request)" *ngIf="!request.isDraft">
+          <button mat-icon-button matTooltip="عرض" (click)="onViewRequest(request)" *ngIf="!isEditable(request)">
             <mat-icon>visibility</mat-icon>
           </button>
           <button mat-icon-button matTooltip="حذف" (click)="onDeleteRequest(request)" *ngIf="request.isDraft" class="delete-btn">

@@ -4,6 +4,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { CaseRegistrationRequestService, CaseRegistrationRequestListVM, SearchRequestDTO, PagedResult } from '../../../../../core/services/case-registration-request.service';
 import { NotificationService } from '../../../../../core/services/notification.service';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../../../../shared/components/confirm-dialog/confirm-dialog.component';
+import { STATUS_DRAFT, STATUS_NEW, STATUS_UNDER_REVIEW, STATUS_REGISTERED, STATUS_REJECTED, STATUS_PENDING_COMPLETION, STATUS_ON_JUDGE_DESK, STATUS_COMPLETED, STATUS_AUTO_REJECTED, STATUS_CANCELLED } from '../../../models/status-constants';
 import { LookupsApiService } from '../../../services/lookups-api.service';
 
 interface RequestFilters {
@@ -155,24 +156,43 @@ export class RequestListComponent implements OnInit {
 
   getStatusClass(statusId: number): string {
     switch (statusId) {
-      case 1: return 'status-draft';
-      case 2: return 'status-new';
-      case 3: return 'status-review';
-      case 4: return 'status-registered';
-      case 5: return 'status-rejected';
+      case STATUS_DRAFT: return 'status-draft';
+      case STATUS_NEW: return 'status-new';
+      case STATUS_UNDER_REVIEW: return 'status-review';
+      case STATUS_REGISTERED: return 'status-registered';
+      case STATUS_REJECTED: return 'status-rejected';
+      case STATUS_PENDING_COMPLETION: return 'status-pending';
+      case STATUS_ON_JUDGE_DESK: return 'status-judge';
+      case STATUS_COMPLETED: return 'status-completed';
+      case STATUS_AUTO_REJECTED: return 'status-auto-rejected';
+      case STATUS_CANCELLED: return 'status-cancelled';
       default: return '';
     }
   }
 
   getStatusName(statusId: number): string {
+    // Return Arabic status names to match database seed
     switch (statusId) {
-      case 1: return 'مسودة';
-      case 2: return 'جديد';
-      case 3: return 'استكمال نواقص';
-      case 4: return 'مقيدة';
-      case 5: return 'مرفوضة';
+      case STATUS_DRAFT: return 'مسودة';
+      case STATUS_NEW: return 'جديد';
+      case STATUS_UNDER_REVIEW: return 'قيد المراجعة';
+      case STATUS_REGISTERED: return 'مقيد';
+      case STATUS_REJECTED: return 'مرفوض';
+      case STATUS_PENDING_COMPLETION: return 'بانتظار الاستكمال';
+      case STATUS_ON_JUDGE_DESK: return 'على مكتب القاضي';
+      case STATUS_COMPLETED: return 'مكتمل';
+      case STATUS_AUTO_REJECTED: return 'مرفوض تلقائياً';
+      case STATUS_CANCELLED: return 'ملغي';
       default: return '';
     }
+  }
+
+  /**
+   * Checks if a request is in an editable status.
+   * Editable statuses: Draft (1), New (2), PendingCompletion (6)
+   */
+  isEditable(request: CaseRegistrationRequestListVM): boolean {
+    return [STATUS_DRAFT, STATUS_NEW, STATUS_PENDING_COMPLETION].includes(request.requestStatusId);
   }
 
   removeStatusFilter(statusId: number): void {

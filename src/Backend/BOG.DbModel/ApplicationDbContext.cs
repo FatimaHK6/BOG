@@ -98,6 +98,7 @@ public class ApplicationDbContext : DbContext
     public DbSet<PlaintiffAttachment> PlaintiffAttachments { get; set; }
     public DbSet<Defendant> Defendants { get; set; }
     public DbSet<CaseRequestDefendant> CaseRequestDefendants { get; set; }
+    public DbSet<CaseRequestWorkflow> CaseRequestWorkflows { get; set; }
     public DbSet<Representative> Representatives { get; set; }
     public DbSet<RepresentativeAttachment> RepresentativeAttachments { get; set; }
     public DbSet<RequestAttachment> RequestAttachments { get; set; }
@@ -1091,6 +1092,50 @@ public class ApplicationDbContext : DbContext
                 .WithMany()
                 .HasForeignKey(e => e.AttachmentTypeId)
                 .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        // CaseRequestWorkflow configuration
+        modelBuilder.Entity<CaseRequestWorkflow>(entity =>
+        {
+            // Primary key (inherited from BaseEntity)
+            entity.HasKey(e => e.Id);
+
+            // Properties
+            entity.Property(e => e.CaseRegistrationRequestId)
+                .IsRequired();
+
+            entity.Property(e => e.PreviousStatusId)
+                .IsRequired();
+
+            entity.Property(e => e.NewStatusId)
+                .IsRequired();
+
+            entity.Property(e => e.UserId)
+                .IsRequired(false);
+
+            entity.Property(e => e.FullName)
+                .HasMaxLength(200)
+                .IsRequired(false);
+
+            entity.Property(e => e.Notes)
+                .HasMaxLength(4000)
+                .IsRequired(false);
+
+            entity.Property(e => e.ActionDate)
+                .IsRequired();
+
+            // Relationship with CaseRegistrationRequest
+            entity.HasOne(e => e.CaseRegistrationRequest)
+                .WithMany()
+                .HasForeignKey(e => e.CaseRegistrationRequestId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Indexes
+            entity.HasIndex(e => e.ActionDate)
+                .HasFilter("[IsDeleted] = 0");
+
+            entity.HasIndex(e => e.CaseRegistrationRequestId)
+                .HasFilter("[IsDeleted] = 0");
         });
     }
 

@@ -33,4 +33,8 @@ public class CaseRegistrationRequestVM
     public string? PrimaryMobile { get; set; }
     public string? SecondaryMobile { get; set; }
     public string? Email { get; set; }
+    public int? ApplyingMethodId { get; set; }
+    public string? ApplyingMethodNameAr { get; set; }
+    public int? CaseTypeId { get; set; }
+    public string? CaseTypeName { get; set; }
 }

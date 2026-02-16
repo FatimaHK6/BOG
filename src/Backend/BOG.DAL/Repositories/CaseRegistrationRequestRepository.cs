@@ -62,10 +62,17 @@ public class CaseRegistrationRequestRepository : Repository<CaseRegistrationRequ
             .Include(r => r.Status)
             .Include(r => r.Court)
             .Include(r => r.ApplyingMethod)
+            .Include(r => r.CaseType)
             .Include(r => r.CreatedByUser)
             .Include(r => r.CaseRequestPlaintiffs.Where(p => !p.IsDeleted))
                 .ThenInclude(crp => crp.Plaintiff)
                     .ThenInclude(p => p.PlaintiffType)
+            .Include(r => r.CaseRequestPlaintiffs.Where(p => !p.IsDeleted))
+                .ThenInclude(crp => crp.Plaintiff)
+                    .ThenInclude(p => p.Attachments.Where(a => !a.IsDeleted))
+            .Include(r => r.CaseRequestPlaintiffs.Where(p => !p.IsDeleted))
+                .ThenInclude(crp => crp.Plaintiff)
+                    .ThenInclude(p => p.Representatives.Where(rep => !rep.IsDeleted))
             .Include(r => r.CaseRequestDefendants.Where(d => !d.IsDeleted))
                 .ThenInclude(crd => crd.Defendant)
             .Include(r => r.Claims.Where(c => !c.IsDeleted))
@@ -82,10 +89,17 @@ public class CaseRegistrationRequestRepository : Repository<CaseRegistrationRequ
             .Include(r => r.Status)
             .Include(r => r.Court)
             .Include(r => r.ApplyingMethod)
+            .Include(r => r.CaseType)
             .Include(r => r.CreatedByUser)
             .Include(r => r.CaseRequestPlaintiffs.Where(p => !p.IsDeleted))
                 .ThenInclude(crp => crp.Plaintiff)
                     .ThenInclude(p => p.PlaintiffType)
+            .Include(r => r.CaseRequestPlaintiffs.Where(p => !p.IsDeleted))
+                .ThenInclude(crp => crp.Plaintiff)
+                    .ThenInclude(p => p.Attachments.Where(a => !a.IsDeleted))
+            .Include(r => r.CaseRequestPlaintiffs.Where(p => !p.IsDeleted))
+                .ThenInclude(crp => crp.Plaintiff)
+                    .ThenInclude(p => p.Representatives.Where(rep => !rep.IsDeleted))
             .Include(r => r.CaseRequestDefendants.Where(d => !d.IsDeleted))
                 .ThenInclude(crd => crd.Defendant)
             .Include(r => r.Claims.Where(c => !c.IsDeleted))
@@ -97,12 +111,12 @@ public class CaseRegistrationRequestRepository : Repository<CaseRegistrationRequ
     public async Task<IEnumerable<CaseRegistrationRequest>> GetPendingCompletionExpiredAsync(CancellationToken cancellationToken = default)
     {
         // Get requests in PendingCompletion status (ID: 6) that have exceeded their completion deadline
-        // Deadline is 7 days from when the request entered PendingCompletion status
-        var sevenDaysAgo = DateTime.UtcNow.AddDays(-7);
+        // Deadline is 30 days from when the request entered PendingCompletion status
+        var thirtyDaysAgo = DateTime.UtcNow.AddDays(-30);
 
         return await _dbSet
             .AsNoTracking()
-            .Where(r => r.RequestStatusId == 6 && !r.IsDeleted && r.ModifiedDate <= sevenDaysAgo)
+            .Where(r => r.RequestStatusId == 6 && !r.IsDeleted && r.ModifiedDate <= thirtyDaysAgo)
             .Include(r => r.Status)
             .Include(r => r.Court)
             .OrderByDescending(r => r.ModifiedDate)
