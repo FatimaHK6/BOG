@@ -111,12 +111,12 @@ public class CaseRegistrationRequestRepository : Repository<CaseRegistrationRequ
     public async Task<IEnumerable<CaseRegistrationRequest>> GetPendingCompletionExpiredAsync(CancellationToken cancellationToken = default)
     {
         // Get requests in PendingCompletion status (ID: 6) that have exceeded their completion deadline
-        // Deadline is 7 days from when the request entered PendingCompletion status
-        var sevenDaysAgo = DateTime.UtcNow.AddDays(-7);
+        // Deadline is 30 days from when the request entered PendingCompletion status
+        var thirtyDaysAgo = DateTime.UtcNow.AddDays(-30);
 
         return await _dbSet
             .AsNoTracking()
-            .Where(r => r.RequestStatusId == 6 && !r.IsDeleted && r.ModifiedDate <= sevenDaysAgo)
+            .Where(r => r.RequestStatusId == 6 && !r.IsDeleted && r.ModifiedDate <= thirtyDaysAgo)
             .Include(r => r.Status)
             .Include(r => r.Court)
             .OrderByDescending(r => r.ModifiedDate)

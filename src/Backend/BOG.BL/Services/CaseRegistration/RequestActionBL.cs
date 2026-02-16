@@ -315,7 +315,7 @@ public class RequestActionBL : IRequestActionBL
             {
                 try
                 {
-                    request.RequestStatusId = RequestStatusIds.Rejected;
+                    request.RequestStatusId = RequestStatusIds.AutoRejected;
                     request.RejectionReason = "انتهت مهلة الاستكمال (30 يوم) - تم الرفض تلقائياً";
                     request.ModifiedDate = DateTime.UtcNow;
 

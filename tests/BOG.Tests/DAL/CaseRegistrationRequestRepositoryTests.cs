@@ -102,20 +102,20 @@ public class CaseRegistrationRequestRepositoryTests : IDisposable
         // Arrange
         var expiredRequest = new CaseRegistrationRequest
         {
-            RequestStatusId = 8, // PendingCompletion
+            RequestStatusId = 6, // PendingCompletion
             CourtId = 1,
             Subject = "Expired Case",
-            CompletionDeadline = DateTime.UtcNow.AddDays(-1), // Deadline passed
+            ModifiedDate = DateTime.UtcNow.AddDays(-31), // Expired (past 30-day deadline)
             CreatedByUserId = 1,
             CreatedDate = DateTime.UtcNow
         };
 
         var validRequest = new CaseRegistrationRequest
         {
-            RequestStatusId = 8, // PendingCompletion
+            RequestStatusId = 6, // PendingCompletion
             CourtId = 1,
             Subject = "Valid Case",
-            CompletionDeadline = DateTime.UtcNow.AddDays(5), // Deadline in future
+            ModifiedDate = DateTime.UtcNow.AddDays(-29), // Not yet expired (within 30 days)
             CreatedByUserId = 1,
             CreatedDate = DateTime.UtcNow
         };
@@ -139,10 +139,10 @@ public class CaseRegistrationRequestRepositoryTests : IDisposable
         // Arrange
         var validRequest = new CaseRegistrationRequest
         {
-            RequestStatusId = 8, // PendingCompletion
+            RequestStatusId = 6, // PendingCompletion
             CourtId = 1,
             Subject = "Valid Case",
-            CompletionDeadline = DateTime.UtcNow.AddDays(5),
+            ModifiedDate = DateTime.UtcNow.AddDays(-15), // Within 30-day deadline
             CreatedByUserId = 1,
             CreatedDate = DateTime.UtcNow
         };
@@ -164,10 +164,10 @@ public class CaseRegistrationRequestRepositoryTests : IDisposable
         // Arrange
         var registeredRequest = new CaseRegistrationRequest
         {
-            RequestStatusId = 6, // Registered (not PendingCompletion)
+            RequestStatusId = 4, // Registered (not PendingCompletion)
             CourtId = 1,
             Subject = "Registered Case",
-            CompletionDeadline = DateTime.UtcNow.AddDays(-1),
+            ModifiedDate = DateTime.UtcNow.AddDays(-31), // Expired, but wrong status
             CreatedByUserId = 1,
             CreatedDate = DateTime.UtcNow
         };
@@ -189,10 +189,10 @@ public class CaseRegistrationRequestRepositoryTests : IDisposable
         // Arrange
         var deletedRequest = new CaseRegistrationRequest
         {
-            RequestStatusId = 8,
+            RequestStatusId = 6, // PendingCompletion
             CourtId = 1,
             Subject = "Deleted Case",
-            CompletionDeadline = DateTime.UtcNow.AddDays(-1),
+            ModifiedDate = DateTime.UtcNow.AddDays(-31), // Expired, but deleted
             IsDeleted = true,
             CreatedByUserId = 1,
             CreatedDate = DateTime.UtcNow
@@ -206,7 +206,7 @@ public class CaseRegistrationRequestRepositoryTests : IDisposable
 
         // Assert
         Assert.NotNull(result);
-        Assert.Empty(result);
+        Assert.Empty(result); // Should exclude deleted requests
     }
 
     #endregion
