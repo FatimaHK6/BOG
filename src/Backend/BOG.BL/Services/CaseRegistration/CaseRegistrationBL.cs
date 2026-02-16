@@ -7,6 +7,7 @@ using BOG.DbModel.Entities.Lookups;
 using BOG.DTO.CaseRegistration;
 using BOG.VM.CaseRegistration;
 using BOG.VM.Shared;
+using CaseRegistrationRequestListVM = BOG.VM.CaseRegistrationRequest.CaseRegistrationRequestListVM;
 using Microsoft.EntityFrameworkCore;
 
 namespace BOG.BL.Services.CaseRegistration;
@@ -488,8 +489,8 @@ public class CaseRegistrationBL : ICaseRegistrationBL
     /// <summary>
     /// Searches case registration requests with optional filters and pagination.
     /// </summary>
-    public async Task<PagedResult<CaseRegistrationRequestVM>> SearchRequestsAsync(
-        object searchCriteria,
+    public async Task<PagedResult<CaseRegistrationRequestListVM>> SearchRequestsAsync(
+        SearchRequestDTO searchCriteria,
         int pageNumber = 1,
         int pageSize = 10,
         CancellationToken cancellationToken = default)
@@ -500,26 +501,156 @@ public class CaseRegistrationBL : ICaseRegistrationBL
         if (pageSize < 1 || pageSize > 100)
             throw new ArgumentException("Page size must be between 1 and 100.", nameof(pageSize));
 
-        // TODO: Implement search with filters once search DTO is defined
-        // For now, return all requests with pagination
+        var query = _context.CaseRegistrationRequests
+            .AsNoTracking()
+            .AsSplitQuery()
+            .Where(r => !r.IsDeleted)
+            .Include(r => r.Status)
+            .Include(r => r.Court)
+            .Include(r => r.CaseRequestPlaintiffs.Where(p => !p.IsDeleted))
+                .ThenInclude(crp => crp.Plaintiff)
+            .Include(r => r.CaseRequestDefendants.Where(d => !d.IsDeleted))
+                .ThenInclude(crd => crd.Defendant)
+            .AsQueryable();
 
-        var allRequests = await _requestRepository.GetAllAsync(cancellationToken);
-        var filteredRequests = allRequests.Where(r => !r.IsDeleted).ToList();
+        // Apply filters
+        if (searchCriteria != null)
+        {
+            if (searchCriteria.RequestId.HasValue)
+                query = query.Where(r => r.Id == searchCriteria.RequestId.Value);
 
-        var totalCount = filteredRequests.Count;
+            if (searchCriteria.StatusId.HasValue)
+                query = query.Where(r => r.RequestStatusId == searchCriteria.StatusId.Value);
+
+            if (searchCriteria.CourtId.HasValue)
+                query = query.Where(r => r.CourtId == searchCriteria.CourtId.Value);
+
+            if (searchCriteria.ApplyingMethodId.HasValue)
+                query = query.Where(r => r.ApplyingMethodId == searchCriteria.ApplyingMethodId.Value);
+
+            if (searchCriteria.CaseTypeId.HasValue)
+                query = query.Where(r => r.CaseTypeId == searchCriteria.CaseTypeId.Value);
+
+            if (!string.IsNullOrWhiteSpace(searchCriteria.Subject))
+                query = query.Where(r => r.Subject != null && r.Subject.Contains(searchCriteria.Subject));
+
+            if (!string.IsNullOrWhiteSpace(searchCriteria.CaseNumber))
+                query = query.Where(r => r.CaseNumber != null && r.CaseNumber.Contains(searchCriteria.CaseNumber));
+
+            if (!string.IsNullOrWhiteSpace(searchCriteria.PlaintiffIdentityNumber))
+                query = query.Where(r => r.CaseRequestPlaintiffs.Any(p =>
+                    !p.IsDeleted && p.Plaintiff != null &&
+                    p.Plaintiff.IdentityNumber != null &&
+                    p.Plaintiff.IdentityNumber.Contains(searchCriteria.PlaintiffIdentityNumber)));
+
+            if (!string.IsNullOrWhiteSpace(searchCriteria.PlaintiffName))
+                query = query.Where(r => r.CaseRequestPlaintiffs.Any(p =>
+                    !p.IsDeleted && p.Plaintiff != null &&
+                    (p.Plaintiff.FirstName + " " + p.Plaintiff.FatherName + " " + p.Plaintiff.FamilyName)
+                        .Contains(searchCriteria.PlaintiffName)));
+
+            if (!string.IsNullOrWhiteSpace(searchCriteria.DefendantIdentityNumber))
+                query = query.Where(r => r.CaseRequestDefendants.Any(d =>
+                    !d.IsDeleted && d.Defendant != null &&
+                    d.Defendant.IdentityNumber != null &&
+                    d.Defendant.IdentityNumber.Contains(searchCriteria.DefendantIdentityNumber)));
+
+            if (!string.IsNullOrWhiteSpace(searchCriteria.DefendantName))
+                query = query.Where(r => r.CaseRequestDefendants.Any(d =>
+                    !d.IsDeleted && d.Defendant != null &&
+                    d.Defendant.FullName != null &&
+                    d.Defendant.FullName.Contains(searchCriteria.DefendantName)));
+
+            if (searchCriteria.CreatedDateFrom.HasValue)
+                query = query.Where(r => r.CreatedDate >= searchCriteria.CreatedDateFrom.Value);
+
+            if (searchCriteria.CreatedDateTo.HasValue)
+                query = query.Where(r => r.CreatedDate <= searchCriteria.CreatedDateTo.Value);
+
+            if (searchCriteria.SubmissionDateFrom.HasValue)
+                query = query.Where(r => r.SubmissionDate >= searchCriteria.SubmissionDateFrom.Value);
+
+            if (searchCriteria.SubmissionDateTo.HasValue)
+                query = query.Where(r => r.SubmissionDate <= searchCriteria.SubmissionDateTo.Value);
+
+            if (searchCriteria.RegistrationDateFrom.HasValue)
+                query = query.Where(r => r.RegistrationDate >= searchCriteria.RegistrationDateFrom.Value);
+
+            if (searchCriteria.RegistrationDateTo.HasValue)
+                query = query.Where(r => r.RegistrationDate <= searchCriteria.RegistrationDateTo.Value);
+        }
+
+        // Apply sorting
+        var sortBy = searchCriteria?.SortBy ?? "CreatedDate";
+        var sortDesc = string.Equals(searchCriteria?.SortDirection, "desc", StringComparison.OrdinalIgnoreCase);
+
+        query = sortBy switch
+        {
+            "Subject" => sortDesc ? query.OrderByDescending(r => r.Subject) : query.OrderBy(r => r.Subject),
+            "Status" => sortDesc ? query.OrderByDescending(r => r.RequestStatusId) : query.OrderBy(r => r.RequestStatusId),
+            "SubmissionDate" => sortDesc ? query.OrderByDescending(r => r.SubmissionDate) : query.OrderBy(r => r.SubmissionDate),
+            "ModifiedDate" => sortDesc ? query.OrderByDescending(r => r.ModifiedDate) : query.OrderBy(r => r.ModifiedDate),
+            "CaseNumber" => sortDesc ? query.OrderByDescending(r => r.CaseNumber) : query.OrderBy(r => r.CaseNumber),
+            _ => sortDesc ? query.OrderByDescending(r => r.CreatedDate) : query.OrderBy(r => r.CreatedDate),
+        };
+
+        var totalCount = await query.CountAsync(cancellationToken);
         var skipCount = (pageNumber - 1) * pageSize;
-        var requests = filteredRequests
+
+        var requests = await query
             .Skip(skipCount)
             .Take(pageSize)
-            .Select(MapToViewModel)
-            .ToList();
+            .ToListAsync(cancellationToken);
 
-        return new PagedResult<CaseRegistrationRequestVM>(
-            items: requests,
+        var items = requests.Select(MapToListViewModel).ToList();
+
+        return new PagedResult<CaseRegistrationRequestListVM>(
+            items: items,
             totalCount: totalCount,
             pageNumber: pageNumber,
             pageSize: pageSize
         );
+    }
+
+    private static CaseRegistrationRequestListVM MapToListViewModel(CaseRegistrationRequest request)
+    {
+        var firstPlaintiff = request.CaseRequestPlaintiffs?
+            .Where(p => !p.IsDeleted && p.Plaintiff != null)
+            .Select(p => p.Plaintiff)
+            .FirstOrDefault();
+        var plaintiffName = firstPlaintiff != null
+            ? $"{firstPlaintiff.FirstName} {firstPlaintiff.FatherName} {firstPlaintiff.FamilyName}".Trim()
+            : null;
+
+        var firstDefendant = request.CaseRequestDefendants?
+            .Where(d => !d.IsDeleted && d.Defendant != null)
+            .Select(d => d.Defendant)
+            .FirstOrDefault();
+        var defendantName = firstDefendant?.FullName;
+
+        return new CaseRegistrationRequestListVM
+        {
+            Id = request.Id,
+            CaseNumber = request.CaseNumber,
+            RegistrationNumber = request.RegistrationNumber,
+            RequestStatusId = request.RequestStatusId,
+            StatusName = request.Status?.Name ?? "",
+            StatusNameAr = request.Status?.NameAr ?? "",
+            CourtName = request.Court?.NameAr,
+            CourtNameAr = request.Court?.NameAr,
+            SubmissionDate = request.SubmissionDate,
+            CreatedDate = request.CreatedDate,
+            ModifiedDate = request.ModifiedDate,
+            PlaintiffsCount = request.CaseRequestPlaintiffs?.Count(p => !p.IsDeleted) ?? 0,
+            DefendantsCount = request.CaseRequestDefendants?.Count(d => !d.IsDeleted) ?? 0,
+            IsDraft = request.RequestStatusId == 1,
+            CaseTypeId = request.CaseTypeId,
+            SubjectPreview = !string.IsNullOrEmpty(request.Subject)
+                ? (request.Subject.Length > 50 ? request.Subject.Substring(0, 50) + "..." : request.Subject)
+                : null,
+            PlaintiffName = plaintiffName,
+            DefendantName = defendantName
+        };
     }
 
     /// <summary>

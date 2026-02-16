@@ -575,6 +575,37 @@ public class LookupsController : ControllerBase
     }
 
     /// <summary>
+    /// Gets all active applying methods.
+    /// </summary>
+    [HttpGet("applying-methods")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public async Task<ActionResult> GetApplyingMethods(CancellationToken cancellationToken)
+    {
+        try
+        {
+            var methods = await _context.ApplyingMethods
+                .AsNoTracking()
+                .Where(m => m.IsActive && !m.IsDeleted)
+                .OrderBy(m => m.Id)
+                .Select(m => new
+                {
+                    m.Id,
+                    m.Name,
+                    m.NameAr
+                })
+                .ToListAsync(cancellationToken);
+
+            return Ok(methods);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error retrieving applying methods");
+            return StatusCode(StatusCodes.Status500InternalServerError,
+                new { message = "حدث خطأ أثناء استرجاع طرق التقديم" });
+        }
+    }
+
+    /// <summary>
     /// Gets all active government entities.
     /// </summary>
     [HttpGet("government-entities")]

@@ -4,7 +4,7 @@
     <!-- Header -->
     <div class="page-header">
     <h2 class="page-title">المدعين</h2>
-    <div class="header-actions">
+    <div class="header-actions" *ngIf="canEdit">
       <button mat-raised-button class="add-plaintiff-btn" [matMenuTriggerFor]="plaintiffTypeMenu">
         <mat-icon>add</mat-icon>
         إضافة مدعي جديد
@@ -26,14 +26,16 @@
   <div *ngIf="!isLoading && plaintiffs.length === 0" class="empty-state">
     <mat-icon class="empty-icon">person_off</mat-icon>
     <p>لا يوجد مدعين مسجلين</p>
-    <button mat-stroked-button class="add-plaintiff-btn-outline" [matMenuTriggerFor]="plaintiffTypeMenuEmpty">
-      إضافة مدعي
-    </button>
-    <mat-menu #plaintiffTypeMenuEmpty="matMenu" class="plaintiff-type-menu">
-      <button mat-menu-item *ngFor="let type of plaintiffTypes" (click)="onSelectPlaintiffType(type)">
-        {{ type.nameAr }}
+    <ng-container *ngIf="canEdit">
+      <button mat-stroked-button class="add-plaintiff-btn-outline" [matMenuTriggerFor]="plaintiffTypeMenuEmpty">
+        إضافة مدعي
       </button>
-    </mat-menu>
+      <mat-menu #plaintiffTypeMenuEmpty="matMenu" class="plaintiff-type-menu">
+        <button mat-menu-item *ngFor="let type of plaintiffTypes" (click)="onSelectPlaintiffType(type)">
+          {{ type.nameAr }}
+        </button>
+      </mat-menu>
+    </ng-container>
   </div>
 
   <!-- Plaintiffs Table -->
@@ -92,17 +94,17 @@
                 <mat-icon>visibility</mat-icon>
                 <span>عرض التفاصيل</span>
               </button>
-              <button mat-menu-item (click)="onEditPlaintiff(plaintiff.id)">
+              <button mat-menu-item (click)="onEditPlaintiff(plaintiff.id)" *ngIf="canEdit">
                 <mat-icon>edit</mat-icon>
                 <span>تعديل</span>
               </button>
               <button mat-menu-item (click)="onSetApplicant(plaintiff)"
-                      *ngIf="!plaintiff.isApplicant && plaintiff.plaintiffTypeId === 1">
+                      *ngIf="canEdit && !plaintiff.isApplicant && plaintiff.plaintiffTypeId === 1">
                 <mat-icon>person_pin</mat-icon>
                 <span>تعيين كمقدم طلب</span>
               </button>
-              <mat-divider></mat-divider>
-              <button mat-menu-item (click)="onDeletePlaintiff(plaintiff)" class="delete-action">
+              <mat-divider *ngIf="canEdit"></mat-divider>
+              <button mat-menu-item (click)="onDeletePlaintiff(plaintiff)" class="delete-action" *ngIf="canEdit">
                 <mat-icon>delete</mat-icon>
                 <span>حذف</span>
               </button>
@@ -199,7 +201,7 @@
               </button>
               <mat-menu #repActionMenu="matMenu">
                 <button mat-menu-item (click)="onSetRepresentativeAsApplicant(rep)"
-                        *ngIf="!rep.isApplicant">
+                        *ngIf="canEdit && !rep.isApplicant">
                   <mat-icon>person_pin</mat-icon>
                   <span>تعيين كمقدم طلب</span>
                 </button>

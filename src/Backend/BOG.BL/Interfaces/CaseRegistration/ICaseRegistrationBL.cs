@@ -1,5 +1,7 @@
+using BOG.DTO.CaseRegistration;
 using BOG.VM.CaseRegistration;
 using BOG.VM.Shared;
+using CaseRegistrationRequestListVM = BOG.VM.CaseRegistrationRequest.CaseRegistrationRequestListVM;
 
 namespace BOG.BL.Interfaces.CaseRegistration;
 
@@ -77,5 +79,5 @@ public interface ICaseRegistrationBL
     /// <param name="pageSize">Number of items per page</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Paged list of case registration requests</returns>
-    Task<PagedResult<CaseRegistrationRequestVM>> SearchRequestsAsync(object searchCriteria, int pageNumber = 1, int pageSize = 10, CancellationToken cancellationToken = default);
+    Task<PagedResult<CaseRegistrationRequestListVM>> SearchRequestsAsync(SearchRequestDTO searchCriteria, int pageNumber = 1, int pageSize = 10, CancellationToken cancellationToken = default);
 }
