@@ -502,6 +502,14 @@ public class RequestActionBL : IRequestActionBL
                 throw new InvalidOperationException($"نوع قرار غير صالح: {decision.DecisionType}");
         }
 
+        // **CRITICAL FIX**: Reload request to get updated status from action method
+        // Action methods load their own fresh copies and update status in DB,
+        // but the original request object in this method is stale.
+        // We must clear the tracker and reload to get the correct new status.
+        _unitOfWork.ClearChangeTracker();
+        request = await _requestRepository.GetByIdAsync(requestId, cancellationToken)
+            ?? throw new InvalidOperationException($"الطلب {requestId} غير موجود بعد تنفيذ الإجراء");
+
         // Parse result to get new status ID
         var resultDict = result as dynamic;
         if (result != null)
@@ -512,9 +520,16 @@ public class RequestActionBL : IRequestActionBL
                 await SaveWorkflowHistoryAsync(
                     requestId,
                     previousStatus,
-                    request.RequestStatusId, // Will be updated by action method
+                    request.RequestStatusId, // ✅ NOW CORRECT: Fresh request with updated status
                     decision.Notes,
                     cancellationToken);
+
+                _logger.LogInformation(
+                    "Workflow history saved for request {RequestId}: {PreviousStatus} -> {NewStatus}, Notes: {HasNotes}",
+                    requestId,
+                    previousStatus,
+                    request.RequestStatusId,
+                    !string.IsNullOrEmpty(decision.Notes) ? "Yes" : "No");
             }
             catch (Exception ex)
             {
