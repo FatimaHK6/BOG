@@ -3,6 +3,7 @@ import { BehaviorSubject, Observable, throwError } from 'rxjs';
 import { tap, catchError } from 'rxjs/operators';
 import { CaseRequestVM } from '../models/case-request.model';
 import { CaseRegistrationApiService } from './case-registration-api.service';
+import { STATUS_DRAFT, STATUS_NEW, STATUS_UNDER_REVIEW, STATUS_ON_JUDGE_DESK, STATUS_PENDING_COMPLETION } from '../models/status-constants';
 
 @Injectable({
   providedIn: 'root'
@@ -48,17 +49,19 @@ export class RequestStateService {
   // Permission checks
   canEdit(): boolean {
     const request = this.currentRequestSubject.value;
-    return request?.requestStatusId === 1 || request?.requestStatusId === 2 || request?.requestStatusId === 6; // Draft, New, or PendingCompletion
+    return [STATUS_DRAFT, STATUS_NEW, STATUS_PENDING_COMPLETION].includes(request?.requestStatusId || 0);
+    // Draft (1), New (2), or PendingCompletion (6)
   }
 
   canSubmit(): boolean {
     const request = this.currentRequestSubject.value;
-    return request?.requestStatusId === 1; // Draft only
+    return request?.requestStatusId === STATUS_DRAFT; // Draft only (1)
   }
 
   canTakeAction(): boolean {
     const request = this.currentRequestSubject.value;
-    return [2, 7, 9].includes(request?.requestStatusId || 0); // New, OnJudgeDesk, AutoRejected
+    return [STATUS_NEW, STATUS_ON_JUDGE_DESK, STATUS_UNDER_REVIEW].includes(request?.requestStatusId || 0);
+    // New (2), OnJudgeDesk (7), UnderReview (3)
   }
 
   getCurrentRequest(): CaseRequestVM | null {

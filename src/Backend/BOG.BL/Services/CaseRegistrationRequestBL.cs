@@ -1,6 +1,7 @@
 using BOG.BL.Interfaces;
 using BOG.DAL.Interfaces;
 using BOG.DbModel;
+using BOG.DbModel.Constants;
 using BOG.DbModel.Entities.CaseRegistration;
 using BOG.DTO.CaseRegistration;
 using BOG.VM.CaseRegistrationRequest;
@@ -63,6 +64,7 @@ public class CaseRegistrationRequestBL : ICaseRegistrationRequestBL
         {
             RequestStatusId = StatusDraft,
             CaseTypeId = 1, // Default to first CaseType
+            ApplyingMethodId = ApplyingMethodIds.ThroughCourt, // Default to "Through Court"
             CreatedByUserId = userId,
             CreatedDate = DateTime.UtcNow,
             ModifiedDate = DateTime.UtcNow
@@ -293,7 +295,11 @@ public class CaseRegistrationRequestBL : ICaseRegistrationRequestBL
                 .ToList(),
             PrimaryMobile = request.PrimaryMobile,
             SecondaryMobile = request.SecondaryMobile,
-            Email = request.Email
+            Email = request.Email,
+            ApplyingMethodId = request.ApplyingMethodId,
+            ApplyingMethodNameAr = request.ApplyingMethod?.NameAr,
+            CaseTypeId = request.CaseTypeId,
+            CaseTypeName = request.CaseType?.NameAr
         };
     }
 }

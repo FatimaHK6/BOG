@@ -399,6 +399,36 @@
   border: 1px solid #ef9a9a;
 }
 
+.status-pending {
+  background-color: #fff8e1;
+  color: #f57c00;
+  border: 1px solid #ffcc80;
+}
+
+.status-judge {
+  background-color: #f3e5f5;
+  color: #7b1fa2;
+  border: 1px solid #ce93d8;
+}
+
+.status-completed {
+  background-color: #e0f2f1;
+  color: #00695c;
+  border: 1px solid #80cbc4;
+}
+
+.status-auto-rejected {
+  background-color: #fce4ec;
+  color: #c2185b;
+  border: 1px solid #f8bbd0;
+}
+
+.status-cancelled {
+  background-color: #eceff1;
+  color: #455a64;
+  border: 1px solid #b0bec5;
+}
+
 /* Card Details */
 .card-details {
   margin-bottom: 12px;

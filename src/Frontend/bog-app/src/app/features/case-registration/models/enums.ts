@@ -14,19 +14,6 @@ export enum IdentityType {
   GCC_Id = 4
 }
 
-export enum RequestStatus {
-  Draft = 1,
-  Submitted = 2,
-  New = 3,
-  UnderReview = 4,
-  OnJudgeDesk = 5,
-  Registered = 6,
-  Returned = 7,
-  PendingCompletion = 8,
-  ReviewComplete = 9,
-  Rejected = 10
-}
-
 export enum DecisionType {
   Register = 'Register',
   SendToJudge = 'SendToJudge',
@@ -48,17 +35,4 @@ export const IdentityTypeLabels: Record<IdentityType, string> = {
   [IdentityType.Iqama]: 'إقامة',
   [IdentityType.Passport]: 'جواز سفر',
   [IdentityType.GCC_Id]: 'هوية خليجية'
-};
-
-export const RequestStatusLabels: Record<RequestStatus, string> = {
-  [RequestStatus.Draft]: 'مسودة',
-  [RequestStatus.Submitted]: 'مرسل',
-  [RequestStatus.New]: 'طلب جديد',
-  [RequestStatus.UnderReview]: 'قيد المراجعة',
-  [RequestStatus.OnJudgeDesk]: 'عرض على رئيس المحكمة',
-  [RequestStatus.Registered]: 'مقيد حديثًا',
-  [RequestStatus.Returned]: 'مرجع',
-  [RequestStatus.PendingCompletion]: 'استكمال النواقص',
-  [RequestStatus.ReviewComplete]: 'اكتملت المراجعة',
-  [RequestStatus.Rejected]: 'تم حفظ الطلب'
 };

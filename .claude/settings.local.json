@@ -29,7 +29,8 @@
       "Bash(Start-Sleep -Seconds 2)",
       "Bash(Write-Host \"Process stopped\")",
       "Bash(wmic process where \"ProcessId=14948\" delete /nointeractive)",
-      "Bash(kill:*)"
+      "Bash(kill:*)",
+      "Bash(dotnet clean:*)"
     ]
   }
 }
